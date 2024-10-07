@@ -1,0 +1,4 @@
+/target
+# local copies of similar octatrack sample management implementations
+refs/
+*.swp
