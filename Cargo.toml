@@ -2,6 +2,8 @@
 name = "rs-octatrack-sample-manager-cli"
 version = "0.1.0"
 edition = "2021"
+readme = "README.md"
+exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*"]
 
 [dependencies]
 base16ct = "0.2.0"

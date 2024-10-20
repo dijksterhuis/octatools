@@ -1,3 +1,7 @@
+//! A Compact Flash Card (CF Card) index can be used to:
+//! (1) check for change conflicts (samples already used in existing Octatrack Projects being overwritten or edited) when attempting to copy samples onto a CF card.
+//! (2) inspect the current state of sample use across an CF Card.
+
 use std::{
     path::PathBuf,
     fs::File,
@@ -6,28 +10,56 @@ use std::{
 use csv::Writer;
 use log::{error, info, warn, debug};
 
-use crate::otset::OctatrackSet;
+use crate::octatrack::sets::OctatrackSet;
+use crate::results::{self, VoidResultBoxed};
 
+/// A single row of data written to the index file.
 
 #[derive(PartialEq, Debug, Clone, serde::Serialize)]
 pub struct CompactFlashScanCsvRow {
+
+    /// Disk name of the card
     cfcard: String,
+
+    /// Octatrack Set this row is a member of
     set: String,
+
+    /// File name of an indexed audio file.
     audio_name: String,
+
+    /// File path of an indexed audio file.
     audio_filepath: PathBuf,
+
+    /// File path of an indexed `.ot` Octatrack sample metadata settings file.
     ot_filepath: Option<PathBuf>,
+
+    /// Whether this these files are part of the Set's Audio Pool,
+    /// or contained in a specific Octatrack Project.
     is_set_audio_pool: bool,
+
+    /// The Octatrack Project these files are related to.
     project: Option<String>,
 }
 
+/// A compact flash card which we need to scan for audio files.
+
 #[derive(PartialEq, Debug, Clone)]
 pub struct CompactFlashDrive {
+
+    /// The path to the current compact flash card.
     cfcard_path: PathBuf,
+
+    /// Octatrack Sets on the compact flash card. 
     ot_sets: Vec<OctatrackSet>,
 }
 
 impl CompactFlashDrive {
-    pub fn new(path: &PathBuf, csv_file_path: &Option<&PathBuf>) -> Result<CompactFlashDrive, ()> {
+
+    /// Index a compact flash card by scanning through each `OctatrackSet` under the given `PathBuf`'s directory tree.
+    // TODO: Remove to csv in here and call it explicitly.
+    
+    pub fn from_pathbuf(path: &PathBuf, csv_file_path: &Option<PathBuf>) -> Result<CompactFlashDrive, ()> {
+
         let ot_sets = OctatrackSet::from_cfcard_pathbuf(&path);
 
         let cf = CompactFlashDrive {
@@ -36,19 +68,19 @@ impl CompactFlashDrive {
         };
 
         if ! csv_file_path.is_none() {
-            info!("Generating CF Card index file locally: {:#?}", csv_file_path);
-            cf.to_csv(&csv_file_path.unwrap());
-        }
-    
+            cf.to_csv(&csv_file_path.as_ref().unwrap());
+        };
+
+
         Ok(cf)
     }
 
-    fn to_csv(&self, csv_filepath: &PathBuf) -> () {
-
-        // let mut rows: Vec<CompactFlashScanCsvRow> = Vec::new();
+    /// Create a local index file for a `CompactFlashDrive` which has been indexed.
+    /// Audio Pool records are written first, then individual Projects
+    
+    fn to_csv(&self, csv_filepath: &PathBuf) -> Result<(), std::io::Error> {
 
         let sets = self.ot_sets.clone();
-
         let mut wtr = Writer::from_writer(vec![]);
 
         for s in sets {
@@ -64,7 +96,7 @@ impl CompactFlashDrive {
                     audio_name: audio_pool_sample.name,
                 };
 
-                let __ = wtr.serialize(row);
+                let _ = wtr.serialize(row);
             }
 
             for project in &s.projects {
@@ -86,12 +118,12 @@ impl CompactFlashDrive {
         }
 
         let mut file = File::create(csv_filepath).unwrap();
-        let res: Result<(), std::io::Error> = file
+        let write_result: Result<(), std::io::Error> = file
             .write_all(&wtr.into_inner().unwrap())
             .map_err(|e| e)
         ;
 
-
+        write_result
     }
 
 }
@@ -131,9 +163,11 @@ mod tests {
     #[test]
     fn dummy_test() {
         let cfcard_path = PathBuf::from("data/tests/index-cf/DEV-OTsm/");
-        let csv_path = PathBuf::from("./.otsm-index-cf.csv");
+        let _csv_path = PathBuf::from("./.otsm-index-cf.csv");
 
-        let res = CompactFlashDrive::new(&cfcard_path, &None);
+        let res: Result<CompactFlashDrive, ()> = CompactFlashDrive
+            ::from_pathbuf(&cfcard_path, &None)
+        ;
 
         assert!(res.is_ok());
     }

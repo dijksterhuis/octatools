@@ -1,184 +1,134 @@
-mod config_yaml_samplechain;
-// mod otsample_fncs;
-mod otsample;
-mod otproject;
-mod indexfile_cf;
-mod indexfile_samples;
+mod cli;
+mod yaml_io;
+mod indexing;
 mod results;
 mod constants;
-mod wavfile;
-mod otset;
+mod octatrack;
+mod audio;
 
-use clap::{command, Parser, Subcommand};
-use std::path::PathBuf;
+use clap::Parser;
 use env_logger::{Builder, Target};
 use log::{error, info, warn, debug, LevelFilter};
 
-use crate::otsample::SampleChain;
-use crate::config_yaml_samplechain::create_chains_from_yaml;
-use crate::indexfile_samples::SamplesDirIndex;
-use crate::indexfile_cf::CompactFlashDrive;
+use crate::yaml_io::samplechains::YamlChainConfig;
+use crate::indexing::samplesdir::SamplesDirIndex;
+use crate::indexing::cfcard::CompactFlashDrive;
+use crate::cli::{Cli, Commands};
 
+use crate::octatrack::samples::{
+    SampleChain,
+    SampleLoopConfig,
+    SampleTrimConfig,
+    Slices,
+    get_otsample_n_bars_from_wavfiles,
+};
+use crate::octatrack::samples::OctatrackSampleFilePair;
+use crate::audio::wavfile::{
+    WavFile,
+    chain_wavfiles_64_batch,
+};
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-#[command(propagate_version = true)]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
+/// Create Octatrack samplechain file-pairs from a loaded yaml config.
+
+fn create_samplechains(yaml_conf: &YamlChainConfig) -> Result<Vec<OctatrackSampleFilePair>, ()> {
+
+    let mut outchains_files: Vec<OctatrackSampleFilePair> = vec![];
+    let mut outchains_samplechains: Vec<SampleChain> = vec![];
+
+    for chain_config in &yaml_conf.chains {
+
+        info!("Creating chain: {}", &chain_config.chain_name);
+
+        debug!("Reading wav files: n={:#?}", &chain_config.sample_file_paths.len());
+        let mut wavfiles: Vec<WavFile> = Vec::new();
+        for wav_file_path in &chain_config.sample_file_paths {
+            let wavfile = WavFile::from_file(&wav_file_path).unwrap();
+            wavfiles.push(wavfile);
+        };
+
+        debug!("Batching wav files ...");
+        // first element is the chained wavfile output
+        // second is the individual wav files that made the chain
+        let wavfiles_batched: Vec<(WavFile, Vec<WavFile>)> = chain_wavfiles_64_batch(&wavfiles).unwrap();
+
+        for (idx, (single_wav, vec_wavs)) in wavfiles_batched.iter().enumerate() {
+
+            info!("Processing batch: {} / {}", idx + 1, wavfiles_batched.len());
+
+            debug!(
+                "Have {:1?} WAV chains from {:2?} samples",
+                &wavfiles_batched.len(),
+                &wavfiles.len()
+            );
+
+            let slices = Slices
+                ::from_wavfiles(&vec_wavs, &0)
+                .unwrap()
+            ;
+
+            // let chain = SampleChain::from_yaml_conf(&chain_config).unwrap();
+            // chains.insert(chain);
+
+            // TODO -- can use single wavfile here?! would make the funtion more generally applicable.
+            let bars = get_otsample_n_bars_from_wavfiles(&vec_wavs, &125.0).unwrap();
+
+            let trim_config = SampleTrimConfig {
+                start: 0,
+                end: single_wav.len,
+                length: bars,
+            };
+    
+            let loop_config = SampleLoopConfig {
+                start: 0,
+                length: bars,
+                mode: chain_config.octatrack_settings.loop_mode,
+            };
+    
+            let fstem = chain_config.chain_name.clone() + &format!("-{:?}", idx);
+
+            let chain_data = SampleChain
+                ::new(
+                    &chain_config.octatrack_settings.bpm,
+                    &chain_config.octatrack_settings.timestretch_mode,
+                    &chain_config.octatrack_settings.quantization_mode,
+                    &chain_config.octatrack_settings.gain,
+                    &trim_config,
+                    &loop_config,
+                    &slices
+                )
+                .unwrap()
+            ;
+
+            let base_outchain_path = yaml_conf
+                .global_settings
+                .out_dir_path
+                .join(fstem);
+    
+            let mut ot_outpath = base_outchain_path.clone();
+            let mut wav_sliced_outpath = base_outchain_path.clone();
+    
+            ot_outpath.set_extension("ot");
+            wav_sliced_outpath.set_extension("wav");
+    
+            let _chain_res = chain_data.to_file(&ot_outpath);
+            let _wav_slice_res = single_wav.to_file(&wav_sliced_outpath);
+
+            info!("Created chain files: audio={:?} ot={:?}", wav_sliced_outpath, ot_outpath);
+
+            let sample = OctatrackSampleFilePair
+                ::from_pathbufs(&wav_sliced_outpath, &Some(ot_outpath))
+                .unwrap()
+            ;
+
+            outchains_samplechains.push(chain_data);
+            outchains_files.push(sample);
+        };
+        info!("Created sample chain(s): {}", &chain_config.chain_name);
+    };
+    debug!("SAMPLE CHAINS GENERATED: {:#?}", outchains_samplechains);
+
+    Ok(outchains_files)
 }
-
-#[derive(Subcommand, Debug)]
-enum Chain {
-    /// Create a simple sample chain from source files
-    Construct { 
-        /// Directory path where the sample chain audio file and .ot file will be written
-        // chain_dir_path: String,
-        /// File name for both audio and .ot files.
-        // chain_name: String,
-        /// Paths to the audio files to include in the sample chain.
-        // audio_file_paths: Vec<String>,
-
-        /// The '.samples-index' file which holds sample chains configs (will be updated during processing)
-        samples_index_file_path: String,
-    },
-    /// Use an Octatrack '.ot' file to deconstruct a sample chain into component parts
-    Deconstruct { 
-        /// Path to the '.ot' file to use for deconstruction.
-        ot_file_path: String,
-        /// Path to the audio file to use for deconstruction.
-        audio_file_path: String,
-        /// Directory path where the audio files will be written
-        out_dir_path: String,
-        /// [OPTIONAL] Which '.samples-index' file these chains will belong to
-        samples_index_file_path: Option<String>,
-    },
-
-    // TODO: EHHHHH don't like the idea of adding a new index file here.
-    /// Use a '.combi-index' file to generate combinatorial sample chains for a selection of samples
-    Combinator { 
-        /// Which '.samples-index' file to add these chains to
-        samples_index_file_path: String,
-        /// '.combi-index' file to generate the chains from
-        combi_index_file_path: String,
-    },
-}
-
-#[derive(Subcommand, Debug)]
-enum Index {
-    /// Recursively scan local directories for audio sample files and build an index
-    Samples { 
-        /// Output location of the '.samples-index' file.
-        index_file_path: String,
-        /// Directory paths of where to scan for samples
-        source_dir_paths: Vec<String>,
-        /// Create a Octatrack compatible copy of any audio sample files
-        /// that are not suitable for use on an Octatrack 
-        /// (44.1kHz 16-bit WAV files)
-        #[arg(long, required = false, default_value_t = false)]
-        convert: bool,
-    },
-    /// Scan a CF Card with Octatrack sets and build an index file for it
-    Cf {
-        /// Location to write the '.cf-index' file
-        index_file_path: String,
-        /// Directory path on your machine to the CF Card,
-        /// on Windows this would be 'X:\' or similar
-        cf_card_dir_path: String,
-        /// Overwrite existing 'index' file if it exists
-        /// (default behaviour is to exit if index exists)
-        #[arg(long, required = false, default_value_t = false)]
-        force: bool,
-    },
-}
-
-#[derive(Subcommand, Debug)]
-enum Diff {
-    /// List differences in the '.samples-index' file versus a samples directory
-    Samples { 
-        /// Location of an existing '.samples-index' file
-        samples_index_file_path: String,
-        /// Directory path of where to scan for samples
-        saples_dir_path: String,
-    },
-    /// List differences in the '.stage-index' file versus a 'cf-index' file
-    Stage { 
-        /// Location of an existing '.stage-index' file
-        stage_index_file_path: String,
-        /// Location of an existing '.cf-index' file
-        cf_index_file_path: String,
-    },
-    /// List differences in the '.cf-index' file versus an Octatrack CF Card
-    Cf { 
-        /// Location of an existing '.cf-index' file for the CF card
-        cf_index_file_path: String,
-        /// Directory path on your machine to the CF Card,
-        /// on Windows this would be 'X:\' or similar
-        cf_card_dir_path: String,
-    },
-}
-
-#[derive(Subcommand, Debug)]
-enum Push {
-    /// Create a '.stage-index' file from a '.samples-index' file.
-    Stage { 
-        /// Location of the '.samples-index' file.
-        samples_index_file_path: String,
-        /// Location of the '.cf-index' file -- used to inspect for any problematic samples and/or chages.
-        cf_index_file_path: String,
-        /// Output location of the '.stage-index' file.
-        stage_index_file_path: String,
-        /// Default behaviour for this command is to do dry runs for safety reasons,
-        /// provide this flag to make changes
-        #[arg(long, required = false, default_value_t = false)]
-        commit: bool,
-        /// Default behaviour is to skip any changes that could cause a conflict,
-        /// provide this flag to overrule
-        #[arg(long, required = false, default_value_t = false)]
-        ignore_conflicts: bool,
-    },
-    /// Reads a '.stage-index' file and pushes the changes to an Octratrack Compact Flash card.
-    /// WARNING -- this is a dangerous operation as it involves writing data to your CF Card!
-    Cf { 
-        /// Location of an existing '.stage-index' file for the CF card
-        index_file_path: String,
-        /// Directory path on your machine to the CF Card,
-        /// on Windows this would be 'X:\' or similar
-        cf_card_dir_path: String,
-        /// Default behaviour for this command is to do dry runs for safety reasons,
-        /// provide this flag to make changes
-        #[arg(long, required = false, default_value_t = false)]
-        commit: bool,
-    },
-}
-
-/*
-#[derive(Subcommand, Debug)]
-enum Commands {
-    /// Generate index files by recursively scanning through 
-    /// an Octatrack Compact Flash card or a local samples directory 
-    #[command(subcommand)]
-    Index(Index),
-    /// Inspect differences between an index file and it's source
-    #[command(subcommand)]
-    Diff(Diff),
-    /// Create audio sample chains
-    #[command(subcommand)]
-    Chain(Chain),
-    /// Push changes
-    #[command(subcommand)]
-    Push(Push),
-}
-*/
-
-
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-    ListSamples {},
-    CreateChainsYaml {}
-}
-
 
 fn main() -> () {
 
@@ -188,30 +138,32 @@ fn main() -> () {
 
     let args = Cli::parse();
 
-    let samples_dir_path = PathBuf::from("./data/");
-    // let _ = create_index_samples_dir(&samples_dir_path);
+    info!("ARGS: {:#?}", args);
 
-    let _sample_index = SamplesDirIndex
-        ::new(
-            &samples_dir_path, 
-            &None,
-        )
-        .unwrap()
-    ;
+    match &args.command {
+        Commands::ScanSamplesDir { samples_dir_path, csv_file_path } 
+        => {
+            let _sample_index = SamplesDirIndex
+                ::new(&samples_dir_path, &csv_file_path)
+                .unwrap()
+            ;
+        },
+        Commands::ScanCfCard { cfcard_dir_path, csv_file_path} 
+        => {
+            let _cf = CompactFlashDrive
+                ::from_pathbuf(&cfcard_dir_path, &csv_file_path)
+                .unwrap()
+            ;
+        },
+        Commands::CreateChainsYaml { yaml_file_path } 
+        => {
+            let chain_conf = YamlChainConfig
+                ::from_yaml(&yaml_file_path)
+                .unwrap()
+            ;
 
-    let yaml_file_path = PathBuf::from("chain.yaml");
-    let _chain = create_chains_from_yaml(&yaml_file_path);
-
-    let one_chain = SampleChain::from_yaml_conf(chain_config).unwrap();
-
-    let cf_card_dir_path = PathBuf::from("./data/tests/index-cf/");
-    let _cf = CompactFlashDrive
-        ::new(
-            &cf_card_dir_path,
-            &None,
-        )
-        .unwrap()
-    ;
-
+            let _ = create_samplechains(&chain_conf);
+        }
+    }
 
 }
