@@ -2,3 +2,7 @@
 # local copies of similar octatrack sample management implementations
 refs/
 *.swp
+outchains/
+infiles/
+outfiles/
+inchains/
