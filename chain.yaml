@@ -1,0 +1,90 @@
+global_settings:
+  # TODO: need to set up normalization ... normalize each or per chain? New Enum for options if so *sighs*
+  normalize: false
+  out_dir_path: "./outchains/"
+
+chains:
+  - chain_name: first
+    octatrack_settings:
+      bpm: 150.0
+      # TODO:
+      # 0 <= x <= 48 ... but this is not the value in struct
+      # tweak this to 0.0 <= x <= 100.0 for better UX?
+      # or even 0.0 <= x <= 1.0 for simplicity?
+      # ^ it's not really simpler because we're just placing a different upper bound on the value
+      # ----> use the OT values --> -24 <= x <= +24 --> hen translate to u16 -- 48 maximum?
+      # ----> is this supposed to be an i8, rather than an u16?
+      # 
+      # Octachainer: (0x30 = 0, 0x60 = 24 (max), 0x00 = -24 (min))
+      # ---> 0x60 is 96!
+      # ---> so instead of what i've got, i need to do: ((x_f32 + 24.0_f32) * 2.0) as u16
+      # ---> probably want a round() in there as well, so something like 
+      # ---> (round(((x_f32 + 24.0_f32) * 2.0) * 10.0) / 10.0) as u16
+      # this is 13.5 db gain ... aother +12db ish to go to max value
+      gain: 27
+      timestretch_mode: "Normal"
+      quantization_mode: "PatternLength"
+      loop_mode: "Normal"
+    sample_file_paths:
+      - "./data/tests/1/wavs/596990__stoltingmediagroup__smg_sound_drum_hat_0012035626.wav"
+      - "./data/tests/1/wavs/597018__stoltingmediagroup__smg_sound_drum_hat_0035158918.wav"
+      - "./data/tests/1/wavs/597185__stoltingmediagroup__smg_sound_drum_hat_0038894814.wav"
+      - "./data/tests/1/wavs/597295__stoltingmediagroup__smg_sound_drum_hat_0014103221.wav"
+      - "./data/tests/1/wavs/597370__stoltingmediagroup__smg_sound_drum_hat_0053134163.wav"
+      - "./data/tests/1/wavs/597477__stoltingmediagroup__smg_sound_drum_hat_0095767959.wav"
+
+  - chain_name: second
+    octatrack_settings:
+      bpm: 100.0
+      # this is 12db gain
+      gain: 24
+      timestretch_mode: "Beat"
+      quantization_mode: "TwelveSteps"
+      loop_mode: "PingPong"
+    sample_file_paths:
+      - "./data/tests/1/wavs/597501__stoltingmediagroup__smg_sound_drum_hat_0066511481.wav"
+      - "./data/tests/1/wavs/597545__stoltingmediagroup__smg_sound_drum_hat_0080276916.wav"
+      - "./data/tests/1/wavs/597811__stoltingmediagroup__smg_sound_drum_hat_0119421409.wav"
+      - "./data/tests/1/wavs/597888__stoltingmediagroup__smg_sound_drum_hat_0130322189.wav"
+
+  - chain_name: third
+    octatrack_settings:
+      bpm: 130.0
+      # this is 6db gain
+      gain: 12
+      timestretch_mode: "Off"
+      quantization_mode: "Direct"
+      loop_mode: "Off"
+    sample_file_paths:
+      - "./data/tests/1/wavs/597501__stoltingmediagroup__smg_sound_drum_hat_0066511481.wav"
+      - "./data/tests/1/wavs/597545__stoltingmediagroup__smg_sound_drum_hat_0080276916.wav"
+      - "./data/tests/1/wavs/597811__stoltingmediagroup__smg_sound_drum_hat_0119421409.wav"
+      - "./data/tests/1/wavs/597888__stoltingmediagroup__smg_sound_drum_hat_0130322189.wav"
+
+  - chain_name: fourth
+    octatrack_settings:
+      bpm: 120.0
+      # this is 0db gain
+      gain: 0
+      timestretch_mode: "Off"
+      quantization_mode: "Direct"
+      loop_mode: "Off"
+    sample_file_paths:
+      - "./data/tests/1/wavs/597501__stoltingmediagroup__smg_sound_drum_hat_0066511481.wav"
+      - "./data/tests/1/wavs/597545__stoltingmediagroup__smg_sound_drum_hat_0080276916.wav"
+      - "./data/tests/1/wavs/597811__stoltingmediagroup__smg_sound_drum_hat_0119421409.wav"
+      - "./data/tests/1/wavs/597888__stoltingmediagroup__smg_sound_drum_hat_0130322189.wav"
+
+  - chain_name: fifth
+    octatrack_settings:
+      bpm: 120.0
+      # should be +24 db?
+      gain: 48
+      timestretch_mode: "Off"
+      quantization_mode: "Direct"
+      loop_mode: "Off"
+    sample_file_paths:
+      - "./data/tests/1/wavs/597501__stoltingmediagroup__smg_sound_drum_hat_0066511481.wav"
+      - "./data/tests/1/wavs/597545__stoltingmediagroup__smg_sound_drum_hat_0080276916.wav"
+      - "./data/tests/1/wavs/597811__stoltingmediagroup__smg_sound_drum_hat_0119421409.wav"
+      - "./data/tests/1/wavs/597888__stoltingmediagroup__smg_sound_drum_hat_0130322189.wav"
