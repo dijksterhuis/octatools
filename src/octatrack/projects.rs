@@ -19,6 +19,8 @@ TODO: Rename `from_project_ascii` methods to one of
 - `from_string` / `from_str`
 */
 
+use std::ffi::OsStr;
+use std::thread::AccessError;
 use std::{
     collections::HashMap,
     path::PathBuf,
@@ -36,6 +38,8 @@ use crate::octatrack::options::{
     SampleAttributeTimestrechMode,
     SampleAttributeTrigQuantizationMode,
 };
+
+use crate::octatrack::samples::OctatrackSampleFilePair;
 
 // TODO: Move to contants.rs
 /// ASCII data section headings within an Octatrack `project.*` file
@@ -136,54 +140,25 @@ fn string_to_hashmap(data: &String, section: &ProjectRawFileSection) -> Result<H
 /// Trait to enable extracting a section of raw Octatrack Project file ASCII data
 trait ParseHashMapValueAs {
 
-    fn get_hmap_value_as_i8(hmap: &HashMap<String, String>, key: &str) -> Result<i8, Box<dyn std::error::Error>> {
+    fn parse_hashmap_value<T: std::str::FromStr>(hmap: &HashMap<String, String>, key: &str) -> Result<T, Box<dyn std::error::Error>>     
+        where <T as std::str::FromStr>::Err: std::fmt::Debug {
         Ok(
             hmap
                 .get(key)
-                .unwrap_or(&i8::MAX.to_string())
-                .parse::<i8>()
-                ?
+                .unwrap()
+                .parse::<T>()
+                .unwrap()
         )
     }
 
-    fn get_hmap_value_as_u8(hmap: &HashMap<String, String>, key: &str) -> Result<u8, Box<dyn std::error::Error>> {
-        Ok(
-            hmap
-                .get(key)
-                .unwrap_or(&u8::MAX.to_string())
-                .parse::<u8>()
-                ?
-        )
-    }
-
-    fn get_hmap_value_as_u32(hmap: &HashMap<String, String>, key: &str) -> Result<u32, Box<dyn std::error::Error>> {
-        Ok(
-            hmap
-                .get(key)
-                .unwrap_or(&u32::MAX.to_string())
-                .parse::<u32>()
-                ?
-        )
-    }
-
-    fn get_hmap_value_as_bool(hmap: &HashMap<String, String>, key: &str) -> Result<bool, Box<dyn std::error::Error>> {
-
-        // TODO: can't use TryFrom trait for u8 into bools, but maybe we can extend the trait somehow?
-        let val =  hmap
-            .get(key)
-            .unwrap_or(&0.to_string())
-            .parse::<u8>()
-            ?
-        ;
-
+    // special case as boolean values are actually stored as 0 / 1 in the project data
+    fn parse_hashmap_value_bool(hmap: &HashMap<String, String>, key: &str) -> Result<bool, Box<dyn std::error::Error>> {
         let mut res = false;
-        if val == 1 {res = true};
-
+        if Self::parse_hashmap_value::<u8>(&hmap, &key)? == 1 {res = true};
         Ok(res)
-    }
-
 }
 
+}
 
 pub trait FromProjectStringData {
     type T;
@@ -219,8 +194,10 @@ impl FromProjectStringData for ProjectMetadata {
 
     fn from_string(data: &String) -> Result<Self, Box<dyn std::error::Error>> {
 
-        let hmap = string_to_hashmap(&data, &ProjectRawFileSection::Meta)?;
-        println!("META: {:#?}", hmap);
+        let hmap = string_to_hashmap(
+            &data,
+            &ProjectRawFileSection::Meta,
+        )?;
 
         let filetype_default = "OCTATRACK DPS-1 PROJECT".to_string();
         let project_version_default = "19".to_string();
@@ -572,73 +549,72 @@ impl FromProjectStringData for ProjectSettings {
     fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
 
         let hmap = string_to_hashmap(&s, &ProjectRawFileSection::Settings)?;
-        println!("SETTINGS: {:#?}", hmap);
 
         Ok(
             Self {
-                write_protected: Self::get_hmap_value_as_bool(&hmap, "write_protected")?,
-                tempo: Self::get_hmap_value_as_u32(&hmap, "tempo")?,
-                pattern_tempo_enabled: Self::get_hmap_value_as_bool(&hmap, "pattern_tempo_enabled")?,
-                master_track: Self::get_hmap_value_as_bool(&hmap, "master_track")?,
-                cue_studio_mode: Self::get_hmap_value_as_bool(&hmap, "cue_studio_mode")?,
-                midi_clock_send: Self::get_hmap_value_as_bool(&hmap, "midi_clock_send")?,
-                midi_clock_receive: Self::get_hmap_value_as_bool(&hmap, "midi_clock_receive")?,
-                midi_transport_send: Self::get_hmap_value_as_bool(&hmap, "midi_transport_send")?,
-                midi_transport_receive: Self::get_hmap_value_as_bool(&hmap, "midi_transport_receive")?,
-                midi_progchange_send: Self::get_hmap_value_as_bool(&hmap, "midi_progchange_send")?,
-                midi_progchange_send_channel: Self::get_hmap_value_as_i8(&hmap, "midi_progchange_send_channel")?,
-                midi_progchange_receive: Self::get_hmap_value_as_bool(&hmap, "midi_progchange_receive")?,
-                midi_progchange_receive_channel: Self::get_hmap_value_as_i8(&hmap, "midi_progchange_receive_channel")?,
-                midi_trig_ch1: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch1")?,
-                midi_trig_ch2: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch2")?,
-                midi_trig_ch3: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch3")?,
-                midi_trig_ch4: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch4")?,
-                midi_trig_ch5: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch5")?,
-                midi_trig_ch6: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch6")?,
-                midi_trig_ch7: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch7")?,
-                midi_trig_ch8: Self::get_hmap_value_as_u8(&hmap, "midi_trig_ch8")?,
-                midi_auto_channel: Self::get_hmap_value_as_u8(&hmap, "midi_auto_channel")?,
-                midi_soft_thru: Self::get_hmap_value_as_bool(&hmap, "midi_soft_thru")?,
-                midi_audio_track_cc_in: Self::get_hmap_value_as_bool(&hmap, "midi_audio_track_cc_in")?,
-                midi_audio_track_cc_out: Self::get_hmap_value_as_u8(&hmap, "midi_audio_track_cc_out")?,
-                midi_audio_track_note_in: Self::get_hmap_value_as_u8(&hmap, "midi_audio_track_note_in")?,
-                midi_audio_track_note_out: Self::get_hmap_value_as_u8(&hmap, "midi_audio_track_note_out")?,
-                midi_midi_track_cc_in: Self::get_hmap_value_as_u8(&hmap, "midi_midi_track_cc_in")?,
-                pattern_change_chain_behaviour: Self::get_hmap_value_as_u8(&hmap, "pattern_change_chain_behaviour")?,
-                pattern_change_auto_silence_tracks: Self::get_hmap_value_as_bool(&hmap, "pattern_change_auto_trig_lfos")?,
-                pattern_change_auto_trig_lfos: Self::get_hmap_value_as_bool(&hmap, "pattern_change_auto_trig_lfos")?,
-                load_24bit_flex: Self::get_hmap_value_as_bool(&hmap, "load_24bit_flex")?,
-                dynamic_recorders: Self::get_hmap_value_as_bool(&hmap, "dynamic_recorders")?,
-                record_24bit: Self::get_hmap_value_as_bool(&hmap, "record_24bit")?,
-                reserved_recorder_count: Self::get_hmap_value_as_u8(&hmap, "reserved_recorder_count")?,
-                reserved_recorder_length: Self::get_hmap_value_as_u32(&hmap, "reserved_recorder_length")?,
-                input_delay_compensation: Self::get_hmap_value_as_bool(&hmap, "input_delay_compensation")?,
-                gate_ab: Self::get_hmap_value_as_u8(&hmap, "gate_ab")?,
-                gate_cd: Self::get_hmap_value_as_u8(&hmap, "gate_cd")?,
-                gain_ab: Self::get_hmap_value_as_u8(&hmap, "gain_ab")?,
-                gain_cd: Self::get_hmap_value_as_u8(&hmap, "gate_cd")?,
-                dir_ab: Self::get_hmap_value_as_u8(&hmap, "dir_ab")?,
-                dir_cd: Self::get_hmap_value_as_u8(&hmap, "gate_cd")?,
-                phones_mix: Self::get_hmap_value_as_u8(&hmap, "phones_mix")?,
-                main_to_cue: Self::get_hmap_value_as_u8(&hmap, "main_to_cue")?,
-                main_level: Self::get_hmap_value_as_u8(&hmap, "main_level")?,
-                cue_level: Self::get_hmap_value_as_u8(&hmap, "cue_level")?,
-                metronome_time_signature: Self::get_hmap_value_as_u8(&hmap, "metronome_time_signature")?,
-                metronome_time_denominator: Self::get_hmap_value_as_u8(&hmap, "metronome_time_denominator")?,
-                metronome_preroll: Self::get_hmap_value_as_u8(&hmap, "metronome_preroll")?,
-                metronome_cue_volume: Self::get_hmap_value_as_u8(&hmap, "metronome_cue_volume")?,
-                metronome_main_volume: Self::get_hmap_value_as_u8(&hmap, "metronome_main_volume")?,
-                metronome_pitch: Self::get_hmap_value_as_u8(&hmap, "metronome_pitch")?,
-                metronome_tonal: Self::get_hmap_value_as_bool(&hmap, "metronome_tonal")?,
-                metronome_enabled: Self::get_hmap_value_as_bool(&hmap, "metronome_enabled")?,
-                trig_mode_midi_track_1: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_1")?,
-                trig_mode_midi_track_2: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_2")?,
-                trig_mode_midi_track_3: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_3")?,
-                trig_mode_midi_track_4: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_4")?,
-                trig_mode_midi_track_5: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_5")?,
-                trig_mode_midi_track_6: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_6")?,
-                trig_mode_midi_track_7: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_7")?,
-                trig_mode_midi_track_8: Self::get_hmap_value_as_u8(&hmap, "trig_mode_midi_track_8")?,
+                write_protected: Self::parse_hashmap_value_bool(&hmap, "writeprotected")?,
+                tempo: Self::parse_hashmap_value::<u32>(&hmap, "tempox24")? / 24,
+                pattern_tempo_enabled: Self::parse_hashmap_value_bool(&hmap, "pattern_tempo_enabled")?,
+                master_track: Self::parse_hashmap_value_bool(&hmap, "master_track")?,
+                cue_studio_mode: Self::parse_hashmap_value_bool(&hmap, "cue_studio_mode")?,
+                midi_clock_send: Self::parse_hashmap_value_bool(&hmap, "midi_clock_send")?,
+                midi_clock_receive: Self::parse_hashmap_value_bool(&hmap, "midi_clock_receive")?,
+                midi_transport_send: Self::parse_hashmap_value_bool(&hmap, "midi_transport_send")?,
+                midi_transport_receive: Self::parse_hashmap_value_bool(&hmap, "midi_transport_receive")?,
+                midi_progchange_send: Self::parse_hashmap_value_bool(&hmap, "midi_program_change_send")?,
+                midi_progchange_send_channel: Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
+                midi_progchange_receive: Self::parse_hashmap_value_bool(&hmap, "midi_program_change_receive")?,
+                midi_progchange_receive_channel: Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
+                midi_trig_ch1: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch1")?,
+                midi_trig_ch2: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch2")?,
+                midi_trig_ch3: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch3")?,
+                midi_trig_ch4: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch4")?,
+                midi_trig_ch5: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch5")?,
+                midi_trig_ch6: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch6")?,
+                midi_trig_ch7: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch7")?,
+                midi_trig_ch8: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch8")?,
+                midi_auto_channel: Self::parse_hashmap_value::<u8>(&hmap, "midi_auto_channel")?,
+                midi_soft_thru: Self::parse_hashmap_value_bool(&hmap, "midi_soft_thru")?,
+                midi_audio_track_cc_in: Self::parse_hashmap_value_bool(&hmap, "midi_audio_trk_cc_in")?,
+                midi_audio_track_cc_out: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_cc_out")?,
+                midi_audio_track_note_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_note_in")?,
+                midi_audio_track_note_out: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_note_out")?,
+                midi_midi_track_cc_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_midi_trk_cc_in")?,
+                pattern_change_chain_behaviour: Self::parse_hashmap_value::<u8>(&hmap, "pattern_change_chain_behavior")?,
+                pattern_change_auto_silence_tracks: Self::parse_hashmap_value_bool(&hmap, "pattern_change_auto_trig_lfos")?,
+                pattern_change_auto_trig_lfos: Self::parse_hashmap_value_bool(&hmap, "pattern_change_auto_trig_lfos")?,
+                load_24bit_flex: Self::parse_hashmap_value_bool(&hmap, "load_24bit_flex")?,
+                dynamic_recorders: Self::parse_hashmap_value_bool(&hmap, "dynamic_recorders")?,
+                record_24bit: Self::parse_hashmap_value_bool(&hmap, "record_24bit")?,
+                reserved_recorder_count: Self::parse_hashmap_value::<u8>(&hmap, "reserved_recorder_count")?,
+                reserved_recorder_length: Self::parse_hashmap_value::<u32>(&hmap, "reserved_recorder_length")?,
+                input_delay_compensation: Self::parse_hashmap_value_bool(&hmap, "input_delay_compensation")?,
+                gate_ab: Self::parse_hashmap_value::<u8>(&hmap, "gate_ab")?,
+                gate_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
+                gain_ab: Self::parse_hashmap_value::<u8>(&hmap, "gain_ab")?,
+                gain_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
+                dir_ab: Self::parse_hashmap_value::<u8>(&hmap, "dir_ab")?,
+                dir_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
+                phones_mix: Self::parse_hashmap_value::<u8>(&hmap, "phones_mix")?,
+                main_to_cue: Self::parse_hashmap_value::<u8>(&hmap, "main_to_cue")?,
+                main_level: Self::parse_hashmap_value::<u8>(&hmap, "main_level")?,
+                cue_level: Self::parse_hashmap_value::<u8>(&hmap, "cue_level")?,
+                metronome_time_signature: Self::parse_hashmap_value::<u8>(&hmap, "metronome_time_signature")?,
+                metronome_time_denominator: Self::parse_hashmap_value::<u8>(&hmap, "metronome_time_signature_denominator")?,
+                metronome_preroll: Self::parse_hashmap_value::<u8>(&hmap, "metronome_preroll")?,
+                metronome_cue_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_cue_volume")?,
+                metronome_main_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_main_volume")?,
+                metronome_pitch: Self::parse_hashmap_value::<u8>(&hmap, "metronome_pitch")?,
+                metronome_tonal: Self::parse_hashmap_value_bool(&hmap, "metronome_tonal")?,
+                metronome_enabled: Self::parse_hashmap_value_bool(&hmap, "metronome_enabled")?,
+                trig_mode_midi_track_1: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_1")?,
+                trig_mode_midi_track_2: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_2")?,
+                trig_mode_midi_track_3: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_3")?,
+                trig_mode_midi_track_4: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_4")?,
+                trig_mode_midi_track_5: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_5")?,
+                trig_mode_midi_track_6: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_6")?,
+                trig_mode_midi_track_7: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_7")?,
+                trig_mode_midi_track_8: Self::parse_hashmap_value::<u8>(&hmap, "trig_mode_midi_track_8")?,
             }
         )
     }
@@ -707,25 +683,24 @@ impl FromProjectStringData for ProjectStates {
     fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
 
         let hmap = string_to_hashmap(&s, &ProjectRawFileSection::States)?;
-        println!("STATES: {:#?}", hmap);
 
         Ok(
             Self {
-                bank: Self::get_hmap_value_as_u8(&hmap, "bank")?,
-                pattern: Self::get_hmap_value_as_u8(&hmap, "pattern")?,
-                arrangement: Self::get_hmap_value_as_u8(&hmap, "arrangement")?,
-                arrangement_mode: Self::get_hmap_value_as_u8(&hmap, "arrangement_mode")?,
-                part: Self::get_hmap_value_as_u8(&hmap, "part")?,
-                track: Self::get_hmap_value_as_u8(&hmap, "track")?,
-                track_othermode: Self::get_hmap_value_as_u8(&hmap, "track_othermode")?,
-                scene_a_mute: Self::get_hmap_value_as_bool(&hmap, "scene_a_mute")?,
-                scene_b_mute: Self::get_hmap_value_as_bool(&hmap, "scene_b_mute")?,
-                track_cue_mask: Self::get_hmap_value_as_u8(&hmap, "track_cue_mask")?,
-                track_mute_mask: Self::get_hmap_value_as_u8(&hmap, "track_mute_mask")?,
-                track_solo_mask: Self::get_hmap_value_as_u8(&hmap, "track_solo_mask")?,
-                midi_track_mute_mask: Self::get_hmap_value_as_u8(&hmap, "midi_track_mute_mask")?,
-                midi_track_solo_mask: Self::get_hmap_value_as_u8(&hmap, "midi_track_solo_mask")?,
-                midi_mode: Self::get_hmap_value_as_u8(&hmap, "midi_mode")?,
+                bank: Self::parse_hashmap_value::<u8>(&hmap, "bank")?,
+                pattern: Self::parse_hashmap_value::<u8>(&hmap, "pattern")?,
+                arrangement: Self::parse_hashmap_value::<u8>(&hmap, "arrangement")?,
+                arrangement_mode: Self::parse_hashmap_value::<u8>(&hmap, "arrangement_mode")?,
+                part: Self::parse_hashmap_value::<u8>(&hmap, "part")?,
+                track: Self::parse_hashmap_value::<u8>(&hmap, "track")?,
+                track_othermode: Self::parse_hashmap_value::<u8>(&hmap, "track_othermode")?,
+                scene_a_mute: Self::parse_hashmap_value_bool(&hmap, "scene_a_mute")?,
+                scene_b_mute: Self::parse_hashmap_value_bool(&hmap, "scene_b_mute")?,
+                track_cue_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_cue_mask")?,
+                track_mute_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_mute_mask")?,
+                track_solo_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_solo_mask")?,
+                midi_track_mute_mask: Self::parse_hashmap_value::<u8>(&hmap, "midi_track_mute_mask")?,
+                midi_track_solo_mask: Self::parse_hashmap_value::<u8>(&hmap, "midi_track_solo_mask")?,
+                midi_mode: Self::parse_hashmap_value::<u8>(&hmap, "midi_mode")?,
             }
         )
     }
@@ -733,13 +708,15 @@ impl FromProjectStringData for ProjectStates {
 
 // [SAMPLE]\r\nTYPE=FLEX\r\nSLOT=001\r\nPATH=../AUDIO/flex.wav\r\nTRIM_BARSx100=173\r\nTSMODE=2\r\nLOOPMODE=1\r\nGAIN=48\r\nTRIGQUANTIZATION=-1\r\n[/SAMPLE]
 
-/// Project samples read from a parsed Octatrack Project file
+/// Project sample read from a parsed Octatrack Project file.
+/// This only loads data from the project file.
+/// Samples not added to a project sample lsit for sstatic/flex machines will not be loaded.
 /// **NOTE**: any fields matching those in an Octatrack sample attributes file 
 /// may not have been writtten to an attributes file yet. 
-/// These are project files loaded into memory when switching to the project.
+/// (these are project files loaded into memory when switching to the project)/
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct ProjectSample {
+pub struct ProjectSampleActive {
 
     // TODO: Should recording buffers be treated as a separate slot type?
     /// Type of sample: STATIC or FLEX
@@ -752,6 +729,9 @@ pub struct ProjectSample {
 
     /// Relative path to the file on the card from the project directory.
     path: PathBuf,
+
+    /// The sample's file pair (audio file and optional attributes file).
+    file_pair: Option<OctatrackSampleFilePair>,
 
     // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current bar trim (float). This is multiplied by 100 on the machine.
@@ -777,7 +757,7 @@ pub struct ProjectSample {
 }
 
 // cannot use FromProjectStringData because it expects a lone Self result, rather than a Vec. 
-impl ProjectSample {
+impl ProjectSampleActive {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn std::error::Error>> {
 
@@ -803,12 +783,26 @@ impl ProjectSample {
             .unwrap()
         ;
 
+        // TODO: Will never find the respective OT file as
+        // the ^ path is alwys relative to project dir on CF card
+
+        let mut file_pair = None;
+        if path.file_name() != PathBuf::from("").file_name() {
+            file_pair = Some(
+                OctatrackSampleFilePair
+                    ::from_audio_pathbuf(&path)
+                    .unwrap()
+                )
+            ;
+        }
+
         let trim_bars = hmap
             .get("trim_barsx100")
-            .unwrap_or(&"-1.0".to_string())
+            .unwrap_or(&"0.0".to_string())
             .clone()
             .parse::<f32>()
             .unwrap()
+            / 100.0
         ;
 
         let loop_mode = SampleAttributeLoopMode
@@ -866,13 +860,14 @@ impl ProjectSample {
             .unwrap_or(&"2880".to_string())
             .clone()
             .parse::<u16>()
-            .unwrap_or(2880)
+            .unwrap_or(2880) / 24_u16
         ;
 
         let sample_struct = Self {
             sample_type,
             slot_id,
             path,
+            file_pair,
             trim_bars,
             timestrech_mode,
             loop_mode,
@@ -915,7 +910,7 @@ impl ProjectSample {
             .collect()
         ;
 
-        let mut sample_structs: Vec<ProjectSample> = Vec::new();
+        let mut sample_structs: Vec<ProjectSampleActive> = Vec::new();
         for sample in samples {
 
             let mut hmap: HashMap<String, String> = HashMap::new();
@@ -937,6 +932,24 @@ impl ProjectSample {
 }
 
 
+/// All samples related to the project
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+pub struct ProjectSamples {
+
+    /// samples loaded into a project sample slot
+    active: Vec<ProjectSampleActive>,
+
+    /// smples in a project directory, but not loaded into a sample slot.
+    inactive: Vec<OctatrackSampleFilePair>,
+}
+
+impl ProjectSamples {
+    pub fn from_string() {
+
+    }
+}
+
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -946,8 +959,33 @@ pub struct Project {
     pub meta: ProjectMetadata,
     pub settings: ProjectSettings,
     pub states: ProjectStates,
-    pub samples: Vec<ProjectSample>,
+    pub samples: ProjectSamples,
+
+    /// Name of this Project (directory basename)
+    pub name: String,
+
+    /// Explicit path to this Audio Pool
+    pub path: PathBuf,
 }
+
+// TODO: Move to some utils file
+// TODO: Error type
+fn get_pathbuf_fname_as_string(path: &PathBuf) -> Result<String, ()> {
+
+    let name = path
+        .clone()
+        .file_name()
+        .unwrap_or(&OsStr::new("err"))
+        .to_str()
+        .unwrap_or("err")
+        .to_string()
+    ;
+
+    if name == "err" {return Err(())};
+    Ok(name)
+
+}
+
 
 impl Project {
 
@@ -957,9 +995,9 @@ impl Project {
 
     /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
     
-    pub fn from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_file(path: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
 
-        let s = std::fs::read_to_string(path)?;
+        let s = std::fs::read_to_string(&path)?;
 
         let meta = ProjectMetadata::from_string(&s)?;
         println!("META: {:#?}", meta);
@@ -970,8 +1008,20 @@ impl Project {
         let settings = ProjectSettings::from_string(&s)?;
         println!("SETTINGS: {:#?}", settings);
 
-        let samples = ProjectSample::from_string(&s)?;
-        println!("SAMPLES: {:#?}", &samples);
+        // TODO: Get sample file pairs, pop the ones that are active, the rest are inactive.
+
+        let active_samples = ProjectSampleActive::from_string(&s)?;
+        println!("SAMPLES: {:#?}", &active_samples);
+
+        // TODO
+        let inactive_samples: Vec<OctatrackSampleFilePair> = vec![];
+
+        let samples = ProjectSamples {
+            active: active_samples,
+            inactive: inactive_samples,
+        };
+
+        let name = get_pathbuf_fname_as_string(&path).unwrap();
 
         Ok(
             Self {
@@ -979,6 +1029,8 @@ impl Project {
                 settings,
                 states,
                 samples,
+                name,
+                path,
             }
         )
     }
@@ -994,7 +1046,11 @@ mod test_integration {
     fn test_read_a_project() {
         assert!(
             ! Project
-                ::from_file("data/tests/index-cf/DEV-OTsm/FLEX-ONESTRTEND/project.work")
+                ::from_file(
+                    PathBuf
+                        ::from_str("data/tests/index-cf/DEV-OTsm/FLEX-ONESTRTEND/project.work")
+                        .unwrap()
+                )
                 .is_ok()
         );
     }
