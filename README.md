@@ -14,7 +14,7 @@ Only tested against the latest version of the Octatrack OS 1.40B (?).
 
 Doing sample preperation work for the Octatrack in a **more automated manner**. The main goals are:
 
-1. `ot-sm chains yaml`: Create multiple 'sliced' sample chains simultaneously via from a single YAML config.
+1. `ot-sm chains yaml`: Create multiple 'sliced' sample chains simultaneously via a single YAML config.
 2. `ot-sm scan samples`: Scan a local directory and output a list of compatible audio files to a YAML file (copy paste YAML into the sample chain config for `ot-sm chains yaml`).
 
 Additional commands I'm thinking about:
