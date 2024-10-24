@@ -7,6 +7,9 @@ because GUI applications are a pain when you need to create 50+ sample chains in
 
 Only tested against the latest version of the Octatrack OS 1.40B (?).
 
+**NOTE**: This is mostly a **learning** project for me to mess around and get to grips with Rust. 
+**DO NOT EXPECT HIGH QUALITY RUST CODE HERE**.
+
 ### What this software aims to do
 
 Doing sample preperation work for the Octatrack in a **more automated manner**. The main goals are:
