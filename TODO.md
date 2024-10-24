@@ -15,4 +15,7 @@
 - Handle both `AIFF` and `WAV` writes at 16/24 bit depth & 24.1/28kHz sample rates.
 - Minor audio edits in for sample chains (fade in 1%/2%/5%/100%, fade out, fade in/out type (linear/exp/etc), normalisation, 'fast-cuts' glitching, reverses?)
 - Deconstruct a sample chain into individual samples (inverse of creating a sample chain)
-- ...?
+- Deconstruct a bunch of sample chains + attribute files into a YAML config for offline editing (add more samples, chainge gain values, etc.)
+- Random slice selection -- randonly create Nx slices for a single sample file.
+- Mode parameter for how to do the sample chaining?
+- Sample attribute gain noramlisation in YAML / CLI? Should it be 0.0 -> 100.0? Or Octatrack native machine values (-24.0dB -> +24.0db)?
