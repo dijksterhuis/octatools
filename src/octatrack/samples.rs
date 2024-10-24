@@ -105,6 +105,26 @@ impl OctatrackSampleFilePair {
             }
         )
     }
+
+    /// Create a new `OctatrackSampleFile` only from  the audio file path 
+
+    pub fn from_audio_pathbuf(audio_fp: &PathBuf) -> Result<Self, ()> {
+
+        // TODO: optimise this? so many clones
+        let mut ot_file_path = audio_fp.clone();
+        ot_file_path.set_extension("ot");
+
+        let mut ot_file_pathbuf = Some(ot_file_path.clone());
+        if ! ot_file_path.exists() {ot_file_pathbuf = None};
+
+        Ok(
+            Self {
+                name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
+                audio_path: audio_fp.clone(),
+                otfile_path: ot_file_pathbuf
+            }
+        )
+    }
 }
 
 
