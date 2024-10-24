@@ -7,9 +7,9 @@ use serde::{Serialize, Deserialize};
 use crate::audio::wavfile::scan_dir_path_for_wavfiles;
 use crate::octatrack::samples::OctatrackSampleFilePair;
 
-/// Searching for audio 'samples' (`.wav` files).
+/// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
 
-pub trait ScanForSamples {
+pub trait SearchForOctatrackSampleFilePair {
 
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
 
@@ -58,7 +58,7 @@ pub struct OctatrackSetProjects {
     pub samples: Vec<OctatrackSampleFilePair>
 }
 
-impl ScanForSamples for OctatrackSetProjects {}
+impl SearchForOctatrackSampleFilePair for OctatrackSetProjects {}
 
 impl OctatrackSetProjects {
 
@@ -95,7 +95,7 @@ pub struct OctatrackSetAudioPool {
     pub samples: Vec<OctatrackSampleFilePair>
 }
 
-impl ScanForSamples for OctatrackSetAudioPool {}
+impl SearchForOctatrackSampleFilePair for OctatrackSetAudioPool {}
 
 impl OctatrackSetAudioPool {
 
