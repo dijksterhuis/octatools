@@ -4,7 +4,6 @@
 
 use serde::{Deserialize, Serialize};
 use crate::octatrack::common::OptionEnumValueConvert;
-use anyhow::Result;
 
 /// Sample Slot options for Projects.
 
