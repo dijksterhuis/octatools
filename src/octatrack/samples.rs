@@ -1,24 +1,14 @@
-//! Read and write Octatrack `.ot` sample metadata/settings files.
+//! Read/Write Octatrack sample attributes (`.ot`) files.
 
-/*
-TODOs:
-* Default: https://doc.rust-lang.org/std/default/trait.Default.html
-* Rename to OctatrackSampleXXX
-*/
+pub mod configs;
+pub mod slices;
 
 use std::{
-    error::Error,
     fs::File,
     io::prelude::*,
     path::PathBuf,
 };
 
-use log::{
-    error,
-    info,
-    warn,
-    debug,
-};
 use bincode::ErrorKind;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
@@ -29,9 +19,16 @@ use crate::constants::DEFAULT_SAMPLE_RATE;
 
 use crate::octatrack::common::OptionEnumValueConvert;
 use crate::octatrack::options::{
-    SampleAttributeLoopMode,
     SampleAttributeTimestrechMode,
     SampleAttributeTrigQuantizationMode,
+};
+
+use crate::octatrack::samples::{
+    configs::{
+        SampleLoopConfig,
+        SampleTrimConfig,
+    },
+    slices::{Slice, Slices},
 };
 
 
@@ -74,6 +71,25 @@ pub const FULL_HEADER: [u8; 23] = [
     0x00
 ];
 
+
+
+// TODO: Change to taking number of samples as argument
+// so we can pass in a single wav or a vvector worth of wavs
+// otherwise we have to mess around with switching about types
+
+// TODO: Move to octatrack_common?
+
+/// Calculate the effective number of bars for a sample / slice.
+/// Assumes four beats per bar. 
+
+pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -> U32Result {
+    let total_samples: u32 = wavs.iter().map(|x| x.len as u32).sum();
+    let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
+    let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
+    bars -= bars % 0.25;
+    Ok((bars * 100.0) as u32)
+}
+
 /// Each 'sample' can have two files present on an Octatrack: 
 /// the audio file and the corresponding `.ot` attributes file.
 /// This struct represents one 'sample' as a combination of those two file paths.
@@ -81,16 +97,16 @@ pub const FULL_HEADER: [u8; 23] = [
 // NOTE: samples can be stored either in the set's audio pool or in the project directory
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct OctatrackSampleFilePair {
+pub struct SampleFilePair {
     /// Name of this Sample (file basenames)
     pub name: String,
     /// Explicit path to the **audio** file. 
-    pub audio_path: PathBuf,
+    pub audio_filepath: PathBuf,
     /// Explicit path to the **Octatrack attributes** file. 
-    pub otfile_path: Option<PathBuf>,
+    pub attributes_filepath: Option<PathBuf>,
 }
 
-impl OctatrackSampleFilePair {
+impl SampleFilePair {
 
     /// Create a new `OctatrackSampleFile` from the audio file path 
     /// and an optional attributes file path.
@@ -100,8 +116,8 @@ impl OctatrackSampleFilePair {
         Ok(
             Self {
                 name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
-                audio_path: audio_fp.clone(),
-                otfile_path: ot_fp.clone()
+                audio_filepath: audio_fp.clone(),
+                attributes_filepath: ot_fp.clone()
             }
         )
     }
@@ -120,178 +136,11 @@ impl OctatrackSampleFilePair {
         Ok(
             Self {
                 name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
-                audio_path: audio_fp.clone(),
-                otfile_path: ot_file_pathbuf
+                audio_filepath: audio_fp.clone(),
+                attributes_filepath: ot_file_pathbuf
             }
         )
     }
-}
-
-
-
-/// An OT Sample's Trim settings
-
-#[derive(PartialEq, Debug, Clone, Copy)]
-pub struct SampleTrimConfig {
-    /// Start of full audio sample (n samples)
-    pub start: u32,
-    /// End of full audio sample (n samples)
-    pub end: u32,
-    /// Length of audio sample to play before stopping/looping playback (n samples)
-    pub length: u32,
-}
-
-// impl SampleTrimConfig {
-//     pub fn from_decoded(decoded: &SampleChain) -> Result<Self, Box<dyn Error>> {
-//         let new = SampleTrimConfig {
-//             start: decoded.trim_start,
-//             end: decoded.trim_end,
-//             length: decoded.trim_len,
-//         };
-//         Ok(new)
-//     }
-// }
-
-/// An OT Sample's Loop settings
-
-#[derive(PartialEq, Debug, Clone, Copy)]
-pub struct SampleLoopConfig {
-
-    /// Loop start position for the audio sample (n samples).
-    pub start: u32,
-
-    /// Length of the loop for the audio sample (n samples).
-    pub length: u32,
-
-    /// Type of looping mode.
-    pub mode: SampleAttributeLoopMode,
-}
-
-// impl SampleLoopConfig {
-//     pub fn from_decoded(decoded: &SampleChain) -> Result<Self, Box<dyn Error>> {
-//         Ok(
-//             SampleLoopConfig {
-//                 start: decoded.loop_start,
-//                 length: decoded.loop_len,
-//                 mode: decoded.loop_mode as u8,
-//             }
-//         )
-//     }
-// }
-
-/// Positions of a 'slice' within a single WAV file
-/// (a sliced WAV file is multiple samples joined in series)
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Copy)]
-pub struct Slice {
-
-    /// Start position for the `Slice`.
-    pub trim_start: u32,
-
-    /// End position for the `Slice`.
-    pub trim_end: u32,
-
-    /// Loop start position for the `Slice`.
-    pub loop_start: u32,
-}
-
-impl Slice {
-
-    /// Swap bytes for all struct fields 
-
-    pub fn as_bswapped(&self) -> Self {
-
-        Self {
-            trim_start: self.trim_start.swap_bytes(),
-            trim_end: self.trim_end.swap_bytes(),
-            loop_start: self.loop_start.swap_bytes(),
-        }
-    }
-
-    /// Create a `Slice` object for an unchained wavfile.
-    /// The starting `offset` position should be the sample index within the eventual chained wavfile.
-
-    pub fn from_wavfile(wavfile: &WavFile, offset: u32) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Slice {
-                trim_start: 0 + offset,
-                trim_end: offset + wavfile.len,
-                loop_start: 0xFFFFFFFF,
-            }
-        )
-    }
-}
-
-
-/// A collection of `Slice` objects.
-
-pub struct Slices {
-
-    /// `Slice` objects, must be 64 elements in length.
-    pub slices: [Slice; 64],
-
-    /// Number of non-zero valued `Slice` objects in the `slices` field array.
-    pub count: u32,
-}
-
-impl Slices {
-
-    /// Get a new `Vec` of Slices, given a `Vec` of `WavFile`s and a starting position offset.
-
-    fn get_vec_from_wavfiles(wavfiles: &Vec<WavFile>, initial_offset: &u32) -> Result<Vec<Slice>, Box<dyn Error>> {
-
-        let mut off = initial_offset.clone();
-        let mut slices: Vec<Slice> = Vec::new();
-    
-        for w in wavfiles.iter() {
-            slices.push(Slice::from_wavfile(w, off).unwrap());
-            off += w.len as u32;
-        }
-
-        Ok(slices)
-    }
-
-    /// Get a new `Slices` struct, given a `Vec` of `WavFile`s.
-
-    pub fn from_wavfiles(wavfiles: &Vec<WavFile>, offset: &u32) -> Result<Self, Box<dyn Error>> {
-
-        let new_slices: _ = Self::get_vec_from_wavfiles(&wavfiles, &offset).unwrap();
-    
-        let default_slice = Slice {
-            trim_end: 0,
-            trim_start: 0,
-            loop_start: 0,
-        };
-    
-        let mut slices_arr: [Slice; 64] = [default_slice; 64];
-        for (i, slice_vec) in new_slices.iter().enumerate() {
-            slices_arr[i] = slice_vec.clone();
-        }
-
-        Ok(
-            Self {
-                slices: slices_arr,
-                count: wavfiles.len() as u32
-            }
-        )
-    }
-}
-
-// TODO: Change to taking number of samples as argument
-// so we can pass in a single wav or a vvector worth of wavs
-// otherwise we have to mess around with switching about types
-
-// TODO: Move to octatrack_common?
-
-/// Calculate the effective number of bars for a sample / slice.
-/// Assumes four beats per bar. 
-
-pub fn get_otsample_n_bars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -> U32Result {
-    let total_samples: u32 = wavs.iter().map(|x| x.len as u32).sum();
-    let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
-    let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
-    bars -= bars % 0.25;
-    Ok((bars * 100.0) as u32)
 }
 
 
@@ -300,7 +149,7 @@ pub fn get_otsample_n_bars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -
 /// and the slice array with pointer positions for the sliced WAV.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct SampleChain {
+pub struct SampleAttributes {
 
     /// Header is always: `FORM....DPS1SMPA`
     pub header: [u8; 16],
@@ -369,7 +218,7 @@ pub struct SampleChain {
     pub checksum: u16,
 }
 
-impl SampleChain {
+impl SampleAttributes {
     pub fn new(
         tempo: &f32,
         stretch: &SampleAttributeTimestrechMode,
@@ -641,7 +490,6 @@ mod test_unit_sample_chain {
 
 #[cfg(test)]
 mod test_integration {
-    use super::*;
 
     mod test_integration_sample_chain_create_vs_read {
 
@@ -650,18 +498,26 @@ mod test_integration {
         use walkdir::{DirEntry, WalkDir};
 
         use crate::audio::wavfile::WavFile;
-        use crate::octatrack::samples::get_otsample_n_bars_from_wavfiles;
-        use super::{
-            SampleChain,
-            SampleLoopConfig,
-            SampleTrimConfig,
-            Slices,
-            Slice,
+
+        use crate::octatrack::options::{
             SampleAttributeTimestrechMode,
+            SampleAttributeTrigQuantizationMode,
             SampleAttributeLoopMode,
-            SampleAttributeTrigQuantizationMode
         };
 
+        use crate::octatrack::samples::{
+            configs::{
+                SampleLoopConfig,
+                SampleTrimConfig,    
+            },
+            slices::{
+                Slice,
+                Slices,
+            },
+            SampleAttributes,
+            get_otsample_nbars_from_wavfiles
+        };
+        
         fn walkdir_filter_is_wav(entry: &DirEntry) -> bool {
             entry.file_name()
                     .to_str()
@@ -689,17 +545,17 @@ mod test_integration {
             Ok(fpaths)
         }
 
-        fn create_sample_chain_encoded_from_wavfiles(wav_fps: &Vec<PathBuf>) -> Result<(SampleLoopConfig, SampleTrimConfig, Slices), Box<dyn Error>> {
+        fn create_sample_chain_encoded_from_wavfiles(wav_fps: Vec<PathBuf>) -> Result<(SampleLoopConfig, SampleTrimConfig, Slices), Box<dyn Error>> {
 
             let mut wavs: Vec<WavFile> = Vec::new();
-            for fp in wav_fps.into_iter() {
-                let wav = WavFile::from_file(&fp).unwrap();
+            for fp in wav_fps {
+                let wav = WavFile::from_file(fp).unwrap();
                 wavs.push(wav);
             }
 
             let slices_config = Slices::from_wavfiles(&wavs, &0).unwrap();
 
-            let bars = get_otsample_n_bars_from_wavfiles(&wavs, &125.0).unwrap();
+            let bars = get_otsample_nbars_from_wavfiles(&wavs, &125.0).unwrap();
 
             let trim_config = SampleTrimConfig {
                 start: 0,
@@ -717,8 +573,8 @@ mod test_integration {
 
         }
 
-        fn read_valid_sample_chain(path: &str) -> Result<SampleChain, Box<dyn Error>> {
-            let read_chain = SampleChain
+        fn read_valid_sample_chain(path: &str) -> Result<SampleAttributes, Box<dyn Error>> {
+            let read_chain = SampleAttributes
                 ::from_file(path)
                 .unwrap()
                 ;
@@ -729,9 +585,9 @@ mod test_integration {
         fn test_default_10_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/1/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain_res = SampleChain
+            let composed_chain_res = SampleAttributes
                 ::new(
                     &125.0, 
                     &SampleAttributeTimestrechMode::Off, 
@@ -764,9 +620,9 @@ mod test_integration {
         fn test_default_3_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/2/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &125.0, 
                     &SampleAttributeTimestrechMode::Off, 
@@ -794,9 +650,9 @@ mod test_integration {
         fn test_default_64_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &175.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -830,9 +686,9 @@ mod test_integration {
         fn test_default_67_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &175.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -898,7 +754,7 @@ mod test_integration {
 
             let (trim_conf, loop_conf, slices) = create_mock_configs_blank();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &147.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -918,9 +774,9 @@ mod test_integration {
         fn test_non_default_quantize_3_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &125.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -954,9 +810,9 @@ mod test_integration {
         fn test_non_default_gain_3_samples() {
 
             let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
-            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(&wav_fps).unwrap();
+            let (loop_config, trim_config, slices) = create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &125.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -991,7 +847,7 @@ mod test_integration {
 
             let (trim_conf, loop_conf, slices) = create_mock_configs_blank();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &10000.0,
                     &SampleAttributeTimestrechMode::Off, 
@@ -1010,7 +866,7 @@ mod test_integration {
 
             let (trim_conf, loop_conf, slices) = create_mock_configs_blank();
 
-            let composed_chain = SampleChain
+            let composed_chain = SampleAttributes
                 ::new(
                     &125.0,
                     &SampleAttributeTimestrechMode::Off, 

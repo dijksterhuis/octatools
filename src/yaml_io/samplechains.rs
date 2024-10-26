@@ -5,14 +5,16 @@
 use serde_yml::Error as SerdeYmlError;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use log::{error, info, warn, debug};
+use log::{info, debug};
 
 use crate::octatrack::options::{
     SampleAttributeLoopMode,
     SampleAttributeTrigQuantizationMode,
     SampleAttributeTimestrechMode,
 };
-use crate::octatrack::samples::OctatrackSampleFilePair;
+use crate::octatrack::samples::SampleFilePair;
+
+use crate::common::{FromYamlFile, ToYamlFile};
 
 // TODO: normalization
 // TODO: fades
@@ -61,41 +63,42 @@ pub struct YamlChainConfig {
     pub chains: Vec<YamlChainConfigSamplechain>,
 }
 
-impl YamlChainConfig {
+impl FromYamlFile for  YamlChainConfig {}
+impl ToYamlFile for  YamlChainConfig {}
 
-    /// Write data to a new YAML file.
+//     /// Write data to a new YAML file.
 
-    pub fn to_yaml(self: &Self, yaml_file_path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+//     pub fn to_yaml(self: &Self, yaml_file_path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
 
-        debug!("Writing SampleChain config to YAML file: {:#?}", &yaml_file_path);
+//         debug!("Writing SampleChain config to YAML file: {:#?}", &yaml_file_path);
 
-        let f = std::fs::File::open(yaml_file_path)?;
-        let written = serde_yml::to_writer(f, self)?;
+//         let f = std::fs::File::open(yaml_file_path)?;
+//         let written = serde_yml::to_writer(f, self)?;
 
-        info!("Write SampleChain config to YAML file: {:#?}", &yaml_file_path);
+//         info!("Write SampleChain config to YAML file: {:#?}", &yaml_file_path);
 
-        Ok(written)
-    }
+//         Ok(written)
+//     }
 
-    /// **TODO**: Deconstruct existing samplechain file pairs into a YAML config file.
-    /// Useful for editing sample chains created on device.
+//     /// **TODO**: Deconstruct existing samplechain file pairs into a YAML config file.
+//     /// Useful for editing sample chains created on device.
 
-    pub fn from_samplechain_files(sample_files: &Vec<OctatrackSampleFilePair>, outdir: &PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
-        todo!()
-    }
+//     pub fn from_samplechain_files(sample_files: &Vec<OctatrackSampleFilePair>, outdir: &PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
+//         todo!()
+//     }
 
-    /// Read yaml config from file.
+//     /// Read yaml config from file.
 
-    pub fn from_yaml(yaml_file_path: &PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
+//     pub fn from_yaml(yaml_file_path: &PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
 
-        debug!("Reading YAML config file: {:#?}", &yaml_file_path);
+//         debug!("Reading YAML config file: {:#?}", &yaml_file_path);
 
-        let f = std::fs::File::open(yaml_file_path)?;
-        let data: Result<Self, SerdeYmlError> = serde_yml::from_reader(f);
+//         let f = std::fs::File::open(yaml_file_path)?;
+//         let data: Result<Self, SerdeYmlError> = serde_yml::from_reader(f);
 
-        info!("Read YAML config file: {:#?}", &yaml_file_path);
+//         info!("Read YAML config file: {:#?}", &yaml_file_path);
 
-        Ok(data?)
+//         Ok(data?)
 
-    }
-}
+//     }
+// }

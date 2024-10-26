@@ -8,14 +8,13 @@ use std::{
     io::Write,
 };
 use csv::Writer;
-use log::{error, info, warn, debug};
+use serde::{Serialize, Deserialize};
 
 use crate::octatrack::sets::OctatrackSet;
-use crate::results::{self, VoidResultBoxed};
-
+use crate::common::{FromYamlFile, ToYamlFile};
 /// A single row of data written to the index file.
 
-#[derive(PartialEq, Debug, Clone, serde::Serialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashScanCsvRow {
 
     /// Disk name of the card
@@ -43,8 +42,10 @@ pub struct CompactFlashScanCsvRow {
 
 /// A compact flash card which we need to scan for audio files.
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashDrive {
+
+    pub index_file_path: Option<PathBuf>,
 
     /// The path to the current compact flash card.
     cfcard_path: PathBuf,
@@ -53,78 +54,77 @@ pub struct CompactFlashDrive {
     ot_sets: Vec<OctatrackSet>,
 }
 
+impl FromYamlFile for CompactFlashDrive{}
+impl ToYamlFile for CompactFlashDrive{}
+
 impl CompactFlashDrive {
 
     /// Index a compact flash card by scanning through each `OctatrackSet` under the given `PathBuf`'s directory tree.
-    // TODO: Remove to csv in here and call it explicitly.
     
-    pub fn from_pathbuf(path: &PathBuf, csv_file_path: &Option<PathBuf>) -> Result<CompactFlashDrive, ()> {
+    pub fn from_pathbuf(cfcard_path: PathBuf, index_file_path: Option<PathBuf>) -> Result<CompactFlashDrive, ()> {
 
-        let ot_sets = OctatrackSet::from_cfcard_pathbuf(&path);
+        // TODO: Hard exit on failure
+        let ot_sets = OctatrackSet::from_cfcard_pathbuf(&cfcard_path).unwrap();
 
         let cf = CompactFlashDrive {
-            cfcard_path: path.clone(),
-            ot_sets: ot_sets.unwrap(),
+            index_file_path,
+            cfcard_path,
+            ot_sets,
         };
-
-        if ! csv_file_path.is_none() {
-            cf.to_csv(&csv_file_path.as_ref().unwrap());
-        };
-
 
         Ok(cf)
     }
 
-    /// Create a local index file for a `CompactFlashDrive` which has been indexed.
-    /// Audio Pool records are written first, then individual Projects
+    // /// Create a local index file for a `CompactFlashDrive` which has been indexed.
+    // /// Audio Pool records are written first, then individual Projects
     
-    fn to_csv(&self, csv_filepath: &PathBuf) -> Result<(), std::io::Error> {
+    // fn to_csv(&self, csv_filepath: &PathBuf) -> Result<(), std::io::Error> {
 
-        let sets = self.ot_sets.clone();
-        let mut wtr = Writer::from_writer(vec![]);
+    //     let sets = self.ot_sets.clone();
+    //     let mut wtr = Writer::from_writer(vec![]);
 
-        for s in sets {
-            for audio_pool_sample in s.audio_pool.samples {
+    //     for s in sets {
+    //         for audio_pool_sample in s.audio_pool.samples {
 
-                let row = CompactFlashScanCsvRow {
-                    cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
-                    set: s.name.clone(),
-                    is_set_audio_pool: true,
-                    project: None,
-                    audio_filepath: audio_pool_sample.audio_path,
-                    ot_filepath: audio_pool_sample.otfile_path,
-                    audio_name: audio_pool_sample.name,
-                };
+    //             let row = CompactFlashScanCsvRow {
+    //                 cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
+    //                 set: s.name.clone(),
+    //                 is_set_audio_pool: true,
+    //                 project: None,
+    //                 audio_filepath: audio_pool_sample.audio_path,
+    //                 ot_filepath: audio_pool_sample.otfile_path,
+    //                 audio_name: audio_pool_sample.name,
+    //             };
 
-                let _ = wtr.serialize(row);
-            }
+    //             let _ = wtr.serialize(row);
+    //         }
 
-            for project in &s.projects {
-                for project_sample in &project.samples {
+    //         for project in &s.projects {
+    //             for project_sample in &project.samples {
 
-                    let row = CompactFlashScanCsvRow {
-                        cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
-                        set: s.name.clone(),
-                        is_set_audio_pool: true,
-                        project: None,
-                        audio_filepath: project_sample.audio_path.clone(),
-                        ot_filepath: project_sample.otfile_path.clone(),
-                        audio_name: project_sample.name.clone(),
-                    };
+    //                 let row = CompactFlashScanCsvRow {
+    //                     cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
+    //                     set: s.name.clone(),
+    //                     is_set_audio_pool: true,
+    //                     project: None,
+    //                     audio_filepath: project_sample.audio_path.clone(),
+    //                     ot_filepath: project_sample.otfile_path.clone(),
+    //                     audio_name: project_sample.name.clone(),
+    //                 };
     
-                    let _ = wtr.serialize(row);
-                }
-            }
-        }
+    //                 let _ = wtr.serialize(row);
+    //             }
+    //         }
+    //     }
 
-        let mut file = File::create(csv_filepath).unwrap();
-        let write_result: Result<(), std::io::Error> = file
-            .write_all(&wtr.into_inner().unwrap())
-            .map_err(|e| e)
-        ;
+    //     let mut file = File::create(csv_filepath).unwrap();
+    //     let write_result: Result<(), std::io::Error> = file
+    //         .write_all(&wtr.into_inner().unwrap())
+    //         .map_err(|e| e)
+    //     ;
 
-        write_result
-    }
+    //     write_result
+    // }
 
 }
 
@@ -166,7 +166,7 @@ mod tests {
         let _csv_path = PathBuf::from("./.otsm-index-cf.csv");
 
         let res: Result<CompactFlashDrive, ()> = CompactFlashDrive
-            ::from_pathbuf(&cfcard_path, &None)
+            ::from_pathbuf(cfcard_path, None)
         ;
 
         assert!(res.is_ok());

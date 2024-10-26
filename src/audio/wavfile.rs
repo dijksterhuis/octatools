@@ -18,7 +18,6 @@ use walkdir::{
 use log::{
     debug,
     info,
-    warn,
     error,
 };
 
@@ -74,12 +73,17 @@ pub fn chain_wavfiles_64_batch(wavfiles: &Vec<WavFile>) -> Result<Vec<(WavFile, 
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct WavFile {
+
     /// hound wav file specification struct
     pub spec: WavSpec,
+
     /// length of the wav file data (number of samples)
     pub len: u32,
+
     /// instantaneous samples of the audio
     pub samples: Vec<i32>,  // cannot use Copy trait
+
+    pub file_path: PathBuf,
 }
 
 impl WavFile {
@@ -101,13 +105,14 @@ impl WavFile {
 
     /// Read samples, specficiation etc. frm a WAV file.
 
-    pub fn from_file(wav_file_path: &PathBuf) -> Result<WavFile, Box<dyn Error>> {
+    pub fn from_file(wav_file_path: PathBuf) -> Result<WavFile, Box<dyn Error>> {
         let mut reader = WavFile::open(&wav_file_path).unwrap();
         let spec = WavFile::read_wav_spec(&mut reader).unwrap();
         let samples = WavFile::read_wav_samples(&mut reader).unwrap();
 
         Ok(
             WavFile {
+                file_path: wav_file_path,
                 samples: samples.clone(),
                 len: samples.len() as u32 / spec.channels as u32,
                 spec,

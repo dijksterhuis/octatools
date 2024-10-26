@@ -33,54 +33,150 @@ pub enum Commands {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    ScanSamplesDir {
-        samples_dir_path: PathBuf,
-        csv_file_path: Option<PathBuf>
-    },
-    ScanCfCard {
+    #[command(subcommand)]
+    Chains(Chains),
+
+    #[command(subcommand)]
+    Scan(Index),
+
+    // ScanSamplesDirFull {
+    //     samples_dir_path: PathBuf,
+    //     yaml_file_path: Option<PathBuf>,
+    // },
+    // ScanSamplesDirSimple {
+    //     samples_dir_path: PathBuf,
+    //     yaml_file_path: Option<PathBuf>,
+    // },
+    // ScanCfCard {
+    //     cfcard_dir_path: PathBuf,
+    //     csv_file_path: Option<PathBuf>
+    // },
+}
+
+/// Commands related to samplechains.
+#[derive(Subcommand, Debug)]
+pub enum Chains {
+
+    #[command(subcommand)]
+    Create(CreateChain),
+
+    #[command(subcommand)]
+    Deconstruct(DesconstructChain),
+
+    // // TODO: EHHHHH don't like the idea of adding a new index file here.
+    // /// Use a '.combi-index' file to generate combinatorial sample chains for a selection of samples
+    // Combinator { 
+    //     /// Which '.samples-index' file to add these chains to
+    //     samples_index_file_path: String,
+    //     /// '.combi-index' file to generate the chains from
+    //     combi_index_file_path: String,
+    // },
+}
+
+
+
+/// Generate YAML files after scanning / searching various places.
+#[derive(Subcommand, Debug)]
+pub enum Index {
+
+    #[command(subcommand)]
+    Samples(IndexSamples),
+
+    /// Build a YAML representation of all Sets on a Compact Flash Card.
+    Cfcard {
+
+        /// Directory path of the Compact Flash Card directory
         cfcard_dir_path: PathBuf,
-        csv_file_path: Option<PathBuf>
+
+        /// File path location where the output YAML file will be written
+        yaml_file_path: Option<PathBuf>,
+    }
+}
+
+
+/// Create sample chains
+#[derive(Subcommand, Debug)]
+pub enum CreateChain {
+
+    /// Create a single sample chain from the cli
+    Cli {
+        /// Name of the new sliced samplechain.
+        /// Will be suffixed with an index number.
+        chain_name: String,
+
+        /// Directory path where the audio files will be written
+        out_dir_path: String,
+        
+        /// File paths of wav files to include in the sliced sample chain.
+        /// Shell glob patterns work here too.
+        wav_file_paths: Vec<PathBuf>,
     },
-    CreateChainsYaml {
+
+    /// Create batches of sample chains from a YAML config file
+    Yaml {
+        /// File path of the YAML file for batched samplechains construction.
         yaml_file_path: PathBuf,
     },
 }
 
-
+/// Use an Octatrack '.ot' file to deconstruct a 'sliced' samplechain into component sample files
 #[derive(Subcommand, Debug)]
-enum Chain {
-    /// Create a simple sample chain from source files
-    Construct { 
-        /// Directory path where the sample chain audio file and .ot file will be written
-        // chain_dir_path: String,
-        /// File name for both audio and .ot files.
-        // chain_name: String,
-        /// Paths to the audio files to include in the sample chain.
-        // audio_file_paths: Vec<String>,
+enum DesconstructChain {
 
-        /// The '.samples-index' file which holds sample chains configs (will be updated during processing)
-        samples_index_file_path: String,
+    /// Use a YAML config to deconstruct batches of sliced samplechains.
+    Yaml {
+        /// File path of the YAML file.
+        yaml_file_path: PathBuf,
     },
-    /// Use an Octatrack '.ot' file to deconstruct a sample chain into component parts
-    Deconstruct { 
+
+    /// Use the CLI to deconstruct an individual sliced samplechain.
+    Cli {
         /// Path to the '.ot' file to use for deconstruction.
         ot_file_path: String,
         /// Path to the audio file to use for deconstruction.
         audio_file_path: String,
         /// Directory path where the audio files will be written
         out_dir_path: String,
-        /// \[OPTIONAL\] Which '.samples-index' file these chains will belong to
-        samples_index_file_path: Option<String>,
+    },
+}
+
+/// Recursively search through local directories for Octatrack compatible audio files.
+#[derive(Subcommand, Debug)]
+pub enum IndexSamples {
+
+    /// Creates a YAML file output just listing all compatible files.
+    Simple {
+
+        /// Path to the top of the directory tree to search through.
+        samples_dir_path: PathBuf,
+
+        /// File path for the output YAML file
+        yaml_file_path: Option<PathBuf>,
     },
 
-    // TODO: EHHHHH don't like the idea of adding a new index file here.
-    /// Use a '.combi-index' file to generate combinatorial sample chains for a selection of samples
-    Combinator { 
-        /// Which '.samples-index' file to add these chains to
-        samples_index_file_path: String,
-        /// '.combi-index' file to generate the chains from
-        combi_index_file_path: String,
+    /// Creates a YAML file output including useful file metadata.
+    Full {
+
+        /// Path to the top of the directory tree to search through.
+        samples_dir_path: PathBuf,
+
+        /// File path for the output YAML file
+        yaml_file_path: Option<PathBuf>,
     },
+}
+
+/*
+#[derive(Subcommand, Debug)]
+pub enum IndexCfcard {
+    /// Output location of the '.samples-index' file.
+    index_file_path: String,
+    /// Directory paths of where to scan for samples
+    source_dir_paths: Vec<String>,
+    /// Create a Octatrack compatible copy of any audio sample files
+    /// that are not suitable for use on an Octatrack 
+    /// (44.1kHz 16-bit WAV files)
+    #[arg(long, required = false, default_value_t = false)]
+    convert: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -170,3 +266,4 @@ enum Push {
         commit: bool,
     },
 }
+*/

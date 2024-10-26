@@ -2,10 +2,12 @@
 
 use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
-use log::{error, info, warn, debug};
+use log::debug;
 use serde::{Serialize, Deserialize};
 use crate::audio::wavfile::scan_dir_path_for_wavfiles;
-use crate::octatrack::samples::OctatrackSampleFilePair;
+use crate::octatrack::samples::SampleFilePair;
+use crate::octatrack::projects::Project;
+use crate::octatrack::common::FromFileAtPathBuf;
 
 /// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
 
@@ -13,28 +15,17 @@ pub trait SearchForOctatrackSampleFilePair {
 
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
 
-    fn scan_dir_path_for_samples(dir_path: &PathBuf) -> Result<Vec<OctatrackSampleFilePair>, ()> {
+    fn scan_dir_path_for_samples(dir_path: &PathBuf) -> Result<Vec<SampleFilePair>, ()> {
 
         let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dir_path).unwrap();
-        let mut ot_sample_files: Vec<OctatrackSampleFilePair> = Vec::new();
 
-        for wav_file_path in wav_file_paths {
-
-            // TODO: optimise this?
-            let mut ot_file_path = wav_file_path.clone();
-            ot_file_path.set_extension("ot");
-
-            let mut ot_file_pathbuf = Some(ot_file_path.clone());
-            if ! ot_file_path.exists() {ot_file_pathbuf = None};
-
-            let sample = OctatrackSampleFilePair {
-                name: wav_file_path.file_name().unwrap().to_str().unwrap().to_string().clone(),
-                audio_path: wav_file_path.clone(),
-                otfile_path: ot_file_pathbuf.clone(),
-            };
-
-            ot_sample_files.push(sample);
-        };
+        let ot_sample_files: Vec<SampleFilePair> = wav_file_paths
+            .into_iter()
+            .map(
+                |fp| SampleFilePair::from_audio_pathbuf(&fp).unwrap()
+            )
+            .collect()
+        ;
 
         debug!("Audio samples and OT files: {:#?}", ot_sample_files);
         Ok(ot_sample_files)
@@ -46,33 +37,41 @@ pub trait SearchForOctatrackSampleFilePair {
 /// Octatrack Projects that are contained within an Octatrack Set.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct OctatrackSetProjects {
+pub struct OctatrackSetProject {
 
     /// Name of this Project (directory basename)
     pub name: String,
 
     /// Explicit path to this Audio Pool
-    pub path: PathBuf,
+    pub dirpath: PathBuf,
 
     /// 'Samples' which are members of this Project.
-    pub samples: Vec<OctatrackSampleFilePair>
+    pub sample_filepaths: Vec<SampleFilePair>,
+
+    pub data: Project,
+
 }
 
-impl SearchForOctatrackSampleFilePair for OctatrackSetProjects {}
+impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
 
-impl OctatrackSetProjects {
+impl OctatrackSetProject {
 
-    /// Create a new `OctatrackSetProjects` from a `PathBuf`.
-    /// **NOTE**: the `PathBuf` must point to the correct directory.
+    /// Create a new `OctatrackSetProject` from the dirpath `PathBuf`.
 
-    pub fn from_pathbuf(path: &PathBuf) -> Result<OctatrackSetProjects, ()> {
+    pub fn from_pathbuf(dirpath: &PathBuf) -> Result<Self, ()> {
 
+        // TODO: Handle looking for .work / .strd
+        if ! dirpath.is_dir() {
+            return Err(())
+        }
+        
         Ok(
-            OctatrackSetProjects {
-                name: path.file_name().unwrap().to_str().unwrap().to_string(),
-                path: path.clone(),
+            Self {
+                name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
+                dirpath: dirpath.clone(),
                 // samples: scan_dir_for_ot_files(path).unwrap_or(Vec::new()).clone()
-                samples: OctatrackSetProjects::scan_dir_path_for_samples(&path).unwrap()
+                sample_filepaths: Self::scan_dir_path_for_samples(&dirpath).unwrap(),
+                data: Project::from_pathbuf(dirpath.join("project.work")).unwrap()
             }
         )
     }
@@ -92,7 +91,7 @@ pub struct OctatrackSetAudioPool {
 
     // TODO: There can be zero samples!
     /// 'Samples' which are members of this Audio Pool.
-    pub samples: Vec<OctatrackSampleFilePair>
+    pub samples: Vec<SampleFilePair>
 }
 
 impl SearchForOctatrackSampleFilePair for OctatrackSetAudioPool {}
@@ -102,16 +101,17 @@ impl OctatrackSetAudioPool {
     /// Create a new `OctatrackSetAudioPool` from a `PathBuf`.
     /// **NOTE**: the `PathBuf` must point to the correct directory.
 
-    pub fn from_pathbuf(path: &PathBuf) -> Result<OctatrackSetAudioPool, ()> {
+    pub fn from_pathbuf(path: &PathBuf) -> Result<Self, ()> {
         Ok(
-            OctatrackSetAudioPool {
+            Self {
                 name: path.file_name().unwrap().to_str().unwrap().to_string(),
                 path: path.clone(),
-                samples: OctatrackSetAudioPool::scan_dir_path_for_samples(&path).unwrap()
+                samples: Self::scan_dir_path_for_samples(&path).unwrap()
             }
         )
     }
 }
+
 
 /// An Octatrack 'Set'. Each 'Set' contains multiple Octatrack 'Project's and a single 'Audio Pool'. 
 
@@ -128,7 +128,7 @@ pub struct OctatrackSet {
     pub audio_pool: OctatrackSetAudioPool,
 
     /// Projects which are members of this Set.
-    pub projects: Vec<OctatrackSetProjects>,
+    pub projects: Vec<OctatrackSetProject>,
 }
 
 impl OctatrackSet {
@@ -153,19 +153,20 @@ impl OctatrackSet {
             )
         ;
 
-        let mut ot_sets: Vec<OctatrackSet> = Vec::new();
-        for entry in set_paths_iter {
-            let unwrapped = entry.unwrap();
-            let ot_set_path = unwrapped.path().to_path_buf();
-            let ot_set = OctatrackSet::from_pathbuf(&ot_set_path);
-            let unwrapped_set = ot_set.unwrap();
-
-            if unwrapped_set != None {
-                ot_sets.push(unwrapped_set.unwrap());
-            }
-
-        }
-
+        let ot_sets: Vec<OctatrackSet> = set_paths_iter
+            .map(
+                | e: Result<DirEntry, walkdir::Error> | {
+                    let unwrapped = e.unwrap();
+                    let ot_set_path = unwrapped.path().to_path_buf();
+                    let ot_set = OctatrackSet::from_pathbuf(&ot_set_path);
+                    let unwrapped_set = ot_set.unwrap();
+                    unwrapped_set
+                }
+            )
+            .filter(|o: &Option<OctatrackSet>| !o.is_none())
+            .map(|o: Option<OctatrackSet>| o.unwrap() )
+            .collect()
+        ;
         Ok(ot_sets)
 
     }
@@ -201,13 +202,16 @@ impl OctatrackSet {
             )
         ;
 
-        let mut projects: Vec<OctatrackSetProjects> = Vec::new();
-        for entry in project_paths_iter {
-            let unwrapped = entry.unwrap();
-            let project_path = unwrapped.path().to_path_buf();
-            let project = OctatrackSetProjects::from_pathbuf(&project_path);
-            projects.push(project.unwrap());
-        }
+        let projects: Vec<OctatrackSetProject> = project_paths_iter
+            .into_iter()
+            .map(|d| {
+                let unwrapped = d.unwrap();
+                let project_path = unwrapped.path().to_path_buf();
+                let project = OctatrackSetProject::from_pathbuf(&project_path);
+                project.unwrap()
+            })
+            .collect()
+        ;
 
         Ok(
             Some(

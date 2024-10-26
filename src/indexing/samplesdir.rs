@@ -1,129 +1,169 @@
 //! A 'Sample Directory' contains samples that a user might want to load onto an Octatrack compact flash card.
 
-use std::{io::Read, fs::File, io::Write};
+use std::{io::Read, fs::File};
 use std::path::PathBuf;
 
-use csv::Writer;
 use md5::Digest;
 use base64ct::{Base64, Encoding};
-use log::{error, info, warn, debug};
+use log::{info, debug, error};
 use serde::{Serialize, Deserialize};
+use std::fs::canonicalize;
 
 use crate::audio::wavfile::scan_dir_path_for_wavfiles;
+use crate::common::{FromYamlFile, ToYamlFile};
 
+
+fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> Result<String, ()> {
+
+    debug!("Getting file path's file name: file={pathbuf:#?}");
+
+    // TODO: More idiomatic way of handling None values
+    let fname_osstr = pathbuf.file_stem();
+    if fname_osstr.is_none() {
+        error!("Could not get file path's file name: file={pathbuf:#?}");
+        return Err(())
+    }
+
+    // TODO: More idiomatic way of handling None values
+    let file_name_str = fname_osstr.unwrap().to_str();
+    if file_name_str.is_none() {
+        error!("Could not get file path's file name: file={pathbuf:#?}");
+        return Err(())
+    }
+
+    let file_name = file_name_str.unwrap().to_string();
+
+    debug!("Got file path's file name: file={pathbuf:#?} md5={file_name:#?}");
+
+    Ok(file_name)
+
+}
+
+
+fn get_md5_hash_from_pathbuf(pathbuf: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
+
+    debug!("Getting md5 hash: file={pathbuf:#?}");
+
+    let mut f: File = File::open(&pathbuf)?;
+    let mut buf: Vec<u8> = vec![];
+    let _: usize = f.read_to_end(&mut buf)?;
+    let md5_hash: Digest = md5::compute(buf);
+
+    let mut buf = [0u8; 32];
+
+    // TODO: hard exit on error
+    let md5_hash_string = Base64
+        ::encode(&md5_hash[..], &mut  buf)
+        .unwrap()
+        .to_string()
+    ;
+
+    debug!("Got md5 hash: file={pathbuf:#?} md5={md5_hash_string:#?}");
+
+    Ok(md5_hash_string)
+
+}
 
 /// One audio file detected in a scanned directory of samples.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SamplesDirAudioFile {
-    md5: String,
-    path: PathBuf,
-    name: String,
+    pub md5: String,
+    pub path: PathBuf,
+    pub name: String,
+}
+
+
+impl SamplesDirAudioFile {
+    pub fn new(fp: PathBuf) -> Result<Self, ()> {
+
+        let md5_hash = get_md5_hash_from_pathbuf(&fp).unwrap();
+
+        // TODO: this is a hard exit on failure
+        let file_name = get_stem_from_pathbuf(&fp).unwrap();
+
+        Ok(
+            SamplesDirAudioFile {
+                path: canonicalize(fp).unwrap(),
+                md5: md5_hash,
+                name: file_name
+            }    
+        )
+
+    }
 }
 
 /// An index of a "sample's directory" -- i.e. where someone stores their samples.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct SamplesDirIndex {
-    dirpath: PathBuf,
-    index_file_path: Option<PathBuf>,
-    samples: Vec<SamplesDirAudioFile>,
+pub struct SamplesDirIndexFull {
+    pub dirpath: PathBuf,
+    pub index_file_path: Option<PathBuf>,
+    pub samples: Vec<SamplesDirAudioFile>,
 }
 
 
-impl SamplesDirIndex {
 
-    fn scandir(dirpath: &PathBuf) -> Result<Vec<SamplesDirAudioFile>, ()> {
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dirpath).unwrap();
+impl FromYamlFile for SamplesDirIndexFull {}
+impl ToYamlFile for SamplesDirIndexFull {}
 
-        info!("Getting md5 hashes of files ...");
-        let mut samples: Vec<SamplesDirAudioFile> = Vec::new();
-        for wav_file_path in wav_file_paths {
+impl SamplesDirIndexFull {
 
-            debug!("Getting md5 hash: file={:#?}", wav_file_path);
-
-            let mut f: File = File::open(&wav_file_path).unwrap();
-            let mut buf: Vec<u8> = vec![];
-            let _: usize = f.read_to_end(&mut buf).unwrap();    
-            let md5_hash: Digest = md5::compute(buf);
-
-            let mut buf = [0u8; 32];
-            // let hash_hex = base16ct::lower::encode_str(&md5_hash[..], &mut buf).unwrap();
-
-            // this doc is wrong, but i hope this works
-            // https://github.com/RustCrypto/hashes/tree/master?tab=readme-ov-file
-            let base64_hash = Base64
-                ::encode(&md5_hash[..], &mut  buf)
-                .unwrap()
-            ;
-
-            let wav_file_name = wav_file_path
-                .file_name()
-                .unwrap()
-                .to_str()
-                .unwrap()
-                .to_string()
-            ;
-
-            debug!(
-                "Got md5 hash: file={:#?} md5={:#?}", 
-                wav_file_path, 
-                base64_hash,
-            );
-
-            let sample = SamplesDirAudioFile {
-                path: wav_file_path,
-                md5: base64_hash.to_string(),
-                name: wav_file_name
-            };
-
-            samples.push(sample);
-        };
-    
-        info!("Got md5 hashes of files.");
-
-        Ok(samples)
-
-    }
-
-    // TODO: Refactor to write CSV index lines in scandir (if argument provided).
-    pub fn new(dirpath: &PathBuf, csv_file_path: &Option<PathBuf>) -> Result<SamplesDirIndex, ()> {
+    pub fn new(dirpath: PathBuf, index_file_path: Option<PathBuf>) -> Result<SamplesDirIndexFull, ()> {
 
         info!("Generating new sample directory index ...");
 
-        let samples = SamplesDirIndex::scandir(&dirpath).unwrap();
+        // TODO: Hard exit on failure
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dirpath).unwrap();
 
-        if ! csv_file_path.is_none() {
+        let samples: Vec<SamplesDirAudioFile> = wav_file_paths
+            .into_iter()
+            // TODO: Hard exit on failure
+            .map(| fp: PathBuf| SamplesDirAudioFile::new(fp).unwrap())
+            .collect()
+        ;
 
-            let mut wtr = Writer::from_writer(vec![]);
-
-            for sample in &samples {
-                let __ = wtr.serialize(sample);
-            };
-        
-            let csv_fp = csv_file_path.clone();
-            let mut file = File::create(csv_fp.unwrap()).unwrap();
-
-            info!(
-                "Writing sample index to CSV: path={:#?}",
-                &csv_file_path.clone().unwrap(),
-            );
-
-            let _res: Result<(), std::io::Error> = file
-                .write_all(&wtr.into_inner().unwrap())
-                .map_err(|e| e)
-            ;
+        let index = SamplesDirIndexFull {
+            dirpath: canonicalize(dirpath).unwrap(),
+            index_file_path,
+            samples,
         };
 
         info!("Generated new sample directory index.");
 
-        Ok(
-            SamplesDirIndex {
-                dirpath: dirpath.clone(),
-                index_file_path: csv_file_path.clone(),
-                samples: samples.clone(),
-            }
-        )
+        Ok(index)
+
+    }
+
+}
+
+
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+pub struct SamplesDirIndexSimple {
+    pub index_file_path: Option<PathBuf>,
+    pub samples: Vec<PathBuf>,
+}
+
+impl FromYamlFile for SamplesDirIndexSimple {}
+impl ToYamlFile for SamplesDirIndexSimple {}
+
+impl SamplesDirIndexSimple {
+
+    pub fn new(dirpath: PathBuf, index_file_path: Option<PathBuf>) -> Result<Self, ()> {
+
+        info!("Generating simple sample directory index ...");
+
+        // TODO: Hard exit on failure
+        let samples: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dirpath).unwrap();
+
+        let index = SamplesDirIndexSimple {
+            samples,
+            index_file_path,
+        };
+
+        info!("Generated simple sample directory index.");
+
+        Ok(index)
 
     }
 
