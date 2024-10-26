@@ -19,3 +19,8 @@
 - Random slice selection -- randonly create Nx slices for a single sample file.
 - Mode parameter for how to do the sample chaining?
 - Sample attribute gain noramlisation in YAML / CLI? Should it be 0.0 -> 100.0? Or Octatrack native machine values (-24.0dB -> +24.0db)?
+- `ValuesFrom` Trait for ......? some non-OT enum...? Errors?
+- Set up projects to be able to write to new project files. for  TEMPLATE projects (no overwriting existing projects!).
+  e.g. fill static sample slots 001 through 032 with drum sample chains, 064-128 with field recordings etc.
+- How to handle moving sample slots and associated bank data etc between projects?
+- TODO: what about project.strd ??! which one of work/strd is the "active" un-saved/un-synced data? (work is current, strd is last version)
