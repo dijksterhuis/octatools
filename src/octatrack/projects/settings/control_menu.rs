@@ -1,22 +1,16 @@
 //! Data structures for the Octatrack Project Settings 'Control Menu'.
 
+use crate::octatrack::options::ProjectMidiChannels;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use serde::{Serialize, Deserialize};
-use crate::octatrack::options::ProjectMidiChannels;
 
-use crate::octatrack::common::{
-    OptionEnumValueConvert,
-    ParseHashMapValueAs,
-    FromHashMap,
-};
-
+use crate::octatrack::common::{FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs};
 
 /// Convenience struct for all data related to the Octatrack Project Settings 'Control' Menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ControlMenu {
-
     /// 'Audio' page
     audio: AudioControlPage,
 
@@ -42,28 +36,24 @@ pub struct ControlMenu {
 
 impl ParseHashMapValueAs for ControlMenu {}
 impl FromHashMap for ControlMenu {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-
-        Ok(
-            Self {
-                audio: AudioControlPage::from_hashmap(&hmap)?,
-                input: InputControlPage::from_hashmap(&hmap)?,
-                sequencer: SequencerControlPage::from_hashmap(&hmap)?,
-                midi_sequencer: MidiSequencerControlPage {},
-                memory: MemoryControlPage::from_hashmap(&hmap)?,
-                metronome: MetronomeControlPage::from_hashmap(&hmap)?,
-                midi: MidiSubMenu::from_hashmap(&hmap)?,
-            }
-        )
+        Ok(Self {
+            audio: AudioControlPage::from_hashmap(&hmap)?,
+            input: InputControlPage::from_hashmap(&hmap)?,
+            sequencer: SequencerControlPage::from_hashmap(&hmap)?,
+            midi_sequencer: MidiSequencerControlPage {},
+            memory: MemoryControlPage::from_hashmap(&hmap)?,
+            metronome: MetronomeControlPage::from_hashmap(&hmap)?,
+            midi: MidiSubMenu::from_hashmap(&hmap)?,
+        })
     }
 }
 
-/// Convenience struct for all data related to the 'MIDI' sub-menu 
+/// Convenience struct for all data related to the 'MIDI' sub-menu
 /// within the Octatrack Project Settings 'Control' Menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -77,63 +67,52 @@ pub struct MidiSubMenu {
 
 impl ParseHashMapValueAs for MidiSubMenu {}
 impl FromHashMap for MidiSubMenu {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                control: MidiControlMidiPage::from_hashmap(&hmap)?,
-                sync: MidiSyncMidiPage::from_hashmap(&hmap)?,
-                channels: MidiChannelsMidiPage::from_hashmap(&hmap)?,
-            }
-        )
+        Ok(Self {
+            control: MidiControlMidiPage::from_hashmap(&hmap)?,
+            sync: MidiSyncMidiPage::from_hashmap(&hmap)?,
+            channels: MidiChannelsMidiPage::from_hashmap(&hmap)?,
+        })
     }
 }
 
-
-
-/// `PROJECT` -> `CONTROL` -> `AUDIO` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `AUDIO` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct AudioControlPage {
-
     /// `TRACK 8` setting. Whether Track 8 is a master audio track or not:
     /// - **NORMAL**: `false`
     /// - **MASTER**: `true`
     master_track: bool,
 
-    /// `CUE CFG` setting. Behaviour for audio routing to CUE outputs. 
+    /// `CUE CFG` setting. Behaviour for audio routing to CUE outputs.
     /// - **NORMAL** -> **CUE+TRACK** button combo sends audio to CUE out.
     /// - **STUDIO** -> Individual track volume controls for CUE out (unable to **CUE+TRACK**).
     cue_studio_mode: bool,
-
 }
 
 impl ParseHashMapValueAs for AudioControlPage {}
 impl FromHashMap for AudioControlPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                master_track: Self::parse_hashmap_value_bool(&hmap, "master_track")?,
-                cue_studio_mode: Self::parse_hashmap_value_bool(&hmap, "cue_studio_mode")?,
-            }
-        )
+        Ok(Self {
+            master_track: Self::parse_hashmap_value_bool(&hmap, "master_track")?,
+            cue_studio_mode: Self::parse_hashmap_value_bool(&hmap, "cue_studio_mode")?,
+        })
     }
 }
 
-/// `PROJECT` -> `CONTROL` -> `INPUT` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `INPUT` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct InputControlPage {
-
     /// dB level of noise gate for the AB external audio inputs.
     /// See Manual section 8.8 MIXER MENU
     gate_ab: u8, // 127 is default so i assume this is u8? midpoint?
@@ -142,42 +121,39 @@ pub struct InputControlPage {
     /// See Manual section 8.8 MIXER MENU
     gate_cd: u8, // 127 is default so i assume this is u8? midpoint?
 
-
     /// See Manual section 8.6.2. INPUT.
     /// Adds a delay to incoming external audio signals. Controlled by the DIR setting on the MIXER page.
     input_delay_compensation: bool,
-
 }
 
 impl ParseHashMapValueAs for InputControlPage {}
 impl FromHashMap for InputControlPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                gate_ab: Self::parse_hashmap_value::<u8>(&hmap, "gate_ab")?,
-                gate_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
-                input_delay_compensation: Self::parse_hashmap_value_bool(&hmap, "input_delay_compensation")?,
-            },
-        )
+        Ok(Self {
+            gate_ab: Self::parse_hashmap_value::<u8>(&hmap, "gate_ab")?,
+            gate_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
+            input_delay_compensation: Self::parse_hashmap_value_bool(
+                &hmap,
+                "input_delay_compensation",
+            )?,
+        })
     }
 }
 
-/// `PROJECT` -> `CONTROL` -> `SEQUENCER` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `SEQUENCER` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct SequencerControlPage {
-
     /// `CHAIN AFTER` setting.
     /// When chained patterns start playing once the pattern is chosen.
     /// This is the global project level setting, but can be overidden for each pattern.
-    /// Default setting is "PATTERN LENGTH". 
+    /// Default setting is "PATTERN LENGTH".
     /// See Manual section 8.6.3. SEQUENCER.
-    pattern_change_chain_behaviour: u8,  // bool?
+    pattern_change_chain_behaviour: u8, // bool?
 
     /// `SILENCE TRACKS` setting
     /// Silence tracks when switching to a new pattern.
@@ -188,43 +164,47 @@ pub struct SequencerControlPage {
     /// Whether to retrigger LFOs when swtiching to a new pattern
     /// See Manual section 8.6.3. SEQUENCER.
     pattern_change_auto_trig_lfos: bool,
-
 }
 
 impl ParseHashMapValueAs for SequencerControlPage {}
 impl FromHashMap for SequencerControlPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                pattern_change_chain_behaviour: Self::parse_hashmap_value::<u8>(&hmap, "pattern_change_chain_behavior")?,
-                pattern_change_auto_silence_tracks: Self::parse_hashmap_value_bool(&hmap, "pattern_change_auto_trig_lfos")?,
-                pattern_change_auto_trig_lfos: Self::parse_hashmap_value_bool(&hmap, "pattern_change_auto_trig_lfos")?,
-            },
-        )
+        Ok(Self {
+            pattern_change_chain_behaviour: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "pattern_change_chain_behavior",
+            )?,
+            pattern_change_auto_silence_tracks: Self::parse_hashmap_value_bool(
+                &hmap,
+                "pattern_change_auto_trig_lfos",
+            )?,
+            pattern_change_auto_trig_lfos: Self::parse_hashmap_value_bool(
+                &hmap,
+                "pattern_change_auto_trig_lfos",
+            )?,
+        })
     }
 }
 
-/// `PROJECT` -> `CONTROL` -> `MIDI SEQUENCER` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `MIDI SEQUENCER` UI menu.
 // TODO: ?!?!?!?! Where is the alue for this??!?!?!
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MidiSequencerControlPage {}
 
-/// `PROJECT` -> `CONTROL` -> `MEMORY` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `MEMORY` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MemoryControlPage {
-
     /// Whether samples can be loaded in 24-bit depth (16 bit depth samples are always oaded as 16 bit).
     /// Setting this to false loads all samples as 16 bit depth.
     /// See Manual section 8.6.5. MEMORY.
     load_24bit_flex: bool,
 
-    /// Disabled forces all recorders to use track recorder memory (16 seconds per track). 
+    /// Disabled forces all recorders to use track recorder memory (16 seconds per track).
     /// When enabled, track recorders can use free Flex RAM memory.
     /// See Manual section 8.6.5. MEMORY.
     dynamic_recorders: bool,
@@ -240,34 +220,35 @@ pub struct MemoryControlPage {
     /// How many 'sequencer steps' should be reserved for track recorders in RAM.
     /// See Manual section 8.6.5. MEMORY.
     reserved_recorder_length: u32,
-
 }
 
 impl ParseHashMapValueAs for MemoryControlPage {}
 impl FromHashMap for MemoryControlPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                load_24bit_flex: Self::parse_hashmap_value_bool(&hmap, "load_24bit_flex")?,
-                dynamic_recorders: Self::parse_hashmap_value_bool(&hmap, "dynamic_recorders")?,
-                record_24bit: Self::parse_hashmap_value_bool(&hmap, "record_24bit")?,
-                reserved_recorder_count: Self::parse_hashmap_value::<u8>(&hmap, "reserved_recorder_count")?,
-                reserved_recorder_length: Self::parse_hashmap_value::<u32>(&hmap, "reserved_recorder_length")?,
-            },
-        )
+        Ok(Self {
+            load_24bit_flex: Self::parse_hashmap_value_bool(&hmap, "load_24bit_flex")?,
+            dynamic_recorders: Self::parse_hashmap_value_bool(&hmap, "dynamic_recorders")?,
+            record_24bit: Self::parse_hashmap_value_bool(&hmap, "record_24bit")?,
+            reserved_recorder_count: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "reserved_recorder_count",
+            )?,
+            reserved_recorder_length: Self::parse_hashmap_value::<u32>(
+                &hmap,
+                "reserved_recorder_length",
+            )?,
+        })
     }
 }
 
-/// `PROJECT` -> `CONTROL` -> `METRONOME` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `METRONOME` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MetronomeControlPage {
-
     /// `TIME SIG. NUMER` setting in `PROJECT` -> `CONTROL` -> `METRONOME` UI menu.
     /// Controls the numerator for time signature (the 3 in 3/4).
     /// See Manual section 8.6.6 METRONOME
@@ -281,7 +262,7 @@ pub struct MetronomeControlPage {
     /// `PREROLL` setting in `PROJECT` -> `CONTROL` -> `METRONOME` UI menu.
     /// How many bars to prerolls with the metronome before playing a pattern.
     /// See Manual section 8.6.6 METRONOME
-    metronome_preroll: u8,  // what is the maximum for this?
+    metronome_preroll: u8, // what is the maximum for this?
 
     /// How loud to play the metronome on CUE outputs. Default is 32.
     /// See Manual section 8.6.6 METRONOME
@@ -302,37 +283,38 @@ pub struct MetronomeControlPage {
     /// Whether the metronome is active. Default is `false`.
     /// See Manual section 8.6.6 METRONOME
     metronome_enabled: bool,
-
 }
 
 impl ParseHashMapValueAs for MetronomeControlPage {}
 impl FromHashMap for MetronomeControlPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                metronome_time_signature: Self::parse_hashmap_value::<u8>(&hmap, "metronome_time_signature")?,
-                metronome_time_signature_denominator: Self::parse_hashmap_value::<u8>(&hmap, "metronome_time_signature_denominator")?,
-                metronome_preroll: Self::parse_hashmap_value::<u8>(&hmap, "metronome_preroll")?,
-                metronome_cue_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_cue_volume")?,
-                metronome_main_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_main_volume")?,
-                metronome_pitch: Self::parse_hashmap_value::<u8>(&hmap, "metronome_pitch")?,
-                metronome_tonal: Self::parse_hashmap_value_bool(&hmap, "metronome_tonal")?,
-                metronome_enabled: Self::parse_hashmap_value_bool(&hmap, "metronome_enabled")?,
-            },
-        )
+        Ok(Self {
+            metronome_time_signature: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "metronome_time_signature",
+            )?,
+            metronome_time_signature_denominator: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "metronome_time_signature_denominator",
+            )?,
+            metronome_preroll: Self::parse_hashmap_value::<u8>(&hmap, "metronome_preroll")?,
+            metronome_cue_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_cue_volume")?,
+            metronome_main_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_main_volume")?,
+            metronome_pitch: Self::parse_hashmap_value::<u8>(&hmap, "metronome_pitch")?,
+            metronome_tonal: Self::parse_hashmap_value_bool(&hmap, "metronome_tonal")?,
+            metronome_enabled: Self::parse_hashmap_value_bool(&hmap, "metronome_enabled")?,
+        })
     }
 }
 
-/// `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MidiControlMidiPage {
-
     /// Whether samples can be loaded in 24-bit depth (16 bit depth samples are always oaded as 16 bit).
     /// `AUDIO CC IN` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
     /// Whether audio tracks respond to MIDI CC IN messages.
@@ -343,12 +325,12 @@ pub struct MidiControlMidiPage {
     /// Whether audio tracks send MIDI CC OUT messages. Three options:
     /// - `INT`: No messages sent, knobs only affect Octatrack settings.
     /// - `EXT`: Sends CC OUT messages but they don't alter any Octatrack settings.
-    /// - `INT+EXT`: Simulataneously affects Octratack settings and sends CC OUT messages. 
+    /// - `INT+EXT`: Simulataneously affects Octratack settings and sends CC OUT messages.
     /// See manual section 8.7.1 CONTROL.
     midi_audio_track_cc_out: u8,
 
     /// `AUDIO NOTE IN` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
-    /// Whether to receive MIDI NOTE IN messages on Audio tracks and how the audio tracks 
+    /// Whether to receive MIDI NOTE IN messages on Audio tracks and how the audio tracks
     /// respond to those MIDI NOTE IN messages.
     /// - **OFF**: midi note has no effet.
     /// - **STANDARD**: standard note mapping (default).
@@ -361,41 +343,44 @@ pub struct MidiControlMidiPage {
     /// Whether audio tracks send MIDI NOTE OUT messages. Three options:
     /// - `INT`: No messages sent, knobs only affect Octatrack settings.
     /// - `EXT`: Sends NOTE OUT messages but they don't alter any Octatrack settings.
-    /// - `INT+EXT`: Simulataneously affects Octratack settings and sends NOTE OUT messages. 
+    /// - `INT+EXT`: Simulataneously affects Octratack settings and sends NOTE OUT messages.
     /// See manual section 8.7.1 CONTROL.
     midi_audio_track_note_out: u8,
 
     /// Unknown. MIDI channel to MIDI Track CC In messages n (1 - 16) ?
     midi_midi_track_cc_in: u8,
-
 }
 
 impl ParseHashMapValueAs for MidiControlMidiPage {}
 impl FromHashMap for MidiControlMidiPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                midi_audio_track_cc_in: Self::parse_hashmap_value_bool(&hmap, "midi_audio_trk_cc_in")?,
-                midi_audio_track_cc_out: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_cc_out")?,
-                midi_audio_track_note_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_note_in")?,
-                midi_audio_track_note_out: Self::parse_hashmap_value::<u8>(&hmap, "midi_audio_trk_note_out")?,
-                midi_midi_track_cc_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_midi_trk_cc_in")?,
-            },
-        )
+        Ok(Self {
+            midi_audio_track_cc_in: Self::parse_hashmap_value_bool(&hmap, "midi_audio_trk_cc_in")?,
+            midi_audio_track_cc_out: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "midi_audio_trk_cc_out",
+            )?,
+            midi_audio_track_note_in: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "midi_audio_trk_note_in",
+            )?,
+            midi_audio_track_note_out: Self::parse_hashmap_value::<u8>(
+                &hmap,
+                "midi_audio_trk_note_out",
+            )?,
+            midi_midi_track_cc_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_midi_trk_cc_in")?,
+        })
     }
 }
 
-
-/// `PROJECT` -> `CONTROL` -> `MIDI` -> `SYNC` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `MIDI` -> `SYNC` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MidiSyncMidiPage {
-
     /// `CLOCK SEND` setting.
     /// Whether MIDI clock sending is enabled/disabled
     /// See manual section 8.7.2 SYNC.
@@ -437,45 +422,49 @@ pub struct MidiSyncMidiPage {
     /// **NOTE**: should be set to `-1` when `midi_progchange_receive` is disabled.
     /// See manual section 8.7.2 SYNC.
     midi_progchange_receive_channel: ProjectMidiChannels,
-
 }
-
 
 impl ParseHashMapValueAs for MidiSyncMidiPage {}
 impl FromHashMap for MidiSyncMidiPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                midi_clock_send: Self::parse_hashmap_value_bool(&hmap, "midi_clock_send")?,
-                midi_clock_receive: Self::parse_hashmap_value_bool(&hmap, "midi_clock_receive")?,
-                midi_transport_send: Self::parse_hashmap_value_bool(&hmap, "midi_transport_send")?,
-                midi_transport_receive: Self::parse_hashmap_value_bool(&hmap, "midi_transport_receive")?,
-                midi_progchange_send: Self::parse_hashmap_value_bool(&hmap, "midi_program_change_send")?,
-                // TODO: Unwrap
-                midi_progchange_send_channel: ProjectMidiChannels::from_value(
-                    Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
-                ).unwrap(),
-                midi_progchange_receive: Self::parse_hashmap_value_bool(&hmap, "midi_program_change_receive")?,
-                // TODO: Unwrap
-                midi_progchange_receive_channel: ProjectMidiChannels::from_value(
-                    Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
-                ).unwrap()
-            },
-        )
+        Ok(Self {
+            midi_clock_send: Self::parse_hashmap_value_bool(&hmap, "midi_clock_send")?,
+            midi_clock_receive: Self::parse_hashmap_value_bool(&hmap, "midi_clock_receive")?,
+            midi_transport_send: Self::parse_hashmap_value_bool(&hmap, "midi_transport_send")?,
+            midi_transport_receive: Self::parse_hashmap_value_bool(
+                &hmap,
+                "midi_transport_receive",
+            )?,
+            midi_progchange_send: Self::parse_hashmap_value_bool(
+                &hmap,
+                "midi_program_change_send",
+            )?,
+            // TODO: Unwrap
+            midi_progchange_send_channel: ProjectMidiChannels::from_value(
+                Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
+            )
+            .unwrap(),
+            midi_progchange_receive: Self::parse_hashmap_value_bool(
+                &hmap,
+                "midi_program_change_receive",
+            )?,
+            // TODO: Unwrap
+            midi_progchange_receive_channel: ProjectMidiChannels::from_value(
+                Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
+            )
+            .unwrap(),
+        })
     }
 }
 
-
-/// `PROJECT` -> `CONTROL` -> `MIDI` -> `CHANNELS` UI menu. 
+/// `PROJECT` -> `CONTROL` -> `MIDI` -> `CHANNELS` UI menu.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MidiChannelsMidiPage {
-
     /// `TRIG CH 1` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CHANNELS` UI menu.
     /// MIDI Channel to send MIDI Trig 1 messages to (1 - 16)
     /// See manual section 8.7.3 CHANNELS.
@@ -522,28 +511,23 @@ pub struct MidiChannelsMidiPage {
     midi_auto_channel: u8,
 }
 
-
 impl ParseHashMapValueAs for MidiChannelsMidiPage {}
 impl FromHashMap for MidiChannelsMidiPage {
-
     type A = String;
     type B = String;
     type T = Self;
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self {
-                midi_trig_ch1: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch1")?,
-                midi_trig_ch2: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch2")?,
-                midi_trig_ch3: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch3")?,
-                midi_trig_ch4: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch4")?,
-                midi_trig_ch5: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch5")?,
-                midi_trig_ch6: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch6")?,
-                midi_trig_ch7: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch7")?,
-                midi_trig_ch8: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch8")?,
-                midi_auto_channel: Self::parse_hashmap_value::<u8>(&hmap, "midi_auto_channel")?,    
-            },
-        )
+        Ok(Self {
+            midi_trig_ch1: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch1")?,
+            midi_trig_ch2: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch2")?,
+            midi_trig_ch3: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch3")?,
+            midi_trig_ch4: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch4")?,
+            midi_trig_ch5: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch5")?,
+            midi_trig_ch6: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch6")?,
+            midi_trig_ch7: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch7")?,
+            midi_trig_ch8: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch8")?,
+            midi_auto_channel: Self::parse_hashmap_value::<u8>(&hmap, "midi_auto_channel")?,
+        })
     }
 }
-

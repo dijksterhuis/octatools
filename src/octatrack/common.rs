@@ -4,39 +4,39 @@
 // TODO: from_value and value method generic type arguments
 
 use std::collections::HashMap;
-use std::str::FromStr;
-use std::fmt::Debug;
 use std::error::Error;
+use std::fmt::Debug;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 /// Trait to enable extracting a section of raw Octatrack Project file ASCII data
 pub trait ParseHashMapValueAs {
-
-    fn parse_hashmap_value<T: FromStr>(hmap: &HashMap<String, String>, key: &str) -> Result<T, Box<dyn Error>>
-        where <T as FromStr>::Err: Debug {
-        Ok(
-            hmap
-                .get(key)
-                .unwrap()
-                .parse::<T>()
-                .unwrap()
-        )
+    fn parse_hashmap_value<T: FromStr>(
+        hmap: &HashMap<String, String>,
+        key: &str,
+    ) -> Result<T, Box<dyn Error>>
+    where
+        <T as FromStr>::Err: Debug,
+    {
+        Ok(hmap.get(key).unwrap().parse::<T>().unwrap())
     }
 
     // special case as boolean values are actually stored as 0 / 1 in the project data
-    fn parse_hashmap_value_bool(hmap: &HashMap<String, String>, key: &str) -> Result<bool, Box<dyn std::error::Error>> {
+    fn parse_hashmap_value_bool(
+        hmap: &HashMap<String, String>,
+        key: &str,
+    ) -> Result<bool, Box<dyn std::error::Error>> {
         let mut res = false;
-        if Self::parse_hashmap_value::<u8>(&hmap, &key)? == 1 {res = true};
+        if Self::parse_hashmap_value::<u8>(&hmap, &key)? == 1 {
+            res = true
+        };
         Ok(res)
     }
-
 }
-
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
 
 pub trait FromHashMap {
-
     /// Type for `HashMap` keys
     type A;
 
@@ -50,10 +50,8 @@ pub trait FromHashMap {
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>>;
 }
 
-
 /// Trait to use when a new struct can be created by reading some file located at the specified path.
 pub trait FromFileAtPathBuf {
-
     /// Type for `Self`
     type T;
 
@@ -61,11 +59,9 @@ pub trait FromFileAtPathBuf {
     fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
 }
 
-
 /// Trait to use when a new struct can be created by reading a string..
 
 pub trait FromString {
-
     /// Type for `Self`
     type T;
 
@@ -76,17 +72,15 @@ pub trait FromString {
 /// Trait to convert between Enum option instances and their corresponding value.
 
 pub trait OptionEnumValueConvert {
-
     /// One of the enum types within the `octatrack::options` module.
     type T;
 
     /// Input type for `from_value` and return type for `value` method.
     type V;
-    
+
     /// Get an Enum instance from a numeric value.
     fn from_value(v: Self::V) -> Result<Self::T, ()>;
 
     /// Get a numeric value for an Enum instance.
     fn value(&self) -> Result<Self::V, ()>;
-
 }

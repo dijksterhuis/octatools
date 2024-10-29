@@ -1,4 +1,4 @@
-//! Helper / Grouped configs for sample attribute files (`SampleAttributes`). 
+//! Helper / Grouped configs for sample attribute files (`SampleAttributes`).
 
 use std::error::Error;
 
@@ -33,7 +33,6 @@ pub struct SampleTrimConfig {
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub struct SampleLoopConfig {
-
     /// Loop start position for the audio sample (n samples).
     pub start: u32,
 
@@ -45,7 +44,6 @@ pub struct SampleLoopConfig {
 }
 
 impl SampleLoopConfig {
-
     pub fn new(start: u32, length: u32, mode: SampleAttributeLoopMode) -> Self {
         SampleLoopConfig {
             start,
@@ -55,16 +53,11 @@ impl SampleLoopConfig {
     }
 
     pub fn from_decoded(decoded: &SampleAttributes) -> Result<Self, Box<dyn Error>> {
-        Ok(
-            Self::new(
-                decoded.loop_start,
-                decoded.loop_len,
-                SampleAttributeLoopMode
-                    ::from_value(decoded.loop_mode)
-                    .unwrap_or(
-                        SampleAttributeLoopMode::Off,
-                    )
-            )
-        )
+        Ok(Self::new(
+            decoded.loop_start,
+            decoded.loop_len,
+            SampleAttributeLoopMode::from_value(decoded.loop_mode)
+                .unwrap_or(SampleAttributeLoopMode::Off),
+        ))
     }
 }

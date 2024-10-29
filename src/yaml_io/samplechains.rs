@@ -2,15 +2,13 @@
 //! Reading a config and creating a sample chain is currently implemented.
 //! TODO: Writing a new YAML config from an existing sample chain (edit existing chains via YAML).
 
-use serde_yml::Error as SerdeYmlError;
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
+use serde_yml::Error as SerdeYmlError;
 use std::path::PathBuf;
-use log::{info, debug};
 
 use crate::octatrack::options::{
-    SampleAttributeLoopMode,
-    SampleAttributeTrigQuantizationMode,
-    SampleAttributeTimestrechMode,
+    SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 use crate::octatrack::samples::SampleFilePair;
 
@@ -31,16 +29,15 @@ pub struct YamlChainConfigGlobalSettings {
     pub out_dir_path: PathBuf,
 }
 
-
 // Deliberately does not include the trim / loop length settings
 // as they are mostly irrelevant for creating sample chains
 /// YAML section controlling an individual chain's Octatrack sample settings.
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YamlChainConfigChainsOctatrackSettings {
-    pub bpm: f32,  // this will get multiplied by 24
-    pub gain: f32,  // -24.0 <= x <= +24.0
-    pub timestretch_mode: SampleAttributeTimestrechMode,  // needs to be one of the enum values
+    pub bpm: f32,                                        // this will get multiplied by 24
+    pub gain: f32,                                       // -24.0 <= x <= +24.0
+    pub timestretch_mode: SampleAttributeTimestrechMode, // needs to be one of the enum values
     pub loop_mode: SampleAttributeLoopMode,
     pub quantization_mode: SampleAttributeTrigQuantizationMode,
 }
@@ -63,8 +60,8 @@ pub struct YamlChainConfig {
     pub chains: Vec<YamlChainConfigSamplechain>,
 }
 
-impl FromYamlFile for  YamlChainConfig {}
-impl ToYamlFile for  YamlChainConfig {}
+impl FromYamlFile for YamlChainConfig {}
+impl ToYamlFile for YamlChainConfig {}
 
 //     /// Write data to a new YAML file.
 

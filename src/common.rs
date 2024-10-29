@@ -1,23 +1,27 @@
 //! TODO
-use serde_yml::Error as SerdeYmlError;
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
+use serde_yml::Error as SerdeYmlError;
 use std::{io::Write, path::PathBuf};
-use log::{info, debug};
 
+use std::error::Error;
 
-pub trait ToYamlFile 
-where Self: Serialize {
+pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
+pub type RVoidError<T> = Result<T, ()>;
+
+pub trait ToYamlFile
+where
+    Self: Serialize,
+{
     fn to_yaml(self: &Self, yaml_file_path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Writing data to YAML file: {:#?}", &yaml_file_path);
-
 
         let mut f = std::fs::File::options()
             .read(true)
             .write(true)
             .create_new(true)
             .open(&yaml_file_path)
-            .unwrap()
-        ;
+            .unwrap();
         debug!("Opened file: {:#?}", &yaml_file_path);
 
         let written = serde_yml::to_writer(f, self)?;
@@ -28,10 +32,11 @@ where Self: Serialize {
     }
 }
 
-pub trait FromYamlFile 
-where Self: for<'a> Deserialize<'a> {
+pub trait FromYamlFile
+where
+    Self: for<'a> Deserialize<'a>,
+{
     fn from_yaml(yaml_file_path: PathBuf) -> Result<Self, Box<dyn std::error::Error>> {
-
         debug!("Reading YAML file: {:#?}", &yaml_file_path);
 
         let f = std::fs::File::open(&yaml_file_path)?;
@@ -40,6 +45,5 @@ where Self: for<'a> Deserialize<'a> {
         info!("Read YAML file: {:#?}", &yaml_file_path);
 
         Ok(data?)
-
     }
 }

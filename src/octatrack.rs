@@ -1,7 +1,8 @@
-//! Module for everything and anything related to Octatrack device files. 
+//! Module for everything and anything related to Octatrack device files.
 
-pub mod samples;
-pub mod projects;
-pub mod sets;
+pub mod banks;
+pub mod common;
 pub mod options;
-mod common;
+pub mod projects;
+pub mod samples;
+pub mod sets;

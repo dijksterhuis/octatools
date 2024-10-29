@@ -2,14 +2,15 @@
 
 // TODO: Break this up into options modules in the projects / samples directories.
 
-use serde::{Deserialize, Serialize};
+use crate::common::{RBoxErr, RVoidError};
+
 use crate::octatrack::common::OptionEnumValueConvert;
+use serde::{Deserialize, Serialize};
 
 /// Sample Slot options for Projects.
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub enum ProjectSampleSlotType {
-
     /// Static machine slot
     Static,
 
@@ -21,36 +22,32 @@ pub enum ProjectSampleSlotType {
 }
 
 impl OptionEnumValueConvert for ProjectSampleSlotType {
-
     type T = ProjectSampleSlotType;
     type V = String;
 
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+    fn from_value(v: Self::V) -> RVoidError<Self::T> {
         match v.to_ascii_uppercase().as_str() {
             "STATIC" => Ok(ProjectSampleSlotType::Static),
             "FLEX" => Ok(ProjectSampleSlotType::Flex),
             "RECORDER" => Ok(ProjectSampleSlotType::RecorderBuffer),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RVoidError<Self::V> {
         match self {
             ProjectSampleSlotType::Static => Ok("STATIC".to_string()),
             ProjectSampleSlotType::Flex => Ok("FLEX".to_string()),
-            ProjectSampleSlotType::RecorderBuffer => Ok("RECORDER".to_string())
+            ProjectSampleSlotType::RecorderBuffer => Ok("RECORDER".to_string()),
         }
     }
 }
-
-
 
 /// Sample attributes Timestrech options.
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
 pub enum SampleAttributeTimestrechMode {
-
     /// No timestreching applied.
     #[default]
     Off,
@@ -63,20 +60,19 @@ pub enum SampleAttributeTimestrechMode {
 }
 
 impl OptionEnumValueConvert for SampleAttributeTimestrechMode {
-
     type T = SampleAttributeTimestrechMode;
     type V = u32;
 
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+    fn from_value(v: Self::V) -> RVoidError<Self::T> {
         match v {
             0 => Ok(SampleAttributeTimestrechMode::Off),
             2 => Ok(SampleAttributeTimestrechMode::Normal),
             3 => Ok(SampleAttributeTimestrechMode::Beat),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RVoidError<Self::V> {
         match self {
             SampleAttributeTimestrechMode::Off => Ok(0),
             SampleAttributeTimestrechMode::Normal => Ok(2),
@@ -90,7 +86,6 @@ impl OptionEnumValueConvert for SampleAttributeTimestrechMode {
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
 pub enum SampleAttributeLoopMode {
-
     /// Loop points are ignored and sample will never loop.
     #[default]
     Off,
@@ -98,26 +93,24 @@ pub enum SampleAttributeLoopMode {
     /// Loop by starting again at the loop start position once playback of the sample reaches loop end.
     Normal,
 
-    /// Loop by continuously reversing once playback of the sample reaches loop end/loop start. 
+    /// Loop by continuously reversing once playback of the sample reaches loop end/loop start.
     PingPong,
 }
 
-
 impl OptionEnumValueConvert for SampleAttributeLoopMode {
-
     type T = SampleAttributeLoopMode;
     type V = u32;
 
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+    fn from_value(v: Self::V) -> RVoidError<Self::T> {
         match v {
             0 => Ok(SampleAttributeLoopMode::Off),
             1 => Ok(SampleAttributeLoopMode::Normal),
             2 => Ok(SampleAttributeLoopMode::PingPong),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RVoidError<Self::V> {
         match self {
             SampleAttributeLoopMode::Off => Ok(0),
             SampleAttributeLoopMode::Normal => Ok(1),
@@ -126,13 +119,12 @@ impl OptionEnumValueConvert for SampleAttributeLoopMode {
     }
 }
 
-/// Sample attributes Trig Quantization options 
+/// Sample attributes Trig Quantization options
 /// (quantization when manually triggering samples via track buttons).
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
 pub enum SampleAttributeTrigQuantizationMode {
-
     /// Play back immediately, no quantization.
     #[default]
     Direct,
@@ -190,11 +182,10 @@ pub enum SampleAttributeTrigQuantizationMode {
 }
 
 impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
-
     type T = SampleAttributeTrigQuantizationMode;
     type V = u32;
-    
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+
+    fn from_value(v: Self::V) -> RVoidError<Self::T> {
         match v {
             0 => Ok(SampleAttributeTrigQuantizationMode::Direct),
             255 => Ok(SampleAttributeTrigQuantizationMode::PatternLength),
@@ -214,12 +205,11 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
             14 => Ok(SampleAttributeTrigQuantizationMode::OneTwentyEightSteps),
             15 => Ok(SampleAttributeTrigQuantizationMode::OneNinetyTwoSteps),
             16 => Ok(SampleAttributeTrigQuantizationMode::TwoFiveSixSteps),
-            _ => Err(())
-
+            _ => Err(()),
         }
     }
 
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RVoidError<Self::V> {
         match self {
             SampleAttributeTrigQuantizationMode::Direct => Ok(0),
             SampleAttributeTrigQuantizationMode::PatternLength => Ok(255),
@@ -243,7 +233,6 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
     }
 }
 
-
 // TODO: Specification tests
 
 /// MIDI Channel options in Project Settings Menu
@@ -251,7 +240,6 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
 pub enum ProjectMidiChannels {
-
     /// No MIDI Channel selected -- Project Menu -> Control -> Midi -> Sync
     #[default]
     Disabled,
@@ -303,15 +291,13 @@ pub enum ProjectMidiChannels {
 
     /// MIDI CH 16
     Sixteen,
-
 }
 
 impl OptionEnumValueConvert for ProjectMidiChannels {
-
     type T = ProjectMidiChannels;
     type V = i8;
-    
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+
+    fn from_value(v: Self::V) -> RVoidError<Self::T> {
         match v {
             -1 => Ok(Self::Disabled),
             1 => Ok(Self::One),
@@ -330,12 +316,11 @@ impl OptionEnumValueConvert for ProjectMidiChannels {
             14 => Ok(Self::Fourteen),
             15 => Ok(Self::Fifteen),
             16 => Ok(Self::Sixteen),
-            _ => Err(())
-
+            _ => Err(()),
         }
     }
 
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RVoidError<Self::V> {
         match self {
             Self::Disabled => Ok(-1),
             Self::One => Ok(1),
@@ -358,8 +343,6 @@ impl OptionEnumValueConvert for ProjectMidiChannels {
     }
 }
 
-
-
 /// "Specification" tests ... ie. guarantee that enum values match correct values.
 #[cfg(test)]
 mod test_spec {
@@ -374,20 +357,14 @@ mod test_spec {
 
             #[test]
             fn test_static() {
-                assert_eq!(
-                    ProjectSampleSlotType::Static.value().unwrap(),
-                    "STATIC",
-                );
+                assert_eq!(ProjectSampleSlotType::Static.value().unwrap(), "STATIC",);
             }
             #[test]
             fn test_flex() {
-                assert_eq!(
-                    ProjectSampleSlotType::Flex.value().unwrap(),
-                    "FLEX",
-                );
+                assert_eq!(ProjectSampleSlotType::Flex.value().unwrap(), "FLEX",);
             }
         }
-    
+
         mod from_value {
 
             // NOTE: @dijksterhuis: have to import the trait to use it
@@ -444,78 +421,166 @@ mod test_spec {
 
             #[test]
             fn test_direct() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::Direct.value().unwrap(), 0);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::Direct.value().unwrap(),
+                    0
+                );
             }
             #[test]
             fn test_patternlen() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::PatternLength.value().unwrap(), 255);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::PatternLength
+                        .value()
+                        .unwrap(),
+                    255
+                );
             }
             #[test]
             fn test_1() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::OneStep.value().unwrap(), 1);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::OneStep
+                        .value()
+                        .unwrap(),
+                    1
+                );
             }
             #[test]
             fn test_2() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::TwoSteps.value().unwrap(), 2);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::TwoSteps
+                        .value()
+                        .unwrap(),
+                    2
+                );
             }
             #[test]
             fn test_3() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::ThreeSteps.value().unwrap(), 3);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::ThreeSteps
+                        .value()
+                        .unwrap(),
+                    3
+                );
             }
             #[test]
             fn test_4() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::FourSteps.value().unwrap(), 4);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::FourSteps
+                        .value()
+                        .unwrap(),
+                    4
+                );
             }
             #[test]
             fn test_6() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::SixSteps.value().unwrap(), 5);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::SixSteps
+                        .value()
+                        .unwrap(),
+                    5
+                );
             }
             #[test]
             fn test_8() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::EightSteps.value().unwrap(), 6);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::EightSteps
+                        .value()
+                        .unwrap(),
+                    6
+                );
             }
             #[test]
             fn test_12() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::TwelveSteps.value().unwrap(), 7);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::TwelveSteps
+                        .value()
+                        .unwrap(),
+                    7
+                );
             }
             #[test]
             fn test_16() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::SixteenSteps.value().unwrap(), 8);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::SixteenSteps
+                        .value()
+                        .unwrap(),
+                    8
+                );
             }
             #[test]
             fn test_24() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::TwentyFourSteps.value().unwrap(), 9);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::TwentyFourSteps
+                        .value()
+                        .unwrap(),
+                    9
+                );
             }
             #[test]
             fn test_32() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::ThirtyTwoSteps.value().unwrap(), 10);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::ThirtyTwoSteps
+                        .value()
+                        .unwrap(),
+                    10
+                );
             }
             #[test]
             fn test_48() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::FourtyEightSteps.value().unwrap(), 11);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::FourtyEightSteps
+                        .value()
+                        .unwrap(),
+                    11
+                );
             }
             #[test]
             fn test_64() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::SixtyFourSteps.value().unwrap(), 12);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::SixtyFourSteps
+                        .value()
+                        .unwrap(),
+                    12
+                );
             }
             #[test]
             fn test_96() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::NinetySixSteps.value().unwrap(), 13);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::NinetySixSteps
+                        .value()
+                        .unwrap(),
+                    13
+                );
             }
             #[test]
             fn test_128() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::OneTwentyEightSteps.value().unwrap(), 14);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::OneTwentyEightSteps
+                        .value()
+                        .unwrap(),
+                    14
+                );
             }
             #[test]
             fn test_192() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::OneNinetyTwoSteps.value().unwrap(), 15);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::OneNinetyTwoSteps
+                        .value()
+                        .unwrap(),
+                    15
+                );
             }
             #[test]
             fn test_256() {
-                assert_eq!(SampleAttributeTrigQuantizationMode::TwoFiveSixSteps.value().unwrap(), 16);
+                assert_eq!(
+                    SampleAttributeTrigQuantizationMode::TwoFiveSixSteps
+                        .value()
+                        .unwrap(),
+                    16
+                );
             }
         }
-    
+
         mod from_value {
             use crate::octatrack::common::OptionEnumValueConvert;
             use crate::octatrack::options::SampleAttributeTrigQuantizationMode;
@@ -654,12 +719,10 @@ mod test_spec {
                 );
             }
         }
-
-
     }
 
     mod ot_timestrech_mode {
-    
+
         mod value {
             use crate::octatrack::common::OptionEnumValueConvert;
             use crate::octatrack::options::SampleAttributeTimestrechMode;
@@ -686,18 +749,12 @@ mod test_spec {
             fn test_error() {
                 // not in a sequental range with other values
                 // dunno why they implemented it to skip value of 1, possible bug or easter egg?
-                assert_eq!(
-                    SampleAttributeTimestrechMode::from_value(1),
-                    Err(()),
-                );
+                assert_eq!(SampleAttributeTimestrechMode::from_value(1), Err(()),);
                 // do a slightly exhausitve check, but don't test the whole u32 range
                 // as it's not worth the performance drain
                 for i in 4..u8::MAX {
-                    assert_eq!(
-                        SampleAttributeTimestrechMode::from_value(i as u32),
-                        Err(()),
-                    );    
-                }  
+                    assert_eq!(SampleAttributeTimestrechMode::from_value(i as u32), Err(()),);
+                }
             }
             #[test]
             fn test_off_from_value() {
@@ -728,7 +785,7 @@ mod test_spec {
         mod value {
             use crate::octatrack::common::OptionEnumValueConvert;
             use crate::octatrack::options::SampleAttributeLoopMode;
-        
+
             #[test]
             fn test_off_value() {
                 assert_eq!(SampleAttributeLoopMode::Off.value().unwrap(), 0);
@@ -746,16 +803,13 @@ mod test_spec {
         mod from_value {
             use crate::octatrack::common::OptionEnumValueConvert;
             use crate::octatrack::options::SampleAttributeLoopMode;
-        
+
             #[test]
             fn test_error() {
                 // do a slightly exhausitve check, but don't test the whole u32 range
                 // as it's not worth the performance drain
                 for i in 3..u8::MAX {
-                    assert_eq!(
-                        SampleAttributeLoopMode::from_value(i as u32),
-                        Err(()),
-                    );
+                    assert_eq!(SampleAttributeLoopMode::from_value(i as u32), Err(()),);
                 }
             }
             #[test]
@@ -781,7 +835,6 @@ mod test_spec {
             }
         }
     }
-
 
     mod ot_proj_settings_midi_channels {
 
@@ -858,7 +911,7 @@ mod test_spec {
                 assert_eq!(ProjectMidiChannels::Sixteen.value().unwrap(), 16);
             }
         }
-    
+
         mod from_value {
 
             use crate::octatrack::common::OptionEnumValueConvert;
@@ -866,17 +919,11 @@ mod test_spec {
 
             #[test]
             fn test_error_1() {
-                assert_eq!(
-                    ProjectMidiChannels::from_value(100),
-                    Err(()),
-                );
+                assert_eq!(ProjectMidiChannels::from_value(100), Err(()),);
             }
             #[test]
             fn test_error_2() {
-                assert_eq!(
-                    ProjectMidiChannels::from_value(0),
-                    Err(()),
-                );
+                assert_eq!(ProjectMidiChannels::from_value(0), Err(()),);
             }
             #[test]
             fn test_disabled() {

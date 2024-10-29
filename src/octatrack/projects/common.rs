@@ -1,19 +1,17 @@
-
 //! Utilities for reading `project.*` files.
 
-use std::collections::HashMap;
 use crate::octatrack::common::OptionEnumValueConvert;
+use std::collections::HashMap;
 
 /// ASCII data section headings within an Octatrack `project.*` file
 pub enum ProjectRawFileSection {
     Meta,
     States,
     Settings,
-    Samples
+    Samples,
 }
 
 impl OptionEnumValueConvert for ProjectRawFileSection {
-
     type T = ProjectRawFileSection;
     type V = String;
 
@@ -23,7 +21,7 @@ impl OptionEnumValueConvert for ProjectRawFileSection {
             "STATES" => Ok(Self::States),
             "SETTINGS" => Ok(Self::Settings),
             "SAMPLES" => Ok(Self::Samples),
-            _ => Err(())
+            _ => Err(()),
         }
     }
 
@@ -47,10 +45,12 @@ impl ProjectRawFileSection {
     }
 }
 
-/// Extract ASCII string project data for a specified section as a HashMap of k-v pairs. 
+/// Extract ASCII string project data for a specified section as a HashMap of k-v pairs.
 
-pub fn string_to_hashmap(data: &String, section: &ProjectRawFileSection) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
-
+pub fn string_to_hashmap(
+    data: &String,
+    section: &ProjectRawFileSection,
+) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
     let start_idx: usize = data.find(&section.start_string()).unwrap();
     let start_idx_shifted: usize = start_idx + &section.start_string().len();
     let end_idx: usize = data.find(&section.end_string()).unwrap();
@@ -61,19 +61,15 @@ pub fn string_to_hashmap(data: &String, section: &ProjectRawFileSection) -> Resu
     let mut trig_mode_midi_field_idx = 1;
 
     for split_s in section.split("\r\n") {
-
         // new line splits returns empty fields :/
 
         if split_s != "" {
             let key_pair_string = split_s.to_string();
-            let mut key_pair_split: Vec<&str> = key_pair_string
-                .split("=")
-                .into_iter()
-                .collect();
+            let mut key_pair_split: Vec<&str> = key_pair_string.split("=").into_iter().collect();
 
             // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
-            // but the keys do not have track number indicators. i assume they're 
-            // stored in order of the midi track number, and each subsequent one we 
+            // but the keys do not have track number indicators. i assume they're
+            // stored in order of the midi track number, and each subsequent one we
             // read is the next track.
             let key_renamed: String = format!("trig_mode_midi_track_{}", &trig_mode_midi_field_idx);
             if key_pair_split[0] == "TRIG_MODE_MIDI" {
@@ -82,15 +78,11 @@ pub fn string_to_hashmap(data: &String, section: &ProjectRawFileSection) -> Resu
             }
 
             hmap.insert(
-                key_pair_split[0].to_string().to_ascii_lowercase(), 
+                key_pair_split[0].to_string().to_ascii_lowercase(),
                 key_pair_split[1].to_string(),
             );
-
         }
     }
 
     Ok(hmap)
-
 }
-
-

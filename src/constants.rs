@@ -1,8 +1,8 @@
-//! Various global constants. 
+//! Various global constants.
 
-use hound::{WavSpec, SampleFormat::Int};
+use hound::{SampleFormat::Int, WavSpec};
 
-/// Default sample rate of a wav file. 
+/// Default sample rate of a wav file.
 // TODO: Remove this!
 
 pub const DEFAULT_SAMPLE_RATE: u16 = 44100;
@@ -12,7 +12,7 @@ pub const DEFAULT_SAMPLE_RATE: u16 = 44100;
 pub const AVAILABLE_SAMPLE_RATES: [u16; 2] = [44100, 48000];
 
 /// Acceptable audio file formats as per the Octatrack manual.
-pub const OCTATRACK_AUDIO_FILE_FORMATS: [&str; 2] = ["wav",  "aiff"];
+pub const OCTATRACK_AUDIO_FILE_FORMATS: [&str; 2] = ["wav", "aiff"];
 
 /// Acceptable audio file sample rates as per the Octatrack manual.
 pub const OCTATRACK_AUDIO_FILE_SAMPLE_RATE: u16 = 44100;
@@ -49,5 +49,4 @@ pub const OCTATRACK_COMPATIBLE_HOUND_WAVSPECS: [WavSpec; 4] = [
         bits_per_sample: 24,
         sample_format: Int,
     },
-    
 ];

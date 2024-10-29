@@ -2,21 +2,16 @@
 //! (1) check for change conflicts (samples already used in existing Octatrack Projects being overwritten or edited) when attempting to copy samples onto a CF card.
 //! (2) inspect the current state of sample use across an CF Card.
 
-use std::{
-    path::PathBuf,
-    fs::File,
-    io::Write,
-};
 use csv::Writer;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::octatrack::sets::OctatrackSet;
 use crate::common::{FromYamlFile, ToYamlFile};
+use crate::octatrack::sets::OctatrackSet;
 /// A single row of data written to the index file.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashScanCsvRow {
-
     /// Disk name of the card
     cfcard: String,
 
@@ -44,25 +39,25 @@ pub struct CompactFlashScanCsvRow {
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashDrive {
-
     pub index_file_path: Option<PathBuf>,
 
     /// The path to the current compact flash card.
     cfcard_path: PathBuf,
 
-    /// Octatrack Sets on the compact flash card. 
+    /// Octatrack Sets on the compact flash card.
     ot_sets: Vec<OctatrackSet>,
 }
 
-impl FromYamlFile for CompactFlashDrive{}
-impl ToYamlFile for CompactFlashDrive{}
+impl FromYamlFile for CompactFlashDrive {}
+impl ToYamlFile for CompactFlashDrive {}
 
 impl CompactFlashDrive {
-
     /// Index a compact flash card by scanning through each `OctatrackSet` under the given `PathBuf`'s directory tree.
-    
-    pub fn from_pathbuf(cfcard_path: PathBuf, index_file_path: Option<PathBuf>) -> Result<CompactFlashDrive, ()> {
 
+    pub fn from_pathbuf(
+        cfcard_path: PathBuf,
+        index_file_path: Option<PathBuf>,
+    ) -> Result<CompactFlashDrive, ()> {
         // TODO: Hard exit on failure
         let ot_sets = OctatrackSet::from_cfcard_pathbuf(&cfcard_path).unwrap();
 
@@ -77,7 +72,7 @@ impl CompactFlashDrive {
 
     // /// Create a local index file for a `CompactFlashDrive` which has been indexed.
     // /// Audio Pool records are written first, then individual Projects
-    
+
     // fn to_csv(&self, csv_filepath: &PathBuf) -> Result<(), std::io::Error> {
 
     //     let sets = self.ot_sets.clone();
@@ -111,7 +106,7 @@ impl CompactFlashDrive {
     //                     ot_filepath: project_sample.otfile_path.clone(),
     //                     audio_name: project_sample.name.clone(),
     //                 };
-    
+
     //                 let _ = wtr.serialize(row);
     //             }
     //         }
@@ -125,9 +120,7 @@ impl CompactFlashDrive {
 
     //     write_result
     // }
-
 }
-
 
 /*
 # TODO
@@ -137,12 +130,12 @@ impl CompactFlashDrive {
 - grab list of acceptable audio file extensions from OctaChainer
 - use ^ OTChainer audio file extension list instead of exclusionary search
 - read audio file data and OT file data into the CSV file
-- test on the OT whether adding a sample to static/flex slots creates a new OT file 
+- test on the OT whether adding a sample to static/flex slots creates a new OT file
   (there are a lot of wav files with no OT file ... makes life simpler if not needed!)
 - unit tests where possible!
 - think about a better data store format than CSV -- sqlite?
   (csv works well for cli, less good for GUI ... focus on CLI w/ CSV for now)
-- general clean up, better results and error handling 
+- general clean up, better results and error handling
 - turn this whole thing into a lib? with separate projects for cli and gui?
 - OT_IO: read multiple wavs and create a **sample chain OT file** has been done...
   Need to handle writing of the wavs, with similar testing -- how to isolate tests?
@@ -154,7 +147,6 @@ impl CompactFlashDrive {
   or `ot-sm chain ./file_a.wav outfile --tempo 124.5 --gain 1.0 --quantize DIRECT`.
 */
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -165,11 +157,8 @@ mod tests {
         let cfcard_path = PathBuf::from("data/tests/index-cf/DEV-OTsm/");
         let _csv_path = PathBuf::from("./.otsm-index-cf.csv");
 
-        let res: Result<CompactFlashDrive, ()> = CompactFlashDrive
-            ::from_pathbuf(cfcard_path, None)
-        ;
+        let res: Result<CompactFlashDrive, ()> = CompactFlashDrive::from_pathbuf(cfcard_path, None);
 
         assert!(res.is_ok());
     }
-
 }

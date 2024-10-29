@@ -8,29 +8,21 @@ mod trig_mode_midi_tracks;
 
 use serde::{Deserialize, Serialize};
 
-use crate::octatrack::common::{
-    FromString,
-    ParseHashMapValueAs,
-    FromHashMap,
-};
+use crate::octatrack::common::{FromHashMap, FromString, ParseHashMapValueAs};
 
 use crate::octatrack::projects::{
     common::string_to_hashmap,
     common::ProjectRawFileSection,
     settings::{
-        control_menu::ControlMenu,
-        mixer::MixerMenu,
-        tempo::TempoMenu,
+        control_menu::ControlMenu, mixer::MixerMenu, tempo::TempoMenu,
         trig_mode_midi_tracks::MidiTrackTrigModes,
     },
 };
-
 
 /// Project settings read from a parsed Octatrack Project file
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectSettings {
-
     /// Whether the project can be written to (probably is currently being read/written when `true`)
     write_protected: bool,
 
@@ -48,34 +40,26 @@ pub struct ProjectSettings {
 
     ///
     midi_tracks_trig_mode: MidiTrackTrigModes,
-
 }
 
 impl ParseHashMapValueAs for ProjectSettings {}
 
 impl FromString for ProjectSettings {
-
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
     fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
+        let hmap = string_to_hashmap(&s, &ProjectRawFileSection::Settings)?;
 
-        let hmap = string_to_hashmap(
-            &s, &ProjectRawFileSection::Settings,
-        )?;
-
-        Ok(
-            Self {
-                write_protected: Self::parse_hashmap_value_bool(&hmap, "writeprotected")?,
-                // Unknown: Whether MIDI 'Thru' is enabled/disabled?
-                midi_soft_thru: Self::parse_hashmap_value_bool(&hmap, "midi_soft_thru")?,
-                //
-                control: ControlMenu::from_hashmap(&hmap).unwrap(),        
-                mixer: MixerMenu::from_hashmap(&hmap)?,
-                tempo: TempoMenu::from_hashmap(&hmap)?,
-                midi_tracks_trig_mode: MidiTrackTrigModes::from_hashmap(&hmap)?
-
-            }
-        )
+        Ok(Self {
+            write_protected: Self::parse_hashmap_value_bool(&hmap, "writeprotected")?,
+            // Unknown: Whether MIDI 'Thru' is enabled/disabled?
+            midi_soft_thru: Self::parse_hashmap_value_bool(&hmap, "midi_soft_thru")?,
+            //
+            control: ControlMenu::from_hashmap(&hmap).unwrap(),
+            mixer: MixerMenu::from_hashmap(&hmap)?,
+            tempo: TempoMenu::from_hashmap(&hmap)?,
+            midi_tracks_trig_mode: MidiTrackTrigModes::from_hashmap(&hmap)?,
+        })
     }
 }
