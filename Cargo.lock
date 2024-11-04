@@ -333,6 +333,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 
 [[package]]
+name = "octatools"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "base64ct",
+ "bincode",
+ "clap",
+ "clap_complete",
+ "csv",
+ "env_logger",
+ "hex-literal",
+ "hound",
+ "itertools",
+ "log",
+ "md5",
+ "serde",
+ "serde-big-array",
+ "serde_yml",
+ "symphonia",
+ "walkdir",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -378,29 +401,6 @@ name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
-
-[[package]]
-name = "rs-octatrack-sample-manager-cli"
-version = "0.1.0"
-dependencies = [
- "base16ct",
- "base64ct",
- "bincode",
- "clap",
- "clap_complete",
- "csv",
- "env_logger",
- "hex-literal",
- "hound",
- "itertools",
- "log",
- "md5",
- "serde",
- "serde-big-array",
- "serde_yml",
- "symphonia",
- "walkdir",
-]
 
 [[package]]
 name = "ryu"

@@ -3,7 +3,8 @@
 mod common;
 mod metadata;
 mod settings;
-mod slots;
+// TODO
+pub mod slots;
 mod states;
 
 use serde::{Deserialize, Serialize};

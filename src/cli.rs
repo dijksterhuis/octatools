@@ -20,10 +20,31 @@ pub enum Commands {
     #[command(subcommand)]
     Scan(Indexing),
 
-    /// Transfer a bank from one project to another.
-    /// Will copy any samples this bank requires to the new bank's audio pool / project.
+    // Working on this now.
+    #[command(subcommand)]
+    Copy(Copy),
+
+    // TODOs
+
+    // #[command(subcommand)]
+    // List(List),
+
+    // #[command(subcommand)]
+    // Consolidate(Consolidate),
+
+    // #[command(subcommand)]
+    // Purge(Purge),
+
+}
+
+
+/// (Safely-ish) Copy Octatrack Projects / Banks between Sets / Projects.
+#[derive(Subcommand, Debug)]
+pub enum Copy {
+    /// Copy a Bank from one Project to another.
+    /// Default behaviour will copy in-use audio files to the destination Set's Audio Pool.
     /// WARNING: Will overwrite the destination bank!
-    TransferBank {
+    Bank {
         /// Bank file to copy to another project
         source_bank_file_path: PathBuf,
 
@@ -39,6 +60,23 @@ pub enum Commands {
         /// WARNING: Source bank sample attribute files (`.ot` files) will be dropped/ignored.
         // TODO: flag
         merge_duplicate_sample_slots: Option<bool>,
+
+        /// No destructive actions will be taken without this flag.
+        /// You accept all liability for any actions taken by running this command.
+        accept_liability: Option<bool>,
+    },
+
+    /// Transfer a Project from one Set to another Set.
+    /// Copies active samples to the audio pool of the new project's set.
+    Project {
+        /// Project data file or directory path of the project
+        source_project: PathBuf,
+
+        /// Destination Set for the new project location
+        dest_set_dir_path: PathBuf,
+
+        /// Copy audio files to the destination set's audio pool or to the new project.
+        copy_samples_to_project: Option<bool>,
 
         /// No destructive actions will be taken without this flag.
         /// You accept all liability for any actions taken by running this command.
@@ -136,5 +174,143 @@ pub enum IndexSamples {
 
         /// File path for the output YAML file
         yaml_file_path: Option<PathBuf>,
+    },
+}
+
+
+// //////////////////////////////// NOT DOING YET ////////////////////////////////
+
+/// List various things
+#[derive(Subcommand, Debug)]
+pub enum List {
+
+    /// List the different octatrack sets (basically list all top level directories)
+    Sets {
+        /// Path to the Compact Flash Card data.
+        cfcard_path: PathBuf,
+    },
+
+    /// List all Projects within a Set.
+    Projects {
+
+        /// Path to the Octatrack Set.
+        set_path: PathBuf,
+    },
+
+    /// List all Arrangements within a Set.
+    Arrangements {
+
+        /// Path to the Octatrack Set.
+        set_path: PathBuf,
+    },
+
+    /// List all slots within a Project
+    Slots {
+        /// Path to the Project data file or directory path of the project
+        project_path: PathBuf,
+
+        /// Only list slots that are in use somewhere within the project
+        ignore_inactive: Option<bool>,
+
+        /// Ignore recording buffers when listing flex sample slots
+        ignore_buffers: Option<bool>,
+
+        /// Flex sample slots only
+        flex_only: Option<bool>,
+
+        /// Static sample slots only
+        static_only: Option<bool>,
+    },
+
+    /// List all samples within a Project
+    Samples {
+
+        /// Project data file or directory path of the project
+        source_project: PathBuf,
+
+        /// Only list slots that are in use somewhere within the project
+        ignore_inactive: Option<bool>,
+
+        /// Ignore recording buffers when listing flex sample slots
+        ignore_buffers: Option<bool>,
+
+        /// Only list Flex assigned samples
+        flex_only: Option<bool>,
+
+        /// Only list Static assigned samples
+        static_only: Option<bool>,
+    },
+
+}
+
+
+/// Consolidate samples
+#[derive(Subcommand, Debug)]
+pub enum Consolidate {
+
+    /// Copy all Project audio files to the Set's Audio Pool, 
+    /// modify all samples slots to point to the new location
+    /// and (optionally) delete the original audio file.
+    ToPool {
+        /// Path to the Project data file or directory path of the project
+        project_path: PathBuf,
+
+        /// Do not delete the original audio files.
+        no_delete: Option<bool>,
+
+        /// Ignore recording buffers when listing flex sample slots
+        ignore_buffers: Option<bool>,
+
+        /// Flex sample slots only
+        flex_only: Option<bool>,
+
+        /// Static sample slots only
+        static_only: Option<bool>,
+    },
+
+    /// Same as `to-pool`, but reversed -- 
+    /// move everything to the Project folder.
+    ToProject {
+        /// Path to the Project data file or directory path of the project
+        project_path: PathBuf,
+
+        /// Do not delete the original audio files.
+        no_delete: Option<bool>,
+
+        /// Ignore recording buffers when listing flex sample slots
+        ignore_buffers: Option<bool>,
+
+        /// Flex sample slots only
+        flex_only: Option<bool>,
+
+        /// Static sample slots only
+        static_only: Option<bool>,
+    },
+}
+
+
+/// Purge unused audio files. 
+/// Will only delete files that are not being used in a project.
+#[derive(Subcommand, Debug)]
+pub enum Purge {
+
+    /// Delete unused samples from a Set's Audio Pool.
+    Pool {
+        /// Path to the Set or Audio Pool directory.
+        set_path: PathBuf,
+
+        /// No destructive actions will be taken without this flag.
+        /// You accept all liability for any actions taken by running this command.
+        accept_liability: Option<bool>,
+    },
+
+    /// Delete unused samples from a Set's Audio Pool.
+    Project {
+        /// Path to the Project data file or directory path of the project
+        project_path: PathBuf,
+
+        /// No destructive actions will be taken without this flag.
+        /// You accept all liability for any actions taken by running this command.
+        accept_liability: Option<bool>,
     },
 }

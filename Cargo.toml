@@ -1,5 +1,5 @@
 [package]
-name = "rs-octatrack-sample-manager-cli"
+name = "octatools"
 version = "0.1.0"
 edition = "2021"
 readme = "README.md"
