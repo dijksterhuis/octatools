@@ -2,9 +2,8 @@
 //! (1) check for change conflicts (samples already used in existing Octatrack Projects being overwritten or edited) when attempting to copy samples onto a CF card.
 //! (2) inspect the current state of sample use across an CF Card.
 
-use csv::Writer;
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Write, path::PathBuf};
+use std::path::PathBuf;
 
 use crate::common::{FromYamlFile, ToYamlFile};
 use crate::octatrack::sets::OctatrackSet;

@@ -2,7 +2,7 @@
 
 // TODO: Break this up into options modules in the projects / samples directories.
 
-use crate::common::{RBoxErr, RVoidError};
+use crate::common::RVoidError;
 
 use crate::octatrack::common::OptionEnumValueConvert;
 use serde::{Deserialize, Serialize};

@@ -2,15 +2,12 @@
 //! Reading a config and creating a sample chain is currently implemented.
 //! TODO: Writing a new YAML config from an existing sample chain (edit existing chains via YAML).
 
-use log::{debug, info};
 use serde::{Deserialize, Serialize};
-use serde_yml::Error as SerdeYmlError;
 use std::path::PathBuf;
 
 use crate::octatrack::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
-use crate::octatrack::samples::SampleFilePair;
 
 use crate::common::{FromYamlFile, ToYamlFile};
 

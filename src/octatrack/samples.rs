@@ -393,46 +393,6 @@ impl SampleAttributes {
     }
 }
 
-#[cfg(test)]
-mod test_unit_sample_chain {
-    use super::*;
-
-    mod from_wav {
-        use super::*;
-
-        fn mock_create_wav(length: u32) -> Vec<u8> {
-            let mut wav: Vec<u8> = Vec::new();
-            for _ in 0..length {
-                wav.push(0_u8)
-            }
-
-            wav
-        }
-
-        #[ignore]
-        #[test]
-        fn test_create_new_sample_chain() {
-            let wav = mock_create_wav(600000);
-
-            let mut slices: [Slice; 64];
-
-            // get sample length (array length)
-            // get number of bars
-            // set defaults for stuff like gain
-            // create dummy slice array
-            todo!()
-        }
-    }
-
-    mod from_file {
-
-        #[ignore]
-        #[test]
-        fn test_do_thing() {
-            todo!()
-        }
-    }
-}
 
 /// Use input files from `resouces/test-data/` to create an OT file output
 /// and compare it to what should exist.
@@ -444,11 +404,10 @@ mod test_integration {
 
     mod test_integration_sample_chain_create_vs_read {
 
-        use std::error::Error;
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};
 
-        use crate::common::{RBoxErr, RVoidError};
+        use crate::common::RBoxErr;
 
         use crate::audio::wavfile::WavFile;
 

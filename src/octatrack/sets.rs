@@ -1,7 +1,7 @@
 //! Recursively scan through an Octatrack Set directory.
 
 use crate::audio::wavfile::scan_dir_path_for_wavfiles;
-use crate::common::{RBoxErr, RVoidError};
+use crate::common::RVoidError;
 use crate::octatrack::common::FromFileAtPathBuf;
 use crate::octatrack::projects::Project;
 use crate::octatrack::samples::SampleFilePair;

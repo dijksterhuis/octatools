@@ -2,7 +2,7 @@
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use serde_yml::Error as SerdeYmlError;
-use std::{io::Write, path::PathBuf};
+use std::path::PathBuf;
 
 use std::error::Error;
 
@@ -16,15 +16,14 @@ where
     fn to_yaml(self: &Self, yaml_file_path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Writing data to YAML file: {:#?}", &yaml_file_path);
 
-        let mut f = std::fs::File::options()
+        debug!("Opened file: {:#?}", &yaml_file_path);
+
+        let written = serde_yml::to_writer(std::fs::File::options()
             .read(true)
             .write(true)
             .create_new(true)
             .open(&yaml_file_path)
-            .unwrap();
-        debug!("Opened file: {:#?}", &yaml_file_path);
-
-        let written = serde_yml::to_writer(f, self)?;
+            .unwrap(), self)?;
         debug!("Write file: {:#?}", &yaml_file_path);
 
         info!("Wrote data to YAML file: {:#?}", &yaml_file_path);
