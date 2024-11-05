@@ -50,13 +50,19 @@ pub trait FromHashMap {
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>>;
 }
 
-/// Trait to use when a new struct can be created by reading some file located at the specified path.
+/// Trait to use when a new struct can be deserialised from some file located at the specified path.
 pub trait FromFileAtPathBuf {
     /// Type for `Self`
     type T;
 
     /// Crete a new struct by reading a file located at `path`.
     fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
+}
+
+/// Trait to use when a new file can be written at the speciifed path by serializing a struct
+pub trait ToFileAtPathBuf {
+    /// Crete a new file at the path file location struct by serializing struct data.
+    fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>>;
 }
 
 /// Trait to use when a new struct can be created by reading a string..

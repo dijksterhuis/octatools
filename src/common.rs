@@ -18,12 +18,15 @@ where
 
         debug!("Opened file: {:#?}", &yaml_file_path);
 
-        let written = serde_yml::to_writer(std::fs::File::options()
-            .read(true)
-            .write(true)
-            .create_new(true)
-            .open(&yaml_file_path)
-            .unwrap(), self)?;
+        let written = serde_yml::to_writer(
+            std::fs::File::options()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(&yaml_file_path)
+                .unwrap(),
+            self,
+        )?;
         debug!("Write file: {:#?}", &yaml_file_path);
 
         info!("Wrote data to YAML file: {:#?}", &yaml_file_path);

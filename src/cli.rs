@@ -23,7 +23,6 @@ pub enum Commands {
     // Working on this now.
     #[command(subcommand)]
     Copy(Copy),
-
     // TODOs
 
     // #[command(subcommand)]
@@ -34,9 +33,7 @@ pub enum Commands {
 
     // #[command(subcommand)]
     // Purge(Purge),
-
 }
-
 
 /// (Safely-ish) Copy Octatrack Projects / Banks between Sets / Projects.
 #[derive(Subcommand, Debug)]
@@ -177,13 +174,11 @@ pub enum IndexSamples {
     },
 }
 
-
 // //////////////////////////////// NOT DOING YET ////////////////////////////////
 
 /// List various things
 #[derive(Subcommand, Debug)]
 pub enum List {
-
     /// List the different octatrack sets (basically list all top level directories)
     Sets {
         /// Path to the Compact Flash Card data.
@@ -192,14 +187,12 @@ pub enum List {
 
     /// List all Projects within a Set.
     Projects {
-
         /// Path to the Octatrack Set.
         set_path: PathBuf,
     },
 
     /// List all Arrangements within a Set.
     Arrangements {
-
         /// Path to the Octatrack Set.
         set_path: PathBuf,
     },
@@ -224,7 +217,6 @@ pub enum List {
 
     /// List all samples within a Project
     Samples {
-
         /// Project data file or directory path of the project
         source_project: PathBuf,
 
@@ -240,15 +232,12 @@ pub enum List {
         /// Only list Static assigned samples
         static_only: Option<bool>,
     },
-
 }
-
 
 /// Consolidate samples
 #[derive(Subcommand, Debug)]
 pub enum Consolidate {
-
-    /// Copy all Project audio files to the Set's Audio Pool, 
+    /// Copy all Project audio files to the Set's Audio Pool,
     /// modify all samples slots to point to the new location
     /// and (optionally) delete the original audio file.
     ToPool {
@@ -268,7 +257,7 @@ pub enum Consolidate {
         static_only: Option<bool>,
     },
 
-    /// Same as `to-pool`, but reversed -- 
+    /// Same as `to-pool`, but reversed --
     /// move everything to the Project folder.
     ToProject {
         /// Path to the Project data file or directory path of the project
@@ -288,12 +277,10 @@ pub enum Consolidate {
     },
 }
 
-
-/// Purge unused audio files. 
+/// Purge unused audio files.
 /// Will only delete files that are not being used in a project.
 #[derive(Subcommand, Debug)]
 pub enum Purge {
-
     /// Delete unused samples from a Set's Audio Pool.
     Pool {
         /// Path to the Set or Audio Pool directory.

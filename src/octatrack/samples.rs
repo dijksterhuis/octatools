@@ -3,7 +3,7 @@
 pub mod configs;
 pub mod slices;
 
-use std::{fs::File, io::prelude::*, path::PathBuf};
+use std::{fs::File, io::prelude::*, io::Write, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
@@ -335,9 +335,6 @@ impl SampleAttributes {
     /// then encodes to binary representation which can be written to file.
 
     pub fn to_file(&self, path: &PathBuf) -> RBoxErr<()> {
-        use std::fs::File;
-        use std::io::Write;
-
         let bytes: Vec<u8> = self.encode().unwrap();
 
         let mut file = File::create(path).unwrap();
@@ -392,7 +389,6 @@ impl SampleAttributes {
         Ok(decoded)
     }
 }
-
 
 /// Use input files from `resouces/test-data/` to create an OT file output
 /// and compare it to what should exist.

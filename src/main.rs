@@ -17,7 +17,6 @@ use crate::indexing::cfcard::CompactFlashDrive;
 use crate::indexing::samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple};
 use crate::yaml_io::samplechains::YamlChainConfig;
 
-
 fn main() -> () {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);
