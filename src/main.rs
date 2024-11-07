@@ -114,7 +114,7 @@ fn main() -> () {
                 merge_duplicate_sample_slots,
                 accept_liability,
             } => {
-                let _ = actions::copy::transfer_bank(
+                let _ = actions::copy::copy_bank(
                     source_bank_file_path,
                     dest_bank_file_path,
                     merge_duplicate_sample_slots.is_some(),
