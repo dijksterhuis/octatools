@@ -113,3 +113,44 @@ pub fn transfer_bank(
 
     Ok(())
 }
+
+
+
+
+#[cfg(test)]
+mod test_integration {
+
+    mod test_integration_copy_bank {
+
+        use bincode;
+        use std::{path::PathBuf, fs::File, io::Read};
+        use serde_octatrack::common::FromFileAtPathBuf;
+        use serde_octatrack::banks::Bank;
+        use crate::common::RBoxErr;
+
+        fn read_known_bank_file(path: PathBuf) -> RBoxErr<Bank> {
+            let bank: Bank = Bank::from_pathbuf(path).unwrap();
+            Ok(bank)
+        }
+
+        #[test]
+        fn test_read_bank_file_no_errors() {
+            let bank_file_path: PathBuf = PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+            let _bank = read_known_bank_file(bank_file_path).unwrap();
+            assert!(true);
+        }
+
+        // Probably a pointless test this one?
+        #[test]
+        fn test_read_bank_file_byte_equality() {
+            let bank_file_path: PathBuf = PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+            let mut infile: File = File::open(&bank_file_path).unwrap();
+            let mut bytes: Vec<u8> = vec![];
+            let _: usize = infile.read_to_end(&mut bytes).unwrap();
+            let test_bank: Bank = Bank::from_pathbuf(bank_file_path).unwrap();
+            let ser_bytes: Vec<u8> = bincode::serialize(&test_bank).unwrap();
+
+            assert_eq!(bytes, ser_bytes);
+        }
+    }
+}
