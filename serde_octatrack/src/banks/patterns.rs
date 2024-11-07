@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLockPlayback {
     pub param1: u8,
     pub param2: u8,
@@ -13,7 +13,7 @@ pub struct AudioTrackParameterLockPlayback {
     pub param6: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLockAmp {
     pub atck: u8,
     pub hold: u8,
@@ -23,7 +23,7 @@ pub struct AudioTrackParameterLockAmp {
     pub unused_1: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLockLfo {
     pub spd1: u8,
     pub spd2: u8,
@@ -33,7 +33,7 @@ pub struct AudioTrackParameterLockLfo {
     pub dep3: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLockFx1 {
     pub param1: u8,
     pub param2: u8,
@@ -43,7 +43,7 @@ pub struct AudioTrackParameterLockFx1 {
     pub param6: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLockFx2 {
     pub param1: u8,
     pub param2: u8,
@@ -53,7 +53,7 @@ pub struct AudioTrackParameterLockFx2 {
     pub param6: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackParameterLocks {
     pub machine: AudioTrackParameterLockPlayback,
     pub lfo: AudioTrackParameterLockLfo,
@@ -61,11 +61,12 @@ pub struct AudioTrackParameterLocks {
     pub fx1: AudioTrackParameterLockFx1,
     pub fx2: AudioTrackParameterLockFx2,
 
+    // todo: sample locks!?
     #[serde(with = "BigArray")]
     pub unknown: [u8; 2],
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackPatternSettings {
     /// Silence any existing audio playback on the Audio Track when switching Patterns.
     pub start_silent: u8,
@@ -140,7 +141,7 @@ pub struct AudioTrackPatternSettings {
 /// - x x x - - - - --> 14
 /// x x x x - - - - --> 15
 /// ```
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackTrigMasks {
     /// Trigger Trig masks -- indicate which Trigger Trigs are active.
     /// Base track Trig masks are stored backwards, meaning
@@ -183,7 +184,7 @@ pub struct AudioTrackTrigMasks {
     pub slide: [u8; 8],
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackPerTrackModeScale {
     /// The Audio Track's Length when Pattern is in Per Track mode.
     /// Default: 16
@@ -205,7 +206,7 @@ pub struct AudioTrackPerTrackModeScale {
 }
 
 /// Track trigs assigned on an Audio Track within a Pattern
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
 pub struct AudioTrackTrigs {
     /// Header data section
     ///
@@ -298,7 +299,7 @@ pub struct MidiTrackTrigs {
     pub unknown: [u8; 128],
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct PatternScaleSettings {
     /// Multiply this value by `master_len_per_track` to get
     /// the real Master Length in Per Track Pattern mode.
@@ -367,7 +368,7 @@ pub struct PatternScaleSettings {
     pub scale_mode: u8,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct PatternChainBehavior {
     /// When `use_project_setting` field is set to `1`/`true`
     /// this field should be set to `N/A` with a value of `255`.
@@ -382,7 +383,7 @@ pub struct PatternChainBehavior {
 
 /// A pattern of trigs stored in the bank.
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct Pattern {
     /// Header indicating start of pattern section
     ///
