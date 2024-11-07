@@ -4,7 +4,28 @@
 image: "rust:latest"
 
 stages:
+  - test
   - build
+
+.test:
+  stage: test
+  tags:
+    - saas-linux-small-amd64
+  script:
+    - cargo test
+  rules:
+    # only run on branches when an MRs is open
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - resources/**
+          - serde_octatrack/**
+          - src/**
+          - cicd.yml
+        compare_to: main
+    - if: $CI_COMMIT_TAG = null
+    # run on main branch for now until i get to the point where MRs are a thing.
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 .build:
   stage: build
