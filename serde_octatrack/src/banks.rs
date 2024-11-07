@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Bank {
     /// Misc header data for Banks.
     /// Always follows the same format.
@@ -32,11 +32,13 @@ pub struct Bank {
     pub header_data: [u8; 22],
 
     /// Pattern data for a Bank.
+    // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub patterns: Box<Array<Pattern, 16>>,
 
     /// Part data for a Bank.
     /// Note: There are 8 `PART` sections.
     /// One batch of 4x `PART` sections will be related to previous saved Part state for reloading.
+    // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub parts: Box<Array<Part, 8>>,
 
     /// Unknown what these bytes refer to.
@@ -53,16 +55,37 @@ pub struct Bank {
     pub remainder: [u8; 2],
 }
 
+impl Bank {
+    /// Crete a new struct by reading a file located at `path`.
+    pub fn from_file(path: PathBuf) -> Result<Box<Self>, Box<dyn Error>> {
+        println!("DEBUG");
+        debug!("Reading Bank file data: {path:#?}");
+        let mut infile: File = File::open(&path)?;
+        let mut bytes: Vec<u8> = vec![];
+        let _: usize = infile.read_to_end(&mut bytes)?;
+        debug!("Read Bank file data: {path:#?}");
+
+        trace!("Deserializing Bank file: {path:#?}");
+        let new: Box<Bank> = Box::new(bincode::deserialize(&bytes[..])?);
+        debug!("Deserialized Bank file: {path:#?}");
+
+        Ok(new)
+    }
+    
+}
+
 impl FromFileAtPathBuf for Bank {
     type T = Bank;
 
     /// Crete a new struct by reading a file located at `path`.
     fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn Error>> {
-        trace!("Reading Bank file data: {path:#?}");
-        let mut infile: File = File::open(&path)?;
+        println!("DEBUG");
+        debug!("Reading Bank file data: {path:#?}");
+        let mut infile = File::open(&path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
         debug!("Read Bank file data: {path:#?}");
+        println!("DEBUG");
 
         trace!("Deserializing Bank file: {path:#?}");
         let new: Self = bincode::deserialize(&bytes[..])?;
