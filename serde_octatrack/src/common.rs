@@ -12,6 +12,21 @@ use std::str::FromStr;
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
 pub type RVoidError<T> = Result<T, ()>;
 
+/// Trait to convert between Enum option instances and their corresponding value.
+pub trait OptionEnumValueConvert {
+    /// One of the enum types within the `octatrack::options` module.
+    type T;
+
+    /// Input type for `from_value` and return type for `value` method.
+    type V;
+
+    /// Get an Enum instance from a numeric value.
+    fn from_value(v: Self::V) -> Result<Self::T, ()>;
+
+    /// Get a numeric value for an Enum instance.
+    fn value(&self) -> Result<Self::V, ()>;
+}
+
 /// Trait for adding the `.swap_bytes()` method.
 pub trait SwapBytes {
     /// Type for `Self`
@@ -48,7 +63,6 @@ pub trait ParseHashMapValueAs {
 }
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
-
 pub trait FromHashMap {
     /// Type for `HashMap` keys
     type A;
@@ -78,28 +92,11 @@ pub trait ToFileAtPathBuf {
     fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>>;
 }
 
-/// Trait to use when a new struct can be created by reading a string..
-
+/// Trait to use when a new struct can be created by reading a string.
 pub trait FromString {
     /// Type for `Self`
     type T;
 
     /// Crete a new struct by parsing a `String`.
     fn from_string(data: &String) -> Result<Self::T, Box<dyn std::error::Error>>;
-}
-
-/// Trait to convert between Enum option instances and their corresponding value.
-
-pub trait OptionEnumValueConvert {
-    /// One of the enum types within the `octatrack::options` module.
-    type T;
-
-    /// Input type for `from_value` and return type for `value` method.
-    type V;
-
-    /// Get an Enum instance from a numeric value.
-    fn from_value(v: Self::V) -> Result<Self::T, ()>;
-
-    /// Get a numeric value for an Enum instance.
-    fn value(&self) -> Result<Self::V, ()>;
 }
