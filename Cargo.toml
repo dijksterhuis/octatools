@@ -5,6 +5,14 @@ edition = "2021"
 readme = "README.md"
 exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*"]
 
+[[bin]]
+name = "octatools"
+path = "src/main.rs"
+
+[lib]
+name = "serde_octatrack"
+path = "serde_octatrack/src/lib.rs"
+
 [dependencies]
 base16ct = "0.2.0"
 base64ct = "1.6.0"

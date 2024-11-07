@@ -12,16 +12,14 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, error::Error, path::PathBuf, str::FromStr};
 
-use crate::octatrack::common::{
-    FromHashMap, FromString, OptionEnumValueConvert, ParseHashMapValueAs,
+use crate::{
+    common::{FromHashMap, FromString, OptionEnumValueConvert, ParseHashMapValueAs},
+    projects::options::ProjectSampleSlotType,
+    samples::options::{
+        SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
+    },
+    // utils::SampleFilePair,
 };
-
-use crate::octatrack::options::{
-    ProjectSampleSlotType, SampleAttributeLoopMode, SampleAttributeTimestrechMode,
-    SampleAttributeTrigQuantizationMode,
-};
-
-use crate::octatrack::samples::SampleFilePair;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectSampleSlots {
@@ -37,8 +35,8 @@ pub struct ProjectSampleSlots {
     /// Relative path to the file on the card from the project directory.
     pub path: PathBuf,
 
-    /// The sample's file pair (audio file and optional attributes file).
-    pub file_pair: Option<SampleFilePair>,
+    // /// The sample's file pair (audio file and optional attributes file).
+    // pub file_pair: Option<SampleFilePair>,
 
     // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current bar trim (float). This is multiplied by 100 on the machine.
@@ -89,10 +87,10 @@ impl FromHashMap for ProjectSampleSlots {
         // TODO: Will never find the respective OT file as
         // the ^ path is alwys relative to project dir on CF card
 
-        let mut file_pair = None;
-        if path.file_name() != PathBuf::from("").file_name() {
-            file_pair = Some(SampleFilePair::from_audio_pathbuf(&path).unwrap());
-        }
+        // let mut file_pair = None;
+        // if path.file_name() != PathBuf::from("").file_name() {
+        //     file_pair = Some(SampleFilePair::from_audio_pathbuf(&path).unwrap());
+        // }
 
         let trim_bars = hmap
             .get("trim_barsx100")
@@ -142,7 +140,7 @@ impl FromHashMap for ProjectSampleSlots {
             sample_type,
             slot_id,
             path,
-            file_pair,
+            // file_pair,
             trim_bars,
             timestrech_mode,
             loop_mode,

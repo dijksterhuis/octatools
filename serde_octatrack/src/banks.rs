@@ -1,7 +1,7 @@
-//! Reading `bank??.*` files
+//! Serialization and Deserialization of Bank files.
 
-mod parts;
-mod patterns;
+pub mod parts;
+pub mod patterns;
 
 use log::{debug, error, info, trace, warn};
 use std::{error::Error, fs::File, io::Read, io::Write, path::PathBuf};
@@ -10,20 +10,20 @@ use bincode;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
-use crate::common::RBoxErr;
-use crate::octatrack::{
+use crate::{
     banks::{parts::Part, patterns::Pattern},
+    common::RBoxErr,
     common::{FromFileAtPathBuf, ToFileAtPathBuf},
 };
 
-/// A Bank.
-
+/// An Octatrack Bank. Contains data related to Parts and Patterns.
 #[derive(Serialize, Deserialize)]
 pub struct Bank {
-    /// Misc header data
+    /// Misc header data for Banks.
+    /// Always follows the same format.
     ///
-    /// example data:
-    /// ```
+    /// Example data:
+    /// ```text
     /// FORM....DPS1BANK......
     /// 46 4f 52 4d 00 00 00 00 44 50 53 31 42 41 4e 4b
     /// 00 00 00 00 00 17
@@ -31,30 +31,24 @@ pub struct Bank {
     #[serde(with = "BigArray")]
     pub header_data: [u8; 22],
 
-    /// All Patterns within a Bank
-    // #[serde(with = "BigArray")]
+    /// Pattern data for a Bank.
     pub patterns: Box<Array<Pattern, 16>>,
 
-    // /// Parts level data
-    // /// There are 8 PART sections.
-    // /// One batch of 4x sections will be related to previous saved Part state for reloading.
-    // #[serde(with = "BigArray")]
+    /// Part data for a Bank.
+    /// Note: There are 8 `PART` sections.
+    /// One batch of 4x `PART` sections will be related to previous saved Part state for reloading.
     pub parts: Box<Array<Part, 8>>,
 
+    /// Unknown what these bytes refer to.
     #[serde(with = "BigArray")]
-    pub data_block_1: [u8; 5],
+    pub unknown: [u8; 5],
 
-    /// The different Part names.
-    /// Only ever four of them and always a 7 character length String.
-    // #[serde(deserialize_with = "deserialize_string")]
-    // pub part_names: [PartName; 4],
-
+    /// Names for each Part within the Bank.
+    /// Maximum 7 character length.
     #[serde(with = "BigArray")]
     pub part_names: [[u8; 7]; 4],
 
-    // /// Whether parts have been saved or not?!
-    // /// Need to check what the last value in the bank file is.
-    // /// It looks like a mask for which parts are edited or not and not yet saved.
+    /// Seems to be related to whether the Bank has been modified or saved?
     #[serde(with = "BigArray")]
     pub remainder: [u8; 2],
 }

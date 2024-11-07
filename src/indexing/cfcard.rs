@@ -5,9 +5,9 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use crate::common::{FromYamlFile, ToYamlFile};
-use crate::octatrack::sets::OctatrackSet;
 /// A single row of data written to the index file.
+use crate::common::{FromYamlFile, ToYamlFile};
+use crate::octatrack_sets::OctatrackSet;
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashScanCsvRow {

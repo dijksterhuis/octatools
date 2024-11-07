@@ -3,25 +3,37 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::octatrack::common::{FromString, ParseHashMapValueAs};
-
-use crate::octatrack::projects::common::{string_to_hashmap, ProjectRawFileSection};
+use crate::{
+    common::{FromString, ParseHashMapValueAs},
+    projects::common::{string_to_hashmap, ProjectRawFileSection},
+};
 
 /// Project metadata read from a parsed Octatrack Project file
-
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectMetadata {
     /// Type of file (always a 'project').
-    /// Example ASCII data: `TYPE=OCTATRACK DPS-1 PROJECT`
-    filetype: String,
+    ///
+    /// Example ASCII data:
+    /// ```text
+    /// TYPE=OCTATRACK DPS-1 PROJECT
+    /// ```
+    pub filetype: String,
 
-    /// Unknown.
-    /// Example ASCII data: `VERSION=19`
-    project_version: u32,
+    /// Unknown. Probably refers to an internal Elektron release version number.
+    ///
+    /// Example ASCII data:
+    /// ```text
+    /// VERSION=19
+    /// ```
+    pub project_version: u32,
 
     /// Version of the Octatrack OS (that the project was created with?).
-    /// Example ASCII data: `OS_VERSION=R0177     1.40B`
-    os_version: String,
+    ///
+    /// Example ASCII data:
+    /// ```text
+    /// OS_VERSION=R0177     1.40B
+    /// ```
+    pub os_version: String,
 }
 
 impl ParseHashMapValueAs for ProjectMetadata {}

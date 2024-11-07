@@ -2,9 +2,9 @@
 
 use std::error::Error;
 
-use crate::octatrack::common::OptionEnumValueConvert;
-use crate::octatrack::options::SampleAttributeLoopMode;
-use crate::octatrack::samples::SampleAttributes;
+use crate::{
+    common::OptionEnumValueConvert, samples::options::SampleAttributeLoopMode, samples::SampleAttributes,
+};
 
 /// An OT Sample's Trim settings
 

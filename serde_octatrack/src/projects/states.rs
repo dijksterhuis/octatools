@@ -3,9 +3,10 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::octatrack::common::{FromString, ParseHashMapValueAs};
-
-use crate::octatrack::projects::{common::string_to_hashmap, common::ProjectRawFileSection};
+use crate::{
+    common::{FromString, ParseHashMapValueAs},
+    projects::{common::string_to_hashmap, common::ProjectRawFileSection},
+};
 
 // [STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]
 
@@ -15,47 +16,49 @@ use crate::octatrack::projects::{common::string_to_hashmap, common::ProjectRawFi
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectStates {
     /// Current active bank
-    bank: u8,
+    pub bank: u8,
 
     /// Current active pattern within a bank
-    pattern: u8,
-    arrangement: u8,
-    arrangement_mode: u8, // dunno if this is a toggle or an enum
+    pub pattern: u8,
+
+    /// Unknown
+    pub arrangement: u8,
+
+    /// Unknown
+    pub arrangement_mode: u8, // dunno if this is a toggle or an enum
 
     /// Current active part for the active pattern within a bank
-    part: u8,
+    pub part: u8,
 
     /// Current active track
-    track: u8,
+    pub track: u8,
 
-    // Unknown
-    track_othermode: u8, // WTFF is this?
-
-    /// Whether Scene A is disabled/enabled
-    // TODO: Should 0 be enabled?
-    scene_a_mute: bool,
+    /// Unknown
+    pub track_othermode: u8, // WTFF is this?
 
     /// Whether Scene A is disabled/enabled
-    // TODO: Should 0 be enabled?
-    scene_b_mute: bool,
+    pub scene_a_mute: bool,
+
+    /// Whether Scene B is disabled/enabled
+    pub scene_b_mute: bool,
+
+    /// Mask detailingg which CUE outputs are muted on Audio Tracks.  
+    pub track_cue_mask: u8,
+
+    /// Mask detailingg which MAIN outputs are muted on Audio Tracks.  
+    pub track_mute_mask: u8,
+
+    /// Mask detailingg which MAIN outputs are soloed on Audio Tracks.  
+    pub track_solo_mask: u8,
+
+    /// Mask detailingg which MIDI outputs are muted on MIDI  Tracks.  
+    pub midi_track_mute_mask: u8,
+
+    /// Mask detailingg which MIDI outputs are soloed on MIDI  Tracks.  
+    pub midi_track_solo_mask: u8,
 
     // Unknown
-    track_cue_mask: u8,
-
-    // Unknown
-    track_mute_mask: u8,
-
-    // Unknown
-    track_solo_mask: u8,
-
-    // Unknown
-    midi_track_mute_mask: u8,
-
-    // Unknown
-    midi_track_solo_mask: u8,
-
-    // Unknown
-    midi_mode: u8,
+    pub midi_mode: u8,
 }
 
 impl ParseHashMapValueAs for ProjectStates {}

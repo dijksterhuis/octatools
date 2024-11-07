@@ -8,9 +8,9 @@ mod trig_mode_midi_tracks;
 
 use serde::{Deserialize, Serialize};
 
-use crate::octatrack::common::{FromHashMap, FromString, ParseHashMapValueAs};
+use crate::common::{FromHashMap, FromString, ParseHashMapValueAs};
 
-use crate::octatrack::projects::{
+use crate::projects::{
     common::string_to_hashmap,
     common::ProjectRawFileSection,
     settings::{
@@ -23,23 +23,23 @@ use crate::octatrack::projects::{
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectSettings {
-    /// Whether the project can be written to (probably is currently being read/written when `true`)
-    write_protected: bool,
+    /// Whether the project can be written to (is currently being read/written when `true`)
+    pub write_protected: bool,
 
-    ///
-    control: ControlMenu,
+    /// Current settings in the `Project`'s control menu UI.
+    pub control: ControlMenu,
 
     /// Unknown: Whether MIDI 'Thru' is enabled/disabled?
-    midi_soft_thru: bool,
+    pub midi_soft_thru: bool,
 
-    ///
-    mixer: MixerMenu,
+    /// Current state of the settings in the Mixer Menu overview
+    pub mixer: MixerMenu,
 
-    ///
-    tempo: TempoMenu,
+    /// Current state of the settings in the Tempo menu
+    pub tempo: TempoMenu,
 
-    ///
-    midi_tracks_trig_mode: MidiTrackTrigModes,
+    /// Current selections for MIDI Track Trig Mode
+    pub midi_tracks_trig_mode: MidiTrackTrigModes,
 }
 
 impl ParseHashMapValueAs for ProjectSettings {}

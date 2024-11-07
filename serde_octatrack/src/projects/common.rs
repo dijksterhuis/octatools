@@ -1,6 +1,6 @@
 //! Utilities for reading `project.*` files.
 
-use crate::octatrack::common::OptionEnumValueConvert;
+use crate::common::OptionEnumValueConvert;
 use std::collections::HashMap;
 
 /// ASCII data section headings within an Octatrack `project.*` file

@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 
-use crate::octatrack::common::{FromHashMap, ParseHashMapValueAs};
+use crate::common::{FromHashMap, ParseHashMapValueAs};
 
 /// Global `TEMPO` UI menu.
 

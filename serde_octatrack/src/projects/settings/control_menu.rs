@@ -1,11 +1,11 @@
 //! Data structures for the Octatrack Project Settings 'Control Menu'.
 
-use crate::octatrack::options::ProjectMidiChannels;
+use crate::projects::options::ProjectMidiChannels;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 
-use crate::octatrack::common::{FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs};
+use crate::common::{FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs};
 
 /// Convenience struct for all data related to the Octatrack Project Settings 'Control' Menu.
 

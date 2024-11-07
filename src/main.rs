@@ -2,9 +2,9 @@ mod actions;
 mod audio;
 mod cli;
 mod common;
-mod constants;
 mod indexing;
-mod octatrack;
+mod octatrack_sets;
+mod utils;
 mod yaml_io;
 
 use clap::Parser;
@@ -80,7 +80,7 @@ fn main() -> () {
                     out_dir_path,
                     wav_file_paths,
                 } => {
-                    let _ = actions::create_samplechain_from_pathbufs(
+                    let _ = actions::chains::create_samplechain_from_pathbufs(
                         wav_file_paths,
                         out_dir_path,
                         chain_name,
@@ -88,7 +88,7 @@ fn main() -> () {
                 }
                 cli::CreateChain::Yaml { yaml_file_path } => {
                     let chain_conf = YamlChainConfig::from_yaml(yaml_file_path).unwrap();
-                    let _ = actions::create_samplechains_from_yaml(&chain_conf);
+                    let _ = actions::chains::create_samplechains_from_yaml(&chain_conf);
                 }
             },
             cli::Chains::Deconstruct(chains_deconstruct_subcmd) => {
@@ -114,7 +114,7 @@ fn main() -> () {
                 merge_duplicate_sample_slots,
                 accept_liability,
             } => {
-                let _ = actions::transfer_bank(
+                let _ = actions::copy::transfer_bank(
                     source_bank_file_path,
                     dest_bank_file_path,
                     merge_duplicate_sample_slots.is_some(),

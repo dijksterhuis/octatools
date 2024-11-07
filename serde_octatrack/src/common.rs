@@ -9,6 +9,19 @@ use std::fmt::Debug;
 use std::path::PathBuf;
 use std::str::FromStr;
 
+pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
+pub type RVoidError<T> = Result<T, ()>;
+
+/// Trait for adding the `.swap_bytes()` method.
+pub trait SwapBytes {
+    /// Type for `Self`
+    type T;
+
+    /// Swap the bytes of all struct fields.
+    /// Must be applied to the `SampleAttributes` file to deal with litle-endian/big-endian systems.
+    fn swap_bytes(&self) -> Result<Self::T, Box<dyn Error>>;
+}
+
 /// Trait to enable extracting a section of raw Octatrack Project file ASCII data
 pub trait ParseHashMapValueAs {
     fn parse_hashmap_value<T: FromStr>(

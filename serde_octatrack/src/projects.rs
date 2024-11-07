@@ -1,25 +1,22 @@
 //! Parse Octatrack `project.*` data files.
 
-mod common;
-mod metadata;
-mod settings;
-// TODO
+pub mod common;
+pub mod metadata;
+pub mod settings;
 pub mod slots;
-mod states;
+pub mod states;
+pub mod options;
 
 use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::path::PathBuf;
 
-use crate::common::{RBoxErr, RVoidError};
+use crate::common::{FromFileAtPathBuf, FromString, RBoxErr, RVoidError, ToFileAtPathBuf};
 
-use crate::octatrack::common::{FromFileAtPathBuf, FromString};
-
-use crate::octatrack::projects::{
+use crate::projects::{
     metadata::ProjectMetadata, settings::ProjectSettings, slots::ProjectSampleSlots,
     states::ProjectStates,
 };
-use crate::octatrack::samples::SampleFilePair;
 
 // TODO: Move to some utils file
 // TODO: Error type
@@ -38,26 +35,21 @@ fn get_pathbuf_fname_as_string(path: &PathBuf) -> RVoidError<String> {
     Ok(name)
 }
 
-/// All samples related to the project
-
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct ProjectSamples {
-    /// samples loaded into a project sample slot
-    active: Vec<ProjectSampleSlots>,
-
-    /// smples in a project directory, but not loaded into a sample slot.
-    inactive: Vec<SampleFilePair>,
-}
 
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Project {
-    // has to be a vec because the length of the
-    // file depends on how many samples are added?
+    /// Metadata key-value pairs from a Project file.
     pub metadata: ProjectMetadata,
+
+    /// Settings key-value pairs from a Project file.
     pub settings: ProjectSettings,
+
+    /// States key-value pairs from a Project file.
     pub states: ProjectStates,
+
+    /// Slots key-value pairs from a Project file.
     pub slots: Vec<ProjectSampleSlots>,
 }
 
@@ -65,7 +57,6 @@ impl FromFileAtPathBuf for Project {
     type T = Project;
 
     /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
-
     fn from_pathbuf(path: PathBuf) -> RBoxErr<Self> {
         let s = std::fs::read_to_string(&path)?;
 
@@ -81,6 +72,12 @@ impl FromFileAtPathBuf for Project {
             states,
             slots,
         })
+    }
+}
+
+impl ToFileAtPathBuf for Project {
+    fn to_pathbuf(&self, path: PathBuf) -> RBoxErr<()> {
+        todo!()
     }
 }
 

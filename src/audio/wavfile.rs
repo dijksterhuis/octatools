@@ -1,11 +1,13 @@
 //! Reading and Writing .wav files.
+//!
+//! **TODO**: Need to move this out into the binary crate.
 
 use hound::{self, WavReader, WavSpec};
 use log::{debug, error, info};
 use std::{error::Error, fs::File, io::BufReader, path::PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
-use crate::constants::OCTATRACK_COMPATIBLE_HOUND_WAVSPECS;
+use serde_octatrack::constants::OCTATRACK_COMPATIBLE_HOUND_WAVSPECS;
 
 /// Chain together a wav sample vector into individual wav file(s).
 ///
@@ -57,21 +59,21 @@ pub fn chain_wavfiles_64_batch(
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct WavFile {
-    /// hound wav file specification struct
+    /// `hound` specification struct for the Wav file.
     pub spec: WavSpec,
 
-    /// length of the wav file data (number of samples)
+    /// Number of audio samples in the Wav file.
     pub len: u32,
 
-    /// instantaneous samples of the audio
+    /// Audio samples
     pub samples: Vec<i32>, // cannot use Copy trait
 
+    /// File path of the Wav file
     pub file_path: PathBuf,
 }
 
 impl WavFile {
     /// Write samples to a WAV file.
-
     pub fn to_file(&self, wav_file_path: &PathBuf) -> Result<(), Box<dyn Error>> {
         let mut writer = hound::WavWriter::create(wav_file_path, self.spec).unwrap();
 
@@ -82,8 +84,7 @@ impl WavFile {
         Ok(())
     }
 
-    /// Read samples, specficiation etc. frm a WAV file.
-
+    /// Read samples, specficiation etc. from a WAV file.
     pub fn from_file(wav_file_path: PathBuf) -> Result<WavFile, Box<dyn Error>> {
         let mut reader = WavFile::open(&wav_file_path).unwrap();
         let spec = WavFile::read_wav_spec(&mut reader).unwrap();
@@ -98,20 +99,17 @@ impl WavFile {
     }
 
     /// Open a wav file into a read buffer
-
     fn open(path: &PathBuf) -> Result<WavReader<BufReader<File>>, hound::Error> {
         hound::WavReader::open(path)
     }
 
     /// Read the hound WavSpec for an opened wav file buffer
-
     fn read_wav_spec(reader: &mut WavReader<BufReader<File>>) -> Result<WavSpec, Box<dyn Error>> {
         let spec = hound::WavReader::spec(reader);
         Ok(spec)
     }
 
     /// Write samples to an open and writeable file buffer.
-
     fn read_wav_samples(
         reader: &mut WavReader<BufReader<File>>,
     ) -> Result<Vec<i32>, Box<dyn Error>> {
@@ -126,7 +124,6 @@ impl WavFile {
 }
 
 /// A filter for walkdir rescursive search: include directories
-
 fn walkdir_filter_is_dir(entry: &DirEntry) -> bool {
     entry.file_type().is_dir()
 }
@@ -136,7 +133,6 @@ fn walkdir_filter_is_not_hidden(entry: &DirEntry) -> bool {
 }
 
 /// A filter for walkdir rescursive search: only files that have the 'wav' file extension
-
 fn walkdir_filter_is_compat_wav(entry: &DirEntry) -> bool {
     let is_wav = entry
         .file_name()
@@ -176,7 +172,6 @@ fn walkdir_filter_is_compat_wav(entry: &DirEntry) -> bool {
 }
 
 /// Recursively search for WAV audio files for a given directory tree.
-
 pub fn scan_dir_path_for_wavfiles(dir_path: &PathBuf) -> Result<Vec<PathBuf>, ()> {
     info!(
         "Recursively searching for Octatrack compatible WAV files: dirpath={:1?}",
