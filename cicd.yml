@@ -18,6 +18,9 @@ test_with_coverage:
     - cargo tarpaulin -o xml
   coverage: '/^\d+.\d+% coverage/'
   artifacts:
+    when: always
+    paths:
+      - cobertura.xml
     reports:
       coverage_report:
         coverage_format: cobertura
