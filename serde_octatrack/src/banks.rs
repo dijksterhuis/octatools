@@ -59,7 +59,7 @@ impl FromFileAtPathBuf for Bank {
     /// Crete a new struct by reading a file located at `path`.
     fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn Error>> {
         trace!("Reading Bank file data: {path:#?}");
-        let mut infile = File::open(&path)?;
+        let mut infile: File = File::open(&path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
         debug!("Read Bank file data: {path:#?}");
@@ -75,11 +75,11 @@ impl FromFileAtPathBuf for Bank {
 impl ToFileAtPathBuf for Bank {
     fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         trace!("Serializing Bank data ...");
-        let bytes = bincode::serialize(&self)?;
+        let bytes: Vec<u8> = bincode::serialize(&self)?;
         debug!("Serialized Bank data.");
 
         trace!("Writing Bank data ...");
-        let mut file = File::create(path)?;
+        let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
         debug!("Written Bank data.");
 
