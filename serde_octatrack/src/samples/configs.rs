@@ -53,11 +53,214 @@ impl SampleLoopConfig {
     }
 
     pub fn from_decoded(decoded: &SampleAttributes) -> Result<Self, Box<dyn Error>> {
-        Ok(Self::new(
+        let new: Self = Self::new(
             decoded.loop_start,
             decoded.loop_len,
             SampleAttributeLoopMode::from_value(decoded.loop_mode)
                 .unwrap_or(SampleAttributeLoopMode::Off),
-        ))
+        );
+        Ok(new)
     }
+}
+
+
+
+#[cfg(test)]
+mod test_integration {
+
+    mod test_sample_loop_config {
+        mod test_new {
+
+            use crate::samples::configs::{SampleLoopConfig, SampleAttributeLoopMode};
+    
+            #[test]
+            fn test_new_sample_loop_config_loop_off() {
+    
+                assert_eq!(
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Off),
+                    SampleLoopConfig {
+                        start: 0,
+                        length: 10,
+                        mode: SampleAttributeLoopMode::Off
+                    }
+                );
+            }
+    
+    
+            #[test]
+            fn test_new_sample_loop_config_umin_start_umax_length() {
+    
+                assert_eq!(
+                    SampleLoopConfig::new(u32::MIN, u32::MAX, SampleAttributeLoopMode::Off),
+                    SampleLoopConfig {
+                        start: u32::MIN,
+                        length: u32::MAX,
+                        mode: SampleAttributeLoopMode::Off
+                    }
+                );
+            }
+    
+            #[test]
+            fn test_new_sample_loop_config_loop_normal() {
+    
+                assert_eq!(
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Normal),
+                    SampleLoopConfig {
+                        start: 0,
+                        length: 10,
+                        mode: SampleAttributeLoopMode::Normal
+                    }
+                );
+            }
+    
+            #[test]
+            fn test_new_sample_loop_config_loop_pingpong() {
+    
+                assert_eq!(
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::PingPong),
+                    SampleLoopConfig {
+                        start: 0,
+                        length: 10,
+                        mode: SampleAttributeLoopMode::PingPong
+                    }
+                );
+            }
+    
+        }
+    
+    }
+
+
+
+    mod tet_from_decoded {
+
+        use crate::{common::OptionEnumValueConvert, samples::{configs::{SampleAttributeLoopMode, SampleLoopConfig}, slices::Slice, SampleAttributes}};
+
+        #[test]
+        fn test_umin_start_umax_len() {
+
+            let decoded = SampleAttributes {
+                header: [0_u8; 16],
+                blank: [0_u8; 7],
+                tempo: 128000,
+                trim_len: 0,
+                loop_len: u32::MAX,
+                stretch: 0,
+                loop_mode: SampleAttributeLoopMode::Off.value().unwrap(),
+                gain: 0,
+                quantization: 0,
+                trim_start: 0,
+                trim_end: 0,
+                loop_start: u32::MIN,
+                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices_len: 0,
+                checksum: 0,
+            };
+
+            assert_eq!(
+                SampleLoopConfig::from_decoded(&decoded).unwrap(),
+                SampleLoopConfig {
+                    start: u32::MIN,
+                    length: u32::MAX,
+                    mode: SampleAttributeLoopMode::Off
+                }
+            );
+        }
+
+        #[test]
+        fn test_loop_off() {
+
+            let decoded = SampleAttributes {
+                header: [0_u8; 16],
+                blank: [0_u8; 7],
+                tempo: 128000,
+                trim_len: 0,
+                loop_len: 10,
+                stretch: 0,
+                loop_mode: SampleAttributeLoopMode::Off.value().unwrap(),
+                gain: 0,
+                quantization: 0,
+                trim_start: 0,
+                trim_end: 0,
+                loop_start: 0,
+                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices_len: 0,
+                checksum: 0,
+            };
+
+            assert_eq!(
+                SampleLoopConfig::from_decoded(&decoded).unwrap(),
+                SampleLoopConfig {
+                    start: 0,
+                    length: 10,
+                    mode: SampleAttributeLoopMode::Off
+                }
+            );
+        }
+
+        #[test]
+        fn test_loop_normal() {
+
+            let decoded = SampleAttributes {
+                header: [0_u8; 16],
+                blank: [0_u8; 7],
+                tempo: 128000,
+                trim_len: 0,
+                loop_len: 10,
+                stretch: 0,
+                loop_mode: SampleAttributeLoopMode::Normal.value().unwrap(),
+                gain: 0,
+                quantization: 0,
+                trim_start: 0,
+                trim_end: 0,
+                loop_start: 0,
+                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices_len: 0,
+                checksum: 0,
+            };
+
+            assert_eq!(
+                SampleLoopConfig::from_decoded(&decoded).unwrap(),
+                SampleLoopConfig {
+                    start: 0,
+                    length: 10,
+                    mode: SampleAttributeLoopMode::Normal
+                }
+            );
+        }
+
+
+        #[test]
+        fn test_loop_pingpong() {
+
+            let decoded = SampleAttributes {
+                header: [0_u8; 16],
+                blank: [0_u8; 7],
+                tempo: 128000,
+                trim_len: 0,
+                loop_len: 10,
+                stretch: 0,
+                loop_mode: SampleAttributeLoopMode::PingPong.value().unwrap(),
+                gain: 0,
+                quantization: 0,
+                trim_start: 0,
+                trim_end: 0,
+                loop_start: 0,
+                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices_len: 0,
+                checksum: 0,
+            };
+
+            assert_eq!(
+                SampleLoopConfig::from_decoded(&decoded).unwrap(),
+                SampleLoopConfig {
+                    start: 0,
+                    length: 10,
+                    mode: SampleAttributeLoopMode::PingPong
+                }
+            );
+        }
+
+    }
+
 }
