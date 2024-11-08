@@ -218,6 +218,22 @@ mod test_spec {
                     ProjectSampleSlotType::from_value("flex".to_string()).unwrap(),
                 );
             }
+
+            #[test]
+            fn test_recorder_upper() {
+                assert_eq!(
+                    ProjectSampleSlotType::RecorderBuffer,
+                    ProjectSampleSlotType::from_value("RECORDER".to_string()).unwrap(),
+                );
+            }
+
+            #[test]
+            fn test_recorder_lower() {
+                assert_eq!(
+                    ProjectSampleSlotType::RecorderBuffer,
+                    ProjectSampleSlotType::from_value("recorder".to_string()).unwrap(),
+                );
+            }
         }
     }
 
