@@ -18,26 +18,7 @@ use crate::projects::{
     states::ProjectStates,
 };
 
-// TODO: Move to some utils file
-// TODO: Error type
-fn get_pathbuf_fname_as_string(path: &PathBuf) -> RVoidError<String> {
-    let name = path
-        .clone()
-        .file_name()
-        .unwrap_or(&OsStr::new("err"))
-        .to_str()
-        .unwrap_or("err")
-        .to_string();
-
-    if name == "err" {
-        return Err(());
-    };
-    Ok(name)
-}
-
-
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
-
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct Project {
     /// Metadata key-value pairs from a Project file.
