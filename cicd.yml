@@ -25,6 +25,8 @@ test_with_coverage:
       coverage_report:
         coverage_format: cobertura
         path: cobertura.xml
+      junit: cobertura.xml
+
   rules:
     # only run on branches when an MRs is open
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
