@@ -93,10 +93,16 @@ pub trait ToFileAtPathBuf {
 }
 
 /// Trait to use when a new struct can be created by reading a string.
-pub trait FromString {
+pub trait ProjectFromString {
     /// Type for `Self`
     type T;
 
     /// Crete a new struct by parsing a `String`.
     fn from_string(data: &String) -> Result<Self::T, Box<dyn std::error::Error>>;
+}
+
+/// Trait to use when a new struct can be created by reading a string.
+pub trait ProjectToString {
+    /// Crete a new struct by parsing a `String`.
+    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>>;
 }
