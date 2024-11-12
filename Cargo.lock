@@ -12,6 +12,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "aifc"
+version = "0.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c5af0223b1babfb925520c151997204ab579564f459db7132c98d0e9d896ef5"
+dependencies = [
+ "audio-codec-algorithms",
+]
+
+[[package]]
 name = "anstream"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -71,6 +80,12 @@ name = "arrayvec"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
+
+[[package]]
+name = "audio-codec-algorithms"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94af03e51bad74c7645ee2560cd67c7ab9a137308131ee5d6076a34de81cdcd7"
 
 [[package]]
 name = "base16ct"
@@ -336,6 +351,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 name = "octatools"
 version = "0.1.0"
 dependencies = [
+ "aifc",
  "base16ct",
  "base64ct",
  "bincode",
