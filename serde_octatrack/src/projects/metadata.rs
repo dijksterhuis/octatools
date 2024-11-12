@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
-    common::{FromString, ParseHashMapValueAs},
+    common::{ParseHashMapValueAs, ProjectFromString, ProjectToString},
     projects::common::{string_to_hashmap, ProjectRawFileSection},
 };
 
@@ -38,7 +38,7 @@ pub struct ProjectMetadata {
 
 impl ParseHashMapValueAs for ProjectMetadata {}
 
-impl FromString for ProjectMetadata {
+impl ProjectFromString for ProjectMetadata {
     type T = Self;
 
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
@@ -51,5 +51,22 @@ impl FromString for ProjectMetadata {
             project_version: Self::parse_hashmap_value::<u32>(&hmap, "version")?,
             os_version: Self::parse_hashmap_value::<String>(&hmap, "os_version")?,
         })
+    }
+}
+
+impl ProjectToString for ProjectMetadata {
+    /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
+
+    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+        let mut s = "".to_string();
+        s.push_str("[META]\r\n");
+        s.push_str(format!("TYPE={}", self.filetype).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("VERSION={}", self.project_version).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("OS_VERSION={}", self.os_version).as_str());
+        s.push_str("\r\n[/META]");
+
+        Ok(s)
     }
 }
