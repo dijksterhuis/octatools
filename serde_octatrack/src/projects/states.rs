@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    common::{FromString, ParseHashMapValueAs},
+    common::{ParseHashMapValueAs, ProjectFromString, ProjectToString},
     projects::{common::string_to_hashmap, common::ProjectRawFileSection},
 };
 
@@ -63,7 +63,7 @@ pub struct ProjectStates {
 
 impl ParseHashMapValueAs for ProjectStates {}
 
-impl FromString for ProjectStates {
+impl ProjectFromString for ProjectStates {
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
@@ -87,5 +87,46 @@ impl FromString for ProjectStates {
             midi_track_solo_mask: Self::parse_hashmap_value::<u8>(&hmap, "midi_track_solo_mask")?,
             midi_mode: Self::parse_hashmap_value::<u8>(&hmap, "midi_mode")?,
         })
+    }
+}
+
+impl ProjectToString for ProjectStates {
+    /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
+
+    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+        let mut s = "".to_string();
+        s.push_str("[STATES]\r\n");
+        s.push_str(format!("BANK={}", self.bank).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("PATTERN={}", self.pattern).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("ARRANGEMENT={}", self.arrangement).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("ARRANGEMENT_MODE={}", self.arrangement_mode).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("PART={}", self.part).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRACK={}", self.track).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRACK_OTHERMODE={}", self.track_othermode).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("SCENE_A_MUTE={}", self.scene_a_mute as u8).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("SCENE_B_MUTE={}", self.scene_b_mute as u8).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRACK_CUE_MASK={}", self.track_cue_mask).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRACK_MUTE_MASK={}", self.track_mute_mask).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRACK_SOLO_MASK={}", self.track_solo_mask).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("MIDI_TRACK_MUTE_MASK={}", self.midi_track_mute_mask).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("MIDI_TRACK_SOLO_MASK={}", self.midi_track_solo_mask).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("MIDI_MODE={}", self.midi_mode).as_str());
+        s.push_str("\r\n[/STATES]");
+
+        Ok(s)
     }
 }
