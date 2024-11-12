@@ -13,12 +13,12 @@ pub struct TempoMenu {
     /// BPM of the current project tempo setting.
     /// **NOTE 1**: This can be ignored by using the `pattern_tempo_enabled`.
     /// **NOTE 2**: Is multiplied by 24 on device.
-    tempo: u32,
+    pub tempo: u32,
 
     /// Whether to use the current pattern's tempo or project tempo.
     /// - Pattern Tempo: `true`
     /// - Project Tempo: `false`
-    pattern_tempo_enabled: bool,
+    pub pattern_tempo_enabled: bool,
 }
 
 impl ParseHashMapValueAs for TempoMenu {}

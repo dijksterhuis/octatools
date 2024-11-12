@@ -14,28 +14,28 @@ pub struct MidiTrackTrigModes {
     // refers to whether MIDI track is on TRACK or CHRMOATIC trig mode.
     // should be u8 as *possible* for more trig modes to be added (although unlikely)
     /// Trig mode for MIDI Track 1
-    trig_mode_midi_track_1: u8,
+    pub trig_mode_midi_track_1: u8,
 
     /// Trig mode for MIDI Track 2
-    trig_mode_midi_track_2: u8,
+    pub trig_mode_midi_track_2: u8,
 
     /// Trig mode for MIDI Track 3
-    trig_mode_midi_track_3: u8,
+    pub trig_mode_midi_track_3: u8,
 
     /// Trig mode for MIDI Track 4
-    trig_mode_midi_track_4: u8,
+    pub trig_mode_midi_track_4: u8,
 
     /// Trig mode for MIDI Track 5
-    trig_mode_midi_track_5: u8,
+    pub trig_mode_midi_track_5: u8,
 
     /// Trig mode for MIDI Track 6
-    trig_mode_midi_track_6: u8,
+    pub trig_mode_midi_track_6: u8,
 
     /// Trig mode for MIDI Track 7
-    trig_mode_midi_track_7: u8,
+    pub trig_mode_midi_track_7: u8,
 
     /// Trig mode for MIDI Track 8
-    trig_mode_midi_track_8: u8,
+    pub trig_mode_midi_track_8: u8,
 }
 
 impl ParseHashMapValueAs for MidiTrackTrigModes {}
