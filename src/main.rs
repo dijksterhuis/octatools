@@ -9,7 +9,7 @@ mod yaml_io;
 
 use clap::Parser;
 use env_logger::{Builder, Target};
-use log::{debug, info, LevelFilter};
+use log::{info, LevelFilter};
 
 use crate::cli::{Cli, Commands, Indexing};
 use crate::common::{FromYamlFile, ToYamlFile};
@@ -31,6 +31,7 @@ fn main() -> () {
                     cfcard_dir_path,
                     yaml_file_path,
                 } => {
+                    info!("Indexing CF card: path={cfcard_dir_path:#?}");
                     let cf =
                         CompactFlashDrive::from_pathbuf(cfcard_dir_path, yaml_file_path).unwrap();
 
@@ -45,6 +46,7 @@ fn main() -> () {
                             samples_dir_path,
                             yaml_file_path,
                         } => {
+                            info!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
                             let sample_index =
                                 SamplesDirIndexSimple::new(samples_dir_path, yaml_file_path)
                                     .unwrap();
@@ -59,6 +61,7 @@ fn main() -> () {
                             samples_dir_path,
                             yaml_file_path,
                         } => {
+                            info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
                             let sample_index =
                                 SamplesDirIndexFull::new(samples_dir_path, yaml_file_path).unwrap();
 
@@ -80,13 +83,15 @@ fn main() -> () {
                     out_dir_path,
                     wav_file_paths,
                 } => {
-                    let _ = actions::chains::create_samplechain_from_pathbufs(
+                    info!("Creating sliced sample chain via CLI args: name={chain_name:#?}");
+                    let _ = actions::chains::create_samplechain_from_pathbufs_only(
                         wav_file_paths,
                         out_dir_path,
                         chain_name,
                     );
                 }
                 cli::CreateChain::Yaml { yaml_file_path } => {
+                    info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
                     let chain_conf = YamlChainConfig::from_yaml(yaml_file_path).unwrap();
                     let _ = actions::chains::create_samplechains_from_yaml(&chain_conf);
                 }
@@ -94,13 +99,15 @@ fn main() -> () {
             cli::Chains::Deconstruct(chains_deconstruct_subcmd) => {
                 match chains_deconstruct_subcmd {
                     cli::DesconstructChain::Cli {
-                        ot_file_path,
-                        audio_file_path,
-                        out_dir_path,
+                        ot_file_path: _,
+                        audio_file_path: _,
+                        out_dir_path: _,
                     } => {
+                        info!("Deconstructing sliced sample chain from CLI args ...");
                         todo!()
                     }
-                    cli::DesconstructChain::Yaml { yaml_file_path } => {
+                    cli::DesconstructChain::Yaml { yaml_file_path: _ } => {
+                        info!("Deconstructing sliced sample chains from YAML file ...");
                         todo!()
                     }
                 }
@@ -110,21 +117,18 @@ fn main() -> () {
             cli::Copy::Bank {
                 source_bank_file_path,
                 dest_bank_file_path,
-                copy_samples_to_project,
-                merge_duplicate_sample_slots,
-                accept_liability,
+                copy_samples_to_project: _,
+                merge_duplicate_sample_slots: _,
+                accept_liability: _,
             } => {
-                let _ = actions::copy::copy_bank(
-                    source_bank_file_path,
-                    dest_bank_file_path,
-                    merge_duplicate_sample_slots.is_some(),
-                );
+                info!("Copying bank: src={source_bank_file_path:#?} dest={dest_bank_file_path:#?}");
+                let _ = actions::copy::copy_bank(source_bank_file_path, dest_bank_file_path);
             }
             cli::Copy::Project {
-                source_project,
-                dest_set_dir_path,
-                copy_samples_to_project,
-                accept_liability,
+                source_project: _,
+                dest_set_dir_path: _,
+                copy_samples_to_project: _,
+                accept_liability: _,
             } => {
                 unimplemented!();
             }
