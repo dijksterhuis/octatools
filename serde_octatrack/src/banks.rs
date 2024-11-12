@@ -94,7 +94,7 @@ impl ToFileAtPathBuf for Bank {
 #[cfg(test)]
 mod test_integration {
 
-    mod test_integration_copy_bank {
+    mod test_banks {
 
         use crate::banks::Bank;
         use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
