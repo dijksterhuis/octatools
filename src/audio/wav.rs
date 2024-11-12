@@ -79,10 +79,12 @@ impl WavFile {
         let samples_iter = reader.samples::<i32>();
 
         trace!("Collecting samples from iterator.");
-        let samples: Vec<f32> = samples_iter.map(
-            // conversion to f32
-            |x| (x.unwrap() / i32::MAX) as f32
-        ).collect();
+        let samples: Vec<f32> = samples_iter
+            .map(
+                // conversion to f32
+                |x| (x.unwrap() / i32::MAX) as f32,
+            )
+            .collect();
 
         debug!("Read WAV file sample data.");
         Ok(samples)
