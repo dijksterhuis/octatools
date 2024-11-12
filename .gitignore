@@ -6,3 +6,4 @@ outchains/
 infiles/
 outfiles/
 inchains/
+*.xml
