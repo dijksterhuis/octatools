@@ -1,7 +1,5 @@
 //! Various global constants.
 
-use hound::{SampleFormat::Int, WavSpec};
-
 /// Default sample rate of a wav file.
 // TODO: Remove this!
 
@@ -23,30 +21,33 @@ pub const OCTATRACK_AUDIO_FILE_BIT_DEPTH: [u8; 2] = [16, 24];
 /// Acceptable audio file number of channels as per the Octatrack manual.
 pub const OCTATRACK_AUDIO_FILE_CHANNELS: [u8; 2] = [1, 2];
 
+#[derive(Debug, PartialEq)]
+pub struct AudioSpec {
+    pub channels: u8,
+    pub sample_rate: u32,
+    pub bit_depth: u8,
+}
+
 /// Acceptable WAV file specifications as `hound::WavSpec` structs.
-pub const OCTATRACK_COMPATIBLE_HOUND_WAVSPECS: [WavSpec; 4] = [
-    WavSpec {
+pub const OCTATRACK_COMPATIBLE_AUDIO_SPECS: [AudioSpec; 4] = [
+    AudioSpec {
         channels: 1,
         sample_rate: 44100,
-        bits_per_sample: 16,
-        sample_format: Int,
+        bit_depth: 16,
     },
-    WavSpec {
+    AudioSpec {
         channels: 2,
         sample_rate: 44100,
-        bits_per_sample: 16,
-        sample_format: Int,
+        bit_depth: 16,
     },
-    WavSpec {
+    AudioSpec {
         channels: 1,
         sample_rate: 44100,
-        bits_per_sample: 24,
-        sample_format: Int,
+        bit_depth: 24,
     },
-    WavSpec {
+    AudioSpec {
         channels: 2,
         sample_rate: 44100,
-        bits_per_sample: 24,
-        sample_format: Int,
+        bit_depth: 24,
     },
 ];

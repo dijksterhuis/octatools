@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 /// Sample Slot options for Projects.
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Eq, Hash)]
 pub enum ProjectSampleSlotType {
     /// Static machine slot
     Static,
