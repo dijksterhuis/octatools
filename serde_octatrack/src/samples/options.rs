@@ -3,7 +3,6 @@
 use crate::common::{OptionEnumValueConvert, RVoidError};
 use serde::{Deserialize, Serialize};
 
-
 /// Sample attributes Timestrech options.
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
@@ -141,7 +140,6 @@ pub enum SampleAttributeTrigQuantizationMode {
     TwoFiveSixSteps,
 }
 
-
 impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
     type T = SampleAttributeTrigQuantizationMode;
     type V = u32;
@@ -193,7 +191,6 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
         }
     }
 }
-
 
 /// "Specification" tests ... ie. guarantee that enum values match correct values.
 #[cfg(test)]
@@ -621,5 +618,4 @@ mod test_spec {
             }
         }
     }
-
 }

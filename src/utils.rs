@@ -1,13 +1,12 @@
-use crate::audio::wavfile::WavFile;
+use crate::audio::wav::WavFile;
+use crate::common::RVoidError;
+use serde::{Deserialize, Serialize};
 use serde_octatrack::common::RBoxErr;
 use serde_octatrack::constants::DEFAULT_SAMPLE_RATE;
+use serde_octatrack::projects::slots::ProjectSampleSlot;
 use serde_octatrack::samples::slices::{Slice, Slices};
 use std::error::Error;
-use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use crate::common::RVoidError;
-use serde_octatrack::projects::slots::ProjectSampleSlots;
-
 
 /// Create a `Slice` object for an unchained wavfile.
 /// The starting `offset` position should be the sample index within the eventual chained wavfile.
@@ -76,11 +75,10 @@ pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) ->
     Ok((bars * 100.0) as u32)
 }
 
-
 /// Each 'sample' can have two files present on an Octatrack:
 /// the audio file and the corresponding `.ot` attributes file.
 /// This struct represents one 'sample' as a combination of those two file paths.
-/// 
+///
 /// Note: The `samples` module is reserved for ser/de of `SampleAttributes` files (`.ot` files),
 /// and this struct is only relevant for Projects anyway.
 
@@ -88,7 +86,6 @@ pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) ->
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SampleFilePair {
-
     /// Name of this Sample (file basenames)
     pub name: String,
 
@@ -131,14 +128,12 @@ impl SampleFilePair {
     }
 }
 
-
-
 /// All samples related to the project
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectSamples {
     /// Samples loaded into project sample slots
-    active: Vec<ProjectSampleSlots>,
+    active: Vec<ProjectSampleSlot>,
 
     /// Samples in a project directory, but not loaded into a sample slot.
     inactive: Vec<SampleFilePair>,

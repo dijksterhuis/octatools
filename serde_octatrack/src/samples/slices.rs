@@ -3,7 +3,6 @@
 // use crate::audio::wavfile::WavFile;
 use crate::common::{RBoxErr, SwapBytes};
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 
 /// Positions of a 'slice' within a single WAV file
 /// (a sliced WAV file is multiple samples joined in series)

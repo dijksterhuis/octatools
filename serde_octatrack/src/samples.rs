@@ -1,8 +1,8 @@
 //! Read/Write Octatrack sample attributes (`.ot`) files.
 
 pub mod configs;
-pub mod slices;
 pub mod options;
+pub mod slices;
 
 use std::{error::Error, fs::File, io::prelude::*, io::Write, path::PathBuf};
 

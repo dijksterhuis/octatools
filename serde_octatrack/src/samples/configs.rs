@@ -3,7 +3,8 @@
 use std::error::Error;
 
 use crate::{
-    common::OptionEnumValueConvert, samples::options::SampleAttributeLoopMode, samples::SampleAttributes,
+    common::OptionEnumValueConvert, samples::options::SampleAttributeLoopMode,
+    samples::SampleAttributes,
 };
 
 /// An OT Sample's Trim settings
@@ -63,19 +64,16 @@ impl SampleLoopConfig {
     }
 }
 
-
-
 #[cfg(test)]
 mod test_integration {
 
     mod test_sample_loop_config {
         mod test_new {
 
-            use crate::samples::configs::{SampleLoopConfig, SampleAttributeLoopMode};
-    
+            use crate::samples::configs::{SampleAttributeLoopMode, SampleLoopConfig};
+
             #[test]
             fn test_new_sample_loop_config_loop_off() {
-    
                 assert_eq!(
                     SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Off),
                     SampleLoopConfig {
@@ -85,11 +83,9 @@ mod test_integration {
                     }
                 );
             }
-    
-    
+
             #[test]
             fn test_new_sample_loop_config_umin_start_umax_length() {
-    
                 assert_eq!(
                     SampleLoopConfig::new(u32::MIN, u32::MAX, SampleAttributeLoopMode::Off),
                     SampleLoopConfig {
@@ -99,10 +95,9 @@ mod test_integration {
                     }
                 );
             }
-    
+
             #[test]
             fn test_new_sample_loop_config_loop_normal() {
-    
                 assert_eq!(
                     SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Normal),
                     SampleLoopConfig {
@@ -112,10 +107,9 @@ mod test_integration {
                     }
                 );
             }
-    
+
             #[test]
             fn test_new_sample_loop_config_loop_pingpong() {
-    
                 assert_eq!(
                     SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::PingPong),
                     SampleLoopConfig {
@@ -125,20 +119,22 @@ mod test_integration {
                     }
                 );
             }
-    
         }
-    
     }
-
-
 
     mod tet_from_decoded {
 
-        use crate::{common::OptionEnumValueConvert, samples::{configs::{SampleAttributeLoopMode, SampleLoopConfig}, slices::Slice, SampleAttributes}};
+        use crate::{
+            common::OptionEnumValueConvert,
+            samples::{
+                configs::{SampleAttributeLoopMode, SampleLoopConfig},
+                slices::Slice,
+                SampleAttributes,
+            },
+        };
 
         #[test]
         fn test_umin_start_umax_len() {
-
             let decoded = SampleAttributes {
                 header: [0_u8; 16],
                 blank: [0_u8; 7],
@@ -152,7 +148,11 @@ mod test_integration {
                 trim_start: 0,
                 trim_end: 0,
                 loop_start: u32::MIN,
-                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices: [Slice {
+                    trim_start: 0,
+                    trim_end: 0,
+                    loop_start: 0,
+                }; 64],
                 slices_len: 0,
                 checksum: 0,
             };
@@ -169,7 +169,6 @@ mod test_integration {
 
         #[test]
         fn test_loop_off() {
-
             let decoded = SampleAttributes {
                 header: [0_u8; 16],
                 blank: [0_u8; 7],
@@ -183,7 +182,11 @@ mod test_integration {
                 trim_start: 0,
                 trim_end: 0,
                 loop_start: 0,
-                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices: [Slice {
+                    trim_start: 0,
+                    trim_end: 0,
+                    loop_start: 0,
+                }; 64],
                 slices_len: 0,
                 checksum: 0,
             };
@@ -200,7 +203,6 @@ mod test_integration {
 
         #[test]
         fn test_loop_normal() {
-
             let decoded = SampleAttributes {
                 header: [0_u8; 16],
                 blank: [0_u8; 7],
@@ -214,7 +216,11 @@ mod test_integration {
                 trim_start: 0,
                 trim_end: 0,
                 loop_start: 0,
-                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices: [Slice {
+                    trim_start: 0,
+                    trim_end: 0,
+                    loop_start: 0,
+                }; 64],
                 slices_len: 0,
                 checksum: 0,
             };
@@ -229,10 +235,8 @@ mod test_integration {
             );
         }
 
-
         #[test]
         fn test_loop_pingpong() {
-
             let decoded = SampleAttributes {
                 header: [0_u8; 16],
                 blank: [0_u8; 7],
@@ -246,7 +250,11 @@ mod test_integration {
                 trim_start: 0,
                 trim_end: 0,
                 loop_start: 0,
-                slices: [Slice {trim_start: 0, trim_end: 0, loop_start: 0}; 64],
+                slices: [Slice {
+                    trim_start: 0,
+                    trim_end: 0,
+                    loop_start: 0,
+                }; 64],
                 slices_len: 0,
                 checksum: 0,
             };
@@ -260,7 +268,5 @@ mod test_integration {
                 }
             );
         }
-
     }
-
 }

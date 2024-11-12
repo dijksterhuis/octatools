@@ -1,11 +1,10 @@
-//! Various utilities realted to Octatrack data files, but not used during 
+//! Various utilities realted to Octatrack data files, but not used during
 //! Serialization / Deserialization.
 
-
-use std::{fmt::Error, ffi::OsStr, path::PathBuf};
 use crate::common::RBoxErr;
+use std::{ffi::OsStr, fmt::Error, path::PathBuf};
 
-
+#[allow(dead_code)]
 fn pathbuf_to_fname(path: &PathBuf) -> RBoxErr<String> {
     let name = path
         .clone()

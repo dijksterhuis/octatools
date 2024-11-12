@@ -22,7 +22,7 @@ use crate::{
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-pub struct ProjectSampleSlots {
+pub struct ProjectSampleSlot {
     // TODO: Should recording buffers be treated as a separate slot type?
     /// Type of sample: STATIC or FLEX
     pub sample_type: ProjectSampleSlotType,
@@ -61,13 +61,13 @@ pub struct ProjectSampleSlots {
     pub bpm: u16,
 }
 
-impl ParseHashMapValueAs for ProjectSampleSlots {}
+impl ParseHashMapValueAs for ProjectSampleSlot {}
 
 // cannot use FromProjectStringData because it expects a lone Self result, rather than a Vec.
-impl FromHashMap for ProjectSampleSlots {
+impl FromHashMap for ProjectSampleSlot {
     type A = String;
     type B = String;
-    type T = ProjectSampleSlots;
+    type T = ProjectSampleSlot;
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
         // Flex Sample slots with ID > 128 are recording buffers
@@ -154,7 +154,7 @@ impl FromHashMap for ProjectSampleSlots {
     }
 }
 
-impl FromString for ProjectSampleSlots {
+impl FromString for ProjectSampleSlot {
     type T = Vec<Self>;
 
     /// Load project 'samples' data from the raw project ASCII file.
@@ -179,7 +179,7 @@ impl FromString for ProjectSampleSlots {
             })
             .collect();
 
-        let mut sample_structs: Vec<ProjectSampleSlots> = Vec::new();
+        let mut sample_structs: Vec<ProjectSampleSlot> = Vec::new();
         for sample in samples {
             let mut hmap: HashMap<String, String> = HashMap::new();
             for key_value_pair in sample {
