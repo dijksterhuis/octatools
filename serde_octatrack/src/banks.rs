@@ -3,7 +3,6 @@
 pub mod parts;
 pub mod patterns;
 
-use log::{debug, error, info, trace, warn};
 use std::{error::Error, fs::File, io::Read, io::Write, path::PathBuf};
 
 use bincode;
@@ -17,7 +16,7 @@ use crate::{
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Bank {
     /// Misc header data for Banks.
     /// Always follows the same format.
@@ -58,20 +57,13 @@ pub struct Bank {
 impl Bank {
     /// Crete a new struct by reading a file located at `path`.
     pub fn from_file(path: PathBuf) -> Result<Box<Self>, Box<dyn Error>> {
-        println!("DEBUG");
-        debug!("Reading Bank file data: {path:#?}");
         let mut infile: File = File::open(&path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
-        debug!("Read Bank file data: {path:#?}");
-
-        trace!("Deserializing Bank file: {path:#?}");
         let new: Box<Bank> = Box::new(bincode::deserialize(&bytes[..])?);
-        debug!("Deserialized Bank file: {path:#?}");
 
         Ok(new)
     }
-    
 }
 
 impl FromFileAtPathBuf for Bank {
@@ -79,17 +71,11 @@ impl FromFileAtPathBuf for Bank {
 
     /// Crete a new struct by reading a file located at `path`.
     fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn Error>> {
-        println!("DEBUG");
-        debug!("Reading Bank file data: {path:#?}");
         let mut infile = File::open(&path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
-        debug!("Read Bank file data: {path:#?}");
-        println!("DEBUG");
 
-        trace!("Deserializing Bank file: {path:#?}");
         let new: Self = bincode::deserialize(&bytes[..])?;
-        debug!("Deserialized Bank file: {path:#?}");
 
         Ok(new)
     }
@@ -97,39 +83,35 @@ impl FromFileAtPathBuf for Bank {
 
 impl ToFileAtPathBuf for Bank {
     fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        trace!("Serializing Bank data ...");
         let bytes: Vec<u8> = bincode::serialize(&self)?;
-        debug!("Serialized Bank data.");
-
-        trace!("Writing Bank data ...");
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-        debug!("Written Bank data.");
 
         Ok(())
     }
 }
-
 
 #[cfg(test)]
 mod test_integration {
 
     mod test_integration_copy_bank {
 
-        use std::path::PathBuf;
-        use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
         use crate::banks::Bank;
+        use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
+        use std::path::PathBuf;
 
         #[test]
         fn test_read_bank_file_no_errors() {
-            let bank_file_path: PathBuf = PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+            let bank_file_path: PathBuf =
+                PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
             let _: Bank = Bank::from_pathbuf(bank_file_path).unwrap();
             assert!(true);
         }
 
         #[test]
         fn test_read_and_write_bank_file_no_errors() {
-            let src_file_path: PathBuf = PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+            let src_file_path: PathBuf =
+                PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
             let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
             let bank: Bank = Bank::from_pathbuf(src_file_path).unwrap();
             let _ = bank.to_pathbuf(dst_file_path);
