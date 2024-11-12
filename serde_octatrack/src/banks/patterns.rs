@@ -1,7 +1,7 @@
 //! Serialization and Deserialization of Pattern related data for Bank files.
 
 use serde::{Deserialize, Serialize};
-use serde_big_array::{BigArray, Array};
+use serde_big_array::{Array, BigArray};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AudioTrackParameterLockPlayback {
@@ -60,20 +60,15 @@ pub struct AudioTrackParameterLocks {
     pub amp: AudioTrackParameterLockAmp,
     pub fx1: AudioTrackParameterLockFx1,
     pub fx2: AudioTrackParameterLockFx2,
-
-    // todo: sample locks!?
-    #[serde(with = "BigArray")]
-    pub unknown: [u8; 2],
+    pub sample_lock_static: u8,
+    pub sample_lock_flex: u8,
 }
-
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MidiTrackParameterLocks {
     #[serde(with = "BigArray")]
     pub todo: [u8; 32],
 }
-
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AudioTrackPatternSettings {
@@ -439,4 +434,25 @@ pub struct Pattern {
     /// Value of 120 BPM is `64` for this field.
     /// Value of 30 BPM is `208` for this field.
     pub tempo_2: u8,
+}
+
+impl Pattern {
+    pub fn update_static_sample_plocks(&mut self, old: &u8, new: &u8) -> () {
+        for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
+            for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
+                if plock.sample_lock_static == *old {
+                    plock.sample_lock_static = *new;
+                }
+            }
+        }
+    }
+    pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> () {
+        for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
+            for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
+                if plock.sample_lock_flex == *old {
+                    plock.sample_lock_flex = *new;
+                }
+            }
+        }
+    }
 }

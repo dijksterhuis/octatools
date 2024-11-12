@@ -1,6 +1,6 @@
 //! Serialization and Deserialization of Part related data for Bank files.
 
-use serde::{Deserialize, Serialize,};
+use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
 /// Audio Track MAIN and CUE volume.
@@ -84,7 +84,7 @@ pub struct AudioTrackMachinesParamsSetup {
 /// Audio Tracks Machine Slot assignments.
 /// Sample Slots assigned for each machine.
 /// Also tracks the recording buffer sample slot assignment.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 pub struct AudioTrackMachineSlot {
     pub static_slot_id: u8,
     pub flex_slot_id: u8,
@@ -626,7 +626,7 @@ pub struct Part {
     pub recorder_setup: [RecorderSetup; 8],
 
     /// Parameter assignments for Scenes.
-    /// 
+    ///
     /// 255 is no assignment on the scene.
     /// Any other value is the Scene's assigned value for that control.
     #[serde(with = "BigArray")]
@@ -654,4 +654,22 @@ pub struct Part {
 
     /// Arp Sequence Notes for MIDI tracks.
     pub midi_track_arp_seqs: MidiArpSequences,
+}
+
+impl Part {
+    pub fn update_static_machine_slot(&mut self, old: &u8, new: &u8) -> () {
+        for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
+            if audio_track_slots.static_slot_id == *old {
+                audio_track_slots.static_slot_id = *new;
+            }
+        }
+    }
+
+    pub fn update_flex_machine_slot(&mut self, old: &u8, new: &u8) -> () {
+        for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
+            if audio_track_slots.flex_slot_id == *old {
+                audio_track_slots.flex_slot_id = *new;
+            }
+        }
+    }
 }
