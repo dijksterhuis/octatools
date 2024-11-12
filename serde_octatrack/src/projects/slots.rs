@@ -13,7 +13,10 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom, error::Error, path::PathBuf, str::FromStr};
 
 use crate::{
-    common::{FromHashMap, FromString, OptionEnumValueConvert, ParseHashMapValueAs},
+    common::{
+        FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs, ProjectFromString,
+        ProjectToString,
+    },
     projects::options::ProjectSampleSlotType,
     samples::options::{
         SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
@@ -73,14 +76,17 @@ impl FromHashMap for ProjectSampleSlot {
         // Flex Sample slots with ID > 128 are recording buffers
         // TODO: Make this part of the ProjectSampleSlotType from_value method?
         let mut sample_slot_type = hmap.get("type").unwrap().clone();
-        let slot_id = Self::parse_hashmap_value::<u16>(&hmap, "slot");
-        if sample_slot_type == "FLEX" && slot_id.unwrap() > 128 {
+        let slot_id = Self::parse_hashmap_value::<u16>(&hmap, "slot")?;
+
+        println!("{sample_slot_type:#?}");
+
+        if sample_slot_type == "FLEX" && slot_id > 129 {
             sample_slot_type = "RECORDER".to_string();
         }
 
         let sample_type = ProjectSampleSlotType::from_value(sample_slot_type).unwrap();
 
-        let slot_id = hmap.get("slot").unwrap().clone().parse::<u16>().unwrap();
+        // let slot_id = hmap.get("slot").unwrap().clone().parse::<u16>().unwrap();
 
         let path = PathBuf::from_str(hmap.get("path").unwrap()).unwrap();
 
@@ -149,21 +155,32 @@ impl FromHashMap for ProjectSampleSlot {
             // bpm: hmap.get("bpm").unwrap().clone().parse::<u16>().unwrap(),
             bpm,
         };
+        println!("New slot ead: {:#?}", sample_struct);
 
         Ok(sample_struct)
     }
 }
 
-impl FromString for ProjectSampleSlot {
+impl ProjectFromString for ProjectSampleSlot {
     type T = Vec<Self>;
 
     /// Load project 'samples' data from the raw project ASCII file.
     fn from_string(data: &String) -> Result<Vec<Self>, Box<dyn std::error::Error>> {
-        let mut data_window: Vec<&str> = data.split("[/SAMPLE]").into_iter().collect();
+        let footer_stripped = data
+            .strip_suffix("\r\n\r\n############################\r\n\r\n")
+            .unwrap();
 
-        data_window = data_window[1..(data_window.len() - 1)].to_vec();
+        let data_window: Vec<&str> = footer_stripped
+            .split("############################\r\n# Samples\r\n############################")
+            .into_iter()
+            .collect();
 
-        let samples: Vec<Vec<Vec<&str>>> = data_window
+        let mut samples_string: Vec<&str> = data_window[1].split("[/SAMPLE]").into_iter().collect();
+
+        // last one is always a blank string.
+        samples_string.pop();
+
+        let samples: Vec<Vec<Vec<&str>>> = samples_string
             .into_iter()
             .map(|sample: &str| {
                 sample
@@ -178,6 +195,8 @@ impl FromString for ProjectSampleSlot {
                     .collect_vec()
             })
             .collect();
+
+        println!("samples: {samples:#?}");
 
         let mut sample_structs: Vec<ProjectSampleSlot> = Vec::new();
         for sample in samples {
@@ -195,5 +214,46 @@ impl FromString for ProjectSampleSlot {
         }
 
         Ok(sample_structs)
+    }
+}
+
+impl ProjectToString for ProjectSampleSlot {
+    /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
+
+    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+        // Recording buffers are actually stored as FLEX slots with
+        // a slot ID > 128.
+        let sample_type = match self.sample_type {
+            ProjectSampleSlotType::Static | ProjectSampleSlotType::Flex => {
+                self.sample_type.value().unwrap()
+            }
+            ProjectSampleSlotType::RecorderBuffer => "FLEX".to_string(),
+        };
+
+        let mut s = "[SAMPLE]\r\n".to_string();
+        s.push_str(format!("TYPE={}", sample_type).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("SLOT={}", self.slot_id).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("PATH={:#?}", self.path).replace("\"", "").as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TRIM_BARSx100={}", (self.trim_bars * 100.0) as u16).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("TSMODE={}", self.timestrech_mode.value().unwrap()).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("LOOPMODE={}", self.loop_mode.value().unwrap()).as_str());
+        s.push_str("\r\n");
+        s.push_str(format!("GAIN={}", self.gain).as_str());
+        s.push_str("\r\n");
+        s.push_str(
+            format!(
+                "TRIGQUANTIZATION={}",
+                self.trig_quantization_mode.value().unwrap()
+            )
+            .as_str(),
+        );
+        s.push_str("\r\n[/SAMPLE]");
+
+        Ok(s)
     }
 }
