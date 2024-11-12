@@ -1,7 +1,6 @@
-//! CLI 'actions' functions
+//! Functions for CLI actions related to chaining samples into sliced sample chains.
 
-use log::{debug, error, info, warn};
-use std::error::Error;
+use log::{trace, debug, info};
 use std::path::PathBuf;
 
 use serde_octatrack::{
@@ -17,56 +16,107 @@ use serde_octatrack::{
 use crate::utils::SampleFilePair;
 
 use crate::{
-    audio::wavfile::{chain_wavfiles_64_batch, WavFile},
+    audio::{aiff::AiffFile, wav::WavFile},
     utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles},
     yaml_io::samplechains::YamlChainConfig,
 };
+
+/// Chain together a wav sample vector into individual wav file(s).
+///
+/// Each individual output can have a maximum of 64 samples,
+/// so results are batched up with a max size of 64.
+// TODO: this needs to return a hashmap so the yaml chain generator can
+//       read the underlying sample information for a batch.
+// TODO: Split this up into two functions --> wavfile_vec_to_batch64 and wavfile_batch64_to_wavfile
+// TODO: Looks like there's a new struct, or a new datatype there...
+pub fn chain_wavfiles_64_batch(
+    wavfiles: &Vec<WavFile>,
+) -> Result<Vec<(WavFile, Vec<WavFile>)>, ()> {
+
+    debug!("Batching {:#?} audio files.", wavfiles.len());
+    let originals: Vec<WavFile> = wavfiles.clone();
+    let mut slice_vecs: Vec<Vec<WavFile>> = vec![];
+
+    let vec_mod_length = wavfiles.len().div_euclid(64);
+
+    trace!("Creating batches.");
+    for i in 0..(vec_mod_length + 1) {
+        let (start, mut end) = (i * 64, (i * 64) + 64);
+
+        if end > originals.len() {
+            end = originals.len();
+        };
+        let mut s: Vec<WavFile> = Vec::with_capacity(end - start);
+
+        for o in &originals[start..end] {
+            s.push(o.clone());
+        }
+        slice_vecs.push(s);
+    }
+
+    trace!("Creating singular sample of samples in each batch.");
+    let mut chains: Vec<(WavFile, Vec<WavFile>)> = vec![];
+    for slice_vec in slice_vecs {
+        let mut single_chain_wav: WavFile = slice_vec[0].clone();
+
+        for wavfile in slice_vec[1..].into_iter() {
+            for s in &wavfile.samples {
+                single_chain_wav.samples.push(*s);
+            }
+            single_chain_wav.len += wavfile.len;
+        }
+        chains.push((single_chain_wav, slice_vec));
+    }
+
+    info!("Batched {:#?} audio files into {:#?} chains.", wavfiles.len(), chains.len());
+
+    Ok(chains)
+}
 
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
 
 pub fn create_samplechains_from_yaml(
     yaml_conf: &YamlChainConfig,
 ) -> Result<Vec<SampleFilePair>, ()> {
+
+    info!("Creating sample chains from yaml config.");
+    trace!("Yaml contents: {yaml_conf:#?}");
+
     let mut outchains_files: Vec<SampleFilePair> = vec![];
     let mut outchains_samplechains: Vec<SampleAttributes> = vec![];
 
     for chain_config in &yaml_conf.chains {
-        info!("Creating chain: {}", &chain_config.chain_name);
 
-        debug!(
-            "Reading wav files: n={:#?}",
-            &chain_config.sample_file_paths.len()
-        );
-        let mut wavfiles: Vec<WavFile> = Vec::new();
-        for wav_file_path in &chain_config.sample_file_paths {
-            // TODO: Clone
-            let wavfile = WavFile::from_file(wav_file_path.clone()).unwrap();
-            wavfiles.push(wavfile);
-        }
+        info!("Creating chain: name={:#?}", &chain_config.chain_name);
+        info!("Getting wav files: n={:#?}", &chain_config.sample_file_paths.len());
+
+        let wavfiles: Vec<WavFile> = chain_config.sample_file_paths
+            .iter()
+            .map(|w| WavFile::from_file(w.to_path_buf()).unwrap())
+            .collect();
 
         debug!("Batching wav files ...");
-        // first element is the chained wavfile output
-        // second is the individual wav files that made the chain
+
+        // first element is the chained audio data
+        // second is the individual audio files that made the chain
         let wavfiles_batched: Vec<(WavFile, Vec<WavFile>)> =
             chain_wavfiles_64_batch(&wavfiles).unwrap();
 
         for (idx, (single_wav, vec_wavs)) in wavfiles_batched.iter().enumerate() {
             info!("Processing batch: {} / {}", idx + 1, wavfiles_batched.len());
+            debug!("Have {:#?} WAV chains from {:#?} samples", &wavfiles_batched.len(), &wavfiles.len());
 
-            debug!(
-                "Have {:1?} WAV chains from {:2?} samples",
-                &wavfiles_batched.len(),
-                &wavfiles.len()
-            );
-
+            trace!("Making slices: {} / {}", idx + 1, wavfiles_batched.len());
             let slices = create_slices_from_wavfiles(&vec_wavs, 0).unwrap();
 
             // let chain = SampleChain::from_yaml_conf(&chain_config).unwrap();
             // chains.insert(chain);
 
+            trace!("Calculating bar length: {} / {}", idx + 1, wavfiles_batched.len());
             // TODO -- can use single wavfile here?! would make the funtion more generally applicable.
             let bars = get_otsample_nbars_from_wavfiles(&vec_wavs, &125.0).unwrap();
 
+            trace!("Setting up sample attributes data: {} / {}", idx + 1, wavfiles_batched.len());
             let trim_config = SampleTrimConfig {
                 start: 0,
                 end: single_wav.len,
@@ -81,6 +131,7 @@ pub fn create_samplechains_from_yaml(
 
             let fstem = chain_config.chain_name.clone() + &format!("-{:?}", idx);
 
+            trace!("Creating new sample attribute: {} / {}", idx + 1, wavfiles_batched.len());
             let chain_data = SampleAttributes::new(
                 &chain_config.octatrack_settings.bpm,
                 &chain_config.octatrack_settings.timestretch_mode,
@@ -94,19 +145,17 @@ pub fn create_samplechains_from_yaml(
 
             let base_outchain_path = yaml_conf.global_settings.out_dir_path.join(fstem);
 
-            let mut ot_outpath = base_outchain_path.clone();
-            let mut wav_sliced_outpath = base_outchain_path.clone();
-
-            ot_outpath.set_extension("ot");
+            trace!("Creating WAV file: {} / {}", idx + 1, wavfiles_batched.len());
+            let mut wav_sliced_outpath = base_outchain_path;
             wav_sliced_outpath.set_extension("wav");
-
-            let _chain_res = chain_data.to_file(&ot_outpath);
             let _wav_slice_res = single_wav.to_file(&wav_sliced_outpath);
+            info!("Created chain audio file: {wav_sliced_outpath:#?}");
 
-            info!(
-                "Created chain files: audio={:?} ot={:?}",
-                wav_sliced_outpath, ot_outpath
-            );
+            trace!("Creating OT sample attributes file: {} / {}", idx + 1, wavfiles_batched.len());
+            let mut ot_outpath = wav_sliced_outpath.clone();
+            ot_outpath.set_extension("ot");
+            let _chain_res = chain_data.to_file(&ot_outpath);
+            info!("Created chain attributes file: {ot_outpath:#?}");
 
             let sample =
                 SampleFilePair::from_pathbufs(&wav_sliced_outpath, &Some(ot_outpath)).unwrap();
@@ -114,20 +163,24 @@ pub fn create_samplechains_from_yaml(
             outchains_samplechains.push(chain_data);
             outchains_files.push(sample);
         }
-        info!("Created sample chain(s): {}", &chain_config.chain_name);
+        info!("Created sample chain: name={}", &chain_config.chain_name);
     }
-    debug!("SAMPLE CHAINS GENERATED: {:#?}", outchains_samplechains);
+    info!("All sample chain(s) created.");
+    trace!("Sample Chains: {:#?}", outchains_samplechains);
 
     Ok(outchains_files)
 }
 
-/// Create Octatrack samplechain file-pairs from a loaded yaml config.
+/// Create 64 length sample chains and write out the files.
 
-pub fn create_samplechain_from_pathbufs(
+pub fn create_samplechain_from_pathbufs_only(
     wav_fps: Vec<PathBuf>,
     outdir_path: PathBuf,
     outchain_name: String,
-) -> Result<(), ()> {
+) -> Result<Vec<SampleFilePair>, ()> {
+
+    let mut outchains_files: Vec<SampleFilePair> = vec![];
+
     let wavfiles: Vec<WavFile> = wav_fps
         .into_iter()
         .map(|fp: PathBuf| WavFile::from_file(fp).unwrap())
@@ -137,11 +190,15 @@ pub fn create_samplechain_from_pathbufs(
         chain_wavfiles_64_batch(&wavfiles).unwrap();
 
     for (idx, (single_wav, vec_wavs)) in wavfiles_batched.iter().enumerate() {
+
+        trace!("Making slices: {} / {}", idx + 1, wavfiles_batched.len());
         let slices = create_slices_from_wavfiles(&vec_wavs, 0).unwrap();
 
+        trace!("Calculating bar length: {} / {}", idx + 1, wavfiles_batched.len());
         // TODO -- can use single wavfile here?! would make the funtion more generally applicable.
         let bars = get_otsample_nbars_from_wavfiles(&vec_wavs, &125.0).unwrap();
 
+        trace!("Setting up sample attributes data: {} / {}", idx + 1, wavfiles_batched.len());
         let trim_config = SampleTrimConfig {
             start: 0,
             end: single_wav.len,
@@ -165,6 +222,7 @@ pub fn create_samplechain_from_pathbufs(
         )
         .unwrap();
 
+        trace!("Modifying file paths: {} / {}", idx + 1, wavfiles_batched.len());
         let base_outchain_path = outdir_path.join(&outchain_name);
 
         let mut wav_sliced_outpath = base_outchain_path;
@@ -172,13 +230,18 @@ pub fn create_samplechain_from_pathbufs(
         let _wav_slice_res = single_wav.to_file(&wav_sliced_outpath);
         info!("Created chain audio file: {wav_sliced_outpath:#?}");
 
-        let mut ot_outpath = wav_sliced_outpath;
+        let mut ot_outpath = wav_sliced_outpath.clone();
         ot_outpath.set_extension("ot");
         let _chain_res = chain_data.to_file(&ot_outpath);
         info!("Created chain attributes file: {ot_outpath:#?}");
-    }
 
-    Ok(())
+        let sample =
+            SampleFilePair::from_pathbufs(&wav_sliced_outpath, &Some(ot_outpath)).unwrap();
+
+        outchains_files.push(sample);
+    }
+    info!("Created sample chain: name={}", &outchain_name);
+    Ok(outchains_files)
 }
 
 /// Use input files from `resouces/test-data/` to create an OT file output
@@ -196,16 +259,16 @@ mod test_integration {
 
         use crate::common::RBoxErr;
 
-        use crate::audio::wavfile::WavFile;
+        use crate::audio::wav::WavFile;
 
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},
-            slices::{Slice, Slices},
-            SampleAttributes,
             options::{
                 SampleAttributeLoopMode, SampleAttributeTimestrechMode,
                 SampleAttributeTrigQuantizationMode,
-            }
+            },
+            slices::{Slice, Slices},
+            SampleAttributes,
         };
 
         use crate::utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles};

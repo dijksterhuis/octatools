@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_yml::Error as SerdeYmlError;
 use std::path::PathBuf;
 
-use crate::audio::wavfile::WavFile;
+use crate::audio::wav::WavFile;
 
 /// YAML section determining the input/output files for an individual sample chain.
 
@@ -16,6 +16,7 @@ pub struct YamlSamplesDirSamples {
     pub file_paths: Vec<PathBuf>,
 }
 
+#[allow(dead_code)]
 pub trait ToYamlFile
 where
     Self: serde::Serialize,
@@ -32,6 +33,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 pub trait FromYamlFile
 where
     Self: for<'a> serde::Deserialize<'a>,
@@ -49,6 +51,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 impl YamlSamplesDirSamples {
     pub fn new(file_paths: Vec<PathBuf>) -> Self {
         YamlSamplesDirSamples {

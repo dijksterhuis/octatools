@@ -1,5 +1,5 @@
 //! Recursively scan through an Octatrack Set directory and build up listings of various entities.
-//! 
+//!
 //! Please note: this is not included in the `serde_octatrack` library crate because there
 //! is no serialization or deserialization of raw binary data files from an Octatrack.
 //! This is just _walking through directories and listing things_.
@@ -16,7 +16,7 @@ use serde_octatrack::{
     projects::Project,
 };
 
-use crate::audio::wavfile::scan_dir_path_for_wavfiles;
+use crate::audio::utils::scan_dir_path_for_audio_files;
 
 /// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
 
@@ -24,7 +24,7 @@ pub trait SearchForOctatrackSampleFilePair {
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
 
     fn scan_dir_path_for_samples(dir_path: &PathBuf) -> RVoidError<Vec<SampleFilePair>> {
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dir_path).unwrap();
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dir_path).unwrap();
 
         let ot_sample_files: Vec<SampleFilePair> = wav_file_paths
             .into_iter()

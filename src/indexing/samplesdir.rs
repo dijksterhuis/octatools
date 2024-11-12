@@ -9,7 +9,7 @@ use md5::Digest;
 use serde::{Deserialize, Serialize};
 use std::fs::canonicalize;
 
-use crate::audio::wavfile::scan_dir_path_for_wavfiles;
+use crate::audio::utils::scan_dir_path_for_audio_files;
 
 use crate::common::{FromYamlFile, ToYamlFile};
 
@@ -99,7 +99,7 @@ impl SamplesDirIndexFull {
         info!("Generating new sample directory index ...");
 
         // TODO: Hard exit on failure
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dirpath).unwrap();
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dirpath).unwrap();
 
         let samples: Vec<SamplesDirAudioFile> = wav_file_paths
             .into_iter()
@@ -133,7 +133,7 @@ impl SamplesDirIndexSimple {
         info!("Generating simple sample directory index ...");
 
         // TODO: Hard exit on failure
-        let samples: Vec<PathBuf> = scan_dir_path_for_wavfiles(&dirpath).unwrap();
+        let samples: Vec<PathBuf> = scan_dir_path_for_audio_files(&dirpath).unwrap();
 
         let index = SamplesDirIndexSimple {
             samples,
