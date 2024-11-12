@@ -46,6 +46,8 @@ impl WavFile {
         trace!("Reading WAV Spec: path={path:#?}");
         let spec = WavFile::read_spec(&mut reader).unwrap();
 
+        println!("spec: {:#?}", spec);
+
         trace!("Reading WAV Samples: path={path:#?}");
         let samples = WavFile::read_samples(&mut reader).unwrap();
 
@@ -74,10 +76,13 @@ impl WavFile {
     /// Write samples to an open and writeable file buffer.
     fn read_samples(reader: &mut WavReader<BufReader<File>>) -> Result<Vec<f32>, Box<dyn Error>> {
         trace!("Reading WAV samples into iterator.");
-        let samples_iter = reader.samples::<f32>();
+        let samples_iter = reader.samples::<i32>();
 
         trace!("Collecting samples from iterator.");
-        let samples: Vec<f32> = samples_iter.map(|x| x.unwrap()).collect();
+        let samples: Vec<f32> = samples_iter.map(
+            // conversion to f32
+            |x| (x.unwrap() / i32::MAX) as f32
+        ).collect();
 
         debug!("Read WAV file sample data.");
         Ok(samples)
