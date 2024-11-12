@@ -2,7 +2,6 @@
 //! such as `Bank`s, `Pattern`s, `Part`s or `Project`s.
 
 use log::{debug, error, info, trace, warn};
-use serde_octatrack::constants::OCTATRACK_AUDIO_FILE_BIT_DEPTH;
 use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
 
@@ -10,7 +9,7 @@ use crate::common::RBoxErr;
 
 use serde_octatrack::{
     banks::Bank,
-    common::{FromFileAtPathBuf, ProjectToString, ToFileAtPathBuf},
+    common::{FromFileAtPathBuf, ToFileAtPathBuf},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
 };
 
@@ -69,14 +68,17 @@ fn get_project_metastorage(bank_file_path: PathBuf) -> RBoxErr<ProjectMetaStore>
 /// Work out the Source/Dest project file path from a bank file.
 fn get_project_path_from_bank_file_path(path: PathBuf) -> RBoxErr<PathBuf> {
     // todo: unwrap on an option. need to handle none case
-    println!("EBUGPATH: {:#?}", path);
-    let strd = path.parent().unwrap().to_path_buf().join("project.strd");
-    println!("EBUGPATH: {:#?}", strd);
+
+    let strd = path
+        .parent()
+        .unwrap()
+        .to_path_buf()
+        .join("project.strd");
+
     let project_path = match strd.exists() {
         true => strd,
         false => path.parent().unwrap().to_path_buf().join("project.work"),
     };
-    println!("EBUGPATH: {:#?}", project_path);
 
     Ok(project_path)
 }
@@ -226,24 +228,20 @@ fn update_sslot_references_static(
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> () {
+    debug!("Updating static sample slots for static machines in parts ...");
     for part in banks.src.bank.parts.iter_mut() {
         part.update_static_machine_slot(&active_slot_id, &dest_slot_id);
     }
+    debug!("Updating static sample slots for static plocks in patterns ...");
     for pattern in banks.src.bank.patterns.iter_mut() {
         pattern.update_static_sample_plocks(&active_slot_id, &dest_slot_id);
     }
-
-    println!(
-        "SLOTS TO CHANGE dest -- {:#?} : {:#?}",
-        dest_slot_id, project.slots
-    );
+    debug!("Updating source project static sample slot location ...");
     project.update_sample_slot_id(
         &active_slot_id,
         &dest_slot_id,
         Some(ProjectSampleSlotType::Static),
     );
-
-    println!("CHANGED SLOTS: {:#?}", project.slots);
 }
 
 /// Update Flex sample slots references within a Bank.
@@ -253,52 +251,25 @@ fn update_sslot_references_flex(
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> () {
+    debug!("Updating flex sample slots for flex machines in parts ...");
     for part in banks.src.bank.parts.iter_mut() {
         part.update_flex_machine_slot(&active_slot_id, &dest_slot_id);
     }
+    debug!("Updating flex sample slots for flex plocks in patterns ...");
     for pattern in banks.src.bank.patterns.iter_mut() {
         pattern.update_flex_sample_plocks(&active_slot_id, &dest_slot_id);
     }
-
-    println!("SLOTS TO CHANGE: {:#?}", project.slots);
-
+    debug!("Updating source project flex sample slot location ...");
     project.update_sample_slot_id(
         &active_slot_id,
         &dest_slot_id,
         Some(ProjectSampleSlotType::Flex),
     );
-
-    println!("CHANGED SLOTS: {:#?}", project.slots);
 }
 
 /// Get the file name of the audio file for a slot.
 fn get_sslot_audio_file_fname(slot: &ProjectSampleSlot) -> RBoxErr<&OsStr> {
     Ok(slot.path.file_name().unwrap())
-}
-
-/// Get the file name of the audio file for a slot.
-fn get_sslot_attributes_file_path(
-    src_proj_path: &PathBuf,
-    slot: &ProjectSampleSlot,
-) -> RBoxErr<Option<PathBuf>> {
-    let mut sample_attr_path_pool = src_proj_path
-        .join("../AUDIO")
-        .join(get_sslot_audio_file_fname(&slot)?);
-    sample_attr_path_pool.set_extension("ot");
-
-    let mut sample_attr_path_project = src_proj_path.join(get_sslot_audio_file_fname(&slot)?);
-    sample_attr_path_project.set_extension("ot");
-
-    let mut res: Option<PathBuf> = None;
-
-    // exists in project
-    if sample_attr_path_project.exists() {
-        res = Some(sample_attr_path_project);
-    } else if !sample_attr_path_pool.exists() {
-        res = Some(sample_attr_path_pool);
-    };
-
-    Ok(res)
 }
 
 /// Resolve absolute paths for an audio file in a sample slot
@@ -353,13 +324,10 @@ fn copy_sslot_sample_files(
     projects: &TransferMetaProject,
     slot: &mut ProjectSampleSlot,
 ) -> RBoxErr<()> {
-    debug!("Copying audio file for sample slot");
+    debug!("Copying audio file for sample slot ...");
 
-    let (src_path, dest_path) = get_abs_paths_for_sslot_audio_file(
-        &projects.src.dirpath.join(&slot.path),
-        &projects.dest.dirpath,
-        &slot,
-    )?;
+    let (src_path, dest_path) =
+        get_abs_paths_for_sslot_audio_file(&projects.src.dirpath, &projects.dest.dirpath, &slot)?;
 
     let _ = copy_file(&src_path, &dest_path);
     let _ = maybe_copy_ot_attr_file(&src_path, &dest_path);
@@ -396,25 +364,15 @@ fn copy_sslot_sample_files(
 ///
 
 pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -> Result<(), ()> {
-    // read projects
+    debug!("Loading projects ...");
     let mut projects = TransferMetaProject {
         src: get_project_metastorage(source_bank_file_path.clone()).unwrap(),
         dest: get_project_metastorage(dest_bank_file_path.clone()).unwrap(),
     };
 
-    println!(
-        "PROJECT SLOTS | SRC | START: {:#?}",
-        projects.src.project.slots
-    );
-    println!(
-        "PROJECT SLOTS | DEST | START: {:#?}",
-        projects.dest.project.slots
-    );
-    println!("PROJECT REWRITE",);
-
     let _ = projects.dest.project.to_pathbuf(projects.dest.path.clone());
 
-    // read banks
+    debug!("Loading banks ...");
     let mut banks = TransferMetaBank {
         src: BankMetaStore {
             bank: Bank::from_pathbuf(source_bank_file_path.clone()).unwrap(),
@@ -426,15 +384,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
         },
     };
 
-    println!(
-        "BANK | SRC | PART | START: {:#?}",
-        banks.src.bank.parts[0].audio_track_machine_slots
-    );
-    println!(
-        "BANK | DEST | PART | START: {:#?}",
-        banks.dest.bank.parts[0].audio_track_machine_slots
-    );
-
+    debug!("Backing up destiantion files ...");
     // create backups of the destination data files
     let _ = std::fs::copy(
         projects.dest.path.clone(),
@@ -442,7 +392,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     );
     let _ = std::fs::copy(banks.dest.path.clone(), PathBuf::from("/tmp/bank.bak"));
 
-    // find possible free space in destination project's sample slots
+    debug!("Finding free sample slots in destination project ...");
     let (mut free_static, mut free_flex) = find_free_sslots(projects.clone()).unwrap();
 
     info!(
@@ -451,6 +401,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
         free_flex.len()
     );
 
+    debug!("Finding sample slots usage in source project ...");
     let src_static_sslot_count = projects
         .src
         .sample_slots
@@ -476,6 +427,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
         panic!("Not enough static slots in destination project!");
     }
 
+    debug!("Finding 'active' sample slots (actually used in source bank) ...");
     // read the source bank, looking for sample slots in active use
     let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src.bank);
 
@@ -492,6 +444,10 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     // - sample plocks reference to project sample slot;
     // - audio track machine assignment reference to project sample slot.
 
+    // todo: what about the case where we have an 'inactive' sample plock,
+    // i.e. to an empty sample slot, but that sample slot is in-use within
+    // the destinaton project
+    debug!("Updating 'active' sample slots in source bank ...");
     for active_slot in active_slots {
         let new_slot_id = match active_slot.sample_type {
             ProjectSampleSlotType::Static => {
@@ -533,29 +489,51 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
             if s.sample_type != ProjectSampleSlotType::RecorderBuffer {
                 let _ = copy_sslot_sample_files(&projects, &mut s);
                 s.path = get_relative_audio_pool_path_audio_file(&s).unwrap();
+                debug!("Updating sample slot ...");
                 updated_sample_slots.push(s);
             }
         }
     }
 
+    debug!("Adding 'active' source project sample slots to destination project ...");
     let mut dest_sample_slots: Vec<ProjectSampleSlot> = projects.dest.project.slots.clone();
     dest_sample_slots.append(&mut updated_sample_slots);
-
-    // update sample slots for the destination project
     projects.dest.project.slots = dest_sample_slots;
 
-    println!(
-        "bank changes: {:#?}",
-        banks.src.bank.parts[0].audio_track_machine_slots
-    );
-
-    let _ = projects.src.project.to_pathbuf(projects.src.path);
+    debug!("Writing sample slots to destination project ...");
     let _ = projects.dest.project.to_pathbuf(projects.dest.path);
-    // write new bank data over old bank file
-    // let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
 
-    // write over project file -- todo! requires Project to be serializable!
-    // let _ = dest_proj.to_pathbuf(projects.dest.path);
+    debug!("Writing new bank within project ...");
+    let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_copy_bank() {
+
+        use copy_dir;
+
+        let infile = PathBuf::from("./data/tests/copy/bank/BANK-COPY-SRC/bank01.work");
+        let outfile = PathBuf::from("./data/tests/copy/bank/BANK-COPY-DUMMY/bank01.work");
+
+        // copy test destination project to a new directory, so we have a fresh test each time
+        let _ = copy_dir::copy_dir(
+            PathBuf::from("./data/tests/copy/bank/BANK-COPY-DEST/"),
+            outfile.parent().unwrap(),
+        );
+
+        let _source_bank = Bank::from_file(infile.clone()).unwrap();
+        let _ = copy_bank(infile, outfile.clone());
+        let _copied_bank = Bank::from_file(outfile.clone()).unwrap();
+
+        // remove the test destination project directory
+        let _ = std::fs::remove_dir_all(outfile.parent().unwrap());
+
+        assert!(true);
+    }
 }

@@ -65,7 +65,7 @@ impl SampleLoopConfig {
 }
 
 #[cfg(test)]
-mod test_integration {
+mod tests {
 
     mod test_sample_loop_config {
         mod test_new {

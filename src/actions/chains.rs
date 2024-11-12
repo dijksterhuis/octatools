@@ -288,9 +288,9 @@ pub fn create_samplechain_from_pathbufs_only(
 /// the OT file then compare it to the known good output from OctaChainer.
 
 #[cfg(test)]
-mod test_integration {
+mod tests {
 
-    mod test_integration_sample_chain_create_vs_read {
+    mod create_vs_read {
 
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};

@@ -78,15 +78,11 @@ impl FromHashMap for ProjectSampleSlot {
         let mut sample_slot_type = hmap.get("type").unwrap().clone();
         let slot_id = Self::parse_hashmap_value::<u16>(&hmap, "slot")?;
 
-        println!("{sample_slot_type:#?}");
-
         if sample_slot_type == "FLEX" && slot_id > 129 {
             sample_slot_type = "RECORDER".to_string();
         }
 
         let sample_type = ProjectSampleSlotType::from_value(sample_slot_type).unwrap();
-
-        // let slot_id = hmap.get("slot").unwrap().clone().parse::<u16>().unwrap();
 
         let path = PathBuf::from_str(hmap.get("path").unwrap()).unwrap();
 
@@ -155,7 +151,6 @@ impl FromHashMap for ProjectSampleSlot {
             // bpm: hmap.get("bpm").unwrap().clone().parse::<u16>().unwrap(),
             bpm,
         };
-        println!("New slot ead: {:#?}", sample_struct);
 
         Ok(sample_struct)
     }
@@ -195,8 +190,6 @@ impl ProjectFromString for ProjectSampleSlot {
                     .collect_vec()
             })
             .collect();
-
-        println!("samples: {samples:#?}");
 
         let mut sample_structs: Vec<ProjectSampleSlot> = Vec::new();
         for sample in samples {

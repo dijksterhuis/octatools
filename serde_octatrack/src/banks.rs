@@ -92,30 +92,26 @@ impl ToFileAtPathBuf for Bank {
 }
 
 #[cfg(test)]
-mod test_integration {
+mod tests {
+    use crate::banks::Bank;
+    use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
+    use std::path::PathBuf;
 
-    mod test_banks {
+    #[test]
+    fn test_read_bank_file_no_errors() {
+        let bank_file_path: PathBuf =
+            PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+        let _: Bank = Bank::from_pathbuf(bank_file_path).unwrap();
+        assert!(true);
+    }
 
-        use crate::banks::Bank;
-        use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
-        use std::path::PathBuf;
-
-        #[test]
-        fn test_read_bank_file_no_errors() {
-            let bank_file_path: PathBuf =
-                PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
-            let _: Bank = Bank::from_pathbuf(bank_file_path).unwrap();
-            assert!(true);
-        }
-
-        #[test]
-        fn test_read_and_write_bank_file_no_errors() {
-            let src_file_path: PathBuf =
-                PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
-            let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
-            let bank: Bank = Bank::from_pathbuf(src_file_path).unwrap();
-            let _ = bank.to_pathbuf(dst_file_path);
-            assert!(true);
-        }
+    #[test]
+    fn test_read_and_write_bank_file_no_errors() {
+        let src_file_path: PathBuf =
+            PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
+        let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
+        let bank: Bank = Bank::from_pathbuf(src_file_path).unwrap();
+        let _ = bank.to_pathbuf(dst_file_path);
+        assert!(true);
     }
 }
