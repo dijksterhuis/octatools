@@ -1,14 +1,16 @@
 //! Functions for CLI actions related to copying Octatrack data,
 //! such as `Bank`s, `Pattern`s, `Part`s or `Project`s.
 
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
+use serde_octatrack::constants::OCTATRACK_AUDIO_FILE_BIT_DEPTH;
+use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
 
 use crate::common::RBoxErr;
 
 use serde_octatrack::{
     banks::Bank,
-    common::{FromFileAtPathBuf, ToFileAtPathBuf},
+    common::{FromFileAtPathBuf, ProjectToString, ToFileAtPathBuf},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
 };
 
@@ -20,7 +22,7 @@ struct ActiveSampleSlot {
 }
 
 /// Helper struct to hold `Project` metadata (and the `Project` itself).
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 struct ProjectMetaStore {
     path: PathBuf,
     dirpath: PathBuf,
@@ -118,6 +120,18 @@ fn find_free_sslots(projects: TransferMetaProject) -> RBoxErr<(Vec<u8>, Vec<u8>)
     Ok((free_static_sample_slots_ids, free_flex_sample_slots_ids))
 }
 
+fn project_sample_slot_is_populated(
+    project_slots: &Vec<ProjectSampleSlot>,
+    slot_id: &u16,
+    sample_type: &ProjectSampleSlotType,
+) -> RBoxErr<bool> {
+    let static_exists_in_project_slots = project_slots
+        .iter()
+        .find(|x| x.slot_id == *slot_id && x.sample_type == *sample_type);
+
+    Ok(!static_exists_in_project_slots.is_none())
+}
+
 /// Find sample slot locations from a `Project` which are being used in a `Bank`
 fn get_active_sslot_ids(
     project_slots: &Vec<ProjectSampleSlot>,
@@ -125,61 +139,79 @@ fn get_active_sslot_ids(
 ) -> HashSet<ActiveSampleSlot> {
     let mut active_slots: HashSet<ActiveSampleSlot> = HashSet::new();
 
-    for pattern in bank.patterns.iter() {
-        for audio_track_trigs in pattern.audio_track_trigs.iter() {
-            for plock in audio_track_trigs.plocks.iter() {
+    for (pattern_idx, pattern) in bank.patterns.iter().enumerate() {
+        for (track_idx, audio_track_trigs) in pattern.audio_track_trigs.iter().enumerate() {
+            for (plock_idx, plock) in audio_track_trigs.plocks.iter().enumerate() {
                 if plock.sample_lock_static < 128 {
-                    let x = ActiveSampleSlot {
-                        slot_id: plock.sample_lock_static,
-                        sample_type: ProjectSampleSlotType::Static,
-                    };
-                    active_slots.insert(x);
+                    if project_sample_slot_is_populated(
+                        project_slots,
+                        &(plock.sample_lock_static as u16),
+                        &ProjectSampleSlotType::Static,
+                    )
+                    .unwrap()
+                    {
+                        let x = ActiveSampleSlot {
+                            slot_id: plock.sample_lock_static,
+                            sample_type: ProjectSampleSlotType::Static,
+                        };
+                        info!("Found active Static sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_static);
+                        active_slots.insert(x);
+                    }
                 }
                 if plock.sample_lock_flex < 128 {
-                    let x = ActiveSampleSlot {
-                        slot_id: plock.sample_lock_flex,
-                        sample_type: ProjectSampleSlotType::Flex,
-                    };
-                    active_slots.insert(x);
+                    if project_sample_slot_is_populated(
+                        project_slots,
+                        &(plock.sample_lock_flex as u16),
+                        &ProjectSampleSlotType::Flex,
+                    )
+                    .unwrap()
+                    {
+                        let x = ActiveSampleSlot {
+                            slot_id: plock.sample_lock_flex,
+                            sample_type: ProjectSampleSlotType::Flex,
+                        };
+                        info!("Found active Flex sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_flex);
+                        active_slots.insert(x);
+                    }
                 }
             }
         }
     }
 
-    for (_idx, part) in bank.parts.iter().enumerate() {
-        for audio_track_slots in part.audio_track_machine_slots.iter() {
-            let static_exists_in_project_slots = project_slots
-                .iter()
-                .filter(|x| {
-                    x.slot_id == audio_track_slots.static_slot_id as u16
-                        && x.sample_type == ProjectSampleSlotType::Static
-                })
-                .count()
-                > 0;
+    for (part_idx, part) in bank.parts.iter().enumerate() {
+        for (track_idx, audio_track_slots) in part.audio_track_machine_slots.iter().enumerate() {
+            // the default sample slot for Static/Flex machines is the track ID.
+            // so we check if there is an actual sample assigned to a machine's slot
+            // to work out if the machine actually has an 'active' sample slot assignment or not.
 
-            let flex_exists_in_project_slots = project_slots
-                .iter()
-                .filter(|x| {
-                    x.slot_id == audio_track_slots.flex_slot_id as u16
-                        && x.sample_type == ProjectSampleSlotType::Flex
-                })
-                .count()
-                > 0;
-
-            if static_exists_in_project_slots {
+            if project_sample_slot_is_populated(
+                project_slots,
+                &(audio_track_slots.static_slot_id as u16),
+                &ProjectSampleSlotType::Static,
+            )
+            .unwrap()
+            {
                 let static_machine = ActiveSampleSlot {
                     slot_id: audio_track_slots.static_slot_id,
                     sample_type: ProjectSampleSlotType::Static,
                 };
                 active_slots.insert(static_machine);
+                info!("Found active Static machine usage: Part: {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.static_slot_id);
             }
 
-            if flex_exists_in_project_slots {
+            if project_sample_slot_is_populated(
+                project_slots,
+                &(audio_track_slots.flex_slot_id as u16),
+                &ProjectSampleSlotType::Flex,
+            )
+            .unwrap()
+            {
                 let flex_machine = ActiveSampleSlot {
                     slot_id: audio_track_slots.flex_slot_id,
                     sample_type: ProjectSampleSlotType::Flex,
                 };
                 active_slots.insert(flex_machine);
+                info!("Found active Flex machine usage: Part: {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.flex_slot_id);
             }
         }
     }
@@ -189,7 +221,7 @@ fn get_active_sslot_ids(
 
 /// Update Static sample slots references within a Bank.
 fn update_sslot_references_static(
-    dest_proj: &mut Project,
+    project: &mut Project,
     banks: &mut TransferMetaBank,
     active_slot_id: u8,
     dest_slot_id: u8,
@@ -201,16 +233,22 @@ fn update_sslot_references_static(
         pattern.update_static_sample_plocks(&active_slot_id, &dest_slot_id);
     }
 
-    dest_proj.update_sample_slot_id(
+    println!(
+        "SLOTS TO CHANGE dest -- {:#?} : {:#?}",
+        dest_slot_id, project.slots
+    );
+    project.update_sample_slot_id(
         &active_slot_id,
         &dest_slot_id,
         Some(ProjectSampleSlotType::Static),
     );
+
+    println!("CHANGED SLOTS: {:#?}", project.slots);
 }
 
 /// Update Flex sample slots references within a Bank.
 fn update_sslot_references_flex(
-    dest_proj: &mut Project,
+    project: &mut Project,
     banks: &mut TransferMetaBank,
     active_slot_id: u8,
     dest_slot_id: u8,
@@ -222,39 +260,111 @@ fn update_sslot_references_flex(
         pattern.update_flex_sample_plocks(&active_slot_id, &dest_slot_id);
     }
 
-    dest_proj.update_sample_slot_id(
+    println!("SLOTS TO CHANGE: {:#?}", project.slots);
+
+    project.update_sample_slot_id(
         &active_slot_id,
         &dest_slot_id,
         Some(ProjectSampleSlotType::Flex),
     );
+
+    println!("CHANGED SLOTS: {:#?}", project.slots);
+}
+
+/// Get the file name of the audio file for a slot.
+fn get_sslot_audio_file_fname(slot: &ProjectSampleSlot) -> RBoxErr<&OsStr> {
+    Ok(slot.path.file_name().unwrap())
+}
+
+/// Get the file name of the audio file for a slot.
+fn get_sslot_attributes_file_path(
+    src_proj_path: &PathBuf,
+    slot: &ProjectSampleSlot,
+) -> RBoxErr<Option<PathBuf>> {
+    let mut sample_attr_path_pool = src_proj_path
+        .join("../AUDIO")
+        .join(get_sslot_audio_file_fname(&slot)?);
+    sample_attr_path_pool.set_extension("ot");
+
+    let mut sample_attr_path_project = src_proj_path.join(get_sslot_audio_file_fname(&slot)?);
+    sample_attr_path_project.set_extension("ot");
+
+    let mut res: Option<PathBuf> = None;
+
+    // exists in project
+    if sample_attr_path_project.exists() {
+        res = Some(sample_attr_path_project);
+    } else if !sample_attr_path_pool.exists() {
+        res = Some(sample_attr_path_pool);
+    };
+
+    Ok(res)
+}
+
+/// Resolve absolute paths for an audio file in a sample slot
+/// TODO: Need to look for Sample Attributes files too!
+fn get_abs_paths_for_sslot_audio_file(
+    src_proj_dirpath: &PathBuf,
+    dest_proj_dirpath: &PathBuf,
+    slot: &ProjectSampleSlot,
+) -> RBoxErr<(PathBuf, PathBuf)> {
+    trace!("Getting absolute file paths for sample slot audio file.");
+    let true_src_path = src_proj_dirpath.join(&slot.path);
+
+    let fname = get_sslot_audio_file_fname(&slot)?;
+    let true_dest_path = dest_proj_dirpath
+        .parent()
+        .unwrap()
+        .join("AUDIO")
+        .join(fname);
+
+    Ok((true_src_path, true_dest_path))
+}
+
+/// Create a new relative path for an audio file in an audio pool.
+/// From a project saple slot the audio pool path is always: "../AUDIO/<fname>.<ext>"
+fn get_relative_audio_pool_path_audio_file(slot: &ProjectSampleSlot) -> RBoxErr<PathBuf> {
+    let fname = get_sslot_audio_file_fname(&slot).unwrap();
+    let relative_path = PathBuf::from("../AUDIO").join(fname);
+
+    Ok(relative_path)
+}
+
+fn copy_file(src: &PathBuf, dest: &PathBuf) -> () {
+    trace!("Copying file: from={src:#?} to={dest:#?}");
+    let _ = std::fs::copy(src, dest);
+    debug!("Copied file: from={src:#?} to={dest:#?}");
+}
+
+fn maybe_copy_ot_attr_file(src_path: &PathBuf, dest_path: &PathBuf) -> () {
+    let mut ot_attr_src_fpath = src_path.clone();
+    ot_attr_src_fpath.set_extension("ot");
+
+    if ot_attr_src_fpath.exists() {
+        let mut ot_attr_dest_fpath = dest_path.clone();
+        ot_attr_dest_fpath.set_extension("ot");
+
+        let _ = copy_file(&ot_attr_src_fpath, &ot_attr_dest_fpath);
+    }
 }
 
 /// If necessary, copy audio files to a new audio pool location and change the path for the sample slot.
-fn maybe_copy_and_update_sslot_sample_file(
+fn copy_sslot_sample_files(
     projects: &TransferMetaProject,
-    slot: ProjectSampleSlot,
-) -> ProjectSampleSlot {
-    let mut new_slot = slot.clone();
+    slot: &mut ProjectSampleSlot,
+) -> RBoxErr<()> {
+    debug!("Copying audio file for sample slot");
 
-    // disabling this for now: copying everything is simpler behaviour to start with.
-    // slot.path.to_str().unwrap_or("err!").contains(&"AUDIO")
+    let (src_path, dest_path) = get_abs_paths_for_sslot_audio_file(
+        &projects.src.dirpath.join(&slot.path),
+        &projects.dest.dirpath,
+        &slot,
+    )?;
 
-    if slot.sample_type != ProjectSampleSlotType::RecorderBuffer {
-        let fname = slot.path.file_name().unwrap();
-        let true_src_path = projects.src.dirpath.join(slot.clone().path);
-        let true_dest_path = projects
-            .dest
-            .dirpath
-            .parent()
-            .unwrap()
-            .join("AUDIO")
-            .join(fname);
-        let relative_dest_path = PathBuf::from("../AUDIO").join(fname);
-        let _ = std::fs::copy(true_src_path, true_dest_path.clone());
-        new_slot.path = relative_dest_path;
-    }
+    let _ = copy_file(&src_path, &dest_path);
+    let _ = maybe_copy_ot_attr_file(&src_path, &dest_path);
 
-    new_slot
+    Ok(())
 }
 
 /// ### Copy a bank from one project / bank to another project / bank.
@@ -300,6 +410,9 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
         "PROJECT SLOTS | DEST | START: {:#?}",
         projects.dest.project.slots
     );
+    println!("PROJECT REWRITE",);
+
+    let _ = projects.dest.project.to_pathbuf(projects.dest.path.clone());
 
     // read banks
     let mut banks = TransferMetaBank {
@@ -333,7 +446,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     let (mut free_static, mut free_flex) = find_free_sslots(projects.clone()).unwrap();
 
     info!(
-        "Destination project has the following free sample slots: {:#?} static; {:#?} flex.",
+        "Destination project has free sample slots: {:#?} static; {:#?} flex.",
         free_static.len(),
         free_flex.len()
     );
@@ -353,7 +466,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
         .count();
 
     info!(
-        "Source project needs the following sample slots: {:#?} static; {:#?} flex.",
+        "Source project has sample slots allocations: {:#?} static; {:#?} flex.",
         src_static_sslot_count, src_flex_sslot_count,
     );
 
@@ -365,63 +478,79 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
 
     // read the source bank, looking for sample slots in active use
     let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src.bank);
-    let mut dest_proj = projects.dest.project.clone();
 
     info!(
         "\"Active\" sample slots in source bank: {:#?}",
         active_slots,
     );
 
+    let mut src_proj = projects.src.project.clone();
+    let mut updated_sample_slots: Vec<ProjectSampleSlot> = vec![];
+
     // edit the bank data in place, updating:
     // - project's sample slot;
     // - sample plocks reference to project sample slot;
     // - audio track machine assignment reference to project sample slot.
+
     for active_slot in active_slots {
-        match active_slot.sample_type {
+        let new_slot_id = match active_slot.sample_type {
             ProjectSampleSlotType::Static => {
                 let dest_slot_id = free_static.pop().unwrap();
                 update_sslot_references_static(
-                    &mut dest_proj,
+                    &mut src_proj,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
                 );
+
+                dest_slot_id
             }
             ProjectSampleSlotType::Flex => {
                 let dest_slot_id = free_flex.pop().unwrap();
                 update_sslot_references_flex(
-                    &mut dest_proj,
+                    &mut src_proj,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
                 );
+
+                dest_slot_id
             }
             ProjectSampleSlotType::RecorderBuffer => {
-                warn!("Usupported behaviour: Attempted to update a Recording Buffer sample slot reference.")
+                warn!("Usupported behaviour: Attempted to update a Recording Buffer sample slot reference.");
+                255
             }
         };
+
+        let src_project_slot = src_proj
+            .slots
+            .clone()
+            .into_iter()
+            .find(|x| x.slot_id == new_slot_id as u16);
+
+        if !src_project_slot.is_none() {
+            let mut s = src_project_slot.unwrap();
+            if s.sample_type != ProjectSampleSlotType::RecorderBuffer {
+                let _ = copy_sslot_sample_files(&projects, &mut s);
+                s.path = get_relative_audio_pool_path_audio_file(&s).unwrap();
+                updated_sample_slots.push(s);
+            }
+        }
     }
 
-    // scan through source sample slots and consolidate to the destination audio pool where needed.
-    let mut updated_sample_slots: Vec<ProjectSampleSlot> = projects.src.project.slots.clone();
-
-    updated_sample_slots = updated_sample_slots
-        .iter()
-        .map(|x| maybe_copy_and_update_sslot_sample_file(&projects, x.clone()))
-        .collect();
+    let mut dest_sample_slots: Vec<ProjectSampleSlot> = projects.dest.project.slots.clone();
+    dest_sample_slots.append(&mut updated_sample_slots);
 
     // update sample slots for the destination project
-    projects.dest.project.slots = updated_sample_slots;
+    projects.dest.project.slots = dest_sample_slots;
 
     println!(
-        "PROJECT SLOTS | SRC | END: {:#?}",
-        projects.src.project.slots
-    );
-    println!(
-        "PROJECT SLOTS | DEST | END: {:#?}",
-        projects.dest.project.slots
+        "bank changes: {:#?}",
+        banks.src.bank.parts[0].audio_track_machine_slots
     );
 
+    let _ = projects.src.project.to_pathbuf(projects.src.path);
+    let _ = projects.dest.project.to_pathbuf(projects.dest.path);
     // write new bank data over old bank file
     // let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
 
