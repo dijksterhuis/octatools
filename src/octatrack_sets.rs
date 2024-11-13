@@ -68,7 +68,7 @@ impl OctatrackSetProject {
             dirpath: dirpath.clone(),
             // samples: scan_dir_for_ot_files(path).unwrap_or(Vec::new()).clone()
             sample_filepaths: Self::scan_dir_path_for_samples(&dirpath).unwrap(),
-            data: Project::from_pathbuf(dirpath.join("project.work")).unwrap(),
+            data: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
         })
     }
 }
