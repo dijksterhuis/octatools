@@ -83,7 +83,7 @@ pub trait FromFileAtPathBuf {
     type T;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
+    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
 }
 
 /// Trait to use when a new file can be written at the speciifed path by serializing a struct

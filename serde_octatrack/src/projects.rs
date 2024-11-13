@@ -105,8 +105,8 @@ impl FromFileAtPathBuf for Project {
     type T = Project;
 
     /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
-    fn from_pathbuf(path: PathBuf) -> RBoxErr<Self> {
-        let s = std::fs::read_to_string(&path)?;
+    fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self> {
+        let s = std::fs::read_to_string(path)?;
 
         let metadata = ProjectMetadata::from_string(&s)?;
         let states = ProjectStates::from_string(&s)?;
@@ -144,14 +144,14 @@ mod tests {
         #[test]
         fn test_read_default_project_work_file() {
             let infile = PathBuf::from("./data/tests/projects/blank.work");
-            assert!(Project::from_pathbuf(infile).is_ok());
+            assert!(Project::from_pathbuf(&infile).is_ok());
         }
 
         // test that the metadata section is correct
         #[test]
         fn test_read_default_project_work_file_metadata() {
             let infile = PathBuf::from("./data/tests/projects/blank.work");
-            let p = Project::from_pathbuf(infile).unwrap();
+            let p = Project::from_pathbuf(&infile).unwrap();
 
             let correct = ProjectMetadata {
                 filetype: "OCTATRACK DPS-1 PROJECT".to_string(),
@@ -166,7 +166,7 @@ mod tests {
         #[test]
         fn test_read_default_project_work_file_states() {
             let infile = PathBuf::from("./data/tests/projects/blank.work");
-            let p = Project::from_pathbuf(infile).unwrap();
+            let p = Project::from_pathbuf(&infile).unwrap();
 
             let correct = ProjectStates {
                 bank: 0,
@@ -203,7 +203,7 @@ mod tests {
             };
 
             let infile = PathBuf::from("./data/tests/projects/blank.work");
-            let p = Project::from_pathbuf(infile).unwrap();
+            let p = Project::from_pathbuf(&infile).unwrap();
 
             let correct = ProjectSettings {
                 write_protected: false,
@@ -311,7 +311,7 @@ mod tests {
             };
 
             let infile = PathBuf::from("./data/tests/projects/blank.work");
-            let p = Project::from_pathbuf(infile).unwrap();
+            let p = Project::from_pathbuf(&infile).unwrap();
 
             let correct: Vec<ProjectSampleSlot> = [
                 ProjectSampleSlot {
@@ -407,7 +407,6 @@ mod tests {
 
             assert_eq!(p.slots, correct);
         }
-
     }
 
     mod test_read_write {
@@ -419,10 +418,10 @@ mod tests {
         fn test_read_write_default_project_work_file() {
             let infile = PathBuf::from("./data/tests/projects/blank.work");
             let outfile = PathBuf::from("/tmp/default_1.work");
-            let p = Project::from_pathbuf(infile).unwrap();
+            let p = Project::from_pathbuf(&infile).unwrap();
             let _ = p.to_pathbuf(outfile.clone());
 
-            let p_reread = Project::from_pathbuf(outfile).unwrap();
+            let p_reread = Project::from_pathbuf(&outfile).unwrap();
 
             assert_eq!(p, p_reread)
         }
@@ -438,7 +437,10 @@ mod tests {
             use crate::projects::settings::{
                 mixer::MixerMenu, tempo::TempoMenu, trig_mode_midi_tracks::MidiTrackTrigModes,
             };
-            use crate::samples::options::{SampleAttributeTimestrechMode, SampleAttributeLoopMode, SampleAttributeTrigQuantizationMode};
+            use crate::samples::options::{
+                SampleAttributeLoopMode, SampleAttributeTimestrechMode,
+                SampleAttributeTrigQuantizationMode,
+            };
 
             let metadata = ProjectMetadata {
                 filetype: "OCTATRACK DPS-1 PROJECT".to_string(),
@@ -649,12 +651,14 @@ mod tests {
             ]
             .to_vec();
 
-            let project = Project { metadata, settings, states, slots };
+            let project = Project {
+                metadata,
+                settings,
+                states,
+                slots,
+            };
             let valid = "############################\r\n# Project Settings\r\n############################\r\n\r\n[META]\r\nTYPE=OCTATRACK DPS-1 PROJECT\r\nVERSION=19\r\nOS_VERSION=R0177     1.40B\r\n[/META]\r\n\r\n[SETTINGS]\r\nWRITEPROTECTED=0\r\nTEMPOx24=2880\r\nPATTERN_TEMPO_ENABLED=0\r\nMIDI_CLOCK_SEND=0\r\nMIDI_CLOCK_RECEIVE=0\r\nMIDI_TRANSPORT_SEND=0\r\nMIDI_TRANSPORT_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_SEND=0\r\nMIDI_PROGRAM_CHANGE_SEND_CH=-1\r\nMIDI_PROGRAM_CHANGE_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_RECEIVE_CH=-1\r\nMIDI_TRIG_CH1=0\r\nMIDI_TRIG_CH2=1\r\nMIDI_TRIG_CH3=2\r\nMIDI_TRIG_CH4=3\r\nMIDI_TRIG_CH5=4\r\nMIDI_TRIG_CH6=5\r\nMIDI_TRIG_CH7=6\r\nMIDI_TRIG_CH8=7\r\nMIDI_AUTO_CHANNEL=10\r\nMIDI_SOFT_THRU=0\r\nMIDI_AUDIO_TRK_CC_IN=1\r\nMIDI_AUDIO_TRK_CC_OUT=3\r\nMIDI_AUDIO_TRK_NOTE_IN=1\r\nMIDI_AUDIO_TRK_NOTE_OUT=3\r\nMIDI_MIDI_TRK_CC_IN=1\r\nPATTERN_CHANGE_CHAIN_BEHAVIOR=0\r\nPATTERN_CHANGE_AUTO_SILENCE_TRACKS=0\r\nPATTERN_CHANGE_AUTO_TRIG_LFOS=0\r\nLOAD_24BIT_FLEX=0\r\nDYNAMIC_RECORDERS=0\r\nRECORD_24BIT=0\r\nRESERVED_RECORDER_COUNT=8\r\nRESERVED_RECORDER_LENGTH=16\r\nINPUT_DELAY_COMPENSATION=0\r\nGATE_AB=127\r\nGATE_CD=127\r\nGAIN_AB=64\r\nGAIN_CD=64\r\nDIR_AB=0\r\nDIR_CD=0\r\nPHONES_MIX=64\r\nMAIN_TO_CUE=0\r\nMASTER_TRACK=0\r\nCUE_STUDIO_MODE=0\r\nMAIN_LEVEL=64\r\nCUE_LEVEL=64\r\nMETRONOME_TIME_SIGNATURE=3\r\nMETRONOME_TIME_SIGNATURE_DENOMINATOR=2\r\nMETRONOME_PREROLL=0\r\nMETRONOME_CUE_VOLUME=32\r\nMETRONOME_MAIN_VOLUME=0\r\nMETRONOME_PITCH=12\r\nMETRONOME_TONAL=1\r\nMETRONOME_ENABLED=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\n[/SETTINGS]\r\n\r\n############################\r\n# Project States\r\n############################\r\n\r\n[STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]\r\n\r\n############################\r\n# Samples\r\n############################\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=129\r\nPATH=../AUDIO/flex.wav\r\nTRIM_BARSx100=173\r\nTSMODE=2\r\nLOOPMODE=1\r\nGAIN=48\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=130\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=131\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=132\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=133\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=134\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=135\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=136\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n############################\r\n\r\n";
             assert_eq!(project.to_string().unwrap(), valid);
-
         }
-
     }
-
 }

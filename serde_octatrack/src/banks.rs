@@ -70,8 +70,8 @@ impl FromFileAtPathBuf for Bank {
     type T = Bank;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: PathBuf) -> Result<Self::T, Box<dyn Error>> {
-        let mut infile = File::open(&path)?;
+    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+        let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
 
@@ -101,7 +101,7 @@ mod tests {
     fn test_read_bank_file_no_errors() {
         let bank_file_path: PathBuf =
             PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
-        let _: Bank = Bank::from_pathbuf(bank_file_path).unwrap();
+        let _: Bank = Bank::from_pathbuf(&bank_file_path).unwrap();
         assert!(true);
     }
 
@@ -110,7 +110,7 @@ mod tests {
         let src_file_path: PathBuf =
             PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
         let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
-        let bank: Bank = Bank::from_pathbuf(src_file_path).unwrap();
+        let bank: Bank = Bank::from_pathbuf(&src_file_path).unwrap();
         let _ = bank.to_pathbuf(dst_file_path);
         assert!(true);
     }
