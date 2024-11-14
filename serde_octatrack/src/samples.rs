@@ -10,7 +10,9 @@ use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
 use crate::{
-    common::{OptionEnumValueConvert, RBoxErr, RVoidError, SwapBytes},
+    common::{
+        FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, RVoidError, SwapBytes, ToFileAtPathBuf,
+    },
     samples::options::{SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode},
     samples::{
         configs::{SampleLoopConfig, SampleTrimConfig},
@@ -219,7 +221,7 @@ impl SampleAttributes {
     /// Swaps byte (when little-endian system), generates the checksum,
     /// then encodes to binary representation.
 
-    pub fn encode(&self) -> RVoidError<Vec<u8>> {
+    pub fn encode(&self) -> RBoxErr<Vec<u8>> {
         let mut bswapd = self.clone();
 
         // tempo is multiplied by 24 when written to encoded file
@@ -239,10 +241,10 @@ impl SampleAttributes {
         // bswapd.loop_len = self.loop_len * 100;
 
         if cfg!(target_endian = "little") {
-            bswapd = bswapd.swap_bytes().unwrap();
+            bswapd = bswapd.swap_bytes()?;
         }
 
-        let mut bytes: Vec<u8> = bincode::serialize(&bswapd).unwrap();
+        let mut bytes: Vec<u8> = bincode::serialize(&bswapd)?;
 
         // TODO: I'm only doing this to confirm a struct decoded from file and written
         // straight out is exactly the same as the read file (which it is).
@@ -263,23 +265,10 @@ impl SampleAttributes {
             if cfg!(target_endian = "little") {
                 bswapd.checksum = bswapd.checksum.swap_bytes();
             }
-            bytes = bincode::serialize(&bswapd).unwrap();
+            bytes = bincode::serialize(&bswapd)?;
         }
 
         Ok(bytes)
-    }
-
-    /// Write encoded struct data to file
-    /// Swaps byte (when little-endian system), generates a checksum,
-    /// then encodes to binary representation which can be written to file.
-
-    pub fn to_file(&self, path: &PathBuf) -> RBoxErr<()> {
-        let bytes: Vec<u8> = self.encode().unwrap();
-
-        let mut file = File::create(path).unwrap();
-        let res: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-
-        res
     }
 
     /// Decode raw bytes of a `.ot` data file into a new struct,
@@ -313,17 +302,30 @@ impl SampleAttributes {
 
         Ok(bswapd)
     }
+}
 
-    /// Read an `.ot` file into a new struct.
-    // TODO: `path` should be a `PathBuf`
+impl FromFileAtPathBuf for SampleAttributes {
+    type T = SampleAttributes;
 
-    pub fn from_file(path: &str) -> RBoxErr<Self> {
+    /// Crete a new struct by reading a file located at `path`.
+    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
         let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
 
-        let decoded = Self::decode(&bytes).unwrap();
+        let decoded = Self::decode(&bytes)?;
 
         Ok(decoded)
+    }
+}
+
+impl ToFileAtPathBuf for SampleAttributes {
+    /// Crete a new file at the path from the current struct
+    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
+        let bytes: Vec<u8> = self.encode()?;
+        let mut file: File = File::create(path)?;
+        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
+
+        Ok(())
     }
 }
