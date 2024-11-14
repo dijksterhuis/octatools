@@ -16,7 +16,7 @@ use crate::{
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Bank {
     /// Misc header data for Banks.
     /// Always follows the same format.
