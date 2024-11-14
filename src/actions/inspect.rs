@@ -19,13 +19,11 @@ pub fn show_patterns(path: &PathBuf) -> RBoxErr<()> {
     Ok(())
 }
 
-
 pub fn show_pattern(path: &PathBuf, index: usize) -> RBoxErr<()> {
     let b = &Bank::from_pathbuf(&path)?.patterns[index];
     println!("{b:#?}");
     Ok(())
 }
-
 
 pub fn show_parts(path: &PathBuf) -> RBoxErr<()> {
     let b = Bank::from_pathbuf(&path)?.parts;
@@ -46,7 +44,7 @@ pub fn show_project(path: &PathBuf) -> RBoxErr<()> {
 }
 
 pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
-    let b = SampleAttributes::from_file(path.to_str().unwrap())?;
+    let b = SampleAttributes::from_pathbuf(&path)?;
     println!("{b:#?}");
     Ok(())
 }

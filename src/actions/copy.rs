@@ -52,7 +52,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     let mut projects =
         TransferMetaProject::new(&source_bank_file_path, &dest_bank_file_path).unwrap();
 
-    let _ = projects.dest.project.to_pathbuf(projects.dest.path.clone());
+    let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Backing up destination bank to /tmp/ ...");
     let _ = std::fs::copy(banks.dest.path.clone(), PathBuf::from("/tmp/bank.bak"));
@@ -174,10 +174,10 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     projects.dest.project.slots = dest_sample_slots;
 
     info!("Writing sample slots to destination project ...");
-    let _ = projects.dest.project.to_pathbuf(projects.dest.path);
+    let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Writing new bank within project ...");
-    let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
+    let _ = banks.dest.bank.to_pathbuf(&dest_bank_file_path);
 
     info!("Bank copy complete.");
     Ok(())
