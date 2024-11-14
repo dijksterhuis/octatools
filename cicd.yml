@@ -26,6 +26,7 @@ test_cobertura:
         coverage_format: cobertura
         path: cobertura.xml
   rules:
+    - when: never
     # only run on branches when an MRs is open
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -52,6 +53,7 @@ test_junit:
     reports:
       junit: test-results/*.xml
   rules:
+    - when: never
     # only run on branches when an MRs is open
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
@@ -84,6 +86,7 @@ test_junit:
     paths:
       - ./octatools.$TARGET
   rules:
+    - when: never
     # only run on branches when an MRs is open
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
