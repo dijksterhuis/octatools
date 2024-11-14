@@ -30,10 +30,8 @@ pub enum Commands {
     Scan(Indexing),
 
     // TODOs
-
     #[command(subcommand)]
     Consolidate(ConsolidateSamples),
-
     // #[command(subcommand)]
     // Purge(Purge),
 }
@@ -95,7 +93,6 @@ pub enum Inspect {
         /// Path to the `.ot` Sample Attributes file.
         path: PathBuf,
     },
-
 }
 
 /// Transfer Octatrack Project(s)/Bank(s) to new location(s).
@@ -240,8 +237,7 @@ pub enum IndexSamples {
     },
 }
 
-
-/// Consolidate Project audio files to either the Project or the Set's Audio Pool. 
+/// Consolidate Project audio files to either the Project or the Set's Audio Pool.
 #[derive(Subcommand, Debug)]
 pub enum ConsolidateSamples {
     /// Copy all Project audio files to the Set's Audio Pool
@@ -258,7 +254,6 @@ pub enum ConsolidateSamples {
         path: PathBuf,
     },
 }
-
 
 // //////////////////////////////// NOT DOING YET ////////////////////////////////
 

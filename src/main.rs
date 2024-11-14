@@ -7,17 +7,27 @@ mod octatrack_sets;
 mod utils;
 mod yaml_io;
 
-use actions::inspect::{show_bank, show_ot_file, show_part, show_parts, show_patterns, show_pattern, show_project};
-use actions::list::list_project_sample_slots;
 use clap::Parser;
 use env_logger::{Builder, Target};
 use log::{info, LevelFilter};
 
-use crate::cli::{Cli, Commands, Indexing};
-use crate::common::{FromYamlFile, ToYamlFile};
-use crate::indexing::cfcard::CompactFlashDrive;
-use crate::indexing::samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple};
-use crate::yaml_io::samplechains::YamlChainConfig;
+use actions::{
+    chains::{
+        create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
+        deconstruct_samplechain_from_pathbufs_only,
+    },
+    copy::{batch_copy_banks, copy_bank},
+    inspect::{
+        show_bank, show_ot_file, show_part, show_parts, show_pattern, show_patterns, show_project,
+    },
+    list::list_project_sample_slots,
+};
+
+use cli::{Cli, Commands, Indexing};
+use common::{FromYamlFile, ToYamlFile};
+use indexing::cfcard::CompactFlashDrive;
+use indexing::samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple};
+use yaml_io::samplechains::YamlChainConfig;
 
 fn main() -> () {
     let mut logger = Builder::new();
@@ -35,7 +45,7 @@ fn main() -> () {
             cli::Inspect::Bank { path } => {
                 let _ = show_bank(&path);
             }
-            cli::Inspect::Parts { path} => {
+            cli::Inspect::Parts { path } => {
                 let _ = show_parts(&path);
             }
             cli::Inspect::Part { path, index } => {
@@ -79,11 +89,11 @@ fn main() -> () {
                     dest_bank_file_path,
                 } => {
                     info!("Copying bank: src={source_bank_file_path:#?} dest={dest_bank_file_path:#?}");
-                    let _ = actions::copy::copy_bank(source_bank_file_path, dest_bank_file_path);
+                    let _ = copy_bank(source_bank_file_path, dest_bank_file_path);
                 }
                 cli::TransferBank::Yaml { yaml_config_path } => {
                     info!("Copying bank using yaml config: {yaml_config_path:#?}");
-                    let _ = actions::copy::batch_copy_banks(yaml_config_path);
+                    let _ = batch_copy_banks(yaml_config_path);
                 }
             },
             cli::Transfer::Projects(x) => match x {
@@ -109,27 +119,31 @@ fn main() -> () {
                     wav_file_paths,
                 } => {
                     info!("Creating sliced sample chain via CLI args: name={chain_name:#?}");
-                    let _ = actions::chains::create_samplechain_from_pathbufs_only(
-                        wav_file_paths,
-                        out_dir_path,
-                        chain_name,
+                    let _ = create_samplechain_from_pathbufs_only(
+                        &wav_file_paths,
+                       &out_dir_path,
+                        &chain_name,
                     );
                 }
                 cli::CreateChain::Yaml { yaml_file_path } => {
                     info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
                     let chain_conf = YamlChainConfig::from_yaml(yaml_file_path).unwrap();
-                    let _ = actions::chains::create_samplechains_from_yaml(&chain_conf);
+                    let _ = create_samplechains_from_yaml(&chain_conf);
                 }
             },
             cli::Chains::Deconstruct(chains_deconstruct_subcmd) => {
                 match chains_deconstruct_subcmd {
                     cli::DesconstructChain::Cli {
-                        ot_file_path: _,
-                        audio_file_path: _,
-                        out_dir_path: _,
+                        ot_file_path,
+                        audio_file_path,
+                        out_dir_path,
                     } => {
                         info!("Deconstructing sliced sample chain from CLI args ...");
-                        todo!()
+                        let _ = deconstruct_samplechain_from_pathbufs_only(
+                            audio_file_path,
+                            ot_file_path,
+                            out_dir_path,
+                        );
                     }
                     cli::DesconstructChain::Yaml { yaml_file_path: _ } => {
                         info!("Deconstructing sliced sample chains from YAML file ...");

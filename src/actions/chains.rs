@@ -4,16 +4,16 @@ use log::{debug, info, trace};
 use std::path::PathBuf;
 
 use serde_octatrack::{
-    samples::options::{
-        SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
-    },
+    common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf},
     samples::{
         configs::{SampleLoopConfig, SampleTrimConfig},
+        options::{
+            SampleAttributeLoopMode, SampleAttributeTimestrechMode,
+            SampleAttributeTrigQuantizationMode,
+        },
         SampleAttributes,
     },
 };
-
-use crate::utils::SampleFilePair;
 
 use crate::{
     audio::{aiff::AiffFile, wav::WavFile},
@@ -78,14 +78,9 @@ pub fn chain_wavfiles_64_batch(
 
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
 
-pub fn create_samplechains_from_yaml(
-    yaml_conf: &YamlChainConfig,
-) -> Result<Vec<SampleFilePair>, ()> {
+pub fn create_samplechains_from_yaml(yaml_conf: &YamlChainConfig) -> RBoxErr<()> {
     info!("Creating sample chains from yaml config.");
     trace!("Yaml contents: {yaml_conf:#?}");
-
-    let mut outchains_files: Vec<SampleFilePair> = vec![];
-    let mut outchains_samplechains: Vec<SampleAttributes> = vec![];
 
     for chain_config in &yaml_conf.chains {
         info!("Creating chain: name={:#?}", &chain_config.chain_name);
@@ -94,132 +89,45 @@ pub fn create_samplechains_from_yaml(
             &chain_config.sample_file_paths.len()
         );
 
-        let wavfiles: Vec<WavFile> = chain_config
-            .sample_file_paths
-            .iter()
-            .map(|w| WavFile::from_file(w.to_path_buf()).unwrap())
-            .collect();
-
-        debug!("Batching wav files ...");
-
-        // first element is the chained audio data
-        // second is the individual audio files that made the chain
-        let wavfiles_batched: Vec<(WavFile, Vec<WavFile>)> =
-            chain_wavfiles_64_batch(&wavfiles).unwrap();
-
-        for (idx, (single_wav, vec_wavs)) in wavfiles_batched.iter().enumerate() {
-            info!("Processing batch: {} / {}", idx + 1, wavfiles_batched.len());
-            debug!(
-                "Have {:#?} WAV chains from {:#?} samples",
-                &wavfiles_batched.len(),
-                &wavfiles.len()
-            );
-
-            trace!("Making slices: {} / {}", idx + 1, wavfiles_batched.len());
-            let slices = create_slices_from_wavfiles(&vec_wavs, 0).unwrap();
-
-            // let chain = SampleChain::from_yaml_conf(&chain_config).unwrap();
-            // chains.insert(chain);
-
-            trace!(
-                "Calculating bar length: {} / {}",
-                idx + 1,
-                wavfiles_batched.len()
-            );
-            // TODO -- can use single wavfile here?! would make the funtion more generally applicable.
-            let bars = get_otsample_nbars_from_wavfiles(&vec_wavs, &125.0).unwrap();
-
-            trace!(
-                "Setting up sample attributes data: {} / {}",
-                idx + 1,
-                wavfiles_batched.len()
-            );
-            let trim_config = SampleTrimConfig {
-                start: 0,
-                end: single_wav.len,
-                length: bars,
-            };
-
-            let loop_config = SampleLoopConfig {
-                start: 0,
-                length: bars,
-                mode: chain_config.octatrack_settings.loop_mode,
-            };
-
-            let fstem = chain_config.chain_name.clone() + &format!("-{:?}", idx);
-
-            trace!(
-                "Creating new sample attribute: {} / {}",
-                idx + 1,
-                wavfiles_batched.len()
-            );
-            let chain_data = SampleAttributes::new(
-                &chain_config.octatrack_settings.bpm,
-                &chain_config.octatrack_settings.timestretch_mode,
-                &chain_config.octatrack_settings.quantization_mode,
-                &chain_config.octatrack_settings.gain,
-                &trim_config,
-                &loop_config,
-                &slices,
+        let _ = create_samplechain_from_pathbufs_only(
+            &chain_config.sample_file_paths,
+            &yaml_conf.global_settings.out_dir_path,
+            &chain_config.chain_name,
+        )
+        .expect(
+            format!(
+                "Could not generate sample chain: name={:#?}",
+                &chain_config.chain_name
             )
-            .unwrap();
-
-            let base_outchain_path = yaml_conf.global_settings.out_dir_path.join(fstem);
-
-            trace!(
-                "Creating WAV file: {} / {}",
-                idx + 1,
-                wavfiles_batched.len()
-            );
-            let mut wav_sliced_outpath = base_outchain_path;
-            wav_sliced_outpath.set_extension("wav");
-            let _wav_slice_res = single_wav.to_file(&wav_sliced_outpath);
-            info!("Created chain audio file: {wav_sliced_outpath:#?}");
-
-            trace!(
-                "Creating OT sample attributes file: {} / {}",
-                idx + 1,
-                wavfiles_batched.len()
-            );
-            let mut ot_outpath = wav_sliced_outpath.clone();
-            ot_outpath.set_extension("ot");
-            let _chain_res = chain_data.to_file(&ot_outpath);
-            info!("Created chain attributes file: {ot_outpath:#?}");
-
-            let sample =
-                SampleFilePair::from_pathbufs(&wav_sliced_outpath, &Some(ot_outpath)).unwrap();
-
-            outchains_samplechains.push(chain_data);
-            outchains_files.push(sample);
-        }
-        info!("Created sample chain: name={}", &chain_config.chain_name);
+            .as_str(),
+        );
     }
-    info!("All sample chain(s) created.");
-    trace!("Sample Chains: {:#?}", outchains_samplechains);
 
-    Ok(outchains_files)
+    Ok(())
 }
 
 /// Create 64 length sample chains and write out the files.
 
 pub fn create_samplechain_from_pathbufs_only(
-    wav_fps: Vec<PathBuf>,
-    outdir_path: PathBuf,
-    outchain_name: String,
-) -> Result<Vec<SampleFilePair>, ()> {
-    let mut outchains_files: Vec<SampleFilePair> = vec![];
-
+    wav_fps: &Vec<PathBuf>,
+    outdir_path: &PathBuf,
+    outchain_name: &String,
+) -> RBoxErr<()> {
     let wavfiles: Vec<WavFile> = wav_fps
         .into_iter()
-        .map(|fp: PathBuf| WavFile::from_file(fp).unwrap())
+        .map(|fp: &PathBuf| {
+            WavFile::from_pathbuf(&fp)
+                .expect(format!("Could not read wav file: path={fp:#?}").as_str())
+        })
         .collect();
 
     let wavfiles_batched: Vec<(WavFile, Vec<WavFile>)> =
-        chain_wavfiles_64_batch(&wavfiles).unwrap();
+        chain_wavfiles_64_batch(&wavfiles).expect("Error creating batches of audio files!");
 
     for (idx, (single_wav, vec_wavs)) in wavfiles_batched.iter().enumerate() {
         trace!("Making slices: {} / {}", idx + 1, wavfiles_batched.len());
-        let slices = create_slices_from_wavfiles(&vec_wavs, 0).unwrap();
+        let slices = create_slices_from_wavfiles(&vec_wavs, 0)
+            .expect(format!("Could not create sample chain slices: idx={idx:#?}").as_str());
 
         trace!(
             "Calculating bar length: {} / {}",
@@ -255,7 +163,10 @@ pub fn create_samplechain_from_pathbufs_only(
             &loop_config,
             &slices,
         )
-        .unwrap();
+        .expect(
+            format!("Could not create sample attributes data for sample chain: idx={idx:#?}")
+                .as_str(),
+        );
 
         trace!(
             "Modifying file paths: {} / {}",
@@ -266,20 +177,72 @@ pub fn create_samplechain_from_pathbufs_only(
 
         let mut wav_sliced_outpath = base_outchain_path;
         wav_sliced_outpath.set_extension("wav");
-        let _wav_slice_res = single_wav.to_file(&wav_sliced_outpath);
-        info!("Created chain audio file: {wav_sliced_outpath:#?}");
+        let _ = single_wav.to_pathbuf(&wav_sliced_outpath).expect(
+            format!(
+                "Could not write sample chain wav file: idx={idx:#?} path={wav_sliced_outpath:#?}"
+            )
+            .as_str(),
+        );
+        info!("Creating chain audio file: {wav_sliced_outpath:#?}");
 
         let mut ot_outpath = wav_sliced_outpath.clone();
         ot_outpath.set_extension("ot");
-        let _chain_res = chain_data.to_file(&ot_outpath);
+        let _ = chain_data.to_pathbuf(&ot_outpath).expect(
+            format!(
+                "Could not write sample chain attributes file: idx={idx:#?} path={ot_outpath:#?}"
+            )
+            .as_str(),
+        );
         info!("Created chain attributes file: {ot_outpath:#?}");
-
-        let sample = SampleFilePair::from_pathbufs(&wav_sliced_outpath, &Some(ot_outpath)).unwrap();
-
-        outchains_files.push(sample);
     }
-    info!("Created sample chain: name={}", &outchain_name);
-    Ok(outchains_files)
+    info!("Created sample chain: name={outchain_name:#?}");
+    Ok(())
+}
+
+// todo: needs tests
+/// Extract a slices from a sliced sample chain into individual samples.
+pub fn deconstruct_samplechain_from_pathbufs_only(
+    audio_fpath: PathBuf,
+    attributes_fpath: PathBuf,
+    out_dirpath: PathBuf,
+) -> RBoxErr<()> {
+    if !out_dirpath.is_dir() {
+        panic!("Output dirpath argument is not a directory. Must be a directory.");
+    }
+
+    let wavfile = WavFile::from_pathbuf(&audio_fpath).expect("Could not read wavfile.");
+
+    let attrs = SampleAttributes::from_pathbuf(&attributes_fpath)
+        .expect("Could not read .ot attributes file.");
+
+    // todo: this feels fragile
+    let base_sample_fname = audio_fpath
+        .file_stem()
+        .unwrap_or(&std::ffi::OsStr::new("deconstructed_samplechain"))
+        .to_str()
+        .unwrap_or("deconstructed_samplechain");
+
+    for i in 0..attrs.slices_len {
+        let slice = attrs.slices[i as usize];
+        let w = wavfile.samples[(slice.trim_start as usize)..(slice.trim_end as usize)].to_vec();
+
+        let wavslice = WavFile {
+            spec: wavfile.spec,
+            len: slice.trim_end - slice.trim_end,
+            samples: w,
+            file_path: PathBuf::from("/tmp/dummy.wav"),
+        };
+
+        // todo: this feels fragile
+        let sample_fname = format!("{base_sample_fname}_{i:#?}");
+        let mut out_fpath = out_dirpath.clone().join(sample_fname);
+        out_fpath.set_extension("wav");
+
+        let _ = wavslice
+            .to_pathbuf(&out_fpath)
+            .expect(format!("Could not write slice to wavfile: path={out_fpath:#?}").as_str());
+    }
+    Ok(())
 }
 
 /// Use input files from `resouces/test-data/` to create an OT file output
@@ -298,6 +261,7 @@ mod tests {
         use crate::common::RBoxErr;
 
         use crate::audio::wav::WavFile;
+        use serde_octatrack::common::FromFileAtPathBuf;
 
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},
@@ -342,7 +306,7 @@ mod tests {
         ) -> RBoxErr<(SampleLoopConfig, SampleTrimConfig, Slices)> {
             let mut wavs: Vec<WavFile> = Vec::new();
             for fp in wav_fps {
-                let wav = WavFile::from_file(fp).unwrap();
+                let wav = WavFile::from_pathbuf(&fp).unwrap();
                 wavs.push(wav);
             }
 
@@ -365,8 +329,8 @@ mod tests {
             Ok((loop_config, trim_config, slices_config))
         }
 
-        fn read_valid_sample_chain(path: &str) -> RBoxErr<SampleAttributes> {
-            let read_chain = SampleAttributes::from_file(path).unwrap();
+        fn read_valid_sample_chain(path: &PathBuf) -> RBoxErr<SampleAttributes> {
+            let read_chain = SampleAttributes::from_pathbuf(path).unwrap();
             Ok(read_chain)
         }
 
@@ -393,7 +357,7 @@ mod tests {
                 assert!(false);
             }
 
-            let valid_ot_fp = "data/tests/1/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/1/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(
@@ -419,7 +383,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = "data/tests/2/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/2/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(
@@ -446,7 +410,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = "data/tests/3/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -476,7 +440,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = "data/tests/3/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -552,7 +516,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = "data/tests/3/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -581,7 +545,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = "data/tests/3/chain.ot";
+            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
