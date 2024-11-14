@@ -1,8 +1,11 @@
 //! Functions for CLI actions related to chaining samples into sliced sample chains.
 
+mod yaml;
+
 use log::{debug, info, trace};
 use std::path::PathBuf;
 
+use crate::common::FromYamlFile;
 use serde_octatrack::{
     common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf},
     samples::{
@@ -18,8 +21,9 @@ use serde_octatrack::{
 use crate::{
     audio::{aiff::AiffFile, wav::WavFile},
     utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles},
-    yaml_io::samplechains::YamlChainConfig,
 };
+
+use yaml::YamlChainConfig;
 
 /// Chain together a wav sample vector into individual wav file(s).
 ///
@@ -78,11 +82,14 @@ pub fn chain_wavfiles_64_batch(
 
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
 
-pub fn create_samplechains_from_yaml(yaml_conf: &YamlChainConfig) -> RBoxErr<()> {
-    info!("Creating sample chains from yaml config.");
-    trace!("Yaml contents: {yaml_conf:#?}");
+pub fn create_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
+    let chain_conf = YamlChainConfig::from_yaml(yaml_conf_fpath)
+        .expect(format!("Could not load yaml file: path={yaml_conf_fpath:#?}").as_str());
 
-    for chain_config in &yaml_conf.chains {
+    info!("Creating sample chains from yaml config.");
+    trace!("Yaml contents: {chain_conf:#?}");
+
+    for chain_config in &chain_conf.chains {
         info!("Creating chain: name={:#?}", &chain_config.chain_name);
         info!(
             "Getting wav files: n={:#?}",
@@ -91,7 +98,7 @@ pub fn create_samplechains_from_yaml(yaml_conf: &YamlChainConfig) -> RBoxErr<()>
 
         let _ = create_samplechain_from_pathbufs_only(
             &chain_config.sample_file_paths,
-            &yaml_conf.global_settings.out_dir_path,
+            &chain_conf.global_settings.out_dir_path,
             &chain_config.chain_name,
         )
         .expect(

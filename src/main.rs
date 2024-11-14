@@ -2,10 +2,8 @@ mod actions;
 mod audio;
 mod cli;
 mod common;
-mod indexing;
 mod octatrack_sets;
 mod utils;
-mod yaml_io;
 
 use clap::Parser;
 use env_logger::{Builder, Target};
@@ -17,6 +15,10 @@ use actions::{
         deconstruct_samplechain_from_pathbufs_only,
     },
     copy::{batch_copy_banks, copy_bank},
+    indexing::{
+        create_index_compact_flash_drive_yaml, create_index_samples_dir_full,
+        create_index_samples_dir_simple,
+    },
     inspect::{
         show_bank, show_ot_file, show_part, show_parts, show_pattern, show_patterns, show_project,
     },
@@ -24,10 +26,6 @@ use actions::{
 };
 
 use cli::{Cli, Commands, Indexing};
-use common::{FromYamlFile, ToYamlFile};
-use indexing::cfcard::CompactFlashDrive;
-use indexing::samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple};
-use yaml_io::samplechains::YamlChainConfig;
 
 fn main() -> () {
     let mut logger = Builder::new();
@@ -121,14 +119,13 @@ fn main() -> () {
                     info!("Creating sliced sample chain via CLI args: name={chain_name:#?}");
                     let _ = create_samplechain_from_pathbufs_only(
                         &wav_file_paths,
-                       &out_dir_path,
+                        &out_dir_path,
                         &chain_name,
                     );
                 }
                 cli::CreateChain::Yaml { yaml_file_path } => {
                     info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
-                    let chain_conf = YamlChainConfig::from_yaml(yaml_file_path).unwrap();
-                    let _ = create_samplechains_from_yaml(&chain_conf);
+                    let _ = create_samplechains_from_yaml(&yaml_file_path);
                 }
             },
             cli::Chains::Deconstruct(chains_deconstruct_subcmd) => {
@@ -153,55 +150,31 @@ fn main() -> () {
             }
         },
         /* =========================================================================== */
-        Commands::Scan(subcmd_scan) => {
-            match subcmd_scan {
-                cli::Indexing::Cfcard {
-                    cfcard_dir_path,
-                    yaml_file_path,
-                } => {
-                    info!("Indexing CF card: path={cfcard_dir_path:#?}");
-                    let cf =
-                        CompactFlashDrive::from_pathbuf(cfcard_dir_path, yaml_file_path).unwrap();
-
-                    // TODO: clone
-                    if !cf.index_file_path.is_none() {
-                        let _ = cf.to_yaml(cf.index_file_path.clone().unwrap());
-                    };
-                }
-                Indexing::Samples(scan_samples_subcmd) => {
-                    match scan_samples_subcmd {
-                        cli::IndexSamples::Simple {
-                            samples_dir_path,
-                            yaml_file_path,
-                        } => {
-                            info!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
-                            let sample_index =
-                                SamplesDirIndexSimple::new(samples_dir_path, yaml_file_path)
-                                    .unwrap();
-
-                            // TODO: clone
-                            if !sample_index.index_file_path.is_none() {
-                                let _ = sample_index
-                                    .to_yaml(sample_index.index_file_path.clone().unwrap());
-                            };
-                        }
-                        cli::IndexSamples::Full {
-                            samples_dir_path,
-                            yaml_file_path,
-                        } => {
-                            info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
-                            let sample_index =
-                                SamplesDirIndexFull::new(samples_dir_path, yaml_file_path).unwrap();
-
-                            // TODO: clone
-                            if !sample_index.index_file_path.is_none() {
-                                let _ = sample_index
-                                    .to_yaml(sample_index.index_file_path.clone().unwrap());
-                            };
-                        }
+        Commands::Scan(subcmd_scan) => match subcmd_scan {
+            cli::Indexing::Cfcard {
+                cfcard_dir_path,
+                yaml_file_path,
+            } => {
+                info!("Indexing CF card: path={cfcard_dir_path:#?}");
+                let _ = create_index_compact_flash_drive_yaml(&cfcard_dir_path, &yaml_file_path);
+            }
+            Indexing::Samples(scan_samples_subcmd) => {
+                match scan_samples_subcmd {
+                    cli::IndexSamples::Simple {
+                        samples_dir_path,
+                        yaml_file_path,
+                    } => {
+                        let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
+                    }
+                    cli::IndexSamples::Full {
+                        samples_dir_path,
+                        yaml_file_path,
+                    } => {
+                        info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
+                        let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
                     }
                 }
             }
-        }
+        },
     }
 }

@@ -7,6 +7,7 @@ use base64ct::{Base64, Encoding};
 use log::{debug, error, info};
 use md5::Digest;
 use serde::{Deserialize, Serialize};
+use serde_octatrack::common::RBoxErr;
 use std::fs::canonicalize;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
@@ -65,14 +66,14 @@ pub struct SamplesDirAudioFile {
 }
 
 impl SamplesDirAudioFile {
-    pub fn new(fp: PathBuf) -> Result<Self, ()> {
-        let md5_hash = get_md5_hash_from_pathbuf(&fp).unwrap();
+    pub fn new(fp: PathBuf) -> RBoxErr<Self> {
+        let md5_hash = get_md5_hash_from_pathbuf(&fp)?;
 
-        // TODO: this is a hard exit on failure
+        // todo: unwrap failure
         let file_name = get_stem_from_pathbuf(&fp).unwrap();
 
         Ok(SamplesDirAudioFile {
-            path: canonicalize(fp).unwrap(),
+            path: canonicalize(fp)?,
             md5: md5_hash,
             name: file_name,
         })
@@ -84,7 +85,6 @@ impl SamplesDirAudioFile {
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SamplesDirIndexFull {
     pub dirpath: PathBuf,
-    pub index_file_path: Option<PathBuf>,
     pub samples: Vec<SamplesDirAudioFile>,
 }
 
@@ -92,14 +92,11 @@ impl FromYamlFile for SamplesDirIndexFull {}
 impl ToYamlFile for SamplesDirIndexFull {}
 
 impl SamplesDirIndexFull {
-    pub fn new(
-        dirpath: PathBuf,
-        index_file_path: Option<PathBuf>,
-    ) -> Result<SamplesDirIndexFull, ()> {
+    pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {
         info!("Generating new sample directory index ...");
 
         // TODO: Hard exit on failure
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dirpath).unwrap();
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(dirpath).unwrap();
 
         let samples: Vec<SamplesDirAudioFile> = wav_file_paths
             .into_iter()
@@ -108,8 +105,7 @@ impl SamplesDirIndexFull {
             .collect();
 
         let index = SamplesDirIndexFull {
-            dirpath: canonicalize(dirpath).unwrap(),
-            index_file_path,
+            dirpath: canonicalize(dirpath)?,
             samples,
         };
 
@@ -121,7 +117,7 @@ impl SamplesDirIndexFull {
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SamplesDirIndexSimple {
-    pub index_file_path: Option<PathBuf>,
+    pub dirpath: PathBuf,
     pub samples: Vec<PathBuf>,
 }
 
@@ -129,15 +125,15 @@ impl FromYamlFile for SamplesDirIndexSimple {}
 impl ToYamlFile for SamplesDirIndexSimple {}
 
 impl SamplesDirIndexSimple {
-    pub fn new(dirpath: PathBuf, index_file_path: Option<PathBuf>) -> Result<Self, ()> {
+    pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {
         info!("Generating simple sample directory index ...");
 
-        // TODO: Hard exit on failure
-        let samples: Vec<PathBuf> = scan_dir_path_for_audio_files(&dirpath).unwrap();
+        let samples: Vec<PathBuf> = scan_dir_path_for_audio_files(dirpath)?;
 
+        // todo: clone
         let index = SamplesDirIndexSimple {
             samples,
-            index_file_path,
+            dirpath: canonicalize(dirpath)?,
         };
 
         info!("Generated simple sample directory index.");

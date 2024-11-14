@@ -1,9 +1,9 @@
 use log::{info, trace};
-use std::{error::Error, path::PathBuf};
+use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::audio::{aiff::AiffFile, wav::WavFile};
-use serde_octatrack::constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS;
+use serde_octatrack::{common::RBoxErr, constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS};
 
 /// A filter for walkdir rescursive search: include directories
 fn direntry_is_dir(entry: &DirEntry) -> bool {
@@ -39,7 +39,7 @@ fn direntry_is_compat_aiff(entry: &DirEntry) -> bool {
 }
 
 /// A filter for walkdir rescursive search: only files that have the 'wav' file extension
-fn file_path_is_compat_wav(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+fn file_path_is_compat_wav(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening WAV file: path={path:#?}");
     let mut reader = WavFile::open(&path)?;
 
@@ -58,7 +58,7 @@ fn file_path_is_compat_wav(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
 }
 
 /// A filter for walkdir rescursive search: only files that have the 'aiff' file extension
-fn file_path_is_compat_aiff(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+fn file_path_is_compat_aiff(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening AIFF file: path={path:#?}");
     let mut reader = AiffFile::open(&path)?;
 
@@ -77,7 +77,7 @@ fn file_path_is_compat_aiff(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
 }
 
 /// Recursively search for WAV audio files for a given directory tree.
-pub fn scan_dir_path_for_audio_files(dir_path: &PathBuf) -> Result<Vec<PathBuf>, ()> {
+pub fn scan_dir_path_for_audio_files(dir_path: &PathBuf) -> RBoxErr<Vec<PathBuf>> {
     info!(
         "Recursively searching for Octatrack compatible audio files: dirpath={:1?}",
         dir_path,

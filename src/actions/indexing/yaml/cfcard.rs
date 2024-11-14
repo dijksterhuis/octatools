@@ -5,6 +5,8 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+use serde_octatrack::common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
+
 /// A single row of data written to the index file.
 use crate::common::{FromYamlFile, ToYamlFile};
 use crate::octatrack_sets::OctatrackSet;
@@ -38,8 +40,6 @@ pub struct CompactFlashScanCsvRow {
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashDrive {
-    pub index_file_path: Option<PathBuf>,
-
     /// The path to the current compact flash card.
     cfcard_path: PathBuf,
 
@@ -50,75 +50,28 @@ pub struct CompactFlashDrive {
 impl FromYamlFile for CompactFlashDrive {}
 impl ToYamlFile for CompactFlashDrive {}
 
-impl CompactFlashDrive {
-    /// Index a compact flash card by scanning through each `OctatrackSet` under the given `PathBuf`'s directory tree.
+impl FromFileAtPathBuf for CompactFlashDrive {
+    type T = CompactFlashDrive;
 
-    pub fn from_pathbuf(
-        cfcard_path: PathBuf,
-        index_file_path: Option<PathBuf>,
-    ) -> Result<CompactFlashDrive, ()> {
-        // TODO: Hard exit on failure
-        let ot_sets = OctatrackSet::from_cfcard_pathbuf(&cfcard_path).unwrap();
+    /// Crete a new struct by reading a file located at `path`.
+    fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self::T> {
+        let ot_sets = OctatrackSet::from_cfcard_pathbuf(path).unwrap();
 
         let cf = CompactFlashDrive {
-            index_file_path,
-            cfcard_path,
+            // todo: clone :/
+            cfcard_path: path.clone(),
             ot_sets,
         };
 
         Ok(cf)
     }
+}
 
-    // /// Create a local index file for a `CompactFlashDrive` which has been indexed.
-    // /// Audio Pool records are written first, then individual Projects
-
-    // fn to_csv(&self, csv_filepath: &PathBuf) -> Result<(), std::io::Error> {
-
-    //     let sets = self.ot_sets.clone();
-    //     let mut wtr = Writer::from_writer(vec![]);
-
-    //     for s in sets {
-    //         for audio_pool_sample in s.audio_pool.samples {
-
-    //             let row = CompactFlashScanCsvRow {
-    //                 cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
-    //                 set: s.name.clone(),
-    //                 is_set_audio_pool: true,
-    //                 project: None,
-    //                 audio_filepath: audio_pool_sample.audio_path,
-    //                 ot_filepath: audio_pool_sample.otfile_path,
-    //                 audio_name: audio_pool_sample.name,
-    //             };
-
-    //             let _ = wtr.serialize(row);
-    //         }
-
-    //         for project in &s.projects {
-    //             for project_sample in &project.samples {
-
-    //                 let row = CompactFlashScanCsvRow {
-    //                     cfcard: self.cfcard_path.file_name().unwrap().to_str().unwrap().to_string(),
-    //                     set: s.name.clone(),
-    //                     is_set_audio_pool: true,
-    //                     project: None,
-    //                     audio_filepath: project_sample.audio_path.clone(),
-    //                     ot_filepath: project_sample.otfile_path.clone(),
-    //                     audio_name: project_sample.name.clone(),
-    //                 };
-
-    //                 let _ = wtr.serialize(row);
-    //             }
-    //         }
-    //     }
-
-    //     let mut file = File::create(csv_filepath).unwrap();
-    //     let write_result: Result<(), std::io::Error> = file
-    //         .write_all(&wtr.into_inner().unwrap())
-    //         .map_err(|e| e)
-    //     ;
-
-    //     write_result
-    // }
+impl ToFileAtPathBuf for CompactFlashDrive {
+    /// Crete a new file at the path from the current struct
+    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
+        unimplemented!();
+    }
 }
 
 /*
@@ -152,11 +105,10 @@ mod tests {
 
     // TODO: Need to test the output
     #[test]
-    fn dummy_test() {
+    fn test_can_load_yaml_file() {
         let cfcard_path = PathBuf::from("data/tests/index-cf/DEV-OTsm/");
-        let _csv_path = PathBuf::from("./.otsm-index-cf.csv");
 
-        let res: Result<CompactFlashDrive, ()> = CompactFlashDrive::from_pathbuf(cfcard_path, None);
+        let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_pathbuf(&cfcard_path);
 
         assert!(res.is_ok());
     }
