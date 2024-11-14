@@ -124,7 +124,7 @@ impl FromFileAtPathBuf for Project {
 }
 
 impl ToFileAtPathBuf for Project {
-    fn to_pathbuf(&self, path: PathBuf) -> RBoxErr<()> {
+    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
         let data = self.to_string()?;
         let mut f = File::create(path)?;
         f.write_all(data.as_bytes())?;
@@ -419,7 +419,7 @@ mod tests {
             let infile = PathBuf::from("./data/tests/projects/blank.work");
             let outfile = PathBuf::from("/tmp/default_1.work");
             let p = Project::from_pathbuf(&infile).unwrap();
-            let _ = p.to_pathbuf(outfile.clone());
+            let _ = p.to_pathbuf(&outfile);
 
             let p_reread = Project::from_pathbuf(&outfile).unwrap();
 

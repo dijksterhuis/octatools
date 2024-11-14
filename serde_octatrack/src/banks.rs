@@ -82,7 +82,7 @@ impl FromFileAtPathBuf for Bank {
 }
 
 impl ToFileAtPathBuf for Bank {
-    fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
@@ -111,7 +111,7 @@ mod tests {
             PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
         let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
         let bank: Bank = Bank::from_pathbuf(&src_file_path).unwrap();
-        let _ = bank.to_pathbuf(dst_file_path);
+        let _ = bank.to_pathbuf(&dst_file_path);
         assert!(true);
     }
 }

@@ -89,7 +89,7 @@ pub trait FromFileAtPathBuf {
 /// Trait to use when a new file can be written at the speciifed path by serializing a struct
 pub trait ToFileAtPathBuf {
     /// Crete a new file at the path file location struct by serializing struct data.
-    fn to_pathbuf(&self, path: PathBuf) -> Result<(), Box<dyn std::error::Error>>;
+    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>>;
 }
 
 /// Trait to use when a new struct can be created by reading a string.
