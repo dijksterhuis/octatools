@@ -25,7 +25,7 @@ use actions::{
     list::list_project_sample_slots,
 };
 
-use cli::{Cli, Commands, Indexing};
+use cli::{Cli, Commands};
 
 fn main() -> () {
     let mut logger = Builder::new();
@@ -91,85 +91,73 @@ fn main() -> () {
         },
 
         /* =========================================================================== */
-        Commands::Transfer(transfer_subcmd) => match transfer_subcmd {
-            cli::Transfer::Banks(x) => match x {
-                cli::TransferBank::Cli {
-                    source_bank_file_path,
-                    dest_bank_file_path,
-                } => {
-                    info!("Copying bank: src={source_bank_file_path:#?} dest={dest_bank_file_path:#?}");
-                    let _ = copy_bank(&source_bank_file_path, &dest_bank_file_path);
-                }
-                cli::TransferBank::Yaml { yaml_config_path } => {
-                    info!("Batch copying banks: {yaml_config_path:#?}");
-                    let _ = batch_copy_banks(&yaml_config_path);
-                }
-            },
-            cli::Transfer::Projects(x) => match x {
-                cli::TransferProject::Cli {
-                    source_project,
-                    dest_set_dir_path,
-                } => {
-                    info!("Copying project: src={source_project:#?} dest={dest_set_dir_path:#?}");
-                    todo!()
-                }
-                cli::TransferProject::Yaml { yaml_config_path } => {
-                    info!("Batch copying projects: yaml={yaml_config_path:#?}");
-                    todo!()
-                }
-            },
+        Commands::Transfer(x) => match x {
+            cli::Transfer::Bank {
+                source_bank_file_path,
+                dest_bank_file_path,
+            } => {
+                info!("Copying bank: src={source_bank_file_path:#?} dest={dest_bank_file_path:#?}");
+                let _ = copy_bank(&source_bank_file_path, &dest_bank_file_path);
+            }
+            cli::Transfer::Banks { yaml_config_path } => {
+                info!("Batch copying banks: {yaml_config_path:#?}");
+                let _ = batch_copy_banks(&yaml_config_path);
+            }
+            cli::Transfer::Project {
+                source_project,
+                dest_set_dir_path,
+            } => {
+                info!("Copying project: src={source_project:#?} dest={dest_set_dir_path:#?}");
+                todo!()
+            }
+            cli::Transfer::Projects { yaml_config_path } => {
+                info!("Batch copying projects: yaml={yaml_config_path:#?}");
+                todo!()
+            }
         },
         /* =========================================================================== */
-        Commands::Chains(chains_subcmd) => {
-            match chains_subcmd {
-                cli::Chains::Create(chains_create_subcmd) => match chains_create_subcmd {
-                    cli::CreateChain::Cli {
-                        chain_name,
-                        out_dir_path,
-                        wav_file_paths,
-                    } => {
-                        info!(
-                            "Creating sliced sample chain: outdir={:#?} name={:#?} wavs={:#?}",
-                            out_dir_path, chain_name, wav_file_paths,
-                        );
-                        let _ = create_samplechain_from_pathbufs_only(
-                            &wav_file_paths,
-                            &out_dir_path,
-                            &chain_name,
-                        );
-                    }
-                    cli::CreateChain::Yaml { yaml_file_path } => {
-                        info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
-                        let _ = create_samplechains_from_yaml(&yaml_file_path);
-                    }
-                },
-                cli::Chains::Deconstruct(chains_deconstruct_subcmd) => {
-                    match chains_deconstruct_subcmd {
-                        cli::DesconstructChain::Cli {
-                            ot_file_path,
-                            audio_file_path,
-                            out_dir_path,
-                        } => {
-                            info!(
-                                "Deconstructing sliced sample chain: sample={:#?} otfile={:#?} outdir={:#?}",
-                                audio_file_path, ot_file_path, out_dir_path,
-                            );
-                            let _ = deconstruct_samplechain_from_pathbufs_only(
-                                &audio_file_path,
-                                &ot_file_path,
-                                &out_dir_path,
-                            );
-                        }
-                        cli::DesconstructChain::Yaml { yaml_file_path } => {
-                            info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                            let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
-                        }
-                    }
-                }
+        Commands::Chains(x) => match x {
+            cli::Chains::CreateChain {
+                chain_name,
+                out_dir_path,
+                wav_file_paths,
+            } => {
+                info!(
+                    "Creating sliced sample chain: outdir={:#?} name={:#?} wavs={:#?}",
+                    out_dir_path, chain_name, wav_file_paths,
+                );
+                let _ = create_samplechain_from_pathbufs_only(
+                    &wav_file_paths,
+                    &out_dir_path,
+                    &chain_name,
+                );
             }
-        }
+            cli::Chains::CreateChains { yaml_file_path } => {
+                info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
+                let _ = create_samplechains_from_yaml(&yaml_file_path);
+            }
+            cli::Chains::DeconstructChain {
+                ot_file_path,
+                audio_file_path,
+                out_dir_path,
+            } => {
+                info!(
+                    "Deconstructing sliced sample chain: sample={:#?} otfile={:#?} outdir={:#?}",
+                    audio_file_path, ot_file_path, out_dir_path,
+                );
+                let _ = deconstruct_samplechain_from_pathbufs_only(
+                    &audio_file_path,
+                    &ot_file_path,
+                    &out_dir_path,
+                );
+            }
+            cli::Chains::DeconstructChains { yaml_file_path } => {
+                info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
+                let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
+            }
+        },
         /* =========================================================================== */
-        Commands::Scan(subcmd_scan) => match subcmd_scan {
+        Commands::Index(x) => match x {
             cli::Indexing::Cfcard {
                 cfcard_dir_path,
                 yaml_file_path,
@@ -177,22 +165,18 @@ fn main() -> () {
                 info!("Indexing CF card: path={cfcard_dir_path:#?}");
                 let _ = create_index_compact_flash_drive_yaml(&cfcard_dir_path, &yaml_file_path);
             }
-            Indexing::Samples(scan_samples_subcmd) => {
-                match scan_samples_subcmd {
-                    cli::IndexSamples::Simple {
-                        samples_dir_path,
-                        yaml_file_path,
-                    } => {
-                        let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
-                    }
-                    cli::IndexSamples::Full {
-                        samples_dir_path,
-                        yaml_file_path,
-                    } => {
-                        info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
-                        let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
-                    }
-                }
+            cli::Indexing::SamplesdirSimple {
+                samples_dir_path,
+                yaml_file_path,
+            } => {
+                let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
+            }
+            cli::Indexing::SamplesdirFull {
+                samples_dir_path,
+                yaml_file_path,
+            } => {
+                info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
+                let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
             }
         },
     }

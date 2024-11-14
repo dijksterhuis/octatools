@@ -105,11 +105,9 @@ mod tests {
 
     // TODO: Need to test the output
     #[test]
-    fn test_can_load_yaml_file() {
-        let cfcard_path = PathBuf::from("data/tests/index-cf/DEV-OTsm/");
-
+    fn test_indexing_cfcard_sets() {
+        let cfcard_path = PathBuf::from("data/tests/index-cf/");
         let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_pathbuf(&cfcard_path);
-
         assert!(res.is_ok());
     }
 }

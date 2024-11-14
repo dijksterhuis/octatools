@@ -27,7 +27,7 @@ pub enum Commands {
     Chains(Chains),
 
     #[command(subcommand)]
-    Scan(Indexing),
+    Index(Indexing),
 
     // TODOs
     #[command(subcommand)]
@@ -55,21 +55,25 @@ pub enum List {
 /// Inspect Octatrack data file contents.
 #[derive(Subcommand, Debug)]
 pub enum Inspect {
+    /// Inspect a Project
     Project {
         /// Path to the Project file.
         path: PathBuf,
     },
 
+    /// Inspect a Bank
     Bank {
         /// Path to the Bank file.
         path: PathBuf,
     },
 
+    /// Inspect all the Parts data within a Bank
     Parts {
         /// Path to the Bank file containing all the Parts to inspect.
         path: PathBuf,
     },
 
+    /// Inspect a specific Part within a Bank
     Part {
         /// Path to the Bank file containing a specific Part to inspect.
         path: PathBuf,
@@ -77,11 +81,13 @@ pub enum Inspect {
         index: usize,
     },
 
+    /// Inspect all the Patterns within a Bank
     Patterns {
         /// Path to the Bank file containing all the Patterns to inspect.
         path: PathBuf,
     },
 
+    /// Inspect a specific Pattern within a Bank
     Pattern {
         /// Path to the Bank file containing a specific Pattern to inspect.
         path: PathBuf,
@@ -89,6 +95,7 @@ pub enum Inspect {
         index: usize,
     },
 
+    /// Inspect a Sample Attributes file for an audio sample
     Sample {
         /// Path to the `.ot` Sample Attributes file.
         path: PathBuf,
@@ -98,20 +105,8 @@ pub enum Inspect {
 /// Transfer Octatrack Project(s)/Bank(s) to new location(s).
 #[derive(Subcommand, Debug)]
 pub enum Transfer {
-    #[command(subcommand)]
-    Banks(TransferBank),
-
-    #[command(subcommand)]
-    Projects(TransferProject),
-}
-
-/// Transfer Bank(s) from source location to a new location.
-/// Will copy in-use audio files to the destination Set's Audio Pool.
-/// WARNING: Will overwrite the destination bank(s)!
-#[derive(Subcommand, Debug)]
-pub enum TransferBank {
     /// Transfer one source Bank to the new Bank location.
-    Cli {
+    Bank {
         /// Bank file to copy.
         source_bank_file_path: PathBuf,
 
@@ -119,18 +114,13 @@ pub enum TransferBank {
         dest_bank_file_path: PathBuf,
     },
     /// Batched transfers of source Banks to multiple destination Banks.
-    Yaml {
+    Banks {
         /// Yaml config file path.
         yaml_config_path: PathBuf,
     },
-}
 
-/// Transfer Projects(s) from Set to a new Set.
-/// Will also copy all in-use samples to the new Set's Audio Pool.
-#[derive(Subcommand, Debug)]
-pub enum TransferProject {
     /// Transfer a Project from one Set to another Set.
-    Cli {
+    Project {
         /// Project data file or directory path of the project
         source_project: PathBuf,
 
@@ -138,7 +128,7 @@ pub enum TransferProject {
         dest_set_dir_path: PathBuf,
     },
     /// Batch transfer of Project(s).
-    Yaml {
+    Projects {
         /// Yaml config to manage the batched copying.
         yaml_config_path: PathBuf,
     },
@@ -147,18 +137,8 @@ pub enum TransferProject {
 /// Create/Deconstruct sliced sample chains.
 #[derive(Subcommand, Debug)]
 pub enum Chains {
-    #[command(subcommand)]
-    Create(CreateChain),
-
-    #[command(subcommand)]
-    Deconstruct(DesconstructChain),
-}
-
-/// Create sample chains
-#[derive(Subcommand, Debug)]
-pub enum CreateChain {
     /// Create a single sample chain from the cli
-    Cli {
+    CreateChain {
         /// Name of the new sliced samplechain.
         /// Will automatically be suffixed with an index number
         /// e.g. 'my_sample_chain_0'
@@ -173,23 +153,12 @@ pub enum CreateChain {
     },
 
     /// Create batches of sample chains from a YAML config file
-    Yaml {
+    CreateChains {
         /// File path of the YAML file for batched samplechains construction.
         yaml_file_path: PathBuf,
     },
-}
-
-/// Use an Octatrack '.ot' file to deconstruct a 'sliced' samplechain into component sample files
-#[derive(Subcommand, Debug)]
-pub enum DesconstructChain {
-    /// Use a YAML config to deconstruct batches of sliced samplechains.
-    Yaml {
-        /// File path of the YAML file.
-        yaml_file_path: PathBuf,
-    },
-
     /// Use the CLI to deconstruct an individual sliced samplechain.
-    Cli {
+    DeconstructChain {
         /// Path to the '.ot' file to use for deconstruction.
         ot_file_path: PathBuf,
         /// Path to the audio file to use for deconstruction.
@@ -197,29 +166,18 @@ pub enum DesconstructChain {
         /// Directory path where the audio files will be written
         out_dir_path: PathBuf,
     },
+    /// Use a YAML config to deconstruct batches of sliced samplechains.
+    DeconstructChains {
+        /// File path of the YAML file.
+        yaml_file_path: PathBuf,
+    },
 }
 
 /// Generate YAML files after scanning / searching various places.
 #[derive(Subcommand, Debug)]
 pub enum Indexing {
-    #[command(subcommand)]
-    Samples(IndexSamples),
-
-    /// Build a YAML representation of all Sets on a Compact Flash Card.
-    Cfcard {
-        /// Directory path of the Compact Flash Card directory
-        cfcard_dir_path: PathBuf,
-
-        /// File path location where the output YAML file will be written
-        yaml_file_path: Option<PathBuf>,
-    },
-}
-
-/// Recursively search through local directories for Octatrack compatible audio files.
-#[derive(Subcommand, Debug)]
-pub enum IndexSamples {
     /// Creates a YAML file output just listing all compatible files.
-    Simple {
+    SamplesdirSimple {
         /// Path to the top of the directory tree to search through.
         samples_dir_path: PathBuf,
 
@@ -228,11 +186,21 @@ pub enum IndexSamples {
     },
 
     /// Creates a YAML file output including useful file metadata.
-    Full {
+    SamplesdirFull {
         /// Path to the top of the directory tree to search through.
         samples_dir_path: PathBuf,
 
         /// File path for the output YAML file
+        yaml_file_path: Option<PathBuf>,
+    },
+
+    /// Generate an in-depth YAML representation of Octatrack data for a Set.
+    /// WARNING: A 1x Project Set will generate a circa 200MB YAML file!
+    Cfcard {
+        /// Directory path of the Compact Flash Card directory
+        cfcard_dir_path: PathBuf,
+
+        /// File path location where the output YAML file will be written
         yaml_file_path: Option<PathBuf>,
     },
 }

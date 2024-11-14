@@ -12,7 +12,8 @@ use walkdir::{DirEntry, WalkDir};
 use crate::utils::SampleFilePair;
 
 use serde_octatrack::{
-    common::{FromFileAtPathBuf, RVoidError},
+    banks::Bank,
+    common::{FromFileAtPathBuf, RBoxErr, RVoidError},
     projects::Project,
 };
 
@@ -49,26 +50,43 @@ pub struct OctatrackSetProject {
     /// 'Samples' which are members of this Project.
     pub sample_filepaths: Vec<SampleFilePair>,
 
-    pub data: Project,
+    /// Project level data
+    pub project_work: Project,
+
+    /// Banks within the project
+    pub banks: Vec<Bank>,
 }
 
 impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
 
 impl OctatrackSetProject {
     /// Create a new `OctatrackSetProject` from the dirpath `PathBuf`.
-
     pub fn from_pathbuf(dirpath: &PathBuf) -> RVoidError<Self> {
         // TODO: Handle looking for .work / .strd
         if !dirpath.is_dir() {
             return Err(());
         }
 
+        let banks: Vec<Bank> = WalkDir::new(dirpath)
+            .sort_by_file_name()
+            .min_depth(1)
+            .into_iter()
+            .filter_entry(|e| {
+                e.file_name().to_string_lossy().starts_with("bank")
+                    && e.file_name().to_string_lossy().ends_with("work")
+            })
+            .map(|x| x.unwrap())
+            .map(|x| x.path().to_path_buf())
+            .map(|x| Bank::from_pathbuf(&x).unwrap())
+            .collect();
+
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
             dirpath: dirpath.clone(),
             // samples: scan_dir_for_ot_files(path).unwrap_or(Vec::new()).clone()
             sample_filepaths: Self::scan_dir_path_for_samples(&dirpath).unwrap(),
-            data: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
+            project_work: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
+            banks,
         })
     }
 }
@@ -126,54 +144,53 @@ impl OctatrackSet {
 
     /// Create a collection of `OctatrackSet`s by recursively
     /// searching through a directory tree, starting at a given `PathBuf`
-
-    pub fn from_cfcard_pathbuf(path: &PathBuf) -> RVoidError<Vec<OctatrackSet>> {
-        let set_paths_iter: _ = WalkDir::new(path)
+    pub fn from_cfcard_pathbuf(path: &PathBuf) -> RBoxErr<Vec<Self>> {
+        let ot_sets: Vec<Self> = WalkDir::new(path)
             .sort_by_file_name()
             .max_depth(1)
             .min_depth(1)
             .into_iter()
             .filter_entry(|e: &DirEntry| {
                 e.file_type().is_dir() && !e.file_name().to_str().unwrap_or(".").starts_with(".")
-            });
-
-        let ot_sets: Vec<OctatrackSet> = set_paths_iter
+            })
             .map(|e: Result<DirEntry, walkdir::Error>| {
                 let unwrapped = e.unwrap();
                 let ot_set_path = unwrapped.path().to_path_buf();
-                let ot_set = OctatrackSet::from_pathbuf(&ot_set_path);
+                let ot_set = Self::from_pathbuf(&ot_set_path);
                 let unwrapped_set = ot_set.unwrap();
                 unwrapped_set
             })
-            .filter(|o: &Option<OctatrackSet>| !o.is_none())
-            .map(|o: Option<OctatrackSet>| o.unwrap())
+            .filter(|o: &Option<Self>| !o.is_none())
+            .map(|o: Option<Self>| o.unwrap())
             .collect();
+
         Ok(ot_sets)
     }
 
-    /// For a given `PathBuf`, find relevant Octatrack directories and files.
-
-    pub fn from_pathbuf(path: &PathBuf) -> RVoidError<Option<OctatrackSet>> {
-        let audio_pool_path = path.join("AUDIO");
-
-        // if AUDIO doesn't exist then this is not a set
-        // it's some other random directory like 'System Volume Information'
-
-        if !audio_pool_path.exists() {
-            return Ok(None);
+    /// For a given `PathBuf` to a Set directory, gather information about Octatrack Projects and the Audio Pool.
+    pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Option<OctatrackSet>> {
+        if !path.exists() {
+            panic!("Path does not exist: path={path:#?}");
+        }
+        if !path.is_dir() {
+            panic!("Path is not a directory: path={path:#?}");
         }
 
-        let audio_pool = OctatrackSetAudioPool::from_pathbuf(&audio_pool_path).unwrap();
+        let audio_pool_path = path.join("AUDIO");
+        if !audio_pool_path.exists() {
+            panic!("Path is not a Set (no 'AUDIO' sub-directory found): path={path:#?}");
+        }
 
-        let project_paths_iter: _ = WalkDir::new(path)
+        let audio_pool = OctatrackSetAudioPool::from_pathbuf(&audio_pool_path).expect(
+            "Could not gather information about Set Audio Pool: audioPoolPath={audio_pool_path:#?}",
+        );
+
+        let projects: Vec<OctatrackSetProject> = WalkDir::new(path)
             .sort_by_file_name()
             .max_depth(1)
             .min_depth(1)
             .into_iter()
-            .filter_entry(|e: &DirEntry| e.file_type().is_dir() && e.file_name() != "AUDIO");
-
-        let projects: Vec<OctatrackSetProject> = project_paths_iter
-            .into_iter()
+            .filter_entry(|e: &DirEntry| e.file_type().is_dir() && e.file_name() != "AUDIO")
             .map(|d| {
                 let unwrapped = d.unwrap();
                 let project_path = unwrapped.path().to_path_buf();
