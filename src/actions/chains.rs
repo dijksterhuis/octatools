@@ -23,7 +23,7 @@ use crate::{
     utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles},
 };
 
-use yaml::YamlChainConfig;
+use yaml::{create::YamlChainCreate, deconstruct::YamlChainDeconstruct};
 
 /// Chain together a wav sample vector into individual wav file(s).
 ///
@@ -83,7 +83,7 @@ pub fn chain_wavfiles_64_batch(
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
 
 pub fn create_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
-    let chain_conf = YamlChainConfig::from_yaml(yaml_conf_fpath)
+    let chain_conf = YamlChainCreate::from_yaml(yaml_conf_fpath)
         .expect(format!("Could not load yaml file: path={yaml_conf_fpath:#?}").as_str());
 
     info!("Creating sample chains from yaml config.");
@@ -209,19 +209,18 @@ pub fn create_samplechain_from_pathbufs_only(
 // todo: needs tests
 /// Extract a slices from a sliced sample chain into individual samples.
 pub fn deconstruct_samplechain_from_pathbufs_only(
-    audio_fpath: PathBuf,
-    attributes_fpath: PathBuf,
-    out_dirpath: PathBuf,
+    audio_fpath: &PathBuf,
+    attributes_fpath: &PathBuf,
+    out_dirpath: &PathBuf,
 ) -> RBoxErr<()> {
     if !out_dirpath.is_dir() {
         panic!("Output dirpath argument is not a directory. Must be a directory.");
     }
 
     let wavfile = WavFile::from_pathbuf(&audio_fpath).expect("Could not read wavfile.");
-
-    let attrs = SampleAttributes::from_pathbuf(&attributes_fpath)
-        .expect("Could not read .ot attributes file.");
-
+    let attrs = SampleAttributes::from_pathbuf(&attributes_fpath).expect(
+        format!("Could not read `.ot` attributes file: path={attributes_fpath:#?}").as_str(),
+    );
     // todo: this feels fragile
     let base_sample_fname = audio_fpath
         .file_stem()
@@ -240,7 +239,6 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
             file_path: PathBuf::from("/tmp/dummy.wav"),
         };
 
-        // todo: this feels fragile
         let sample_fname = format!("{base_sample_fname}_{i:#?}");
         let mut out_fpath = out_dirpath.clone().join(sample_fname);
         out_fpath.set_extension("wav");
@@ -252,6 +250,31 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
     Ok(())
 }
 
+pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
+    let chain_conf = YamlChainDeconstruct::from_yaml(yaml_conf_fpath)
+        .expect(format!("Could not load yaml file: path={yaml_conf_fpath:#?}").as_str());
+
+    info!("Deconstructing sample chains from yaml config.");
+    trace!("Yaml contents: {chain_conf:#?}");
+
+    for chain_config in &chain_conf.chains {
+        deconstruct_samplechain_from_pathbufs_only(
+            &chain_config.sample,
+            &chain_config.otfile,
+            &chain_conf.global_settings.out_dir_path,
+        )
+        .expect(
+            format!(
+                "Could not deconstruct sample chain: sample={:#?} otfile={:#?}",
+                &chain_config.sample, &chain_config.otfile,
+            )
+            .as_str(),
+        );
+    }
+
+    Ok(())
+}
+
 /// Use input files from `resouces/test-data/` to create an OT file output
 /// and compare it to what should exist.
 /// Read relevant WAV files, create an OT file of some description, write
@@ -260,7 +283,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
 #[cfg(test)]
 mod tests {
 
-    mod create_vs_read {
+    mod chain_create {
 
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};

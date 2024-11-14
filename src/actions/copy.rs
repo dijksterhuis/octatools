@@ -43,28 +43,32 @@ use serde_octatrack::{
 ///
 ///
 
-pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -> Result<(), ()> {
+pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf) -> RBoxErr<()> {
     info!("Loading banks ...");
 
-    let mut banks = TransferMetaBank::new(&source_bank_file_path, &dest_bank_file_path);
+    let mut banks = TransferMetaBank::new(source_bank_file_path, dest_bank_file_path)
+        .expect("Could not load banks.");
 
     info!("Loading bank projects ...");
-    let mut projects =
-        TransferMetaProject::new(&source_bank_file_path, &dest_bank_file_path).unwrap();
+    let mut projects = TransferMetaProject::new(source_bank_file_path, dest_bank_file_path)
+        .expect("Could not load projects.");
 
     let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Backing up destination bank to /tmp/ ...");
-    let _ = std::fs::copy(banks.dest.path.clone(), PathBuf::from("/tmp/bank.bak"));
+    let _ = std::fs::copy(banks.dest.path.clone(), PathBuf::from("/tmp/bank.bak"))
+        .expect("Could not back up destination bank file.");
 
-    info!("Backing up destination bank to /tmp/ ...");
+    info!("Backing up destination project to /tmp/ ...");
     let _ = std::fs::copy(
         projects.dest.path.clone(),
         PathBuf::from("/tmp/project.bak"),
-    );
+    )
+    .expect("Could not back up destination bank file.");
 
     info!("Finding free sample slots in destination project ...");
-    let (mut free_static, mut free_flex) = find_free_sslots(projects.clone()).unwrap();
+    let (mut free_static, mut free_flex) = find_free_sslots(projects.clone())
+        .expect("Error while searching for free sample slots in destination project.");
 
     info!(
         "Destination project has free sample slots: {:#?} static; {:#?} flex.",
@@ -102,7 +106,8 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
 
     info!("Finding 'active' sample slots (actually used in source bank) ...");
     // read the source bank, looking for sample slots in active use
-    let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src.bank);
+    let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src.bank)
+        .expect("Error while finding active sample slots in source bank.");
 
     info!(
         "\"Active\" sample slots in source bank: {:#?}",
@@ -124,24 +129,28 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     for active_slot in active_slots {
         let new_slot_id = match active_slot.sample_type {
             ProjectSampleSlotType::Static => {
-                let dest_slot_id = free_static.pop().unwrap();
+                let dest_slot_id = free_static.pop().expect("No more destination slots.");
+
                 update_sslot_references_static(
                     &mut src_proj,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
-                );
+                )
+                .expect("Could not update static sample slot references from source bank.");
 
                 dest_slot_id
             }
             ProjectSampleSlotType::Flex => {
-                let dest_slot_id = free_flex.pop().unwrap();
+                let dest_slot_id = free_flex.pop().expect("No more destination slots.");
+
                 update_sslot_references_flex(
                     &mut src_proj,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
-                );
+                )
+                .expect("Could not update flex slot references from source bank.");
 
                 dest_slot_id
             }
@@ -158,10 +167,13 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
             .find(|x| x.slot_id == new_slot_id as u16);
 
         if !src_project_slot.is_none() {
-            let mut s = src_project_slot.unwrap();
+            let mut s = src_project_slot.expect("Empty sample slots in source project.");
+
             if s.sample_type != ProjectSampleSlotType::RecorderBuffer {
                 let _ = copy_sslot_sample_files(&projects, &mut s);
-                s.path = get_relative_audio_pool_path_audio_file(&s).unwrap();
+                s.path = get_relative_audio_pool_path_audio_file(&s).expect(
+                    "Could not get new file path for sample to transfer to destination project.",
+                );
                 debug!("Updating sample slot ...");
                 updated_sample_slots.push(s);
             }
@@ -177,7 +189,7 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
     let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Writing new bank within project ...");
-    let _ = banks.dest.bank.to_pathbuf(&dest_bank_file_path);
+    let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
 
     info!("Bank copy complete.");
     Ok(())
@@ -191,11 +203,11 @@ pub fn copy_bank(source_bank_file_path: PathBuf, dest_bank_file_path: PathBuf) -
 /// All the caveats and deails for the `copy_bank` function still apply
 /// (this function calls it multiple times).
 
-pub fn batch_copy_banks(yaml_config_path: PathBuf) -> RBoxErr<()> {
-    let conf = YamlCopyBankConfig::from_pathbuf(&yaml_config_path)?;
+pub fn batch_copy_banks(yaml_config_path: &PathBuf) -> RBoxErr<()> {
+    let conf = YamlCopyBankConfig::from_pathbuf(yaml_config_path)?;
 
     for x in conf.bank_copies {
-        let _ = copy_bank(x.src, x.dest);
+        let _ = copy_bank(&x.src, &x.dest);
     }
 
     Ok(())
@@ -219,9 +231,9 @@ mod tests {
             outfile.parent().unwrap(),
         );
 
-        let _source_bank = Bank::from_file(infile.clone()).unwrap();
-        let _ = copy_bank(infile, outfile.clone());
-        let _copied_bank = Bank::from_file(outfile.clone()).unwrap();
+        let _source_bank = Bank::from_pathbuf(&infile).unwrap();
+        let _ = copy_bank(&infile, &outfile);
+        let _copied_bank = Bank::from_pathbuf(&outfile).unwrap();
 
         // remove the test destination project directory
         let _ = std::fs::remove_dir_all(outfile.parent().unwrap());

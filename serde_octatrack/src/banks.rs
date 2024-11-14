@@ -54,18 +54,6 @@ pub struct Bank {
     pub remainder: [u8; 2],
 }
 
-impl Bank {
-    /// Crete a new struct by reading a file located at `path`.
-    pub fn from_file(path: PathBuf) -> Result<Box<Self>, Box<dyn Error>> {
-        let mut infile: File = File::open(&path)?;
-        let mut bytes: Vec<u8> = vec![];
-        let _: usize = infile.read_to_end(&mut bytes)?;
-        let new: Box<Bank> = Box::new(bincode::deserialize(&bytes[..])?);
-
-        Ok(new)
-    }
-}
-
 impl FromFileAtPathBuf for Bank {
     type T = Bank;
 

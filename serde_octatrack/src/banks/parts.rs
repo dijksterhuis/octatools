@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
+use crate::common::RBoxErr;
+
 /// Audio Track MAIN and CUE volume.
 /// Both are 108 by default.
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -657,19 +659,23 @@ pub struct Part {
 }
 
 impl Part {
-    pub fn update_static_machine_slot(&mut self, old: &u8, new: &u8) -> () {
+    pub fn update_static_machine_slot(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
         for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
             if audio_track_slots.static_slot_id == *old {
                 audio_track_slots.static_slot_id = *new;
             }
         }
+
+        Ok(())
     }
 
-    pub fn update_flex_machine_slot(&mut self, old: &u8, new: &u8) -> () {
+    pub fn update_flex_machine_slot(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
         for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
             if audio_track_slots.flex_slot_id == *old {
                 audio_track_slots.flex_slot_id = *new;
             }
         }
+
+        Ok(())
     }
 }

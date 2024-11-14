@@ -41,7 +41,7 @@ impl Project {
         old_slot_id: &u8,
         new_slot_id: &u8,
         sample_type: Option<ProjectSampleSlotType>,
-    ) -> () {
+    ) -> RBoxErr<()> {
         use itertools::Itertools;
         let type_filt = sample_type.unwrap_or(ProjectSampleSlotType::Static);
 
@@ -51,13 +51,15 @@ impl Project {
             .into_iter()
             .find_position(|x| x.slot_id == *old_slot_id as u16 && x.sample_type == type_filt);
 
-        // no samples assigned to slots
+        // there are samples assigned to slots
         if !sample_slot_find.is_none() {
             println!("Found matchin slot id");
             let mut sample_slot = sample_slot_find.clone().unwrap().1;
             sample_slot.slot_id = *new_slot_id as u16;
             self.slots[sample_slot_find.unwrap().0] = sample_slot;
         }
+
+        Ok(())
     }
 }
 

@@ -3,6 +3,8 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
+use crate::common::RBoxErr;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AudioTrackParameterLockPlayback {
     pub param1: u8,
@@ -437,7 +439,7 @@ pub struct Pattern {
 }
 
 impl Pattern {
-    pub fn update_static_sample_plocks(&mut self, old: &u8, new: &u8) -> () {
+    pub fn update_static_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
         for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
             for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
                 if plock.sample_lock_static == *old {
@@ -445,8 +447,9 @@ impl Pattern {
                 }
             }
         }
+        Ok(())
     }
-    pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> () {
+    pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
         for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
             for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
                 if plock.sample_lock_flex == *old {
@@ -454,5 +457,6 @@ impl Pattern {
                 }
             }
         }
+        Ok(())
     }
 }
