@@ -1,4 +1,7 @@
-//! Ser/De of `arr??.*` files to extract out and work with Arranger data.
+//! Deserialization of `arr??.*` files to extract out and work with Arranger data.
+//! Note that Serialization is not complete for arrangement files as there are some 
+//! intricacies relate to how Arranger Row data is written in files (will require
+//! custom Ser/De trait implementations).
 //! 
 //! ### How data is persisted in `*.work` and `*.strd` files
 //! 
@@ -28,7 +31,6 @@ pub enum ArrangeType {
 }
 
 #[derive(Debug)]
-// #[serde(untagged)]
 pub enum ArrangeRow {
     PatternRow {
         // row_type: u8,
@@ -113,6 +115,14 @@ impl<'de> Visitor<'de> for ObjVisitor {
     where
         A: SeqAccess<'de>,
     {
+        // for some reason doing visit_seq deserialization skips like 5 bytes
+        // at the start of the array of bytes that we want to deserialize.
+        //
+        // i have no idea why this is happening, but everything else about
+        // this was working
+        //
+        // :/
+
         let mut v: Vec<u8> = vec![];
         for i in 0..=22 {
             let n = seq
@@ -486,7 +496,7 @@ pub struct Arrangement {
 
     /// Rows of the arrangement. Maximum 256 rows possible.
     pub rows: Vec<ArrangeRow>,
-    // pub fields: [ArrangeRow; 256],
+
     /// Not sure. First Arrangement block in the file is [0, 1].
     /// Second Arrangement block in the file is [1, 0].
     pub unk2: [u8; 2],
@@ -662,7 +672,6 @@ impl FromFileAtPathBuf for ArrangementFile {
                         ];
                         let s = str::from_utf8(&b)?;
                         ArrangeRow::ReminderRow(s.to_string())
-                        // ArrangeRow::ReminderRow("ERR".to_string())
                     }
                     _ => ArrangeRow::ReminderRow("ERROR!".to_string()),
                 };
