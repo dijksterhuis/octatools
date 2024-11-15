@@ -52,6 +52,9 @@ octatools chains deconstruct-chains <YAML_CONFIG_FILE_PATH>
 octatools inspect arrangement <PATH_TO_ARRANGEMENT_FILE>
 octatools inspect bank <PATH_TO_BANK_FILE>
 octatools inspect parts <PATH_TO_BANK_FILE>
+# note: there are actually 8 PART sections in the data files
+# the extra 4 are for storing previous states for reloads
+# (I'm not sure what order the saved parts are in just yet)
 octatools inspect part <PATH_TO_BANK_FILE> <PART_NUMBER>
 octatools inspect patterns <PATH_TO_BANK_FILE>
 octatools inspect pattern <PATH_TO_BANK_FILE> <PATTERN_NUMBER>
