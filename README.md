@@ -22,8 +22,12 @@ Only tested against the latest version of the Octatrack OS 1.40B (?).
 - Find compatible WAV files in a local directory and write their file paths to a YAML file
 - Scan a Compact Flash card and dump full Project information to YAML (warning, generates multi-GB YAML output!)
 
+See the `./examples/yaml/` directory for some examples on how to do batch operations for copying banks and creating sample chains.
+
 ### TODOs
 
+- Clean up CLI commands, sort out CLI options etc via CLAP.
+- Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
 - List all Sets, Projects, Sample Slots, Samples. 
 - Finish reverse engineering bank files.
 - Cross-compilation / CI builds on Windows 10/11 and macOS.
@@ -33,6 +37,7 @@ Only tested against the latest version of the Octatrack OS 1.40B (?).
 - PyO3 bindings for creating a python interface.
 - Actually make the rust code idiomatic and 'clean' and optimised.
 - Ser/De to Enum/String/etc types instead of u8.
+
 
 ### What this software is not
 - A clone of DigiChain
