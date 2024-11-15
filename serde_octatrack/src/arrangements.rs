@@ -1,17 +1,31 @@
 //! Deserialization of `arr??.*` files to extract out and work with Arranger data.
-//! Note that Serialization is not complete for arrangement files as there are some 
+//! Note that Serialization is not complete for arrangement files as there are some
 //! intricacies relate to how Arranger Row data is written in files (will require
 //! custom Ser/De trait implementations).
-//! 
+//!
 //! ### How data is persisted in `*.work` and `*.strd` files
-//! 
-//! `arr??.work` files are updated by using the PROJECT -> SYNC TO CARD operation. 
-//! The `arr??.strd` files are not changed by the PROJECT -> SYNC TO CARD operation. 
-//! 
-//! `arr??.strd` files are updated with the latest arrangement data 
-//! when performing the ARRANGER -> SAVE operation. 
+//!
+//! `arr??.work` files are updated by using the PROJECT -> SYNC TO CARD operation.
+//! The `arr??.strd` files are not changed by the PROJECT -> SYNC TO CARD operation.
+//!
+//! `arr??.strd` files are updated with the latest arrangement data
+//! when performing the ARRANGER -> SAVE operation.
 //! The `arr??.work` files are not changed by the ARRANGER -> SAVE operation.
-
+//!
+//! ### TODO
+//!
+//! - Native conditional serialization and deserialization for Arranger Rows,
+//!   rather than using intermediate data structs
+//!   - Deserialize into `ArrangeRow` enum types based on the first byte in the
+//!     22 length array.
+//!   - Serialize, the opposite of the above.
+//! - `ArrangeRow` unknown blocks:
+//!   - Unknown block 1
+//!   - Unknown block 2
+//! - `ArrangementFile` unknown blocks:
+//!   - Unknown block 1
+//!   - Unknown block 2
+//!
 
 use crate::common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
 use bincode;
@@ -23,77 +37,58 @@ use serde_big_array::BigArray;
 use std::array::from_fn;
 use std::{error::Error, fmt, fs::File, io::Read, io::Write, path::PathBuf, str};
 
-#[derive(Debug, Deserialize, Clone, PartialEq)]
-pub enum ArrangeType {
-    PatternSelect = 0,
-    Looping = 1,
-    Text = 2,
-}
-
+/// A Row in the Arrangement.
 #[derive(Debug)]
 pub enum ArrangeRow {
+    /// pattern choice and playback
     PatternRow {
         // row_type: u8,
+        /// Which Pattern should be played at this point. Patterns are indexed from 0 (A01) -> 256 (P16).
         pattern_id: u8,
+        /// How many times to play this arrangment row.
         repetitions: u8,
         // unused_1: u8,
+        /// How track muting is applied during this arrangement row.
         mute_mask: u8,
         // unused_2: u8,
+        /// First part of the Tempo mask for this row.
+        /// Needs to be combined with `tempo_2` to work out the actual tempo (not sure how it works yet).
         tempo_1: u8,
+        /// Second part of the Tempo mask for this row.
+        /// Needs to be combined with `tempo_1` to work out the actual tempo (not sure how it works yet).
         tempo_2: u8,
+        /// Which scene is assigned to Scene slot A when this arrangement row is playing.
         scene_a: u8,
+        /// Which scene is assigned to Scene slot B when this arrangement row is playing.
         scene_b: u8,
         // unused_3: u8,
+        /// Which trig to start Playing the pattern on.
         offset: u8,
         // unused_4: u8,
+        /// How many trigs to play the pattern for.
+        /// Note that this value always has `offset` added to it.
+        /// So a length on the machine display of 64 when the offset is 32 will result in a value of 96 in the file data.
         length: u8,
+        /// MIDI Track transposes for all 8 midi channels.
+        /// 1 -> 48 values are positive transpose settings.
+        /// 255 (-1) -> 207 (-48) values are negative transpose settings.
         midi_transpose: [u8; 8],
-        // midi_transpose_tr1: u8,
-        // midi_transpose_tr2: u8,
-        // midi_transpose_tr3: u8,
-        // midi_transpose_tr4: u8,
-        // midi_transpose_tr5: u8,
-        // midi_transpose_tr6: u8,
-        // midi_transpose_tr7: u8,
-        // midi_transpose_tr8: u8,
     },
+    /// Loop, Jump and Halt rows are all essentially just Loops.
+    /// So these are bundled into one type.
+    ///
+    /// Loops are `loop_count = 0 -> 65` and the `row_target` is any row before this one (`loop_count=0` is infinite looping).
+    /// Halts are `loop_count = 0` and the `row_target` is this row.
+    /// Jumps are `loop_count = 0` and the `row_target` is any row after this one.
     LoopOrJumpOrHaltRow {
-        // row_type: u8,
-        // unused: u8,
+        /// How many times to loop to the `row_target`. Only applies to loops.
         loop_count: u8,
-        row_target: u8,
-        // unused_1: u8,
-        // unused_2: u8,
-        // unused_3: u8,
-        // unused_4: u8,
-        // unused_5: u8,
-        // unused_6: u8,
-        // unused_7: u8,
-        // unused_8: u8,
-        // unused_9: u8,
-        // unused_10: u8,
-        // unused_11: u8,
-        // unused_12: u8,
-        // unused_13: u8,
-        // unused_14: u8,
-        // unused_15: u8,
-        // unused_16: u8,
-        // unused_17: u8,
-        // unused_18: u8,
-    },
-    JumpRow {
-        // row_type: u8,
-        // unused: u8,
-        // loop_count: u8,
+        /// The row number to loop back to, jump to, or end at.
         row_target: u8,
     },
-    HaltRow {
-        // row_type: u8,
-        // unused: u8,
-        loop_count: u8,
-        row_target: u8,
-    },
+    /// A row of ASCII text data with 15 maximum length.
     ReminderRow(String),
+    /// Row is not in use.
     EmptyRow(),
 }
 
@@ -483,8 +478,13 @@ struct ArrangementIntermediate {
     unk2: [u8; 2],
 }
 
+/// An Arrangement 'block'.
+/// There are multiple arrangement states in `arr??.*` files for Arrangements,
+/// seemingly due to the peculiarities of how the Octatrack stores data
+/// (Project Menu -> SYNC TO CARD and Arranger Mnu -> SAVE both save to different
+/// parts of the file / save to different files),
 #[derive(Debug)]
-pub struct Arrangement {
+pub struct ArrangementBlock {
     /// Name of the Arrangement in ASCII values, max length 15 characters
     pub name: String,
 
@@ -503,6 +503,8 @@ pub struct Arrangement {
 }
 
 // max length: 11336 bytes
+/// Used with the `octatools inspect bytes arrangement` command.
+/// Only really useful for debugging and / or reverse engineering purposes.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ArrangementFileRawBytes {
     #[serde(with = "BigArray")]
@@ -551,6 +553,8 @@ struct ArrangementFileIntermediate {
 }
 
 // max length: 11336 bytes
+/// Public representation of an `arr??.*` Arrangement file.
+/// Pay special attention to
 #[derive(Debug)]
 pub struct ArrangementFile {
     /// Header data:
@@ -570,10 +574,10 @@ pub struct ArrangementFile {
     /// Arrangement files each store 2x blocks of `Arrangement` data.
     ///
     /// The first block is what is currently being edited in the arranger view.
-    /// This block is written the arrangement is edited in the Arranger view, then Project Menu -> SYNC TO CARD.
+    /// This block is written when saving via Project Menu -> SYNC TO CARD.
     ///
-    /// The second block is the 'persisent' store, written when saving the arrangement via Arranger Menu -> SAVE.
-    pub arrange_data: Vec<Arrangement>,
+    /// The second block is written when saving the arrangement via Arranger Menu -> SAVE.
+    pub arrange_data: Vec<ArrangementBlock>,
 
     /// This looks like some form of checksum.
     /// Adding more rows increases the values.
@@ -584,7 +588,6 @@ pub struct ArrangementFile {
     /// 31 rows: [0, 0, 0, 0, 0, 0, 196, 196]
     /// 0 rows (just names): [0, 0, 0, 0, 0, 0, 7, 70]
     /// ```
-    ///
     pub unk2: [u8; 8],
 }
 
@@ -599,7 +602,7 @@ impl FromFileAtPathBuf for ArrangementFile {
 
         let new: ArrangementFileIntermediate = bincode::deserialize(&bytes[..])?;
 
-        let mut a: Vec<Arrangement> = vec![];
+        let mut a: Vec<ArrangementBlock> = vec![];
 
         for arr in new.arrange_data {
             let mut b: Vec<ArrangeRow> = vec![];
@@ -679,7 +682,7 @@ impl FromFileAtPathBuf for ArrangementFile {
                 b.push(x);
             }
 
-            let d = Arrangement {
+            let d = ArrangementBlock {
                 name: str::from_utf8(&arr.name)?.to_string(),
                 unk1: arr.unk1,
                 n_rows: arr.n_rows,

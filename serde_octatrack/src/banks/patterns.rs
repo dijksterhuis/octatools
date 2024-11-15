@@ -5,6 +5,7 @@ use serde_big_array::{Array, BigArray};
 
 use crate::common::RBoxErr;
 
+/// A Trig's parameter locks on the Playback/Machine page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLockPlayback {
     pub param1: u8,
@@ -15,6 +16,7 @@ pub struct AudioTrackParameterLockPlayback {
     pub param6: u8,
 }
 
+/// A Trig's parameter locks on the Amp page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLockAmp {
     pub atck: u8,
@@ -25,6 +27,7 @@ pub struct AudioTrackParameterLockAmp {
     unused_1: u8,
 }
 
+/// A Trig's parameter locks on the LFO page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLockLfo {
     pub spd1: u8,
@@ -35,6 +38,7 @@ pub struct AudioTrackParameterLockLfo {
     pub dep3: u8,
 }
 
+/// A Trig's parameter locks on the FX1 page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLockFx1 {
     pub param1: u8,
@@ -45,6 +49,8 @@ pub struct AudioTrackParameterLockFx1 {
     pub param6: u8,
 }
 
+/// A Trig's parameter locks on the FX2 page for an Audio Track.
+/// todo: merge this with FX1?
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLockFx2 {
     pub param1: u8,
@@ -55,6 +61,7 @@ pub struct AudioTrackParameterLockFx2 {
     pub param6: u8,
 }
 
+/// A single trig's parameter locks on an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLocks {
     pub machine: AudioTrackParameterLockPlayback,
@@ -66,12 +73,14 @@ pub struct AudioTrackParameterLocks {
     pub sample_lock_flex: u8,
 }
 
+/// MIDI Track parameter locks. Still need to look at these.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackParameterLocks {
     #[serde(with = "BigArray")]
     pub todo: [u8; 32],
 }
 
+/// Audio Track Pattern playback settings.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackPatternSettings {
     /// Silence any existing audio playback on the Audio Track when switching Patterns.
@@ -190,6 +199,7 @@ pub struct AudioTrackTrigMasks {
     pub slide: [u8; 8],
 }
 
+/// Audio Track custom scaling when the Pattern is in PER TRACK scale mode.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackPerTrackModeScale {
     /// The Audio Track's Length when Pattern is in Per Track mode.
@@ -305,6 +315,8 @@ pub struct MidiTrackTrigs {
     pub unknown: Box<Array<u8, 128>>,
 }
 
+/// Pattern level scaling settings.
+/// Some of these settings still apply when the pattern is in Per-Track scaling mode.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PatternScaleSettings {
     /// Multiply this value by `master_len_per_track` to get
@@ -374,6 +386,7 @@ pub struct PatternScaleSettings {
     pub scale_mode: u8,
 }
 
+/// Chaining behaviour for the pattern.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PatternChainBehavior {
     /// When `use_project_setting` field is set to `1`/`true`
@@ -388,7 +401,6 @@ pub struct PatternChainBehavior {
 }
 
 /// A pattern of trigs stored in the bank.
-
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub struct Pattern {
     /// Header indicating start of pattern section

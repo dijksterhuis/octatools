@@ -21,6 +21,7 @@ pub struct ActiveScenes {
     pub scene_b: u8,
 }
 
+/// An Audio Track's Setup values for the Static machine on the track (loop setting/slice setting/len setting etc.).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsSetupStatic {
     pub xloop: u8,
@@ -31,6 +32,7 @@ pub struct AudioTrackMachineParamsSetupStatic {
     pub tsns: u8,
 }
 
+/// An Audio Track's Setup values for the Flex machine on the track (loop setting/slice setting/len setting etc.).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsSetupFlex {
     pub xloop: u8,
@@ -41,6 +43,7 @@ pub struct AudioTrackMachineParamsSetupFlex {
     pub tsns: u8,
 }
 
+/// An Audio Track's Setup values for the Thru machine on the track. Should not contain any data.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsSetupThru {
     unused_1: u8,
@@ -51,6 +54,7 @@ pub struct AudioTrackMachineParamsSetupThru {
     unused_6: u8,
 }
 
+/// An Audio Track's Setup values for the Neighbor machine on the track. Should not contain any data.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsSetupNeighbor {
     unused_1: u8,
@@ -61,6 +65,7 @@ pub struct AudioTrackMachineParamsSetupNeighbor {
     unused_6: u8,
 }
 
+/// An Audio Track's Setup values for the Pickup machine on the track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsSetupPickup {
     unused_1: u8,
@@ -95,6 +100,7 @@ pub struct AudioTrackMachineSlot {
     pub recorder_slot_id: u8,
 }
 
+/// Values of an Audio Track's parameters page for the Static machine on the track (pitch/slice/len etc).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsValuesStatic {
     pub ptch: u8,
@@ -105,6 +111,7 @@ pub struct AudioTrackMachineParamsValuesStatic {
     pub rtim: u8,
 }
 
+/// Values of an Audio Track's parameters page for the Flex machine on the track (pitch/slice/len etc).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsValuesFlex {
     pub ptch: u8,
@@ -115,6 +122,7 @@ pub struct AudioTrackMachineParamsValuesFlex {
     pub rtim: u8,
 }
 
+/// Values of an Audio Track's parameters page for the Flex machine on the track (in/vol etc).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsValuesThru {
     pub in_ab: u8,
@@ -125,6 +133,7 @@ pub struct AudioTrackMachineParamsValuesThru {
     pub unused_2: u8,
 }
 
+/// Values of an Audio Track's parameters page for the Neighbor machine on the track. Should not contain any data.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsValuesNeighbor {
     unused_1: u8,
@@ -135,6 +144,7 @@ pub struct AudioTrackMachineParamsValuesNeighbor {
     unused_6: u8,
 }
 
+/// Values of an Audio Track's parameters page for the Pickup machine on the track. (pitch/dir/len etc).
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackMachineParamsValuesPickup {
     pub ptch: u8,
@@ -145,7 +155,7 @@ pub struct AudioTrackMachineParamsValuesPickup {
     pub op: u8,
 }
 
-/// Audio Tracks Machine Parameter Page values.
+/// Audio Tracks Machine Parameter pages.
 /// Machine parameter values persist after the machine type is changed,
 /// meaning audio keeps playing until the new machine is triggered to play new audio.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -157,6 +167,8 @@ pub struct AudioTrackMachinesParamsValues {
     pub pickup_machine: AudioTrackMachineParamsValuesPickup,
 }
 
+/// Values of a Track's main LFO parameters page.
+/// Note that the speed and depth settings in the LFO Setup menu are looking at these values too.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct LfoParamsValues {
     pub spd1: u8,
@@ -167,6 +179,7 @@ pub struct LfoParamsValues {
     pub dep3: u8,
 }
 
+/// Values of a Track's main AMP parameters page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AmpParamsValues {
     pub atk: u8,
@@ -178,6 +191,7 @@ pub struct AmpParamsValues {
     unused: u8,
 }
 
+/// Values of a Track's FX parameters page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct FxParamsValues {
     pub param_1: u8,
@@ -197,6 +211,7 @@ pub struct AudioTrackParamsValues {
     pub fx2: FxParamsValues,
 }
 
+/// First set of values for a Track's LFO Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct LfoParamsSetup1 {
     pub lfo1_pmtr: u8,
@@ -207,6 +222,7 @@ pub struct LfoParamsSetup1 {
     pub lfo3_wave: u8,
 }
 
+/// Second set of values for a Track's LFO Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct LfoParamsSetup2 {
     pub lfo1_mult: u8,
@@ -217,6 +233,7 @@ pub struct LfoParamsSetup2 {
     pub lfo3_trig: u8,
 }
 
+/// Values for a Track's AMP Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AmpParamsSetup {
     pub amp: u8,
@@ -228,6 +245,7 @@ pub struct AmpParamsSetup {
     unused: u8,
 }
 
+/// Values for a Track's FX Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct FxParamsSetup {
     pub setting1: u8,
@@ -257,6 +275,7 @@ pub struct AudioTrackParamsSetup {
     pub lfo_setup_2: LfoParamsSetup2,
 }
 
+/// Values for a MIDI Track's MIDI parameter page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackMidiParamsValues {
     pub note: u8,
@@ -267,6 +286,8 @@ pub struct MidiTrackMidiParamsValues {
     pub not4: u8,
 }
 
+/// Values for a MIDI Track's LFO parameter page.
+/// todo: combine with lfo params?
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackLfoParamsValues {
     pub spd1: u8,
@@ -277,6 +298,7 @@ pub struct MidiTrackLfoParamsValues {
     pub dep3: u8,
 }
 
+/// Values for a MIDI Track's Arp parameter page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackArpParamsValues {
     pub tran: u8,
@@ -287,6 +309,7 @@ pub struct MidiTrackArpParamsValues {
     pub nlen: u8,
 }
 
+/// Values for a MIDI Track's CC1 parameter page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackCc1ParamsValues {
     pub pb: u8,
@@ -297,6 +320,7 @@ pub struct MidiTrackCc1ParamsValues {
     pub cc4: u8,
 }
 
+/// Values for a MIDI Track's CC2 parameter page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackCc2ParamsValues {
     pub cc5: u8,
@@ -319,6 +343,7 @@ pub struct MidiTrackParamsValues {
     pub unknown: [u8; 2],
 }
 
+/// Values for a MIDI Track's Note Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackNoteParamsSetup {
     pub chan: u8,
@@ -329,6 +354,7 @@ pub struct MidiTrackNoteParamsSetup {
     unused_2: u8,
 }
 
+/// Values for a MIDI Track's Arp Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackArpParamsSetup {
     unused_1: u8,
@@ -342,6 +368,7 @@ pub struct MidiTrackArpParamsSetup {
     pub key: u8,
 }
 
+/// Values for a MIDI Track's CC1 Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackCc1ParamsSetup {
     unused_1: u8,
@@ -352,6 +379,7 @@ pub struct MidiTrackCc1ParamsSetup {
     pub cc4: u8,
 }
 
+/// Values for a MIDI Track's CC2 Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackCc2ParamsSetup {
     pub cc5: u8,
@@ -373,7 +401,7 @@ pub struct MidiTrackParamsSetup {
     pub lfo2: LfoParamsSetup2,
 }
 
-// TODO
+/// A custom LFO Design -- array of 16 values.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct CustomLfo([u8; 16]);
 
@@ -409,12 +437,14 @@ pub struct CustomLfos {
 
 /// LFO Interpolation mask.
 /// Indicates which LFO steps should have values interpolated when LFO is triggered.
+/// Not sure exactly how the calculation works yet.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct CustomLfoInterpolationMask {
     #[serde(with = "BigArray")]
     pub mask: [u8; 2],
 }
 
+/// First page of settings controlling an Audio Track's Recording Buffer configuration.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct RecorderSetupSources {
     pub in_ab: u8,
@@ -427,6 +457,7 @@ pub struct RecorderSetupSources {
     pub xloop: u8,
 }
 
+/// Second page of settings controlling an Audio Track's Recording Buffer configuration.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct RecorderSetupProcessing {
     pub fin: u8,
@@ -444,11 +475,14 @@ pub struct RecorderSetup {
     pub proc: RecorderSetupProcessing,
 }
 
+/// Scene Parameter assignments for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct SceneParamsTrack {
+    /// Don't know what this data block is for yet :/
     #[serde(with = "BigArray")]
     pub ukn1: [u8; 340],
 
+    /// The parameter assignments.
     #[serde(with = "BigArray")]
     pub params_values: [u8; 30],
 
@@ -460,69 +494,16 @@ pub struct SceneParamsTrack {
     /// `MIN` -> `0`.
     pub xlv: u8,
 
+    /// Don't know what this data block is for yet :/
     #[serde(with = "BigArray")]
     pub ukn9: [u8; 2],
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct SceneParams {
-    #[serde(with = "BigArray")]
-    pub track_1: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_2: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_3: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_4: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_5: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_6: [u8; 532],
-
-    #[serde(with = "BigArray")]
-    pub track_7: [u8; 532],
-
-    pub track_8: SceneParamsTrack,
-}
-
-// TODO
+/// A MIDI Track's custom Arp sequence.
+/// `0` -> `+63` values (above line) maps to `0` -> `63`.
+/// `-1` -> `-63` values (below line) map to `255` -> `192`.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiArpSequence([u8; 16]);
-
-/// Arp Sequence Patterns for MIDI tracks.
-/// `0` -> `+63` values (above line) maps to `0` -> `63`.
-/// `-1` -> `-63` values (above line) map to `255` -> `192`.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct MidiArpSequences {
-    #[serde(with = "BigArray")]
-    pub track_1: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_2: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_3: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_4: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_5: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_6: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_7: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_8: [u8; 16],
-}
 
 // TODO: For some reaosn there are EIGHT part sections in the data file...
 // I do not know why ... previous states?
@@ -655,7 +636,7 @@ pub struct Part {
     pub midi_track_arp_mute_masks: [u8; 16],
 
     /// Arp Sequence Notes for MIDI tracks.
-    pub midi_track_arp_seqs: MidiArpSequences,
+    pub midi_track_arp_seqs: [MidiArpSequence; 8],
 }
 
 impl Part {
