@@ -6,24 +6,81 @@ CLI tools for the [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratra
 
 Only tested against the latest version of the Octatrack OS 1.40B (?).
 
-**NOTE**: This has mostly been a **learning** project for me to mess around and get to grips with Rust. 
+### Warnings
+
+This has mostly been a **learning** project for me to mess around and get to grips with Rust. 
 **Do not expect high quality rust code just now**.
 
-Also, use at your own risk -- there are still edge cases and some jank.
+Use at your own risk -- there are still edge cases and some jank.
+
+Only Linux supported at the moment.
+
 
 ### Current Features (mostly working-ish)
 
 - Copy 1x Bank to a new location via CLI.
-- Copy Nx Banks to new locations via YAML.
-- Create 1x sliced Sample Chain via CLI
-- Create Nx sliced Sample Chains via YAML
-- Deconstruct 1x sliced Sample Chain into a WAV file per slice via the CLI
-- Deconstruct Nx sliced Sample Chain into a WAV file per slice via YAML
-- Inspect various project data files (project/bank/parts/part/pattern/pattern/arrangement/sample) 
-- List samples slots being used in a project
-- Find compatible WAV files in a local directory and write their file paths to a YAML file
-- Scan a Compact Flash card and dump full Project information to YAML (warning, generates multi-GB YAML output!)
+```bash
+octatools copy bank <SRC_BANK_FILE_PATH> <DEST_BANK_FILE_PATH>
+```
 
+- Copy Nx Banks to new locations via YAML.
+```bash
+octatools copy banks <YAML_CONFIG_FILE_PATH>
+```
+
+- Create 1x sliced Sample Chain via CLI
+```bash
+octatools chains create-chain  <CHAIN_NAME> <OUT_DIR_PATH> [WAV_FILE_PATHS]...
+```
+- Create Nx sliced Sample Chains via YAML
+```bash
+octatools chains create-chains  <YAML_CONFIG_FILE_PATH>
+```
+
+- Deconstruct 1x sliced Sample Chain into a WAV file per slice via the CLI
+```bash
+octatools chains deconstruct-chain <OT_FILE_PATH> <AUDIO_FILE_PATH> <OUT_DIR_PATH>
+```
+
+- Deconstruct Nx sliced Sample Chain into a WAV file per slice via YAML
+```bash
+octatools chains deconstruct-chains <YAML_CONFIG_FILE_PATH>
+```
+
+- Inspect various project data files (project/bank/parts/part/pattern/pattern/arrangement/sample) 
+```bash
+octatools inspect arrangement <PATH_TO_ARRANGEMENT_FILE>
+octatools inspect bank <PATH_TO_BANK_FILE>
+octatools inspect parts <PATH_TO_BANK_FILE>
+octatools inspect part <PATH_TO_BANK_FILE> <PART_NUMBER>
+octatools inspect patterns <PATH_TO_BANK_FILE>
+octatools inspect pattern <PATH_TO_BANK_FILE> <PATTERN_NUMBER>
+octatools inspect project <PATH_TO_PROJECT_FILE>
+octatools inspect sample <PATH_TO_OT_FILE>
+```
+
+- List samples slots being used in a project
+```bash
+octatools list project-slots <PATH_TO_PROJECT_FILE>
+```
+
+- Find compatible WAV files in a local directory and write their file paths to a YAML file
+```bash
+# Output a simple YAML list of compatible files, 
+# can be copied and pasted into the YAML config for
+# the `octatools chains create-chains` command
+octatools index samplesdir-simple <SAMPLES_DIR_PATH> [OUTPUT_YAML_FILE_PATH]
+
+# Generate a more full analysis of available samples
+octatools index samplesdir-full <SAMPLES_DIR_PATH> [OUTPUT_YAML_FILE_PATH]
+```
+
+- Scan a Compact Flash card and dump full Project information to YAML (warning, generates multi-GB YAML output!)
+```bash
+# Generate a YAML dump of all Octatrack data files on a Compact Flash card.
+# CF_CARD_PATH is the path to the root of the Compact Flash Card
+octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
+```
 ### Repo structure
 
 - `./assets/` contains the project logo.
