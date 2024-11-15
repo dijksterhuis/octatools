@@ -1,0 +1,5 @@
+to_copy:
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
