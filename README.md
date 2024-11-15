@@ -20,12 +20,12 @@ Only Linux supported at the moment.
 
 - Copy 1x Bank to a new location via CLI.
 ```bash
-octatools copy bank <SRC_BANK_FILE_PATH> <DEST_BANK_FILE_PATH>
+octatools transfer bank <SRC_BANK_FILE_PATH> <DEST_BANK_FILE_PATH>
 ```
 
 - Copy Nx Banks to new locations via YAML.
 ```bash
-octatools copy banks <YAML_CONFIG_FILE_PATH>
+octatools transfer banks <YAML_CONFIG_FILE_PATH>
 ```
 
 - Create 1x sliced Sample Chain via CLI
