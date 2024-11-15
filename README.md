@@ -22,22 +22,37 @@ Only tested against the latest version of the Octatrack OS 1.40B (?).
 - Find compatible WAV files in a local directory and write their file paths to a YAML file
 - Scan a Compact Flash card and dump full Project information to YAML (warning, generates multi-GB YAML output!)
 
-See the `./examples/yaml/` directory for some examples on how to do batch operations for copying banks and creating sample chains.
+### Repo structure
 
-### TODOs
+- `./assets/` contains the logo thing.
+- `./data/tests/` contains data for running the tests, or trying out some commands.
+- `./examples/yaml/` contains some examples on how to do batch operations for copying banks and creating sample chains.
+- `./serde_octatrack` contains the code for the serialization and deserialization of octatrack files. 
+- `./src` contains the CLI commands code.
+
+### TODOs / Other Ideas
 
 - Clean up CLI commands, sort out CLI options etc via CLAP.
 - Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
 - List all Sets, Projects, Sample Slots, Samples. 
-- Finish reverse engineering bank files.
+- Finish reverse engineering bank files (MIDI Track Pattern trigs, the massive block in Parameter Locks).
 - Cross-compilation / CI builds on Windows 10/11 and macOS.
 - Consolidate all audio files from Projects within a Set into a Set's Audio Pool.
 - Consolidate relevant audio files from a Set's Audio Pool to other Project(s).
 - Minor sample editing (normalisation, fades, reverses, etc).
-- PyO3 bindings for creating a python interface.
+- PyO3 bindings for creating a python interface to `serde_octatrack`
 - Actually make the rust code idiomatic and 'clean' and optimised.
 - Ser/De to Enum/String/etc types instead of u8.
-
+- Handle AIFF files (and switching between AIFF and WAV within the code -- probably needs an abstraction).
+- Logging pass over.
+- Random slices for a long audio file.
+- Template project command: YAML project -> Octatrack project files
+- As above, but with Parts for a bank.
+- Inspect RIFF header issues with `hound` on samples from mars files
+- More tests.
+- Even more tests.
+- CI release builds
+- Deal with over use of `.clone()` absolutely everywhere.
 
 ### What this software is not
 - A clone of DigiChain
