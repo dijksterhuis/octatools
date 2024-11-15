@@ -1,3 +1,4 @@
+pub mod arrangements;
 pub mod banks;
 pub mod common;
 pub mod constants;

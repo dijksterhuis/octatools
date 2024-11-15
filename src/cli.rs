@@ -100,6 +100,85 @@ pub enum Inspect {
         /// Path to the `.ot` Sample Attributes file.
         path: PathBuf,
     },
+
+    /// Inspect an Arrangement file for a Project.
+    Arrangement {
+        /// Path to the arrangement file.
+        path: PathBuf,
+    },
+
+    /// Inspect a Markers file from a Project.
+    Markers {
+        /// Path to the markers file.
+        path: PathBuf,
+    },
+
+    #[command(subcommand)]
+    Bytes(InspectBytes),
+}
+
+/// Inspect Octatrack data file contents as the raw byte streams (to be used in for reverse engineering / debugging).
+#[derive(Subcommand, Debug)]
+pub enum InspectBytes {
+    /// Inspect a Project as u8 bytes
+    Project {
+        /// Path to the Project file.
+        path: PathBuf,
+    },
+
+    /// Inspect a Bank as u8 bytes
+    Bank {
+        /// Path to the Bank file.
+        path: PathBuf,
+    },
+
+    /// Inspect all the Parts data within a Bank as u8 bytes
+    Parts {
+        /// Path to the Bank file containing all the Parts to inspect.
+        path: PathBuf,
+    },
+
+    /// Inspect a specific Part within a Bank as u8 bytes
+    Part {
+        /// Path to the Bank file containing a specific Part to inspect.
+        path: PathBuf,
+        /// The Part number (1/2/3/4)
+        index: usize,
+    },
+
+    /// Inspect all the Patterns within a Bank as u8 bytes
+    Patterns {
+        /// Path to the Bank file containing all the Patterns to inspect.
+        path: PathBuf,
+    },
+
+    /// Inspect a specific Pattern within a Bank as u8 bytes
+    Pattern {
+        /// Path to the Bank file containing a specific Pattern to inspect.
+        path: PathBuf,
+        /// The Pattern number (1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16)
+        index: usize,
+    },
+
+    /// Inspect a Sample Attributes file for an audio sample as u8 bytes
+    Sample {
+        /// Path to the `.ot` Sample Attributes file.
+        path: PathBuf,
+    },
+
+    /// Inspect an Arrangement file for a Project as u8 bytes.
+    Arrangement {
+        /// Path to the arrangement file.
+        path: PathBuf,
+        start_idx: Option<usize>,
+        nbytes: Option<usize>,
+    },
+
+    /// Inspect a Markers file from a Project as u8 bytes.
+    Markers {
+        /// Path to the markers file.
+        path: PathBuf,
+    },
 }
 
 /// Transfer Octatrack Project(s)/Bank(s) to new location(s).
