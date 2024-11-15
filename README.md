@@ -2,14 +2,16 @@
 
 ![CLI Tools for the Elektron Octatrack DPS-1](assets/logo.png "OctaTools")
 
-CLI Tools for the [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
+CLI tools for the [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
 
 Only tested against the latest version of the Octatrack OS 1.40B (?).
 
-**NOTE**: This is mostly a **learning** project for me to mess around and get to grips with Rust. 
-**DO NOT EXPECT HIGH QUALITY RUST CODE HERE**.
+**NOTE**: This has mostly been a **learning** project for me to mess around and get to grips with Rust. 
+**Do not expect high quality rust code just now**.
 
-### Current Features
+Also, use at your own risk -- there are still edge cases and some jank.
+
+### Current Features (mostly working-ish)
 
 - Copy 1x Bank to a new location via CLI.
 - Copy Nx Banks to new locations via YAML.
@@ -24,10 +26,10 @@ Only tested against the latest version of the Octatrack OS 1.40B (?).
 
 ### Repo structure
 
-- `./assets/` contains the logo thing.
+- `./assets/` contains the project logo.
 - `./data/tests/` contains data for running the tests, or trying out some commands.
 - `./examples/yaml/` contains some examples on how to do batch operations for copying banks and creating sample chains.
-- `./serde_octatrack` contains the code for the serialization and deserialization of octatrack files. 
+- `./serde_octatrack` contains the library for serialization and deserialization of octatrack files. 
 - `./src` contains the CLI commands code.
 
 ### TODOs / Other Ideas
