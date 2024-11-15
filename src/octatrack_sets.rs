@@ -20,10 +20,8 @@ use serde_octatrack::{
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
 /// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
-
 pub trait SearchForOctatrackSampleFilePair {
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
-
     fn scan_dir_path_for_samples(dir_path: &PathBuf) -> RVoidError<Vec<SampleFilePair>> {
         let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dir_path).unwrap();
 
