@@ -122,7 +122,7 @@ mod tests {
         }
     }
 
-    mod tet_from_decoded {
+    mod test_from_decoded {
 
         use crate::{
             common::OptionEnumValueConvert,
