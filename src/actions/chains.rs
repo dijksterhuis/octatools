@@ -212,7 +212,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
     audio_fpath: &PathBuf,
     attributes_fpath: &PathBuf,
     out_dirpath: &PathBuf,
-) -> RBoxErr<()> {
+) -> RBoxErr<Vec<PathBuf>> {
     if !out_dirpath.is_dir() {
         panic!("Output dirpath argument is not a directory. Must be a directory.");
     }
@@ -227,6 +227,8 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
         .unwrap_or(&std::ffi::OsStr::new("deconstructed_samplechain"))
         .to_str()
         .unwrap_or("deconstructed_samplechain");
+
+    let mut out_fpaths: Vec<PathBuf> = vec![];
 
     for i in 0..attrs.slices_len {
         let slice = attrs.slices[i as usize];
@@ -246,8 +248,10 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
         let _ = wavslice
             .to_pathbuf(&out_fpath)
             .expect(format!("Could not write slice to wavfile: path={out_fpath:#?}").as_str());
+
+        out_fpaths.push(out_fpath);
     }
-    Ok(())
+    Ok(out_fpaths)
 }
 
 pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
@@ -282,6 +286,38 @@ pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<
 
 #[cfg(test)]
 mod tests {
+
+    mod chain_deconstruct {
+
+        use std::{fs, path::PathBuf};
+        use walkdir::{DirEntry, WalkDir};
+        use crate::actions::chains::deconstruct_samplechain_from_pathbufs_only;
+
+        #[test]
+        fn test_basic() {
+
+            let audio_fpath = PathBuf::from("data/tests/chains/deconstruct/test.wav");
+            let attributes_fpath = PathBuf::from("data/tests/chains/deconstruct/test.ot");
+            let outdir = PathBuf::from("/tmp/");
+
+            let res = deconstruct_samplechain_from_pathbufs_only(
+                &audio_fpath,
+                &attributes_fpath,
+                &outdir,
+            );
+
+            let outfiles = res.unwrap();
+
+            let files_exist: bool = outfiles.iter().all(|fp| fp.exists());
+
+            // clean up
+            for file in outfiles {
+                let _ = fs::remove_file(file);
+            }
+
+            assert!(files_exist)
+        }
+    }
 
     mod chain_create {
 
