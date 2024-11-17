@@ -289,13 +289,12 @@ mod tests {
 
     mod chain_deconstruct {
 
+        use crate::actions::chains::deconstruct_samplechain_from_pathbufs_only;
         use std::{fs, path::PathBuf};
         use walkdir::{DirEntry, WalkDir};
-        use crate::actions::chains::deconstruct_samplechain_from_pathbufs_only;
 
         #[test]
         fn test_basic() {
-
             let audio_fpath = PathBuf::from("data/tests/chains/deconstruct/test.wav");
             let attributes_fpath = PathBuf::from("data/tests/chains/deconstruct/test.ot");
             let outdir = PathBuf::from("/tmp/");

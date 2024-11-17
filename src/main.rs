@@ -1,5 +1,5 @@
 //! # `octatools`
-//! 
+//!
 //! CLI tools to interact with with data files used by the [Elektron Octatrack DPS](https://www.elektron.se/en/octratrack-mkii-explorer)
 
 mod actions;
