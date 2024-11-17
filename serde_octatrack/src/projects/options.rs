@@ -2,7 +2,7 @@
 
 // TODO: Break this up into options modules in the projects / samples directories.
 
-use crate::common::{OptionEnumValueConvert, RVoidError};
+use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
 use serde::{Deserialize, Serialize};
 
 /// Sample Slot options for Projects.
@@ -23,16 +23,16 @@ impl OptionEnumValueConvert for ProjectSampleSlotType {
     type T = ProjectSampleSlotType;
     type V = String;
 
-    fn from_value(v: Self::V) -> RVoidError<Self::T> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v.to_ascii_uppercase().as_str() {
             "STATIC" => Ok(ProjectSampleSlotType::Static),
             "FLEX" => Ok(ProjectSampleSlotType::Flex),
             "RECORDER" => Ok(ProjectSampleSlotType::RecorderBuffer),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
-    fn value(&self) -> RVoidError<Self::V> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             ProjectSampleSlotType::Static => Ok("STATIC".to_string()),
             ProjectSampleSlotType::Flex => Ok("FLEX".to_string()),
@@ -105,7 +105,7 @@ impl OptionEnumValueConvert for ProjectMidiChannels {
     type T = ProjectMidiChannels;
     type V = i8;
 
-    fn from_value(v: Self::V) -> RVoidError<Self::T> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v {
             -1 => Ok(Self::Disabled),
             1 => Ok(Self::One),
@@ -124,11 +124,11 @@ impl OptionEnumValueConvert for ProjectMidiChannels {
             14 => Ok(Self::Fourteen),
             15 => Ok(Self::Fifteen),
             16 => Ok(Self::Sixteen),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
-    fn value(&self) -> RVoidError<Self::V> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             Self::Disabled => Ok(-1),
             Self::One => Ok(1),
@@ -181,9 +181,8 @@ mod test_spec {
 
             #[test]
             fn test_error() {
-                assert_eq!(
-                    ProjectSampleSlotType::from_value("SOME INCORRECT STRING".to_string()),
-                    Err(()),
+                assert!(
+                    ProjectSampleSlotType::from_value(&"SOME INCORRECT STRING".to_string()).is_err(),
                 );
             }
 
@@ -191,7 +190,7 @@ mod test_spec {
             fn test_static_upper() {
                 assert_eq!(
                     ProjectSampleSlotType::Static,
-                    ProjectSampleSlotType::from_value("STATIC".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"STATIC".to_string()).unwrap(),
                 );
             }
 
@@ -199,7 +198,7 @@ mod test_spec {
             fn test_static_lower() {
                 assert_eq!(
                     ProjectSampleSlotType::Static,
-                    ProjectSampleSlotType::from_value("static".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"static".to_string()).unwrap(),
                 );
             }
 
@@ -207,7 +206,7 @@ mod test_spec {
             fn test_flex_upper() {
                 assert_eq!(
                     ProjectSampleSlotType::Flex,
-                    ProjectSampleSlotType::from_value("FLEX".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"FLEX".to_string()).unwrap(),
                 );
             }
 
@@ -215,7 +214,7 @@ mod test_spec {
             fn test_flex_lower() {
                 assert_eq!(
                     ProjectSampleSlotType::Flex,
-                    ProjectSampleSlotType::from_value("flex".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"flex".to_string()).unwrap(),
                 );
             }
 
@@ -223,7 +222,7 @@ mod test_spec {
             fn test_recorder_upper() {
                 assert_eq!(
                     ProjectSampleSlotType::RecorderBuffer,
-                    ProjectSampleSlotType::from_value("RECORDER".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"RECORDER".to_string()).unwrap(),
                 );
             }
 
@@ -231,7 +230,7 @@ mod test_spec {
             fn test_recorder_lower() {
                 assert_eq!(
                     ProjectSampleSlotType::RecorderBuffer,
-                    ProjectSampleSlotType::from_value("recorder".to_string()).unwrap(),
+                    ProjectSampleSlotType::from_value(&"recorder".to_string()).unwrap(),
                 );
             }
         }
@@ -320,129 +319,129 @@ mod test_spec {
 
             #[test]
             fn test_error_1() {
-                assert_eq!(ProjectMidiChannels::from_value(100), Err(()),);
+                assert!(ProjectMidiChannels::from_value(&100).is_err());
             }
             #[test]
             fn test_error_2() {
-                assert_eq!(ProjectMidiChannels::from_value(0), Err(()),);
+                assert!(ProjectMidiChannels::from_value(&0).is_err());
             }
             #[test]
             fn test_disabled() {
                 assert_eq!(
                     ProjectMidiChannels::Disabled,
-                    ProjectMidiChannels::from_value(-1).unwrap()
+                    ProjectMidiChannels::from_value(&-1).unwrap()
                 );
             }
             #[test]
             fn test_1() {
                 assert_eq!(
                     ProjectMidiChannels::One,
-                    ProjectMidiChannels::from_value(1).unwrap()
+                    ProjectMidiChannels::from_value(&1).unwrap()
                 );
             }
             #[test]
             fn test_2() {
                 assert_eq!(
                     ProjectMidiChannels::Two,
-                    ProjectMidiChannels::from_value(2).unwrap()
+                    ProjectMidiChannels::from_value(&2).unwrap()
                 );
             }
             #[test]
             fn test_3() {
                 assert_eq!(
                     ProjectMidiChannels::Three,
-                    ProjectMidiChannels::from_value(3).unwrap()
+                    ProjectMidiChannels::from_value(&3).unwrap()
                 );
             }
             #[test]
             fn test_4() {
                 assert_eq!(
                     ProjectMidiChannels::Four,
-                    ProjectMidiChannels::from_value(4).unwrap()
+                    ProjectMidiChannels::from_value(&4).unwrap()
                 );
             }
             #[test]
             fn test_5() {
                 assert_eq!(
                     ProjectMidiChannels::Five,
-                    ProjectMidiChannels::from_value(5).unwrap()
+                    ProjectMidiChannels::from_value(&5).unwrap()
                 );
             }
             #[test]
             fn test_6() {
                 assert_eq!(
                     ProjectMidiChannels::Six,
-                    ProjectMidiChannels::from_value(6).unwrap()
+                    ProjectMidiChannels::from_value(&6).unwrap()
                 );
             }
             #[test]
             fn test_7() {
                 assert_eq!(
                     ProjectMidiChannels::Seven,
-                    ProjectMidiChannels::from_value(7).unwrap()
+                    ProjectMidiChannels::from_value(&7).unwrap()
                 );
             }
             #[test]
             fn test_8() {
                 assert_eq!(
                     ProjectMidiChannels::Eight,
-                    ProjectMidiChannels::from_value(8).unwrap()
+                    ProjectMidiChannels::from_value(&8).unwrap()
                 );
             }
             #[test]
             fn test_9() {
                 assert_eq!(
                     ProjectMidiChannels::Nine,
-                    ProjectMidiChannels::from_value(9).unwrap()
+                    ProjectMidiChannels::from_value(&9).unwrap()
                 );
             }
             #[test]
             fn test_10() {
                 assert_eq!(
                     ProjectMidiChannels::Ten,
-                    ProjectMidiChannels::from_value(10).unwrap()
+                    ProjectMidiChannels::from_value(&10).unwrap()
                 );
             }
             #[test]
             fn test_11() {
                 assert_eq!(
                     ProjectMidiChannels::Eleven,
-                    ProjectMidiChannels::from_value(11).unwrap()
+                    ProjectMidiChannels::from_value(&11).unwrap()
                 );
             }
             #[test]
             fn test_12() {
                 assert_eq!(
                     ProjectMidiChannels::Twelve,
-                    ProjectMidiChannels::from_value(12).unwrap()
+                    ProjectMidiChannels::from_value(&12).unwrap()
                 );
             }
             #[test]
             fn test_13() {
                 assert_eq!(
                     ProjectMidiChannels::Thirteen,
-                    ProjectMidiChannels::from_value(13).unwrap()
+                    ProjectMidiChannels::from_value(&13).unwrap()
                 );
             }
             #[test]
             fn test_14() {
                 assert_eq!(
                     ProjectMidiChannels::Fourteen,
-                    ProjectMidiChannels::from_value(14).unwrap()
+                    ProjectMidiChannels::from_value(&14).unwrap()
                 );
             }
             #[test]
             fn test_15() {
                 assert_eq!(
                     ProjectMidiChannels::Fifteen,
-                    ProjectMidiChannels::from_value(15).unwrap()
+                    ProjectMidiChannels::from_value(&15).unwrap()
                 );
             }
             #[test]
             fn test_16() {
                 assert_eq!(
                     ProjectMidiChannels::Sixteen,
-                    ProjectMidiChannels::from_value(16).unwrap()
+                    ProjectMidiChannels::from_value(&16).unwrap()
                 );
             }
         }

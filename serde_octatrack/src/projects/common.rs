@@ -1,6 +1,6 @@
 //! Utilities for reading `project.*` files.
 
-use crate::common::OptionEnumValueConvert;
+use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
 use std::collections::HashMap;
 
 /// ASCII data section headings within an Octatrack `project.*` file
@@ -11,22 +11,23 @@ pub enum ProjectRawFileSection {
     Samples,
 }
 
+
 impl OptionEnumValueConvert for ProjectRawFileSection {
     type T = ProjectRawFileSection;
     type V = String;
 
-    fn from_value(v: Self::V) -> Result<Self::T, ()> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v.to_ascii_uppercase().as_str() {
             "META" => Ok(Self::Meta),
             "STATES" => Ok(Self::States),
             "SETTINGS" => Ok(Self::Settings),
             "SAMPLES" => Ok(Self::Samples),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
     // TODO: This should never error, so doesn't need a Result here!
-    fn value(&self) -> Result<Self::V, ()> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             Self::Meta => Ok("META".to_string()),
             Self::States => Ok("STATES".to_string()),

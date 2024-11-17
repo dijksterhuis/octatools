@@ -12,6 +12,23 @@ use std::str::FromStr;
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
 pub type RVoidError<T> = Result<T, ()>;
 
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum SerdeOctatrackErrors {
+    NoMatchingOptionEnumValue,
+}
+impl std::fmt::Display for SerdeOctatrackErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::NoMatchingOptionEnumValue => {
+                write!(f, "no matching enum option for the provided value")
+            }
+        }
+    }
+}
+impl std::error::Error for SerdeOctatrackErrors {}
+
+
 /// Trait to convert between Enum option instances and their corresponding value.
 pub trait OptionEnumValueConvert {
     /// One of the enum types within the `octatrack::options` module.
@@ -21,10 +38,10 @@ pub trait OptionEnumValueConvert {
     type V;
 
     /// Get an Enum instance from a numeric value.
-    fn from_value(v: Self::V) -> Result<Self::T, ()>;
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T>;
 
     /// Get a numeric value for an Enum instance.
-    fn value(&self) -> Result<Self::V, ()>;
+    fn value(&self) -> RBoxErr<Self::V>;
 }
 
 /// Trait for adding the `.swap_bytes()` method.

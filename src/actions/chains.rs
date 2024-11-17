@@ -415,18 +415,11 @@ mod tests {
                 &slices,
             );
 
-            let composed_chain = &composed_chain_res.clone().unwrap();
-
-            if composed_chain_res.is_err() {
-                println!("ERROR IN TEST: {:#?}:", &composed_chain_res.err());
-                assert!(false);
-            }
-
             let valid_ot_fp = PathBuf::from("data/tests/1/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(
-                composed_chain.encode().unwrap(),
+                composed_chain_res.unwrap().encode().unwrap(),
                 valid_sample_chain.encode().unwrap(),
             );
         }

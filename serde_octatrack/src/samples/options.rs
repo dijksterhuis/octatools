@@ -1,6 +1,6 @@
 //! Enums for Octatrack options realted to `SampleAttribute` files (`.ot` files).
 
-use crate::common::{OptionEnumValueConvert, RVoidError};
+use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
 use serde::{Deserialize, Serialize};
 
 /// Sample attributes Timestrech options.
@@ -22,16 +22,16 @@ impl OptionEnumValueConvert for SampleAttributeTimestrechMode {
     type T = SampleAttributeTimestrechMode;
     type V = u32;
 
-    fn from_value(v: Self::V) -> RVoidError<Self::T> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v {
             0 => Ok(SampleAttributeTimestrechMode::Off),
             2 => Ok(SampleAttributeTimestrechMode::Normal),
             3 => Ok(SampleAttributeTimestrechMode::Beat),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
-    fn value(&self) -> RVoidError<Self::V> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             SampleAttributeTimestrechMode::Off => Ok(0),
             SampleAttributeTimestrechMode::Normal => Ok(2),
@@ -60,16 +60,16 @@ impl OptionEnumValueConvert for SampleAttributeLoopMode {
     type T = SampleAttributeLoopMode;
     type V = u32;
 
-    fn from_value(v: Self::V) -> RVoidError<Self::T> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v {
             0 => Ok(SampleAttributeLoopMode::Off),
             1 => Ok(SampleAttributeLoopMode::Normal),
             2 => Ok(SampleAttributeLoopMode::PingPong),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
-    fn value(&self) -> RVoidError<Self::V> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             SampleAttributeLoopMode::Off => Ok(0),
             SampleAttributeLoopMode::Normal => Ok(1),
@@ -144,7 +144,7 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
     type T = SampleAttributeTrigQuantizationMode;
     type V = u32;
 
-    fn from_value(v: Self::V) -> RVoidError<Self::T> {
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v {
             0 => Ok(SampleAttributeTrigQuantizationMode::Direct),
             255 => Ok(SampleAttributeTrigQuantizationMode::PatternLength),
@@ -164,11 +164,11 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
             14 => Ok(SampleAttributeTrigQuantizationMode::OneTwentyEightSteps),
             15 => Ok(SampleAttributeTrigQuantizationMode::OneNinetyTwoSteps),
             16 => Ok(SampleAttributeTrigQuantizationMode::TwoFiveSixSteps),
-            _ => Err(()),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
         }
     }
 
-    fn value(&self) -> RVoidError<Self::V> {
+    fn value(&self) -> RBoxErr<Self::V> {
         match self {
             SampleAttributeTrigQuantizationMode::Direct => Ok(0),
             SampleAttributeTrigQuantizationMode::PatternLength => Ok(255),
@@ -370,135 +370,134 @@ mod test_spec {
 
             #[test]
             fn test_error() {
-                assert_eq!(
-                    SampleAttributeTrigQuantizationMode::from_value(200),
-                    Err(()),
+                assert!(
+                    SampleAttributeTrigQuantizationMode::from_value(&200).is_err()
                 );
             }
             #[test]
             fn test_direct() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::Direct,
-                    SampleAttributeTrigQuantizationMode::from_value(0).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&0).unwrap()
                 );
             }
             #[test]
             fn test_patternlen() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::PatternLength,
-                    SampleAttributeTrigQuantizationMode::from_value(255).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&255).unwrap()
                 );
             }
             #[test]
             fn test_1() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::OneStep,
-                    SampleAttributeTrigQuantizationMode::from_value(1).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&1).unwrap()
                 );
             }
             #[test]
             fn test_2() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::TwoSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(2).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&2).unwrap()
                 );
             }
             #[test]
             fn test_3() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::ThreeSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(3).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&3).unwrap()
                 );
             }
             #[test]
             fn test_4() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::FourSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(4).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&4).unwrap()
                 );
             }
             #[test]
             fn test_6() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::SixSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(5).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&5).unwrap()
                 );
             }
             #[test]
             fn test_8() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::EightSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(6).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&6).unwrap()
                 );
             }
             #[test]
             fn test_12() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::TwelveSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(7).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&7).unwrap()
                 );
             }
             #[test]
             fn test_16() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::SixteenSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(8).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&8).unwrap()
                 );
             }
             #[test]
             fn test_24() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::TwentyFourSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(9).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&9).unwrap()
                 );
             }
             #[test]
             fn test_32() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::ThirtyTwoSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(10).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&10).unwrap()
                 );
             }
             #[test]
             fn test_48() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::FourtyEightSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(11).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&11).unwrap()
                 );
             }
             #[test]
             fn test_64() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::SixtyFourSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(12).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&12).unwrap()
                 );
             }
             #[test]
             fn test_96() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::NinetySixSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(13).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&13).unwrap()
                 );
             }
             #[test]
             fn test_128() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::OneTwentyEightSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(14).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&14).unwrap()
                 );
             }
             #[test]
             fn test_192() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::OneNinetyTwoSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(15).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&15).unwrap()
                 );
             }
             #[test]
             fn test_256() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::TwoFiveSixSteps,
-                    SampleAttributeTrigQuantizationMode::from_value(16).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&16).unwrap()
                 );
             }
         }
@@ -532,32 +531,33 @@ mod test_spec {
             fn test_error() {
                 // not in a sequental range with other values
                 // dunno why they implemented it to skip value of 1, possible bug or easter egg?
-                assert_eq!(SampleAttributeTimestrechMode::from_value(1), Err(()),);
+                assert!(SampleAttributeTimestrechMode::from_value(&1).is_err());
                 // do a slightly exhausitve check, but don't test the whole u32 range
                 // as it's not worth the performance drain
                 for i in 4..u8::MAX {
-                    assert_eq!(SampleAttributeTimestrechMode::from_value(i as u32), Err(()),);
+                    let b = i as u32;
+                    assert!(SampleAttributeTimestrechMode::from_value(&b).is_err());
                 }
             }
             #[test]
             fn test_off_from_value() {
                 assert_eq!(
                     SampleAttributeTimestrechMode::Off,
-                    SampleAttributeTimestrechMode::from_value(0).unwrap()
+                    SampleAttributeTimestrechMode::from_value(&0).unwrap()
                 );
             }
             #[test]
             fn test_normal_from_value() {
                 assert_eq!(
                     SampleAttributeTimestrechMode::Normal,
-                    SampleAttributeTimestrechMode::from_value(2).unwrap()
+                    SampleAttributeTimestrechMode::from_value(&2).unwrap()
                 );
             }
             #[test]
             fn test_beat_from_value() {
                 assert_eq!(
                     SampleAttributeTimestrechMode::Beat,
-                    SampleAttributeTimestrechMode::from_value(3).unwrap()
+                    SampleAttributeTimestrechMode::from_value(&3).unwrap()
                 );
             }
         }
@@ -592,28 +592,29 @@ mod test_spec {
                 // do a slightly exhausitve check, but don't test the whole u32 range
                 // as it's not worth the performance drain
                 for i in 3..u8::MAX {
-                    assert_eq!(SampleAttributeLoopMode::from_value(i as u32), Err(()),);
+                    let x = i as u32;
+                    assert!(SampleAttributeLoopMode::from_value(&x).is_err());
                 }
             }
             #[test]
             fn test_off_from_value() {
                 assert_eq!(
                     SampleAttributeLoopMode::Off,
-                    SampleAttributeLoopMode::from_value(0).unwrap()
+                    SampleAttributeLoopMode::from_value(&0).unwrap()
                 );
             }
             #[test]
             fn test_normal_from_value() {
                 assert_eq!(
                     SampleAttributeLoopMode::Normal,
-                    SampleAttributeLoopMode::from_value(1).unwrap()
+                    SampleAttributeLoopMode::from_value(&1).unwrap()
                 );
             }
             #[test]
             fn test_beat_from_value() {
                 assert_eq!(
                     SampleAttributeLoopMode::PingPong,
-                    SampleAttributeLoopMode::from_value(2).unwrap()
+                    SampleAttributeLoopMode::from_value(&2).unwrap()
                 );
             }
         }

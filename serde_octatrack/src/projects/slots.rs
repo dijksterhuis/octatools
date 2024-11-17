@@ -15,7 +15,7 @@ use std::{collections::HashMap, convert::TryFrom, error::Error, path::PathBuf, s
 use crate::{
     common::{
         FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs, ProjectFromString,
-        ProjectToString,
+        ProjectToString, RBoxErr,
     },
     projects::options::ProjectSampleSlotType,
     samples::options::{
@@ -66,13 +66,14 @@ pub struct ProjectSampleSlot {
 
 impl ParseHashMapValueAs for ProjectSampleSlot {}
 
+
 // cannot use FromProjectStringData because it expects a lone Self result, rather than a Vec.
 impl FromHashMap for ProjectSampleSlot {
     type A = String;
     type B = String;
     type T = ProjectSampleSlot;
 
-    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> RBoxErr<Self::T> {
         // Flex Sample slots with ID > 128 are recording buffers
         // TODO: Make this part of the ProjectSampleSlotType from_value method?
         let mut sample_slot_type = hmap.get("type").unwrap().clone();
@@ -82,7 +83,7 @@ impl FromHashMap for ProjectSampleSlot {
             sample_slot_type = "RECORDER".to_string();
         }
 
-        let sample_type = ProjectSampleSlotType::from_value(sample_slot_type).unwrap();
+        let sample_type = ProjectSampleSlotType::from_value(&sample_slot_type)?;
 
         let path = PathBuf::from_str(hmap.get("path").unwrap()).unwrap();
 
@@ -103,16 +104,15 @@ impl FromHashMap for ProjectSampleSlot {
             / 100.0;
 
         let loop_mode = SampleAttributeLoopMode::from_value(
-            hmap.get("loopmode")
+            &hmap.get("loopmode")
                 .unwrap()
-                .clone()
                 .parse::<u32>()
                 .unwrap(),
         )
         .unwrap();
 
         let timestrech_mode = SampleAttributeTimestrechMode::from_value(
-            hmap.get("tsmode").unwrap().clone().parse::<u32>().unwrap(),
+            &hmap.get("tsmode").unwrap().parse::<u32>().unwrap(),
         )
         .unwrap();
 
@@ -126,7 +126,7 @@ impl FromHashMap for ProjectSampleSlot {
         let tq_u32: u32 = u32::try_from(tq_i16).unwrap_or(255_u32);
 
         let trig_quantization_mode =
-            SampleAttributeTrigQuantizationMode::from_value(tq_u32).unwrap();
+            SampleAttributeTrigQuantizationMode::from_value(&tq_u32).unwrap();
 
         let gain = hmap.get("gain").unwrap().clone().parse::<u8>().unwrap();
 

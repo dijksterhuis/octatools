@@ -57,7 +57,7 @@ impl SampleLoopConfig {
         let new: Self = Self::new(
             decoded.loop_start,
             decoded.loop_len,
-            SampleAttributeLoopMode::from_value(decoded.loop_mode)
+            SampleAttributeLoopMode::from_value(&decoded.loop_mode)
                 .unwrap_or(SampleAttributeLoopMode::Off),
         );
         Ok(new)

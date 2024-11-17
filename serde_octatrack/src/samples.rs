@@ -40,6 +40,20 @@ pub const FULL_HEADER: [u8; 23] = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
 ];
 
+
+#[derive(Debug)]
+enum SampleAttributeErrors {
+    InvalidTempo,
+    InvalidGain,
+}
+impl std::fmt::Display for SampleAttributeErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "invalid first item to double")
+    }
+}
+impl std::error::Error for SampleAttributeErrors {}
+
+
 /// Struct to create a valid Octatrack `.ot` file.
 /// General metadata for the sample's configuration on the OT
 /// and the slice array with pointer positions for the sliced WAV.
@@ -159,17 +173,17 @@ impl SampleAttributes {
         trim_config: &SampleTrimConfig,
         loop_config: &SampleLoopConfig,
         slices: &Slices,
-    ) -> RVoidError<Self> {
+    ) -> RBoxErr<Self> {
         println!("GAIN CHANGES: {:#?}", gain);
 
         if *gain > 24.0 {
             println!(">24");
-            return Err(());
+            return Err(SampleAttributeErrors::InvalidGain.into());
         }
 
         if *gain < -24.0 {
             println!("<24");
-            return Err(());
+            return Err(SampleAttributeErrors::InvalidGain.into());
         }
 
         // translate to 0_u16 <= x < 96_u16 from -24.0_d32 <= x <= + 24.0_f32
@@ -179,7 +193,7 @@ impl SampleAttributes {
         println!("GAIN CHANGES: {:#?} {:#?}", gain, gain_u16);
 
         if *tempo > 300.0 {
-            return Err(());
+            return Err(SampleAttributeErrors::InvalidTempo.into());
         };
 
         // validate that we've got acceptable options

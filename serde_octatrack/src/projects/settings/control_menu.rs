@@ -445,7 +445,7 @@ impl FromHashMap for MidiSyncMidiPage {
             )?,
             // TODO: Unwrap
             midi_progchange_send_channel: ProjectMidiChannels::from_value(
-                Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
+                &Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
             )
             .unwrap(),
             midi_progchange_receive: Self::parse_hashmap_value_bool(
@@ -454,7 +454,7 @@ impl FromHashMap for MidiSyncMidiPage {
             )?,
             // TODO: Unwrap
             midi_progchange_receive_channel: ProjectMidiChannels::from_value(
-                Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
+                &Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
             )
             .unwrap(),
         })
