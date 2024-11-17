@@ -12,7 +12,6 @@ use std::str::FromStr;
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
 pub type RVoidError<T> = Result<T, ()>;
 
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum SerdeOctatrackErrors {
     NoMatchingOptionEnumValue,
@@ -27,7 +26,6 @@ impl std::fmt::Display for SerdeOctatrackErrors {
     }
 }
 impl std::error::Error for SerdeOctatrackErrors {}
-
 
 /// Trait to convert between Enum option instances and their corresponding value.
 pub trait OptionEnumValueConvert {

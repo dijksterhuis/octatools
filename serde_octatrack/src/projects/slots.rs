@@ -66,7 +66,6 @@ pub struct ProjectSampleSlot {
 
 impl ParseHashMapValueAs for ProjectSampleSlot {}
 
-
 // cannot use FromProjectStringData because it expects a lone Self result, rather than a Vec.
 impl FromHashMap for ProjectSampleSlot {
     type A = String;
@@ -104,10 +103,7 @@ impl FromHashMap for ProjectSampleSlot {
             / 100.0;
 
         let loop_mode = SampleAttributeLoopMode::from_value(
-            &hmap.get("loopmode")
-                .unwrap()
-                .parse::<u32>()
-                .unwrap(),
+            &hmap.get("loopmode").unwrap().parse::<u32>().unwrap(),
         )
         .unwrap();
 

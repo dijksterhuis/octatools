@@ -1,6 +1,6 @@
 //! Utilities for reading `project.*` files.
 
-use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
+use crate::common::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
 use std::collections::HashMap;
 
 /// ASCII data section headings within an Octatrack `project.*` file
@@ -10,7 +10,6 @@ pub enum ProjectRawFileSection {
     Settings,
     Samples,
 }
-
 
 impl OptionEnumValueConvert for ProjectRawFileSection {
     type T = ProjectRawFileSection;

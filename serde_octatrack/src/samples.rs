@@ -40,7 +40,6 @@ pub const FULL_HEADER: [u8; 23] = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
 ];
 
-
 #[derive(Debug)]
 enum SampleAttributeErrors {
     InvalidTempo,
@@ -52,7 +51,6 @@ impl std::fmt::Display for SampleAttributeErrors {
     }
 }
 impl std::error::Error for SampleAttributeErrors {}
-
 
 /// Struct to create a valid Octatrack `.ot` file.
 /// General metadata for the sample's configuration on the OT
@@ -174,56 +172,38 @@ impl SampleAttributes {
         loop_config: &SampleLoopConfig,
         slices: &Slices,
     ) -> RBoxErr<Self> {
-        println!("GAIN CHANGES: {:#?}", gain);
-
-        if *gain > 24.0 {
-            println!(">24");
-            return Err(SampleAttributeErrors::InvalidGain.into());
-        }
-
-        if *gain < -24.0 {
-            println!("<24");
-            return Err(SampleAttributeErrors::InvalidGain.into());
-        }
-
-        // translate to 0_u16 <= x < 96_u16 from -24.0_d32 <= x <= + 24.0_f32
-        // with one decimal place
-        let gain_u16 = (((2.0 * 10.0 * (gain + 24.0)).round()) / 10.0) as u16;
-
-        println!("GAIN CHANGES: {:#?} {:#?}", gain, gain_u16);
-
-        if *tempo > 300.0 {
-            return Err(SampleAttributeErrors::InvalidTempo.into());
+        let validated_gain: RBoxErr<u16> = if gain > &24.0 {
+            Err(SampleAttributeErrors::InvalidGain.into())
+        } else if gain < &-24.0 {
+            Err(SampleAttributeErrors::InvalidGain.into())
+        } else {
+            // translate to 0_u16 <= x < 96_u16 from -24.0_d32 <= x <= + 24.0_f32
+            // with one decimal place
+            let new_gain_f32 = (2.0 * 10.0 * (gain + 24.0)).round() * 0.1;
+            Ok(new_gain_f32 as u16)
         };
 
-        // validate that we've got acceptable options
-        let loop_res = loop_config.mode.value();
-        let stretch_res = stretch.value();
-        let quantise_res = quantization.value();
-
-        if loop_res.is_err() {
-            return Err(loop_res.err().unwrap());
-        }
-        if stretch_res.is_err() {
-            return Err(stretch_res.err().unwrap());
-        }
-        if quantise_res.is_err() {
-            return Err(quantise_res.err().unwrap());
-        }
+        let validated_tempo: RBoxErr<f32> = if tempo < &30.0 {
+            Err(SampleAttributeErrors::InvalidGain.into())
+        } else if tempo > &300.0 {
+            Err(SampleAttributeErrors::InvalidGain.into())
+        } else {
+            Ok(*tempo)
+        };
 
         Ok(Self {
             header: HEADER_BYTES,
             blank: UNKNOWN_BYTES,
-            gain: gain_u16,
-            stretch: stretch_res.unwrap(),
-            tempo: *tempo as u32,
-            quantization: quantise_res.unwrap() as u8,
+            gain: validated_gain?,
+            stretch: stretch.value()?,
+            tempo: validated_tempo? as u32,
+            quantization: quantization.value()? as u8,
             trim_start: trim_config.start,
             trim_end: trim_config.end,
             trim_len: trim_config.length,
             loop_start: loop_config.start,
             loop_len: loop_config.length,
-            loop_mode: loop_res.unwrap() as u32,
+            loop_mode: loop_config.mode.value()? as u32,
             slices: slices.slices,
             slices_len: slices.count,
             checksum: 0,
@@ -232,10 +212,14 @@ impl SampleAttributes {
 
     /// Encodes struct data to binary representation, after some pre-processing.
     ///
-    /// Swaps byte (when little-endian system), generates the checksum,
-    /// then encodes to binary representation.
-
+    /// Beore serializing, will:
+    /// 1. modify tempo and gain values to machine ranges
+    /// 2. swaps bytes of values (when current system is little-endian)
+    /// 3. generate checksum value
     pub fn encode(&self) -> RBoxErr<Vec<u8>> {
+
+        // clone instead of mutable borrwed reference -- don't want to bytes swap or 
+        // modify current values
         let mut bswapd = self.clone();
 
         // tempo is multiplied by 24 when written to encoded file
@@ -343,9 +327,6 @@ impl ToFileAtPathBuf for SampleAttributes {
         Ok(())
     }
 }
-
-
-
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.

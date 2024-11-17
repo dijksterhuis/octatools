@@ -2,7 +2,7 @@
 
 // TODO: Break this up into options modules in the projects / samples directories.
 
-use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
+use crate::common::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
 use serde::{Deserialize, Serialize};
 
 /// Sample Slot options for Projects.
@@ -182,7 +182,8 @@ mod test_spec {
             #[test]
             fn test_error() {
                 assert!(
-                    ProjectSampleSlotType::from_value(&"SOME INCORRECT STRING".to_string()).is_err(),
+                    ProjectSampleSlotType::from_value(&"SOME INCORRECT STRING".to_string())
+                        .is_err(),
                 );
             }
 

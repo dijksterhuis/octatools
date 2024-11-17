@@ -66,21 +66,19 @@ pub fn show_arrangement(path: &PathBuf) -> RBoxErr<()> {
     Ok(())
 }
 
-
 fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
     let start: usize = match start_idx {
-        None => {0}
-        _ => {start_idx.unwrap()}
+        None => 0,
+        _ => start_idx.unwrap(),
     };
 
     let end: usize = match len {
-        None => {data.len() - 1}
-        _ => {len.unwrap() + start}
+        None => data.len() - 1,
+        _ => len.unwrap() + start,
     };
 
     data[start..end].to_vec()
 }
-
 
 /// Show bytes output as u8 values for an Arrangement file located at `path`
 pub fn show_arrangement_bytes(
@@ -96,7 +94,6 @@ pub fn show_arrangement_bytes(
     println!("{:#?}", bytes);
     Ok(())
 }
-
 
 /// Show bytes output as u8 values for a Bank file located at `path`
 pub fn show_bank_bytes(

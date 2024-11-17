@@ -79,7 +79,6 @@ impl ToFileAtPathBuf for Bank {
     }
 }
 
-
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
 #[derive(Debug, Serialize, Deserialize)]

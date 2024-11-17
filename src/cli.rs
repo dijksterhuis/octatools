@@ -143,7 +143,6 @@ pub enum InspectBytes {
         start_idx: Option<usize>,
         nbytes: Option<usize>,
     },
-
 }
 
 /// Transfer Octatrack Project(s)/Bank(s) to new location(s).

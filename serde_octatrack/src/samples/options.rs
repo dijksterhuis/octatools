@@ -1,6 +1,6 @@
 //! Enums for Octatrack options realted to `SampleAttribute` files (`.ot` files).
 
-use crate::common::{OptionEnumValueConvert, SerdeOctatrackErrors, RBoxErr};
+use crate::common::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
 use serde::{Deserialize, Serialize};
 
 /// Sample attributes Timestrech options.
@@ -370,9 +370,7 @@ mod test_spec {
 
             #[test]
             fn test_error() {
-                assert!(
-                    SampleAttributeTrigQuantizationMode::from_value(&200).is_err()
-                );
+                assert!(SampleAttributeTrigQuantizationMode::from_value(&200).is_err());
             }
             #[test]
             fn test_direct() {

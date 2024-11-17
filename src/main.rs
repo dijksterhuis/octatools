@@ -24,8 +24,8 @@ use actions::{
         create_index_samples_dir_simple,
     },
     inspect::{
-        show_arrangement, show_arrangement_bytes, show_bank, show_ot_file, show_part, show_parts,
-        show_pattern, show_patterns, show_project, show_bank_bytes, show_ot_file_bytes
+        show_arrangement, show_arrangement_bytes, show_bank, show_bank_bytes, show_ot_file,
+        show_ot_file_bytes, show_part, show_parts, show_pattern, show_patterns, show_project,
     },
     list::list_project_sample_slots,
 };
