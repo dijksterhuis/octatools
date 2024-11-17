@@ -1,4 +1,4 @@
-//! Various Audio I/O, DSP etc. related functionality
+//! Module for various Audio I/O, DSP etc. related functionality
 
 pub mod aiff;
 pub mod utils;

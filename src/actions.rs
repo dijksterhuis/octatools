@@ -1,3 +1,5 @@
+//! Module containing code related to running commands
+
 pub mod chains;
 pub mod copy;
 pub mod indexing;

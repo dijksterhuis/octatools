@@ -1,3 +1,7 @@
+//! # `octatools`
+//! 
+//! CLI tools to interact with with data files used by the [Elektron Octatrack DPS](https://www.elektron.se/en/octratrack-mkii-explorer)
+
 mod actions;
 mod audio;
 mod cli;
@@ -28,6 +32,7 @@ use actions::{
 
 use cli::{Cli, Commands};
 
+#[doc(hidden)]
 fn main() -> () {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);

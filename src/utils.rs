@@ -1,3 +1,5 @@
+//! Module for various utility functions and structs.
+
 use crate::audio::wav::WavFile;
 use crate::common::RVoidError;
 use serde::{Deserialize, Serialize};

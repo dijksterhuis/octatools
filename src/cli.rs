@@ -1,4 +1,4 @@
-//! Configuration settings for creating the command line interface arguments.
+//! Module for CLAP based CLI arguments.
 
 use std::path::PathBuf;
 

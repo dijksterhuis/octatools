@@ -1,3 +1,5 @@
+//! Functions to list specific data.
+
 use std::path::PathBuf;
 
 use serde_octatrack::{
@@ -5,6 +7,7 @@ use serde_octatrack::{
     projects::{options::ProjectSampleSlotType, Project},
 };
 
+/// List all the sample slots within an Octatrack Project, given a path to a Project data file
 pub fn list_project_sample_slots(path: &PathBuf) -> RBoxErr<()> {
     let project = Project::from_pathbuf(&path)?;
 

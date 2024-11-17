@@ -1,4 +1,5 @@
-//! TODO
+//! Module for commonly used traits/functions/structs etc.
+
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use serde_yml::Error as SerdeYmlError;
