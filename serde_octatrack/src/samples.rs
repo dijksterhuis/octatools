@@ -329,3 +329,39 @@ impl ToFileAtPathBuf for SampleAttributes {
         Ok(())
     }
 }
+
+
+
+
+/// Used with the `octatools inspect bytes bank` command.
+/// Only really useful for debugging and / or reverse engineering purposes.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SampleAttributesRawBytes {
+    #[serde(with = "BigArray")]
+    pub data: [u8; 816],
+}
+
+impl FromFileAtPathBuf for SampleAttributesRawBytes {
+    type T = SampleAttributesRawBytes;
+
+    /// Crete a new struct by reading a file located at `path`.
+    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+        let mut infile = File::open(path)?;
+        let mut bytes: Vec<u8> = vec![];
+        let _: usize = infile.read_to_end(&mut bytes)?;
+
+        let new: Self = bincode::deserialize(&bytes[..])?;
+
+        Ok(new)
+    }
+}
+
+impl ToFileAtPathBuf for SampleAttributesRawBytes {
+    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        let bytes: Vec<u8> = bincode::serialize(&self)?;
+        let mut file: File = File::create(path)?;
+        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
+
+        Ok(())
+    }
+}

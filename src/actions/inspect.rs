@@ -4,10 +4,10 @@ use std::path::PathBuf;
 
 use serde_octatrack::{
     arrangements::{ArrangementFile, ArrangementFileRawBytes},
-    banks::Bank,
+    banks::{Bank, BankRawBytes},
     common::{FromFileAtPathBuf, RBoxErr},
     projects::Project,
-    samples::SampleAttributes,
+    samples::{SampleAttributes, SampleAttributesRawBytes},
 };
 
 /// Show deserialised representation of a Bank for a given bank file at `path`
@@ -62,9 +62,25 @@ pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
 /// Show deserialised representation of an Arrangement for a given arrangement file at `path`
 pub fn show_arrangement(path: &PathBuf) -> RBoxErr<()> {
     let b = ArrangementFile::from_pathbuf(&path);
-    println!("ARRANGE: {b:#?}");
+    println!("{b:#?}");
     Ok(())
 }
+
+
+fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
+    let start: usize = match start_idx {
+        None => {0}
+        _ => {start_idx.unwrap()}
+    };
+
+    let end: usize = match len {
+        None => {data.len() - 1}
+        _ => {len.unwrap() + start}
+    };
+
+    data[start..end].to_vec()
+}
+
 
 /// Show bytes output as u8 values for an Arrangement file located at `path`
 pub fn show_arrangement_bytes(
@@ -72,19 +88,42 @@ pub fn show_arrangement_bytes(
     start_idx: &Option<usize>,
     len: &Option<usize>,
 ) -> RBoxErr<()> {
-    let b = ArrangementFileRawBytes::from_pathbuf(&path)?.data.to_vec();
-    let start: usize = if start_idx.is_none() {
-        0
-    } else {
-        start_idx.unwrap()
-    };
-    let end: usize = if len.is_none() {
-        b.len() - 1
-    } else {
-        len.unwrap() + start
-    };
+    let bytes = get_bytes_slice(
+        ArrangementFileRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        start_idx,
+        len,
+    );
+    println!("{:#?}", bytes);
+    Ok(())
+}
 
-    let b = &b[start..end];
-    println!("ARRANGE: {b:#?}");
+
+/// Show bytes output as u8 values for a Bank file located at `path`
+pub fn show_bank_bytes(
+    path: &PathBuf,
+    start_idx: &Option<usize>,
+    len: &Option<usize>,
+) -> RBoxErr<()> {
+    let bytes = get_bytes_slice(
+        BankRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        start_idx,
+        len,
+    );
+    println!("{:#?}", bytes);
+    Ok(())
+}
+
+/// Show bytes output as u8 values for a Sample Attributes file located at `path`
+pub fn show_ot_file_bytes(
+    path: &PathBuf,
+    start_idx: &Option<usize>,
+    len: &Option<usize>,
+) -> RBoxErr<()> {
+    let bytes = get_bytes_slice(
+        SampleAttributesRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        start_idx,
+        len,
+    );
+    println!("{:#?}", bytes);
     Ok(())
 }

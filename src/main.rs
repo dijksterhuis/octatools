@@ -25,7 +25,7 @@ use actions::{
     },
     inspect::{
         show_arrangement, show_arrangement_bytes, show_bank, show_ot_file, show_part, show_parts,
-        show_pattern, show_patterns, show_project,
+        show_pattern, show_patterns, show_project, show_bank_bytes, show_ot_file_bytes
     },
     list::list_project_sample_slots,
 };
@@ -80,45 +80,29 @@ fn main() -> () {
                 todo!()
             }
             cli::Inspect::Bytes(y) => match y {
-                cli::InspectBytes::Project { path } => {
-                    info!("Showing project: path={path:#?}");
-                    let _ = show_project(&path);
+                cli::InspectBytes::Bank {
+                    path,
+                    start_idx,
+                    nbytes,
+                } => {
+                    info!("Showing bank bytes: path={path:#?}");
+                    let _ = show_bank_bytes(&path, &start_idx, &nbytes);
                 }
-                cli::InspectBytes::Bank { path } => {
-                    info!("Showing bank: path={path:#?}");
-                    let _ = show_bank(&path);
-                }
-                cli::InspectBytes::Parts { path } => {
-                    info!("Showing parts in bank: path={path:#?}");
-                    let _ = show_parts(&path);
-                }
-                cli::InspectBytes::Part { path, index } => {
-                    info!("Showing specific part in bank: path={path:#?}");
-                    let _ = show_part(&path, index);
-                }
-                cli::InspectBytes::Patterns { path } => {
-                    info!("Showing patterns in bank: path={path:#?}");
-                    let _ = show_patterns(&path);
-                }
-                cli::InspectBytes::Pattern { path, index } => {
-                    info!("Showing specific pattern in bank: path={path:#?}");
-                    let _ = show_pattern(&path, index);
-                }
-                cli::InspectBytes::Sample { path } => {
-                    info!("Showing sample attributes: path={path:#?}");
-                    let _ = show_ot_file(&path);
+                cli::InspectBytes::Sample {
+                    path,
+                    start_idx,
+                    nbytes,
+                } => {
+                    info!("Showing sample attributes bytes: path={path:#?}");
+                    let _ = show_ot_file_bytes(&path, &start_idx, &nbytes);
                 }
                 cli::InspectBytes::Arrangement {
                     path,
-                    start_idx: start_byte,
+                    start_idx,
                     nbytes,
                 } => {
-                    info!("Showing arrangement file: path={path:#?}");
-                    let _ = show_arrangement_bytes(&path, &start_byte, &nbytes);
-                }
-                cli::InspectBytes::Markers { path } => {
-                    info!("Showing markers file: path={path:#?}");
-                    todo!()
+                    info!("Showing arrangement file bytes: path={path:#?}");
+                    let _ = show_arrangement_bytes(&path, &start_idx, &nbytes);
                 }
             },
         },

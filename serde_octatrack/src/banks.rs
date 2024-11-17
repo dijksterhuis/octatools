@@ -79,6 +79,39 @@ impl ToFileAtPathBuf for Bank {
     }
 }
 
+
+/// Used with the `octatools inspect bytes bank` command.
+/// Only really useful for debugging and / or reverse engineering purposes.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BankRawBytes {
+    pub data: Box<Array<u8, 636113>>,
+}
+
+impl FromFileAtPathBuf for BankRawBytes {
+    type T = BankRawBytes;
+
+    /// Crete a new struct by reading a file located at `path`.
+    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+        let mut infile = File::open(path)?;
+        let mut bytes: Vec<u8> = vec![];
+        let _: usize = infile.read_to_end(&mut bytes)?;
+
+        let new: Self = bincode::deserialize(&bytes[..])?;
+
+        Ok(new)
+    }
+}
+
+impl ToFileAtPathBuf for BankRawBytes {
+    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        let bytes: Vec<u8> = bincode::serialize(&self)?;
+        let mut file: File = File::create(path)?;
+        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::banks::Bank;
