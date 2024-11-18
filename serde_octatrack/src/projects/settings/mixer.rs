@@ -29,7 +29,7 @@ pub struct MixerMenu {
     /// See Manual section 8.8 MIXER MENU
     pub phones_mix: u8, // 64 is default, so 0 -> 127 with midpoint = 0 middle mix
 
-    /// Unknown.
+    /// Mix between Main and Cue for headphones out.
     /// See Manual section 8.8 MIXER MENU
     pub main_to_cue: u8,
 

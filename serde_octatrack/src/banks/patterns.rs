@@ -1,7 +1,5 @@
 //! Serialization and Deserialization of Pattern related data for Bank files.
 
-use std::array::from_fn;
-
 use crate::banks::parts::{
     AudioTrackAmpParamsValues, AudioTrackFxParamsValues, LfoParamsValues, MidiTrackArpParamsValues,
     MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues, MidiTrackLfoParamsValues,
@@ -293,7 +291,7 @@ pub struct AudioTrackTrigs {
     pub pattern_settings: TrackPatternSettings,
 
     /// Unknown data.
-    pub unknown_4: u8,
+    pub unknown_2: u8,
 
     /// Parameter-Lock data for all Trigs.
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
@@ -303,7 +301,7 @@ pub struct AudioTrackTrigs {
     /// comes at the end, dunno what this block is yet
     /// mostly a bunch of zero values
     #[serde(with = "BigArray")]
-    pub unknown_5: [u8; 192],
+    pub unknown_3: [u8; 192],
 }
 
 /// MIDI Track Trig masks.
@@ -321,17 +319,6 @@ pub struct AudioTrackTrigs {
 /// 8. 1st half of the 1st page
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackTrigMasks {
-    /// todo
-    #[serde(with = "BigArray")]
-    pub unk1: [u8; 4],
-
-    /// this is something to do with the trig masks but i don't know what it's referring to
-    /// * when not active1 trigs on a track: 7
-    /// * when all trigs on a track are trigger trigs: 7
-    /// * when all trigs on a track are trigless trigs: 6
-    /// * when all trigs on a track are plock trigs: 5
-    pub unknown1: u8,
-
     /// Note Trig masks.
     #[serde(with = "BigArray")]
     pub trigger: [u8; 8],
@@ -352,7 +339,7 @@ pub struct MidiTrackTrigMasks {
     /// this is a block of 8, so looks like a trig mask for tracks,
     /// but I can't think of what it could be.
     #[serde(with = "BigArray")]
-    pub unknown2: [u8; 8],
+    pub unknown_3: [u8; 8],
 }
 
 /// Track trigs assigned on an Audio Track within a Pattern
@@ -367,6 +354,17 @@ pub struct MidiTrackTrigs {
     /// ```
     #[serde(with = "BigArray")]
     pub header: [u8; 4],
+
+    /// Unknown data.
+    #[serde(with = "BigArray")]
+    pub unknown_1: [u8; 4],
+
+    /// this is something to do with the trig masks but i don't know what it's referring to
+    /// * when not active1 trigs on a track: 7
+    /// * when all trigs on a track are trigger trigs: 7
+    /// * when all trigs on a track are trigless trigs: 6
+    /// * when all trigs on a track are plock trigs: 5
+    pub unknown_2: u8,
 
     /// MIDI Track Trig masks contain the Trig step locations for different trig types
     pub trig_masks: MidiTrackTrigMasks,
@@ -395,7 +393,7 @@ pub struct MidiTrackTrigs {
     /// comes at the end, dunno what this block is yet
     /// mostly a bunch of zero values
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
-    pub unknown2: Box<Array<u8, 128>>,
+    pub unknown_3: Box<Array<u8, 128>>,
 }
 
 /// Pattern level scaling settings.

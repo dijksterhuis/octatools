@@ -463,7 +463,7 @@ struct ArrangementIntermediate {
 
     /// Unknown data
     #[serde(with = "BigArray")]
-    unk1: [u8; 2],
+    unknown_1: [u8; 2],
 
     /// Number of active rows in the arrangement
     pub n_rows: u8,
@@ -473,7 +473,7 @@ struct ArrangementIntermediate {
     rows: [ArrangerRowIntermediate; 256],
 
     #[serde(with = "BigArray")]
-    unk2: [u8; 2],
+    unknown_2: [u8; 2],
 }
 
 /// An Arrangement 'block'.
@@ -487,7 +487,7 @@ pub struct ArrangementBlock {
     pub name: String,
 
     /// Unknown data. No idea what this is. Usually [0, 0, 30].
-    pub unk1: [u8; 2],
+    pub unknown_1: [u8; 2],
 
     /// Number of active rows in the arrangement
     pub n_rows: u8,
@@ -497,7 +497,7 @@ pub struct ArrangementBlock {
 
     /// Not sure. First Arrangement block in the file is [0, 1].
     /// Second Arrangement block in the file is [1, 0].
-    pub unk2: [u8; 2],
+    pub unknown_2: [u8; 2],
 }
 
 // max length: 11336 bytes
@@ -541,13 +541,13 @@ struct ArrangementFileIntermediate {
     header: [u8; 22],
 
     #[serde(with = "BigArray")]
-    unk1: [u8; 2],
+    unknown_1: [u8; 2],
 
     #[serde(with = "BigArray")]
     arrange_data: [ArrangementIntermediate; 2],
 
     #[serde(with = "BigArray")]
-    unk2: [u8; 8],
+    unknown_2: [u8; 8],
 }
 
 // max length: 11336 bytes
@@ -682,10 +682,10 @@ impl FromPathBuf for ArrangementFile {
 
             let d = ArrangementBlock {
                 name: str::from_utf8(&arr.name)?.to_string(),
-                unk1: arr.unk1,
+                unknown_1: arr.unknown_1,
                 n_rows: arr.n_rows,
                 rows: b,
-                unk2: arr.unk2,
+                unknown_2: arr.unknown_2,
             };
 
             a.push(d);
@@ -693,9 +693,9 @@ impl FromPathBuf for ArrangementFile {
 
         let decoded = ArrangementFile {
             header: new.header,
-            unk1: new.unk1,
+            unk1: new.unknown_1,
             arrange_data: a,
-            unk2: new.unk2,
+            unk2: new.unknown_2,
         };
 
         Ok(decoded)
