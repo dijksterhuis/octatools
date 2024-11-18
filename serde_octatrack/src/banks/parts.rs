@@ -187,7 +187,7 @@ pub struct LfoParamsValues {
 
 /// Values of a Track's main AMP parameters page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AmpParamsValues {
+pub struct AudioTrackAmpParamsValues {
     pub atk: u8,
     pub hold: u8,
     pub rel: u8,
@@ -199,7 +199,7 @@ pub struct AmpParamsValues {
 
 /// Values of a Track's FX parameters page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct FxParamsValues {
+pub struct AudioTrackFxParamsValues {
     pub param_1: u8,
     pub param_2: u8,
     pub param_3: u8,
@@ -212,9 +212,9 @@ pub struct FxParamsValues {
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParamsValues {
     pub lfo: LfoParamsValues,
-    pub amp: AmpParamsValues,
-    pub fx1: FxParamsValues,
-    pub fx2: FxParamsValues,
+    pub amp: AudioTrackAmpParamsValues,
+    pub fx1: AudioTrackFxParamsValues,
+    pub fx2: AudioTrackFxParamsValues,
 }
 
 /// First set of values for a Track's LFO Setup page.
@@ -241,7 +241,7 @@ pub struct LfoParamsSetup2 {
 
 /// Values for a Track's AMP Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AmpParamsSetup {
+pub struct AudioTrackAmpParamsSetup {
     pub amp: u8,
     pub sync: u8,
     pub atck: u8,
@@ -253,7 +253,7 @@ pub struct AmpParamsSetup {
 
 /// Values for a Track's FX Setup page.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct FxParamsSetup {
+pub struct AudioTrackFxParamsSetup {
     pub setting1: u8,
     pub setting2: u8,
     pub setting3: u8,
@@ -267,16 +267,12 @@ pub struct FxParamsSetup {
 pub struct AudioTrackParamsSetup {
     /// Parameter Target and Wave selection for the 3x LFOs on this Audio Track.
     pub lfo_setup_1: LfoParamsSetup1,
-
     /// Amplitude setup page
-    pub amp: AmpParamsSetup,
-
+    pub amp: AudioTrackAmpParamsSetup,
     /// FX #1 setup page
-    pub fx1: FxParamsSetup,
-
+    pub fx1: AudioTrackFxParamsSetup,
     /// FX #2 setup page
-    pub fx2: FxParamsSetup,
-
+    pub fx2: AudioTrackFxParamsSetup,
     /// Multiplier and Trigger type selection for the 3x LFOs on this Audio Track.
     pub lfo_setup_2: LfoParamsSetup2,
 }
