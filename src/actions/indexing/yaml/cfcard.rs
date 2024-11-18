@@ -5,7 +5,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use serde_octatrack::{FromPathBuf, ToPathBuf};
+use serde_octatrack::FromPathBuf;
 
 /// A single row of data written to the index file.
 use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};

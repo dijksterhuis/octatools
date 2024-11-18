@@ -4,7 +4,7 @@
 mod utils;
 mod yaml;
 
-use log::{debug, error, info, trace, warn};
+use log::{debug, info, warn};
 
 use crate::actions::copy::utils::*;
 use crate::actions::copy::yaml::YamlCopyBankConfig;

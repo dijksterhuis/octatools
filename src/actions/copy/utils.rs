@@ -1,4 +1,4 @@
-use log::{debug, error, info, trace, warn};
+use log::{debug, info, trace};
 
 use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
