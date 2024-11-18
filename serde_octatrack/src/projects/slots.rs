@@ -5,8 +5,22 @@
 //! may not have been writtten to an attributes file yet.
 //! (these are project files loaded into memory when switching to the project)/
 
-// Example data:
-// [SAMPLE]\r\nTYPE=FLEX\r\nSLOT=001\r\nPATH=../AUDIO/flex.wav\r\nTRIM_BARSx100=173\r\nTSMODE=2\r\nLOOPMODE=1\r\nGAIN=48\r\nTRIGQUANTIZATION=-1\r\n[/SAMPLE]
+/*
+Example data:
+[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=001\r\nPATH=../AUDIO/flex.wav\r\nTRIM_BARSx100=173\r\nTSMODE=2\r\nLOOPMODE=1\r\nGAIN=48\r\nTRIGQUANTIZATION=-1\r\n[/SAMPLE]
+-----
+
+[SAMPLE]
+TYPE=FLEX
+SLOT=001
+PATH=../AUDIO/flex.wav
+TRIM_BARSx100=173
+TSMODE=2
+LOOPMODE=1
+GAIN=48
+TRIGQUANTIZATION=-1
+[/SAMPLE]
+*/
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};

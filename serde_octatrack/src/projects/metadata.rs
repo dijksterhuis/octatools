@@ -8,6 +8,17 @@ use crate::projects::{
     ProjectToString,
 };
 
+/*
+Example data:
+[META]\r\nTYPE=OCTATRACK DPS-1 PROJECT\r\nVERSION=19\r\nOS_VERSION=R0177     1.40B\r\n[/META]
+------
+[META]
+TYPE=OCTATRACK DPS-1 PROJECT
+VERSION=19
+OS_VERSION=R0177     1.40B
+[/META]
+*/
+
 /// Project metadata read from a parsed Octatrack Project file
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectMetadata {

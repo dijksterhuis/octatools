@@ -8,7 +8,29 @@ use crate::projects::{
     ProjectFromString, ProjectRawFileSection, ProjectToString,
 };
 
-// [STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]
+/*
+[STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]
+
+----
+
+[STATES]
+BANK=0
+PATTERN=0
+ARRANGEMENT=0
+ARRANGEMENT_MODE=0
+PART=0
+TRACK=0
+TRACK_OTHERMODE=0
+SCENE_A_MUTE=0
+SCENE_B_MUTE=0
+TRACK_CUE_MASK=0
+TRACK_MUTE_MASK=0
+TRACK_SOLO_MASK=0
+MIDI_TRACK_MUTE_MASK=0
+MIDI_TRACK_SOLO_MASK=0
+MIDI_MODE=0
+[/STATES]
+*/
 
 /// Project state from a parsed Octatrack `project.*` file.
 /// This is the current 'UX focus' state, i.e. what parts, patterns, tracks are currently selected etc.
@@ -21,10 +43,10 @@ pub struct ProjectStates {
     /// Current active pattern within a bank
     pub pattern: u8,
 
-    /// Unknown
+    /// Current active arrangement.
     pub arrangement: u8,
 
-    /// Unknown
+    /// Whether in arrangement mode or not.
     pub arrangement_mode: u8, // dunno if this is a toggle or an enum
 
     /// Current active part for the active pattern within a bank

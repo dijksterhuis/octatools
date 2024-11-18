@@ -339,7 +339,7 @@ pub struct MidiTrackTrigMasks {
     /// this is a block of 8, so looks like a trig mask for tracks,
     /// but I can't think of what it could be.
     #[serde(with = "BigArray")]
-    pub unknown_3: [u8; 8],
+    pub unknown: [u8; 8],
 }
 
 /// Track trigs assigned on an Audio Track within a Pattern
