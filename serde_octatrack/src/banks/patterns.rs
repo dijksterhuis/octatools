@@ -558,10 +558,33 @@ mod test {
     mod trig_bitmasks {
 
         #[test]
-        fn test_halfpage_trig_bitmask_unmask_0() {
-            use crate::banks::patterns::get_halfpage_trigs_from_bitmask_value;
+        fn test_all_track_trigs_from_bitmasks() {
+
+            let x: [u8; 8] = std::array::from_fn(|_| 255);
+            let y: [bool; 64] = std::array::from_fn(|_| true);
+
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&0).unwrap(),
+                crate::banks::patterns::get_track_trigs_from_bitmasks(&x).unwrap(),
+                y
+            )
+        }
+
+        #[test]
+        fn test_no_track_trigs_from_bitmasks() {
+
+            let x: [u8; 8] = std::array::from_fn(|_| 0);
+            let y: [bool; 64] = std::array::from_fn(|_| false);
+
+            assert_eq!(
+                crate::banks::patterns::get_track_trigs_from_bitmasks(&x).unwrap(),
+                y
+            )
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_0() {
+            assert_eq!(
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&0).unwrap(),
                 [false, false, false, false, false, false, false, false],
             );
         }
