@@ -153,7 +153,7 @@ fn main() -> () {
         },
         /* =========================================================================== */
         Commands::Chains(x) => match x {
-            cli::Chains::CreateChain {
+            cli::Chains::Create {
                 chain_name,
                 out_dir_path,
                 wav_file_paths,
@@ -168,11 +168,11 @@ fn main() -> () {
                     &chain_name,
                 );
             }
-            cli::Chains::CreateChains { yaml_file_path } => {
+            cli::Chains::CreateYaml { yaml_file_path } => {
                 info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
                 let _ = create_samplechains_from_yaml(&yaml_file_path);
             }
-            cli::Chains::DeconstructChain {
+            cli::Chains::Deconstruct {
                 ot_file_path,
                 audio_file_path,
                 out_dir_path,
@@ -187,7 +187,7 @@ fn main() -> () {
                     &out_dir_path,
                 );
             }
-            cli::Chains::DeconstructChains { yaml_file_path } => {
+            cli::Chains::DeconstructYaml { yaml_file_path } => {
                 info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
                 let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
             }

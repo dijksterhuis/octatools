@@ -177,7 +177,7 @@ pub enum Transfer {
 #[derive(Subcommand, Debug)]
 pub enum Chains {
     /// Create a single sample chain from the cli
-    CreateChain {
+    Create {
         /// Name of the new sliced samplechain.
         /// Will automatically be suffixed with an index number
         /// e.g. 'my_sample_chain_0'
@@ -192,12 +192,12 @@ pub enum Chains {
     },
 
     /// Create batches of sample chains from a YAML config file
-    CreateChains {
+    CreateYaml {
         /// File path of the YAML file for batched samplechains construction.
         yaml_file_path: PathBuf,
     },
     /// Use the CLI to deconstruct an individual sliced samplechain.
-    DeconstructChain {
+    Deconstruct {
         /// Path to the '.ot' file to use for deconstruction.
         ot_file_path: PathBuf,
         /// Path to the audio file to use for deconstruction.
@@ -206,7 +206,7 @@ pub enum Chains {
         out_dir_path: PathBuf,
     },
     /// Use a YAML config to deconstruct batches of sliced samplechains.
-    DeconstructChains {
+    DeconstructYaml {
         /// File path of the YAML file.
         yaml_file_path: PathBuf,
     },
