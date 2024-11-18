@@ -29,7 +29,6 @@ pub fn show_patterns(path: &PathBuf) -> RBoxErr<()> {
 
 /// Show deserialised representation of one Pattern for a given bank file at `path`
 pub fn show_pattern(path: &PathBuf, index: usize) -> RBoxErr<()> {
-
     if index < 1 || index > 16 {
         panic!("Octatrack Patterns are indexed from 1 to 16");
     }
