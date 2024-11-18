@@ -47,11 +47,11 @@ use serde_octatrack::{
 pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf) -> RBoxErr<()> {
     info!("Loading banks ...");
 
-    let mut banks = TransferMetaBank::new(source_bank_file_path, dest_bank_file_path)
+    let mut banks = TransferBank::new(source_bank_file_path, dest_bank_file_path)
         .expect("Could not load banks.");
 
     info!("Loading bank projects ...");
-    let mut projects = TransferMetaProject::new(source_bank_file_path, dest_bank_file_path)
+    let mut projects = TransferProject::new(source_bank_file_path, dest_bank_file_path)
         .expect("Could not load projects.");
 
     let _ = projects.dest.project.to_pathbuf(&projects.dest.path);

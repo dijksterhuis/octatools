@@ -345,7 +345,7 @@ impl ProjectToString for ProjectSampleSlot {
     }
 }
 
-mod tests {
+mod test {
 
     use super::*;
 
@@ -365,6 +365,54 @@ mod tests {
         hmap.insert("slot".to_string(), "AAAA".to_string());
         let slot_id = parse_id(&hmap);
         assert!(slot_id.is_err());
+    }
+
+    #[test]
+    fn test_parse_tempo_correct_default() {
+        let mut hmap = HashMap::new();
+        hmap.insert("bpm".to_string(), "2880".to_string());
+        let r = parse_tempo(&hmap);
+        assert_eq!(120_u16, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tempo_correct_min() {
+        let mut hmap = HashMap::new();
+        hmap.insert("bpm".to_string(), "720".to_string());
+        let r = parse_tempo(&hmap);
+        assert_eq!(30_u16, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tempo_correct_max() {
+        let mut hmap = HashMap::new();
+        hmap.insert("bpm".to_string(), "7200".to_string());
+        let r = parse_tempo(&hmap);
+        assert_eq!(300_u16, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tempo_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert("bpm".to_string(), "AAAFSFSFSSFfssafAA".to_string());
+        let r = parse_tempo(&hmap);
+        assert_eq!(r.unwrap(), 120_u16);
+    }
+
+    #[test]
+    fn test_parse_gain_correct() {
+        let mut hmap = HashMap::new();
+        hmap.insert("gain".to_string(), "72".to_string());
+        let r = parse_gain(&hmap);
+        assert_eq!(24_i8, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_gain_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert("gain".to_string(), "AAAFSFSFSSFfssafAA".to_string());
+        let r = parse_gain(&hmap);
+        assert_eq!(r.unwrap(), 0_i8);
     }
 
     #[test]
@@ -416,5 +464,104 @@ mod tests {
         hmap.insert("loopmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
         let r = parse_loop_mode(&hmap);
         assert_eq!(r.unwrap(), SampleAttributeLoopMode::Off);
+    }
+
+    #[test]
+    fn test_parse_tstretch_correct_off() {
+        let mut hmap = HashMap::new();
+        hmap.insert("tsmode".to_string(), "0".to_string());
+        let r = parse_tstrech_mode(&hmap);
+        assert_eq!(SampleAttributeTimestrechMode::Off, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tstretch_correct_normal() {
+        let mut hmap = HashMap::new();
+        hmap.insert("tsmode".to_string(), "2".to_string());
+        let r = parse_tstrech_mode(&hmap);
+        assert_eq!(SampleAttributeTimestrechMode::Normal, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tstretch_correct_beat() {
+        let mut hmap = HashMap::new();
+        hmap.insert("tsmode".to_string(), "3".to_string());
+        let r = parse_tstrech_mode(&hmap);
+        assert_eq!(SampleAttributeTimestrechMode::Beat, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tstretch_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert("tsmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
+        let r = parse_tstrech_mode(&hmap);
+        assert_eq!(r.unwrap(), SampleAttributeTimestrechMode::Off);
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_off() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "255".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(
+            SampleAttributeTrigQuantizationMode::PatternLength,
+            r.unwrap()
+        );
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_direct() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "0".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(SampleAttributeTrigQuantizationMode::Direct, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_onestep() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "1".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(SampleAttributeTrigQuantizationMode::OneStep, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_twostep() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "2".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(SampleAttributeTrigQuantizationMode::TwoSteps, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_threestep() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "3".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(SampleAttributeTrigQuantizationMode::ThreeSteps, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_tquantize_correct_fourstep() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trigquantization".to_string(), "4".to_string());
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(SampleAttributeTrigQuantizationMode::FourSteps, r.unwrap());
+    }
+
+    // i'm not going to test every single option. we do that already elsewhere.
+
+    #[test]
+    fn test_parse_tquantize_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert(
+            "trigquantization".to_string(),
+            "AAAFSFSFSSFfssafAA".to_string(),
+        );
+        let r = parse_trig_quantize_mode(&hmap);
+        assert_eq!(
+            r.unwrap(),
+            SampleAttributeTrigQuantizationMode::PatternLength
+        );
     }
 }

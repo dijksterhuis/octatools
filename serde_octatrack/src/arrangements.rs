@@ -29,7 +29,6 @@
 
 use crate::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
 use bincode;
-use log::{debug, error, info, trace, warn};
 use serde::de::SeqAccess;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
@@ -126,7 +125,6 @@ impl<'de> Visitor<'de> for ObjVisitor {
 
             v.push(n);
         }
-        debug!("SSSSSS: {v:#?}");
 
         let data = match v[0] {
             0 => {

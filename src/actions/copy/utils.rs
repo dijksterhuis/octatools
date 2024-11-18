@@ -20,13 +20,13 @@ pub struct ActiveSampleSlot {
 
 /// Helper struct to hold `Project` metadata (and the `Project` itself).
 #[derive(Debug, Clone)]
-pub struct ProjectMetaStore {
+pub struct TransferProjectMeta {
     pub path: PathBuf,
     pub dirpath: PathBuf,
     pub project: Project,
 }
 
-impl ProjectMetaStore {
+impl TransferProjectMeta {
     /// Work out the Source/Dest project file path from a bank file.
     fn get_project_dirpath_from_bank_fpath(path: &PathBuf) -> RBoxErr<PathBuf> {
         let project_dirpath = path.parent().unwrap().to_path_buf();
@@ -39,7 +39,7 @@ impl ProjectMetaStore {
         let path = dirpath.join("project.work");
         let project = Project::from_pathbuf(&path).unwrap();
 
-        Ok(ProjectMetaStore {
+        Ok(TransferProjectMeta {
             path,
             dirpath,
             project,
@@ -49,35 +49,28 @@ impl ProjectMetaStore {
 
 /// Helper struct to refer to both source and destination `Project`s.
 #[derive(Clone)]
-pub struct TransferMetaProject {
-    pub src: ProjectMetaStore,
-    pub dest: ProjectMetaStore,
+pub struct TransferProject {
+    pub src: TransferProjectMeta,
+    pub dest: TransferProjectMeta,
 }
 
-impl TransferMetaProject {
+impl TransferProject {
     pub fn new(src: &PathBuf, dest: &PathBuf) -> RBoxErr<Self> {
-        Ok(TransferMetaProject {
-            src: ProjectMetaStore::from_pathbuf(src)?,
-            dest: ProjectMetaStore::from_pathbuf(dest)?,
+        Ok(TransferProject {
+            src: TransferProjectMeta::from_pathbuf(src)?,
+            dest: TransferProjectMeta::from_pathbuf(dest)?,
         })
     }
 }
-
-/// Helper struct to hold `Bank` metadata (and the `Bank` itself).
-pub struct BankMetaStore {
-    pub path: PathBuf,
-    pub bank: Bank,
-}
-
 /// Helper struct to refer to both source and destination `Bank`s.
-pub struct TransferMetaBank {
+pub struct TransferBank {
     pub src: Bank,
     pub dest: Bank,
 }
 
-impl TransferMetaBank {
+impl TransferBank {
     pub fn new(src: &PathBuf, dest: &PathBuf) -> RBoxErr<Self> {
-        Ok(TransferMetaBank {
+        Ok(TransferBank {
             src: Bank::from_pathbuf(src)?,
             dest: Bank::from_pathbuf(dest)?,
         })
@@ -85,7 +78,7 @@ impl TransferMetaBank {
 }
 
 /// Find free sample slot locations in a `Project`
-pub fn find_free_sslots(projects: &TransferMetaProject) -> RBoxErr<(Vec<u8>, Vec<u8>)> {
+pub fn find_free_sslots(projects: &TransferProject) -> RBoxErr<(Vec<u8>, Vec<u8>)> {
     let mut base_vec: Vec<u8> = vec![];
     for i in 1..=128 {
         base_vec.push(i)
@@ -210,7 +203,7 @@ pub fn get_active_sslot_ids(
 /// Update Static sample slots references within a Bank.
 pub fn update_sslot_references_static(
     project: &mut Project,
-    banks: &mut TransferMetaBank,
+    banks: &mut TransferBank,
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
@@ -235,7 +228,7 @@ pub fn update_sslot_references_static(
 /// Update Flex sample slots references within a Bank.
 pub fn update_sslot_references_flex(
     project: &mut Project,
-    banks: &mut TransferMetaBank,
+    banks: &mut TransferBank,
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
@@ -283,7 +276,7 @@ fn get_abs_paths_for_sslot_audio_file(
 }
 
 /// Create a new relative path for an audio file in an audio pool.
-/// From a project saple slot the audio pool path is always: "../AUDIO/<fname>.<ext>"
+/// From a project saple slot the audio pool path is always: "../AUDIO/fname.ext"
 pub fn get_relative_audio_pool_path_audio_file(slot: &ProjectSampleSlot) -> RBoxErr<PathBuf> {
     let fname = get_sslot_audio_file_fname(&slot).unwrap();
     let relative_path = PathBuf::from("../AUDIO").join(fname);
@@ -313,7 +306,7 @@ fn maybe_copy_ot_attr_file(src_path: &PathBuf, dest_path: &PathBuf) -> RBoxErr<(
 
 /// If necessary, copy audio files to a new audio pool location and change the path for the sample slot.
 pub fn copy_sslot_sample_files(
-    projects: &TransferMetaProject,
+    projects: &TransferProject,
     slot: &ProjectSampleSlot,
 ) -> RBoxErr<()> {
     debug!("Copying audio file for sample slot ...");
