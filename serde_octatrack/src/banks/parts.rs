@@ -403,48 +403,17 @@ pub struct MidiTrackParamsSetup {
     pub lfo2: LfoParamsSetup2,
 }
 
-/// A custom LFO Design -- array of 16 values.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct CustomLfo([u8; 16]);
+// /// A custom LFO Design -- array of 16 values.
+// /// 0 -> 127 values (above line) maps to 0 -> 127.
+// /// -1 -> -127 values (above line) seems to map to 255 -> 128.
+// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+// pub struct CustomLfo(pub [u8; 16]);
 
-/// Audio Tracks Custom LFO designs.
-/// 0 -> 127 values (above line) maps to 0 -> 127.
-/// -1 -> -127 values (above line) seems to map to 255 -> 128.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct CustomLfos {
-    #[serde(with = "BigArray")]
-    pub track_1: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_2: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_3: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_4: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_5: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_6: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_7: [u8; 16],
-
-    #[serde(with = "BigArray")]
-    pub track_8: [u8; 16],
-}
-
-/// LFO Interpolation mask.
-/// Indicates which LFO steps should have values interpolated when LFO is triggered.
-/// Not sure exactly how the calculation works yet.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct CustomLfoInterpolationMask {
-    #[serde(with = "BigArray")]
-    pub mask: [u8; 2],
-}
+// /// LFO Interpolation mask.
+// /// Indicates which LFO steps should have values interpolated when LFO is triggered.
+// /// Not sure exactly how the calculation works yet.
+// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+// pub struct CustomLfoInterpolationMask(pub [u8; 2]);
 
 /// First page of settings controlling an Audio Track's Recording Buffer configuration.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -477,38 +446,78 @@ pub struct RecorderSetup {
     pub proc: RecorderSetupProcessing,
 }
 
-/// Scene Parameter assignments for an Audio Track.
+// todo: merge with the Pattern Plock variant of this?
+/// A scene's parameter assignments on the Playback/Machine page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct SceneParamsTrack {
-    /// Don't know what this data block is for yet :/
-    #[serde(with = "BigArray")]
-    pub unknown_1: [u8; 340],
-
-    /// The parameter assignments.
-    #[serde(with = "BigArray")]
-    pub params_values: [u8; 30],
-
-    #[serde(with = "BigArray")]
-    pub unknown_2: [u8; 159],
-
-    /// Audio Track Main Volume fade
-    /// `MAX` -> `127`.
-    /// `MIN` -> `0`.
-    pub xlv: u8,
-
-    /// Don't know what this data block is for yet :/
-    #[serde(with = "BigArray")]
-    pub unknown_3: [u8; 2],
+pub struct AudioTrackSceneLockPlayback {
+    pub param1: u8,
+    pub param2: u8,
+    pub param3: u8,
+    pub param4: u8,
+    pub param5: u8,
+    pub param6: u8,
 }
 
-/// A MIDI Track's custom Arp sequence.
-/// `0` -> `+63` values (above line) maps to `0` -> `63`.
-/// `-1` -> `-63` values (below line) map to `255` -> `192`.
+/// Scene parameter assignments for an audio track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct MidiArpSequence([u8; 16]);
+pub struct ScenesParamsAssignments {
+    /// Scene assignments for the Audio Track's active playback machine
+    pub machine: AudioTrackSceneLockPlayback,
+    /// Scene assignments for the Audio Track's LFO parameters
+    pub lfo: LfoParamsValues,
+    /// Scene assignments for the Audio Track's AMP parameters
+    pub amp: AudioTrackAmpParamsValues,
+    /// Scene assignments for the Audio Track's FX1 parameters
+    pub fx1: AudioTrackFxParamsValues,
+    /// Scene assignments for the Audio Track's FX2 parameters
+    pub fx2: AudioTrackFxParamsValues,
+    /// Unknown, likely leftover sample slot assignment (it
+    /// seems the underlying machine OS code re-uses the same
+    /// data structure in several places).
+    unknown_1: u8,
+    /// Unknown, likely leftover sample slot assignment (it
+    /// seems the underlying machine OS code re-uses the same
+    /// data structure in several places).
+    unknown_2: u8,
+}
 
-// TODO: For some reaosn there are EIGHT part sections in the data file...
-// I do not know why ... previous states?
+// /// Each Scene contains parameter assignments for 8x Audio Tracks.
+// /// 255 is no assignment on the scene.
+// /// Any other value is the Scene's assigned value for that control.
+// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+// pub struct SceneTrackParameters(
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments,
+//     pub ScenesParamsAssignments
+// );
+
+/// XLV Scene Parameter assignments for an Audio Track,
+/// plus two other parameters i don't know yet
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct SceneXlvAssignments {
+    /// Main Volume fade control (XLV) for each Audio Track
+    /// `MAX` -> `127`.
+    /// `MIN` -> `0`.
+    #[serde(with = "BigArray")]
+    pub track_xlvs: [u8; 8],
+
+    /// Don't know what this data block is for yet.
+    /// Possibly leftover from using the same struct in the machine code
+    /// as for audio track parameter values.
+    #[serde(with = "BigArray")]
+    unknown: [u8; 2],
+}
+
+// /// A MIDI Track's custom Arp sequence.
+// /// `0` -> `+63` values (above line) maps to `0` -> `63`.
+// /// `-1` -> `-63` values (below line) map to `255` -> `192`.
+// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+// pub struct MidiArpSequence(pub [u8; 16]);
 
 /// Parts in the bank, containing track data.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -580,7 +589,7 @@ pub struct Part {
     /// Audio Track audio processing parameter values:
     /// Amplitude, LFOs, fx1 and fx2.
     #[serde(with = "BigArray")]
-    pub audio_track_params_values: [AudioTrackParamsValues; 8], // 32
+    pub audio_track_params_values: [AudioTrackParamsValues; 8],
 
     /// Setup values for Audio Track machines:
     /// Static, Flex, Thru, Neighbor and Pickup machines.
@@ -615,30 +624,39 @@ pub struct Part {
     /// 255 is no assignment on the scene.
     /// Any other value is the Scene's assigned value for that control.
     #[serde(with = "BigArray")]
-    pub scene_params: [SceneParamsTrack; 8],
+    pub scenes: [[ScenesParamsAssignments; 8]; 16],
+
+    #[serde(with = "BigArray")]
+    pub scene_xlvs: [SceneXlvAssignments; 16],
 
     /// Custom LFO designs for Audio Tracks.
-    pub audio_track_custom_lfo_designs: CustomLfos,
+    #[serde(with = "BigArray")]
+    pub audio_tracks_custom_lfo_designs: [[u8; 16]; 8],
 
     /// Interpolation of steps in custom LFOs for Audio Tracks.
+    /// Indicates which LFO steps should have values interpolated when LFO is triggered.
+    /// Not sure exactly how the calculation works yet.
     #[serde(with = "BigArray")]
-    pub audio_track_custom_lfos_interpolation_masks: [CustomLfoInterpolationMask; 8],
+    pub audio_tracks_custom_lfos_interpolation_masks: [[u8; 2]; 8],
 
     /// Custom LFO designs for MIDI Tracks.
-    pub midi_track_custom_lfos: CustomLfos,
+    #[serde(with = "BigArray")]
+    pub midi_tracks_custom_lfos: [[u8; 16]; 8],
 
     /// Interpolation of steps in custom LFOs for MIDI Tracks.
+    /// Indicates which LFO steps should have values interpolated when LFO is triggered.
+    /// Not sure exactly how the calculation works yet.
     #[serde(with = "BigArray")]
-    pub midi_track_custom_lfos_interpolation_masks: [CustomLfoInterpolationMask; 8],
+    pub midi_tracks_custom_lfos_interpolation_masks: [[u8; 2]; 8],
 
     /// Arp Sequence Mutes for MIDI tracks.
     /// Not sure how these work.
     /// Muting some of the notes on M-TR-8 has the last array element set to 7 instead of 255.
     #[serde(with = "BigArray")]
-    pub midi_track_arp_mute_masks: [u8; 16],
+    pub midi_tracks_arp_mute_masks: [u8; 16],
 
     /// Arp Sequence Notes for MIDI tracks.
-    pub midi_track_arp_seqs: [MidiArpSequence; 8],
+    pub midi_tracks_arp_seqs: [[u8; 16]; 8],
 }
 
 impl Part {

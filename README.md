@@ -105,9 +105,9 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
     - `MidiTrackTrigs.unknown_2` --> no idea what this is, some kind of mask?
     - `MidiTrackTrigs.unknown_3` --> big 128 length block?!
     - `Pattern.unknown`
-    - `SceneParamsTrack.unknown_1` --> 340 length :/
-    - `SceneParamsTrack.unknown_2` --> 159 length :/
-    - `SceneParamsTrack.unknown_3` only 2 length
+    - `AudioTrackSceneParams.unknown_1` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)
+    - `AudioTrackSceneParams.unknown_2` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)
+    - `SceneTrackXlv.unknown_` only 2 length
     - `MidiTrackParamsValues.unknown` --> space for sample select?
   - Projects:
     - `ProjectSettings.midi_soft_thru` --> what is this for? no menu option named like this.
