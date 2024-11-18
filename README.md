@@ -49,17 +49,13 @@ octatools chains deconstruct-chains <YAML_CONFIG_FILE_PATH>
 
 - Inspect various project data files (project/bank/parts/part/pattern/pattern/arrangement/sample) 
 ```bash
-octatools inspect arrangement <PATH_TO_ARRANGEMENT_FILE>
-octatools inspect bank <PATH_TO_BANK_FILE>
-octatools inspect parts <PATH_TO_BANK_FILE>
-# note: there are actually 8 PART sections in the data files
-# the extra 4 are for storing previous states for reloads
-# (I'm not sure what order the saved parts are in just yet)
-octatools inspect part <PATH_TO_BANK_FILE> <PART_NUMBER>
-octatools inspect patterns <PATH_TO_BANK_FILE>
-octatools inspect pattern <PATH_TO_BANK_FILE> <PATTERN_NUMBER>
 octatools inspect project <PATH_TO_PROJECT_FILE>
 octatools inspect sample <PATH_TO_OT_FILE>
+octatools inspect arrangement <PATH_TO_ARRANGEMENT_FILE>
+octatools inspect bank <PATH_TO_BANK_FILE>
+octatools inspect part-saved <PATH_TO_BANK_FILE> [<PART_NUMBER>...]
+octatools inspect part-unsaved <PATH_TO_BANK_FILE> [<PART_NUMBER>...]
+octatools inspect pattern <PATH_TO_BANK_FILE> [<PATTERN_NUMBER>...]
 ```
 
 - List samples slots being used in a project

@@ -51,15 +51,15 @@ fn main() -> () {
                 info!("Showing bank: path={path:#?}");
                 let _ = show_bank(&path);
             }
-            cli::Inspect::PartSaved { path, index } => {
+            cli::Inspect::PartsSaved { path, index } => {
                 info!("Showing specific part in bank: path={path:#?}");
                 let _ = show_saved_parts(&path, index);
             }
-            cli::Inspect::PartUnsaved { path, index } => {
+            cli::Inspect::PartsUnsaved { path, index } => {
                 info!("Showing specific part in bank: path={path:#?}");
                 let _ = show_unsaved_parts(&path, index);
             }
-            cli::Inspect::Pattern { path, index } => {
+            cli::Inspect::Patterns { path, index } => {
                 info!("Showing specific pattern in bank: path={path:#?}");
                 let _ = show_pattern(&path, index);
             }

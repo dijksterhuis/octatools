@@ -68,7 +68,7 @@ pub enum Inspect {
     },
 
     /// Inspect a specific saved Part state within a Bank
-    PartSaved {
+    PartsSaved {
         /// Path to the Bank file containing a specific Part to inspect.
         path: PathBuf,
         /// The Part number (1/2/3/4)
@@ -76,7 +76,7 @@ pub enum Inspect {
     },
 
     /// Inspect a specific unsaved Part state within a Bank
-    PartUnsaved {
+    PartsUnsaved {
         /// Path to the Bank file containing a specific Part to inspect.
         path: PathBuf,
         /// The Part number (1/2/3/4)
@@ -84,7 +84,7 @@ pub enum Inspect {
     },
 
     /// Inspect a specific Pattern within a Bank
-    Pattern {
+    Patterns {
         /// Path to the Bank file containing a specific Pattern to inspect.
         path: PathBuf,
         /// The Pattern number (1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16)
