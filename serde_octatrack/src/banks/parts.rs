@@ -482,14 +482,14 @@ pub struct RecorderSetup {
 pub struct SceneParamsTrack {
     /// Don't know what this data block is for yet :/
     #[serde(with = "BigArray")]
-    pub ukn1: [u8; 340],
+    pub unknown_1: [u8; 340],
 
     /// The parameter assignments.
     #[serde(with = "BigArray")]
     pub params_values: [u8; 30],
 
     #[serde(with = "BigArray")]
-    pub unk2: [u8; 159],
+    pub unknown_2: [u8; 159],
 
     /// Audio Track Main Volume fade
     /// `MAX` -> `127`.
@@ -498,7 +498,7 @@ pub struct SceneParamsTrack {
 
     /// Don't know what this data block is for yet :/
     #[serde(with = "BigArray")]
-    pub ukn9: [u8; 2],
+    pub unknown_3: [u8; 2],
 }
 
 /// A MIDI Track's custom Arp sequence.
