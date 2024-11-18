@@ -4,7 +4,7 @@
 
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
-use serde_octatrack::FromFileAtPathBuf;
+use serde_octatrack::FromPathBuf;
 use serde_yml::Error as SerdeYmlError;
 use std::path::PathBuf;
 
@@ -21,7 +21,7 @@ pub struct YamlCopyBankConfig {
     pub bank_copies: Vec<YamlCopyBankDetails>,
 }
 
-impl FromFileAtPathBuf for YamlCopyBankConfig {
+impl FromPathBuf for YamlCopyBankConfig {
     type T = Self;
 
     /// Read yaml config from file.

@@ -11,7 +11,7 @@ use serde_big_array::{Array, BigArray};
 
 use crate::{
     banks::{parts::Part, patterns::Pattern},
-    FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf,
+    FromPathBuf, RBoxErr, ToPathBuf,
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
@@ -53,7 +53,7 @@ pub struct Bank {
     pub remainder: [u8; 2],
 }
 
-impl FromFileAtPathBuf for Bank {
+impl FromPathBuf for Bank {
     type T = Bank;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -68,7 +68,7 @@ impl FromFileAtPathBuf for Bank {
     }
 }
 
-impl ToFileAtPathBuf for Bank {
+impl ToPathBuf for Bank {
     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
@@ -85,7 +85,7 @@ pub struct BankRawBytes {
     pub data: Box<Array<u8, 636113>>,
 }
 
-impl FromFileAtPathBuf for BankRawBytes {
+impl FromPathBuf for BankRawBytes {
     type T = BankRawBytes;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -100,7 +100,7 @@ impl FromFileAtPathBuf for BankRawBytes {
     }
 }
 
-impl ToFileAtPathBuf for BankRawBytes {
+impl ToPathBuf for BankRawBytes {
     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
@@ -113,7 +113,7 @@ impl ToFileAtPathBuf for BankRawBytes {
 #[cfg(test)]
 mod tests {
     use crate::banks::Bank;
-    use crate::{FromFileAtPathBuf, ToFileAtPathBuf};
+    use crate::{FromPathBuf, ToPathBuf};
     use std::path::PathBuf;
 
     #[test]

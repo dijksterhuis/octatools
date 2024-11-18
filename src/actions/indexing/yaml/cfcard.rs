@@ -5,7 +5,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use serde_octatrack::{FromFileAtPathBuf, ToFileAtPathBuf};
+use serde_octatrack::{FromPathBuf, ToPathBuf};
 
 /// A single row of data written to the index file.
 use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};
@@ -50,7 +50,7 @@ pub struct CompactFlashDrive {
 impl FromYamlFile for CompactFlashDrive {}
 impl ToYamlFile for CompactFlashDrive {}
 
-impl FromFileAtPathBuf for CompactFlashDrive {
+impl FromPathBuf for CompactFlashDrive {
     type T = CompactFlashDrive;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -67,12 +67,6 @@ impl FromFileAtPathBuf for CompactFlashDrive {
     }
 }
 
-impl ToFileAtPathBuf for CompactFlashDrive {
-    /// Crete a new file at the path from the current struct
-    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
-        unimplemented!();
-    }
-}
 
 /*
 # TODO

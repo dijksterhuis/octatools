@@ -5,7 +5,7 @@
 use crate::common::RBoxErr;
 use hound::{self, WavReader, WavSpec};
 use log::{debug, trace};
-use serde_octatrack::{FromFileAtPathBuf, ToFileAtPathBuf};
+use serde_octatrack::{FromPathBuf, ToPathBuf};
 use std::{error::Error, fs::File, io::BufReader, path::PathBuf};
 
 /// Representation of a wav audio file
@@ -57,7 +57,7 @@ impl WavFile {
     }
 }
 
-impl FromFileAtPathBuf for WavFile {
+impl FromPathBuf for WavFile {
     type T = WavFile;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -83,7 +83,7 @@ impl FromFileAtPathBuf for WavFile {
     }
 }
 
-impl ToFileAtPathBuf for WavFile {
+impl ToPathBuf for WavFile {
     /// Crete a new file at the path from the current struct
     fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
         trace!("Writing WAV data to file: path={path:#?}");

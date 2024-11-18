@@ -2,11 +2,11 @@
 
 mod yaml;
 
-use log::{debug, trace};
+use log::debug;
 
 use std::path::PathBuf;
 
-use serde_octatrack::FromFileAtPathBuf;
+use serde_octatrack::FromPathBuf;
 
 use crate::common::{RBoxErr, ToYamlFile};
 use yaml::cfcard::CompactFlashDrive;

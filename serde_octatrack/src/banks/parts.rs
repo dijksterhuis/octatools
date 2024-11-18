@@ -5,6 +5,12 @@ use serde_big_array::BigArray;
 
 use crate::RBoxErr;
 
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub enum OnOrOff {
+    On = 1,
+    Off = 0,
+}
+
 /// Audio Track MAIN and CUE volume.
 /// Both are 108 by default.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

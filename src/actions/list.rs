@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use crate::common::RBoxErr;
 use itertools::Itertools;
-use serde_octatrack::{projects::Project, FromFileAtPathBuf};
+use serde_octatrack::{projects::Project, FromPathBuf};
 
 /// List all the sample slots within an Octatrack Project, given a path to a Project data file
 pub fn list_project_sample_slots(path: &PathBuf) -> RBoxErr<()> {

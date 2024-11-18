@@ -13,7 +13,7 @@ use std::path::PathBuf;
 
 use serde_octatrack::{
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot},
-    FromFileAtPathBuf, ToFileAtPathBuf,
+    FromPathBuf, ToPathBuf,
 };
 
 /// ### Copy a bank from one project / bank to another project / bank.

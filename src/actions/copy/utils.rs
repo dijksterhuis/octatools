@@ -8,7 +8,7 @@ use crate::common::RBoxErr;
 use serde_octatrack::{
     banks::Bank,
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
-    FromFileAtPathBuf,
+    FromPathBuf,
 };
 
 /// Helper struct for tracking sample slots being used within a `Bank`.

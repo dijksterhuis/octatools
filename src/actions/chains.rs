@@ -15,7 +15,7 @@ use serde_octatrack::{
         },
         SampleAttributes,
     },
-    FromFileAtPathBuf, ToFileAtPathBuf,
+    FromPathBuf, ToPathBuf,
 };
 
 use crate::{
@@ -326,7 +326,7 @@ mod tests {
         use crate::common::RBoxErr;
 
         use crate::audio::wav::WavFile;
-        use serde_octatrack::FromFileAtPathBuf;
+        use serde_octatrack::FromPathBuf;
 
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},

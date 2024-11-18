@@ -68,8 +68,8 @@ trait OptionEnumValueConvert {
     fn value(&self) -> RBoxErr<Self::V>;
 }
 
-/// Trait to use when a new struct can be deserialised from some file located at the specified path.
-pub trait FromFileAtPathBuf {
+/// Trait to use when a new struct can be deserialised from some file or directory tree located at the specified path.
+pub trait FromPathBuf {
     /// Type for `Self`
     type T;
 
@@ -77,8 +77,8 @@ pub trait FromFileAtPathBuf {
     fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
 }
 
-/// Trait to use when a new file can be written at the speciifed path by serializing a struct
-pub trait ToFileAtPathBuf {
+/// Trait to use when a new file(s) can be written at the specifed path by serializing a struct
+pub trait ToPathBuf {
     /// Crete a new file at the path file location struct by serializing struct data.
     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>>;
 }

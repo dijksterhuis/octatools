@@ -27,7 +27,7 @@
 //!   - Unknown block 2
 //!
 
-use crate::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
+use crate::{FromPathBuf, RBoxErr, ToPathBuf};
 use bincode;
 use serde::de::SeqAccess;
 use serde::de::{self, Visitor};
@@ -509,7 +509,7 @@ pub struct ArrangementFileRawBytes {
     pub data: [u8; 11336],
 }
 
-impl FromFileAtPathBuf for ArrangementFileRawBytes {
+impl FromPathBuf for ArrangementFileRawBytes {
     type T = ArrangementFileRawBytes;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -524,7 +524,7 @@ impl FromFileAtPathBuf for ArrangementFileRawBytes {
     }
 }
 
-impl ToFileAtPathBuf for ArrangementFileRawBytes {
+impl ToPathBuf for ArrangementFileRawBytes {
     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
@@ -589,7 +589,7 @@ pub struct ArrangementFile {
     pub unk2: [u8; 8],
 }
 
-impl FromFileAtPathBuf for ArrangementFile {
+impl FromPathBuf for ArrangementFile {
     type T = ArrangementFile;
 
     /// Crete a new struct by reading a file located at `path`.

@@ -15,7 +15,7 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, ToFileAtPathBuf,
+    FromPathBuf, OptionEnumValueConvert, RBoxErr, ToPathBuf,
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
@@ -307,7 +307,7 @@ impl SampleAttributes {
     }
 }
 
-impl FromFileAtPathBuf for SampleAttributes {
+impl FromPathBuf for SampleAttributes {
     type T = SampleAttributes;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -322,7 +322,7 @@ impl FromFileAtPathBuf for SampleAttributes {
     }
 }
 
-impl ToFileAtPathBuf for SampleAttributes {
+impl ToPathBuf for SampleAttributes {
     /// Crete a new file at the path from the current struct
     fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
         let bytes: Vec<u8> = self.encode()?;
@@ -341,7 +341,7 @@ pub struct SampleAttributesRawBytes {
     pub data: [u8; 816],
 }
 
-impl FromFileAtPathBuf for SampleAttributesRawBytes {
+impl FromPathBuf for SampleAttributesRawBytes {
     type T = SampleAttributesRawBytes;
 
     /// Crete a new struct by reading a file located at `path`.
@@ -356,7 +356,7 @@ impl FromFileAtPathBuf for SampleAttributesRawBytes {
     }
 }
 
-impl ToFileAtPathBuf for SampleAttributesRawBytes {
+impl ToPathBuf for SampleAttributesRawBytes {
     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;

@@ -12,7 +12,7 @@ use walkdir::{DirEntry, WalkDir};
 use crate::common::RBoxErr;
 use crate::utils::SampleFilePair;
 
-use serde_octatrack::{banks::Bank, projects::Project, FromFileAtPathBuf};
+use serde_octatrack::{banks::Bank, projects::Project, FromPathBuf};
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 

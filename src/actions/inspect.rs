@@ -8,7 +8,7 @@ use serde_octatrack::{
     banks::{Bank, BankRawBytes},
     projects::Project,
     samples::{SampleAttributes, SampleAttributesRawBytes},
-    FromFileAtPathBuf,
+    FromPathBuf,
 };
 
 /// Show deserialised representation of a Bank for a given bank file at `path`

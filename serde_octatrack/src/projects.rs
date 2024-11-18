@@ -17,7 +17,7 @@ use crate::{
         metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
         slots::ProjectSampleSlot, states::ProjectStates,
     },
-    FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToFileAtPathBuf,
+    FromPathBuf, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToPathBuf,
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
@@ -268,7 +268,7 @@ impl ProjectToString for Project {
     }
 }
 
-impl FromFileAtPathBuf for Project {
+impl FromPathBuf for Project {
     type T = Project;
 
     /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
@@ -290,7 +290,7 @@ impl FromFileAtPathBuf for Project {
     }
 }
 
-impl ToFileAtPathBuf for Project {
+impl ToPathBuf for Project {
     fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
         let data = self.to_string()?;
         let mut f = File::create(path)?;
