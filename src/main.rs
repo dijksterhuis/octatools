@@ -25,7 +25,7 @@ use actions::{
     },
     inspect::{
         show_arrangement, show_arrangement_bytes, show_bank, show_bank_bytes, show_ot_file,
-        show_ot_file_bytes, show_saved_parts, show_unsaved_parts, show_pattern, show_project,
+        show_ot_file_bytes, show_pattern, show_project, show_saved_parts, show_unsaved_parts,
     },
     list::list_project_sample_slots,
 };

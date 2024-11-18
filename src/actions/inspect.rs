@@ -20,7 +20,6 @@ pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
 
 /// Show deserialised representation of Pattern state
 pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
-
     if indexes.len() == 0 {
         panic!("No Pattern numbers specified!");
     };
@@ -28,8 +27,7 @@ pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
         panic!("Invalid Pattern numbers specified! Only 1-16 are allowed.");
     }
 
-    let b = &Bank::from_pathbuf(&path)
-        .expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
 
     for index in indexes {
         if index < 1 || index > 16 {
@@ -37,8 +35,8 @@ pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
         }
         let x = &b.patterns[index - 1];
         println!("{x:#?}");
-    };
-        
+    }
+
     Ok(())
 }
 
@@ -51,19 +49,17 @@ pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
         panic!("Invalid Part numbers specified! Only 1-4 are allowed.");
     }
 
-    let b = &Bank::from_pathbuf(&path)
-        .expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
 
     for index in indexes {
         if index < 1 || index > 4 {
             panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
         }
         let x = &b.parts_saved[index - 1];
-        println!("{x:#?}");    
-    };
+        println!("{x:#?}");
+    }
     Ok(())
 }
-
 
 /// Show deserialised representation of Part's saved state
 pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
@@ -74,20 +70,18 @@ pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
         panic!("Invalid Part numbers specified! Only 1, 2, 3, 4 are allowed");
     }
 
-    let b = &Bank::from_pathbuf(&path)
-        .expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
 
     for index in indexes {
         if index < 1 || index > 4 {
             panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
         }
         let x = &b.parts_saved[index - 1];
-        println!("{x:#?}");    
-    };
+        println!("{x:#?}");
+    }
 
     Ok(())
 }
-
 
 /// Show deserialised representation of a Project for a given project file at `path`
 pub fn show_project(path: &PathBuf) -> RBoxErr<()> {
