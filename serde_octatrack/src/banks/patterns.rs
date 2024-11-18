@@ -556,10 +556,10 @@ impl Pattern {
 
 mod test {
     mod trig_bitmasks {
-        use crate::banks::patterns::get_halfpage_trigs_from_bitmask_value;
 
         #[test]
         fn test_halfpage_trig_bitmask_unmask_0() {
+            use crate::banks::patterns::get_halfpage_trigs_from_bitmask_value;
             assert_eq!(
                 get_halfpage_trigs_from_bitmask_value(&0).unwrap(),
                 [false, false, false, false, false, false, false, false],
@@ -569,14 +569,14 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_1() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&1).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&1).unwrap(),
                 [true, false, false, false, false, false, false, false],
             );
         }
         #[test]
         fn test_halfpage_trig_bitmask_unmask_2() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&2).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&2).unwrap(),
                 [false, true, false, false, false, false, false, false],
             );
         }
@@ -584,7 +584,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_4() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&4).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&4).unwrap(),
                 [false, false, true, false, false, false, false, false],
             );
         }
@@ -592,7 +592,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_8() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&8).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&8).unwrap(),
                 [false, false, false, true, false, false, false, false],
             );
         }
@@ -600,7 +600,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_16() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&16).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&16).unwrap(),
                 [false, false, false, false, true, false, false, false],
             );
         }
@@ -608,7 +608,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_32() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&32).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&32).unwrap(),
                 [false, false, false, false, false, true, false, false],
             );
         }
@@ -616,7 +616,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_64() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&64).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&64).unwrap(),
                 [false, false, false, false, false, false, true, false],
             );
         }
@@ -624,7 +624,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_128() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&128).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&128).unwrap(),
                 [false, false, false, false, false, false, false, true],
             );
         }
@@ -632,7 +632,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_3() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&3).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&3).unwrap(),
                 [true, true, false, false, false, false, false, false],
             );
         }
@@ -640,7 +640,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_7() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&7).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&7).unwrap(),
                 [true, true, true, false, false, false, false, false],
             );
         }
@@ -648,7 +648,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_15() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&15).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&15).unwrap(),
                 [true, true, true, true, false, false, false, false],
             );
         }
@@ -656,7 +656,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_31() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&31).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&31).unwrap(),
                 [true, true, true, true, true, false, false, false],
             );
         }
@@ -664,7 +664,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_63() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&63).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&63).unwrap(),
                 [true, true, true, true, true, true, false, false],
             );
         }
@@ -672,7 +672,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_127() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&127).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&127).unwrap(),
                 [true, true, true, true, true, true, true, false],
             );
         }
@@ -680,7 +680,7 @@ mod test {
         #[test]
         fn test_halfpage_trig_bitmask_unmask_255() {
             assert_eq!(
-                get_halfpage_trigs_from_bitmask_value(&255).unwrap(),
+                crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&255).unwrap(),
                 [true, true, true, true, true, true, true, true],
             );
         }
