@@ -1,9 +1,45 @@
 //! Serialization and Deserialization of Pattern related data for Bank files.
 
+use std::array::from_fn;
+
+use crate::banks::parts::{
+    AudioTrackAmpParamsValues, AudioTrackFxParamsValues, LfoParamsValues, MidiTrackArpParamsValues,
+    MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues, MidiTrackLfoParamsValues,
+    MidiTrackMidiParamsValues,
+};
+
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
 use crate::RBoxErr;
+
+const HALF_PAGE_TRIG_BITMASK_VALUES: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
+
+/// Given a half-page trig bit mask, get a arrary of 8x boolean values
+/// indicating whether each trig in the half-page is active or not
+pub fn get_halfpage_trigs_from_bitmask_value(bitmask: &u8) -> RBoxErr<[bool; 8]> {
+    let arr: [bool; 8] = HALF_PAGE_TRIG_BITMASK_VALUES
+        .iter()
+        .map(|x| (bitmask & x) > 0)
+        .collect::<Vec<bool>>()
+        .try_into()
+        .unwrap();
+    Ok(arr)
+}
+
+/// Given a half-page trig bit mask, get a arrary of 8x boolean values
+/// indicating where each trig in the half-page is active or not
+pub fn get_track_trigs_from_bitmasks(bitmasks: &[u8; 8]) -> RBoxErr<[bool; 64]> {
+    let trigs: [bool; 64] = bitmasks
+        .iter()
+        .map(|x: &u8| get_halfpage_trigs_from_bitmask_value(x).unwrap())
+        .flatten()
+        .collect::<Vec<bool>>()
+        .try_into()
+        .unwrap();
+
+    Ok(trigs)
+}
 
 /// A Trig's parameter locks on the Playback/Machine page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -16,73 +52,34 @@ pub struct AudioTrackParameterLockPlayback {
     pub param6: u8,
 }
 
-/// A Trig's parameter locks on the Amp page for an Audio Track.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackParameterLockAmp {
-    pub atck: u8,
-    pub hold: u8,
-    pub rel: u8,
-    pub vol: u8,
-    pub bal: u8,
-    unused_1: u8,
-}
-
-/// A Trig's parameter locks on the LFO page for an Audio Track.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackParameterLockLfo {
-    pub spd1: u8,
-    pub spd2: u8,
-    pub spd3: u8,
-    pub dep1: u8,
-    pub dep2: u8,
-    pub dep3: u8,
-}
-
-/// A Trig's parameter locks on the FX1 page for an Audio Track.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackParameterLockFx1 {
-    pub param1: u8,
-    pub param2: u8,
-    pub param3: u8,
-    pub param4: u8,
-    pub param5: u8,
-    pub param6: u8,
-}
-
-/// A Trig's parameter locks on the FX2 page for an Audio Track.
-/// todo: merge this with FX1?
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackParameterLockFx2 {
-    pub param1: u8,
-    pub param2: u8,
-    pub param3: u8,
-    pub param4: u8,
-    pub param5: u8,
-    pub param6: u8,
-}
-
 /// A single trig's parameter locks on an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackParameterLocks {
     pub machine: AudioTrackParameterLockPlayback,
-    pub lfo: AudioTrackParameterLockLfo,
-    pub amp: AudioTrackParameterLockAmp,
-    pub fx1: AudioTrackParameterLockFx1,
-    pub fx2: AudioTrackParameterLockFx2,
+    pub lfo: LfoParamsValues,
+    pub amp: AudioTrackAmpParamsValues,
+    pub fx1: AudioTrackFxParamsValues,
+    pub fx2: AudioTrackFxParamsValues,
     pub sample_lock_static: u8,
     pub sample_lock_flex: u8,
 }
 
-/// MIDI Track parameter locks. Still need to look at these.
+/// MIDI Track parameter locks.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackParameterLocks {
+    pub midi: MidiTrackMidiParamsValues,
+    pub lfo: MidiTrackLfoParamsValues,
+    pub arp: MidiTrackArpParamsValues,
+    pub ctrl1: MidiTrackCc1ParamsValues,
+    pub ctrl2: MidiTrackCc2ParamsValues,
+
     #[serde(with = "BigArray")]
-    pub todo: [u8; 32],
+    unknown: [u8; 2],
 }
 
-/// Audio Track Pattern playback settings.
+/// Audio & MIDI Track Pattern playback settings.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackPatternSettings {
+pub struct TrackPatternSettings {
     /// Silence any existing audio playback on the Audio Track when switching Patterns.
     pub start_silent: u8,
 
@@ -129,33 +126,77 @@ pub struct AudioTrackPatternSettings {
     pub oneshot_trk: u8,
 }
 
-/// Trig masks for Audio Tracks.
+/// Trig bitmasks array for Audio Tracks.
+/// Can be converted into an array of booleans using the `get_track_trigs_from_bitmasks` function.
 ///
-/// Base track Trig masks are stored backwards, meaning
-/// the first 8 Trig positions are the last bytes in this section.
+/// Trig bitmask arrays have bitmasks stored in this order, which is slightly confusing (pay attention to the difference with 7 + 8!):
+/// 1. 1st half of the 4th page
+/// 2. 2nd half of the 4th page
+/// 3. 1st half of the 3rd page
+/// 4. 2nd half of the 3rd page
+/// 5. 1st half of the 2nd page
+/// 6. 2nd half of the 2nd page
+/// 7. 2nd half of the 1st page
+/// 8. 1st half of the 1st page
 ///
-/// `255 255 255 255 255 255 255 255` --> all Trigs active across all Pages.
-/// `0 0 0 0 0 0 0 0 255` --> all Trigs activated for the first 8 positions (first half of first Page).
-/// `0 0 0 0 0 0 0 255 255` --> all Trigs activated for the first Page.
-///
-/// The masks works like this:
+/// ### Bitmask values for trig positions
+/// With single trigs in a half-page
 /// ```text
-/// x - - - - - - - --> 1
-/// - x - - - - - - --> 2
-/// x x - - - - - - --> 3
-/// - - x - - - - - --> 4
-/// x - x - - - - - --> 5
-/// - x x - - - - - --> 6
-/// x x x - - - - - --> 7
-/// - - - x - - - - --> 8
-/// x - - x - - - - --> 9
-/// - x - x - - - - --> 10
-/// x x - x - - - - --> 11
-/// - - x x - - - - --> 12
-/// x - x x - - - - --> 13
-/// - x x x - - - - --> 14
-/// x x x x - - - - --> 15
+/// positions
+/// 1 2 3 4 5 6 7 8 | mask value
+/// ----------------|-----------
+/// - - - - - - - - | 0
+/// x - - - - - - - | 1
+/// - x - - - - - - | 2
+/// - - x - - - - - | 4
+/// - - - x - - - - | 8
+/// - - - - x - - - | 16
+/// - - - - - x - - | 32
+/// - - - - - - x - | 64
+/// - - - - - - - x | 128
 /// ```
+///
+/// When there are multiple trigs in a half-page, the individual position values are summed together:
+///
+/// ```text
+/// 1 2 3 4 5 6 7 8 | mask value
+/// ----------------|-----------
+/// x x - - - - - - | 1 + 2 = 3
+/// x x x x - - - - | 1 + 2 + 4 + 8 = 15
+/// ```
+/// ### Fuller diagram of mask values
+///
+/// ```text
+/// positions
+/// 1 2 3 4 5 6 7 8 | mask value
+/// ----------------|-----------
+/// x - - - - - - - | 1
+/// - x - - - - - - | 2
+/// x x - - - - - - | 3
+/// - - x - - - - - | 4
+/// x - x - - - - - | 5
+/// - x x - - - - - | 6
+/// x x x - - - - - | 7
+/// - - - x - - - - | 8
+/// x - - x - - - - | 9
+/// - x - x - - - - | 10
+/// x x - x - - - - | 11
+/// - - x x - - - - | 12
+/// x - x x - - - - | 13
+/// - x x x - - - - | 14
+/// x x x x - - - - | 15
+/// ................|....
+/// x x x x x x - - | 63
+/// ................|....
+/// - - - - - - - x | 128
+/// ................|....
+/// - x - x - x - x | 170
+/// ................|....
+/// - - - - x x x x | 240
+/// ................|....
+/// x x x x x x x x | 255
+/// ```
+///
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct AudioTrackTrigMasks {
     /// Trigger Trig masks -- indicate which Trigger Trigs are active.
@@ -201,7 +242,7 @@ pub struct AudioTrackTrigMasks {
 
 /// Audio Track custom scaling when the Pattern is in PER TRACK scale mode.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct AudioTrackPerTrackModeScale {
+pub struct TrackPerTrackModeScale {
     /// The Audio Track's Length when Pattern is in Per Track mode.
     /// Default: 16
     pub per_track_len: u8,
@@ -242,14 +283,14 @@ pub struct AudioTrackTrigs {
     pub trig_masks: AudioTrackTrigMasks,
 
     /// The scale of this Audio Track in Per Track Pattern mode.
-    pub scale_per_track_mode: AudioTrackPerTrackModeScale,
+    pub scale_per_track_mode: TrackPerTrackModeScale,
 
     /// Amount of swing when a Swing Trig is active for the Track.
     /// Maximum is `30` (`80` on device), minimum is `0` (`50` on device).
     pub swing_amount: u8,
 
     /// Pattern settings for this Audio Track
-    pub pattern_settings: AudioTrackPatternSettings,
+    pub pattern_settings: TrackPatternSettings,
 
     /// Unknown data.
     pub unknown_4: u8,
@@ -265,13 +306,58 @@ pub struct AudioTrackTrigs {
     pub unknown_5: [u8; 192],
 }
 
+/// MIDI Track Trig masks.
+/// Can be converted into an array of booleans using the `get_track_trigs_from_bitmasks` function.
+/// See `AudioTrackTrigMasks` for more information.
+///
+/// Trig mask arrays have data stored in this order, which is slightly confusing (pay attention to the difference with 7 + 8!):
+/// 1. 1st half of the 4th page
+/// 2. 2nd half of the 4th page
+/// 3. 1st half of the 3rd page
+/// 4. 2nd half of the 3rd page
+/// 5. 1st half of the 2nd page
+/// 6. 2nd half of the 2nd page
+/// 7. 2nd half of the 1st page
+/// 8. 1st half of the 1st page
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct MidiTrackTrigMasks {
+    /// todo
+    #[serde(with = "BigArray")]
+    pub unk1: [u8; 4],
+
+    /// this is something to do with the trig masks but i don't know what it's referring to
+    /// * when not active1 trigs on a track: 7
+    /// * when all trigs on a track are trigger trigs: 7
+    /// * when all trigs on a track are trigless trigs: 6
+    /// * when all trigs on a track are plock trigs: 5
+    pub unknown1: u8,
+
+    /// Note Trig masks.
+    #[serde(with = "BigArray")]
+    pub trigger: [u8; 8],
+
+    /// Trigless Trig masks.
+    #[serde(with = "BigArray")]
+    pub trigless: [u8; 8],
+
+    /// Parameter Lock Trig masks.
+    /// Note this only stores data for exclusive parameter lock *trigs* (light green trigs).
+    #[serde(with = "BigArray")]
+    pub plock: [u8; 8],
+
+    /// Swing trigs mask.
+    #[serde(with = "BigArray")]
+    pub swing: [u8; 8],
+
+    /// this is a block of 8, so looks like a trig mask for tracks,
+    /// but I can't think of what it could be.
+    #[serde(with = "BigArray")]
+    pub unknown2: [u8; 8],
+}
+
 /// Track trigs assigned on an Audio Track within a Pattern
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackTrigs {
-    // I think these are to do with whether a pattern has been modified
-    // or not but i'm not sure yet
-    // #[serde(with = "BigArray")]
-    // pub modified_bits: [u8; 2],
     /// Header data section
     ///
     /// example data:
@@ -282,37 +368,34 @@ pub struct MidiTrackTrigs {
     #[serde(with = "BigArray")]
     pub header: [u8; 4],
 
-    /// main block of data, contains a bunch of stuff to parse
-    /// trig mask might be in here?
-    ///
-    /// example data:
-    /// ```text
-    /// 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00
-    /// 00 00 00 00 00 00 00 00 00 00 00 00 00 aa aa aa
-    /// aa aa aa aa aa 00 00 00 00 00 00 00 00 10 02 00
-    /// ff 00 00 00 00
-    /// ```
-    #[serde(with = "BigArray")]
-    pub main_blob: [u8; 53],
+    /// MIDI Track Trig masks contain the Trig step locations for different trig types
+    pub trig_masks: MidiTrackTrigMasks,
 
-    /// trig properties -- sample locks, p-locks etc.
+    /// The scale of this MIDI Track in Per Track Pattern mode.
+    pub scale_per_track_mode: TrackPerTrackModeScale,
+
+    /// Amount of swing when a Swing Trig is active for the Track.
+    /// Maximum is `30` (`80` on device), minimum is `0` (`50` on device).
+    pub swing_amount: u8,
+
+    /// Pattern settings for this MIDI Track
+    pub pattern_settings: TrackPatternSettings,
+
+    /// trig properties -- p-locks etc.
     /// the big `0xff` value block within tracks basically.
-    /// 32 bytes per trig from what I remember.
+    /// 32 bytes per trig -- 6x parameters for 5x pages plus 2x extra fields at the end.
     ///
-    /// too much data to post a full example here, but here
-    /// is one 32 byte block:
-    /// ```text
-    /// ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-    /// ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff
-    /// ```
+    /// For audio tracks, the 2x extra fields at the end are for sample locks,
+    /// but there's no such concept for MIDI tracks.
+    /// It seems like Elektron devs reused their data structures for P-Locks on both Audio + MIDI tracks.
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
-    pub trig_properties: Box<Array<MidiTrackParameterLocks, 64>>,
+    pub plocks: Box<Array<MidiTrackParameterLocks, 64>>,
 
     /// Unknown data.
     /// comes at the end, dunno what this block is yet
     /// mostly a bunch of zero values
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
-    pub unknown: Box<Array<u8, 128>>,
+    pub unknown2: Box<Array<u8, 128>>,
 }
 
 /// Pattern level scaling settings.
@@ -470,5 +553,138 @@ impl Pattern {
             }
         }
         Ok(())
+    }
+}
+
+mod test {
+    mod trig_bitmasks {
+        use crate::banks::patterns::get_halfpage_trigs_from_bitmask_value;
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_0() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&0).unwrap(),
+                [false, false, false, false, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_1() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&1).unwrap(),
+                [true, false, false, false, false, false, false, false],
+            );
+        }
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_2() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&2).unwrap(),
+                [false, true, false, false, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_4() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&4).unwrap(),
+                [false, false, true, false, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_8() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&8).unwrap(),
+                [false, false, false, true, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_16() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&16).unwrap(),
+                [false, false, false, false, true, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_32() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&32).unwrap(),
+                [false, false, false, false, false, true, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_64() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&64).unwrap(),
+                [false, false, false, false, false, false, true, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_128() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&128).unwrap(),
+                [false, false, false, false, false, false, false, true],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_3() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&3).unwrap(),
+                [true, true, false, false, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_7() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&7).unwrap(),
+                [true, true, true, false, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_15() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&15).unwrap(),
+                [true, true, true, true, false, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_31() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&31).unwrap(),
+                [true, true, true, true, true, false, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_63() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&63).unwrap(),
+                [true, true, true, true, true, true, false, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_127() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&127).unwrap(),
+                [true, true, true, true, true, true, true, false],
+            );
+        }
+
+        #[test]
+        fn test_halfpage_trig_bitmask_unmask_255() {
+            assert_eq!(
+                get_halfpage_trigs_from_bitmask_value(&255).unwrap(),
+                [true, true, true, true, true, true, true, true],
+            );
+        }
     }
 }
