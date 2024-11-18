@@ -5,9 +5,8 @@ mod yaml;
 use log::{debug, info, trace};
 use std::path::PathBuf;
 
-use crate::common::FromYamlFile;
+use crate::common::{FromYamlFile, RBoxErr};
 use serde_octatrack::{
-    common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf},
     samples::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         options::{
@@ -16,6 +15,7 @@ use serde_octatrack::{
         },
         SampleAttributes,
     },
+    FromFileAtPathBuf, ToFileAtPathBuf,
 };
 
 use crate::{
@@ -37,28 +37,28 @@ pub fn chain_wavfiles_64_batch(
     wavfiles: &Vec<WavFile>,
 ) -> Result<Vec<(WavFile, Vec<WavFile>)>, ()> {
     debug!("Batching {:#?} audio files.", wavfiles.len());
-    let originals: Vec<WavFile> = wavfiles.clone();
-    let mut slice_vecs: Vec<Vec<WavFile>> = vec![];
 
     let vec_mod_length = wavfiles.len().div_euclid(64);
 
-    trace!("Creating batches.");
-    for i in 0..(vec_mod_length + 1) {
-        let (start, mut end) = (i * 64, (i * 64) + 64);
-
-        if end > originals.len() {
-            end = originals.len();
-        };
-        let mut s: Vec<WavFile> = Vec::with_capacity(end - start);
-
-        for o in &originals[start..end] {
-            s.push(o.clone());
-        }
-        slice_vecs.push(s);
-    }
+    trace!("Creating sample chain audio file batches.");
+    let slice_vecs: Vec<Vec<WavFile>> = (0..(vec_mod_length + 1))
+        .map(|i| {
+            let (start, mut end) = (i * 64, (i * 64) + 64);
+            if end > wavfiles.len() {
+                end = wavfiles.len();
+            };
+            wavfiles[start..end].iter().map(|x| x.clone()).collect()
+        })
+        .collect();
 
     trace!("Creating singular sample of samples in each batch.");
     let mut chains: Vec<(WavFile, Vec<WavFile>)> = vec![];
+
+    // slice_vecs.iter().map(
+    //     |x| {
+    //     }
+    // );
+
     for slice_vec in slice_vecs {
         let mut single_chain_wav: WavFile = slice_vec[0].clone();
 
@@ -326,7 +326,7 @@ mod tests {
         use crate::common::RBoxErr;
 
         use crate::audio::wav::WavFile;
-        use serde_octatrack::common::FromFileAtPathBuf;
+        use serde_octatrack::FromFileAtPathBuf;
 
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},

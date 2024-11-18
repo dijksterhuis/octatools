@@ -1,12 +1,9 @@
-//! Enums for Octatrack values realted to Projects..
+//! Enums for Octatrack values related to Projects.
 
-// TODO: Break this up into options modules in the projects / samples directories.
-
-use crate::common::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
+use crate::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
 use serde::{Deserialize, Serialize};
 
 /// Sample Slot options for Projects.
-
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Eq, Hash)]
 pub enum ProjectSampleSlotType {
     /// Static machine slot
@@ -41,11 +38,8 @@ impl OptionEnumValueConvert for ProjectSampleSlotType {
     }
 }
 
-// TODO: Specification tests
-
 /// MIDI Channel options in Project Settings Menu
 /// (only use when `Disabled` is an option).
-
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
 pub enum ProjectMidiChannels {
     /// No MIDI Channel selected -- Project Menu -> Control -> Midi -> Sync
@@ -160,24 +154,31 @@ mod test_spec {
         mod value {
 
             // NOTE: @dijksterhuis: have to import the trait to use it
-            use crate::common::OptionEnumValueConvert;
             use crate::projects::options::ProjectSampleSlotType;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_static() {
-                assert_eq!(ProjectSampleSlotType::Static.value().unwrap(), "STATIC",);
+                assert_eq!(ProjectSampleSlotType::Static.value().unwrap(), "STATIC");
             }
             #[test]
             fn test_flex() {
-                assert_eq!(ProjectSampleSlotType::Flex.value().unwrap(), "FLEX",);
+                assert_eq!(ProjectSampleSlotType::Flex.value().unwrap(), "FLEX");
+            }
+            #[test]
+            fn test_recorder() {
+                assert_eq!(
+                    ProjectSampleSlotType::RecorderBuffer.value().unwrap(),
+                    "RECORDER"
+                );
             }
         }
 
         mod from_value {
 
             // NOTE: @dijksterhuis: have to import the trait to use it
-            use crate::common::OptionEnumValueConvert;
             use crate::projects::options::ProjectSampleSlotType;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_error() {
@@ -240,8 +241,8 @@ mod test_spec {
     mod ot_proj_settings_midi_channels {
 
         mod value {
-            use crate::common::OptionEnumValueConvert;
             use crate::projects::options::ProjectMidiChannels;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_disabled() {
@@ -315,8 +316,8 @@ mod test_spec {
 
         mod from_value {
 
-            use crate::common::OptionEnumValueConvert;
             use crate::projects::options::ProjectMidiChannels;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_error_1() {

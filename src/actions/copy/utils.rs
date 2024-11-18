@@ -7,8 +7,8 @@ use crate::common::RBoxErr;
 
 use serde_octatrack::{
     banks::Bank,
-    common::FromFileAtPathBuf,
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
+    FromFileAtPathBuf,
 };
 
 /// Helper struct for tracking sample slots being used within a `Bank`.
@@ -71,35 +71,29 @@ pub struct BankMetaStore {
 
 /// Helper struct to refer to both source and destination `Bank`s.
 pub struct TransferMetaBank {
-    pub src: BankMetaStore,
-    pub dest: BankMetaStore,
+    pub src: Bank,
+    pub dest: Bank,
 }
 
 impl TransferMetaBank {
     pub fn new(src: &PathBuf, dest: &PathBuf) -> RBoxErr<Self> {
         Ok(TransferMetaBank {
-            src: BankMetaStore {
-                bank: Bank::from_pathbuf(src).unwrap(),
-                path: src.clone(),
-            },
-            dest: BankMetaStore {
-                bank: Bank::from_pathbuf(dest).unwrap(),
-                path: dest.clone(),
-            },
+            src: Bank::from_pathbuf(src)?,
+            dest: Bank::from_pathbuf(dest)?,
         })
     }
 }
 
 /// Find free sample slot locations in a `Project`
-pub fn find_free_sslots(projects: TransferMetaProject) -> RBoxErr<(Vec<u8>, Vec<u8>)> {
+pub fn find_free_sslots(projects: &TransferMetaProject) -> RBoxErr<(Vec<u8>, Vec<u8>)> {
     let mut base_vec: Vec<u8> = vec![];
     for i in 1..=128 {
         base_vec.push(i)
     }
     let mut free_static_sample_slots_ids: Vec<u8> = base_vec.clone();
-    let mut free_flex_sample_slots_ids: Vec<u8> = base_vec.clone();
+    let mut free_flex_sample_slots_ids: Vec<u8> = base_vec;
 
-    for slot in projects.dest.project.slots {
+    for slot in projects.dest.project.slots.iter() {
         match slot.sample_type {
             ProjectSampleSlotType::Static => {
                 free_static_sample_slots_ids.retain(|x| *x != slot.slot_id as u8);
@@ -221,11 +215,11 @@ pub fn update_sslot_references_static(
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
     debug!("Updating static sample slots for static machines in parts ...");
-    for part in banks.src.bank.parts.iter_mut() {
+    for part in banks.src.parts.iter_mut() {
         part.update_static_machine_slot(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating static sample slots for static plocks in patterns ...");
-    for pattern in banks.src.bank.patterns.iter_mut() {
+    for pattern in banks.src.patterns.iter_mut() {
         pattern.update_static_sample_plocks(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating source project static sample slot location ...");
@@ -246,11 +240,11 @@ pub fn update_sslot_references_flex(
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
     debug!("Updating flex sample slots for flex machines in parts ...");
-    for part in banks.src.bank.parts.iter_mut() {
+    for part in banks.src.parts.iter_mut() {
         part.update_flex_machine_slot(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating flex sample slots for flex plocks in patterns ...");
-    for pattern in banks.src.bank.patterns.iter_mut() {
+    for pattern in banks.src.patterns.iter_mut() {
         pattern.update_flex_sample_plocks(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating source project flex sample slot location ...");
@@ -320,7 +314,7 @@ fn maybe_copy_ot_attr_file(src_path: &PathBuf, dest_path: &PathBuf) -> RBoxErr<(
 /// If necessary, copy audio files to a new audio pool location and change the path for the sample slot.
 pub fn copy_sslot_sample_files(
     projects: &TransferMetaProject,
-    slot: &mut ProjectSampleSlot,
+    slot: &ProjectSampleSlot,
 ) -> RBoxErr<()> {
     debug!("Copying audio file for sample slot ...");
 

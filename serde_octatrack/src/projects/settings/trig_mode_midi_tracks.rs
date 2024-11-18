@@ -2,7 +2,7 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 
-use crate::common::{FromHashMap, ParseHashMapValueAs};
+use crate::projects::{parse_hashmap_string_value, FromHashMap};
 
 /// Current Trig mode setting for MIDI tracks.
 
@@ -38,8 +38,6 @@ pub struct MidiTrackTrigModes {
     pub trig_mode_midi_track_8: u8,
 }
 
-impl ParseHashMapValueAs for MidiTrackTrigModes {}
-
 impl FromHashMap for MidiTrackTrigModes {
     type A = String;
     type B = String;
@@ -47,37 +45,45 @@ impl FromHashMap for MidiTrackTrigModes {
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
         Ok(Self {
-            trig_mode_midi_track_1: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_1: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_1",
+                None,
             )?,
-            trig_mode_midi_track_2: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_2: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_2",
+                None,
             )?,
-            trig_mode_midi_track_3: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_3: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_3",
+                None,
             )?,
-            trig_mode_midi_track_4: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_4: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_4",
+                None,
             )?,
-            trig_mode_midi_track_5: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_5: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_5",
+                None,
             )?,
-            trig_mode_midi_track_6: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_6: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_6",
+                None,
             )?,
-            trig_mode_midi_track_7: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_7: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_7",
+                None,
             )?,
-            trig_mode_midi_track_8: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            trig_mode_midi_track_8: parse_hashmap_string_value::<u8>(
+                hmap,
                 "trig_mode_midi_track_8",
+                None,
             )?,
         })
     }

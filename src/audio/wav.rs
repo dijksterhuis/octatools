@@ -2,9 +2,10 @@
 //!
 //! **TODO**: Need to move this out into the binary crate.
 
+use crate::common::RBoxErr;
 use hound::{self, WavReader, WavSpec};
 use log::{debug, trace};
-use serde_octatrack::common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
+use serde_octatrack::{FromFileAtPathBuf, ToFileAtPathBuf};
 use std::{error::Error, fs::File, io::BufReader, path::PathBuf};
 
 /// Representation of a wav audio file

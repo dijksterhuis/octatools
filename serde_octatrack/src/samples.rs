@@ -10,14 +10,12 @@ use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
 use crate::{
-    common::{
-        FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, RVoidError, SwapBytes, ToFileAtPathBuf,
-    },
     samples::options::{SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode},
     samples::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
+    FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, ToFileAtPathBuf,
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
@@ -40,6 +38,16 @@ pub const FULL_HEADER: [u8; 23] = [
     0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
 ];
 
+/// Trait for adding the `.swap_bytes()` method.
+pub trait SwapBytes {
+    /// Type for `Self`
+    type T;
+
+    /// Swap the bytes of all struct fields.
+    /// Must be applied to the `SampleAttributes` file to deal with litle-endian/big-endian systems.
+    fn swap_bytes(self) -> Result<Self::T, Box<dyn Error>>;
+}
+
 #[derive(Debug)]
 enum SampleAttributeErrors {
     InvalidTempo,
@@ -47,7 +55,10 @@ enum SampleAttributeErrors {
 }
 impl std::fmt::Display for SampleAttributeErrors {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "invalid first item to double")
+        match self {
+            Self::InvalidGain => write!(f, "invalid gain value"),
+            Self::InvalidTempo => write!(f, "invalid tempo value"),
+        }
     }
 }
 impl std::error::Error for SampleAttributeErrors {}
@@ -58,11 +69,8 @@ impl std::error::Error for SampleAttributeErrors {}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct SampleAttributes {
-    /// Header is always: `FORM....DPS1SMPA`
-    pub header: [u8; 16],
-
-    /// Blank values then a single 2 value: `......` (dunno why the 2 value)
-    pub blank: [u8; 7],
+    /// Header
+    pub header: [u8; 23],
 
     /// Tempo is always the machine UI's BPM multiplied by 24
     pub tempo: u32,
@@ -133,16 +141,15 @@ impl SwapBytes for SampleAttributes {
 
     /// Swap the bytes of all struct fields.
     /// Must be applied to the `SampleAttributes` file to deal with litle-endian/big-endian systems.
-    fn swap_bytes(&self) -> Result<Self::T, Box<dyn Error>> {
-        let mut bswapped_slices: [Slice; 64] = self.slices.clone();
+    fn swap_bytes(self) -> Result<Self::T, Box<dyn Error>> {
+        let mut bswapped_slices: [Slice; 64] = self.slices;
 
         for (i, slice) in self.slices.iter().enumerate() {
             bswapped_slices[i] = slice.swap_bytes().unwrap();
         }
 
         let bswapped = Self {
-            header: HEADER_BYTES,
-            blank: UNKNOWN_BYTES,
+            header: FULL_HEADER,
             tempo: self.tempo.swap_bytes(),
             trim_len: self.trim_len.swap_bytes(),
             loop_len: self.loop_len.swap_bytes(),
@@ -184,16 +191,15 @@ impl SampleAttributes {
         };
 
         let validated_tempo: RBoxErr<f32> = if tempo < &30.0 {
-            Err(SampleAttributeErrors::InvalidGain.into())
+            Err(SampleAttributeErrors::InvalidTempo.into())
         } else if tempo > &300.0 {
-            Err(SampleAttributeErrors::InvalidGain.into())
+            Err(SampleAttributeErrors::InvalidTempo.into())
         } else {
             Ok(*tempo)
         };
 
         Ok(Self {
-            header: HEADER_BYTES,
-            blank: UNKNOWN_BYTES,
+            header: FULL_HEADER,
             gain: validated_gain?,
             stretch: stretch.value()?,
             tempo: validated_tempo? as u32,
@@ -217,8 +223,7 @@ impl SampleAttributes {
     /// 2. swaps bytes of values (when current system is little-endian)
     /// 3. generate checksum value
     pub fn encode(&self) -> RBoxErr<Vec<u8>> {
-
-        // clone instead of mutable borrwed reference -- don't want to bytes swap or 
+        // clone instead of mutable borrwed reference -- don't want to bytes swap or
         // modify current values
         let mut bswapd = self.clone();
 

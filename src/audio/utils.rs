@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::audio::{aiff::AiffFile, wav::WavFile};
-use serde_octatrack::{common::RBoxErr, constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS};
+use crate::common::RBoxErr;
+use serde_octatrack::constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS;
 
 /// A filter for walkdir rescursive search: include directories
 fn direntry_is_dir(entry: &DirEntry) -> bool {

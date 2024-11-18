@@ -1,6 +1,5 @@
 //! Parse Octatrack `project.*` data files.
 
-pub mod common;
 pub mod metadata;
 pub mod options;
 pub mod settings;
@@ -8,16 +7,168 @@ pub mod slots;
 pub mod states;
 
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Write, path::PathBuf};
-
-use crate::common::{
-    FromFileAtPathBuf, ProjectFromString, ProjectToString, RBoxErr, ToFileAtPathBuf,
+use std::{
+    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::PathBuf,
+    str::FromStr,
 };
 
-use crate::projects::{
-    metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
-    slots::ProjectSampleSlot, states::ProjectStates,
+use crate::{
+    projects::{
+        metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
+        slots::ProjectSampleSlot, states::ProjectStates,
+    },
+    FromFileAtPathBuf, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToFileAtPathBuf,
 };
+
+/// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
+trait FromHashMap {
+    /// Type for `HashMap` keys
+    type A;
+
+    /// Type for `HashMap` values
+    type B;
+
+    /// Type for `Self`
+    type T;
+
+    /// Crete a new struct from a `HashMap`.
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>>;
+}
+
+/// Trait to use when a new struct can be created by reading a string.
+trait ProjectFromString {
+    /// Type for `Self`
+    type T;
+
+    /// Crete a new struct by parsing a `String`.
+    fn from_string(data: &String) -> Result<Self::T, Box<dyn std::error::Error>>;
+}
+
+/// Trait to use when a new struct can be created by reading a string.
+trait ProjectToString {
+    /// Crete a new struct by parsing a `String`.
+    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>>;
+}
+
+/// Return the string value of a `HashMap<_, String>` parsed into specified type `T`
+fn parse_hashmap_string_value<T: FromStr>(
+    hmap: &HashMap<String, String>,
+    key: &str,
+    default_str: Option<&str>,
+) -> Result<T, <T as FromStr>::Err>
+where
+    <T as FromStr>::Err: Debug,
+{
+    match default_str {
+        Some(x) => hmap.get(key).unwrap_or(&x.to_string()).parse::<T>(),
+        None => hmap.get(key).unwrap().parse::<T>(),
+    }
+}
+
+/// Return the string value of a `HashMap<_, String>` parsed into a boolean value
+/// (any parsed value != 1 returns `false`)
+fn parse_hashmap_string_value_bool(
+    hmap: &HashMap<String, String>,
+    key: &str,
+    default_str: Option<&str>,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    Ok(
+        match parse_hashmap_string_value::<u8>(&hmap, &key, default_str)? {
+            1 => true,
+            _ => false,
+        },
+    )
+}
+
+/// ASCII data section headings within an Octatrack `project.*` file
+enum ProjectRawFileSection {
+    Meta,
+    States,
+    Settings,
+    Samples,
+}
+
+impl OptionEnumValueConvert for ProjectRawFileSection {
+    type T = ProjectRawFileSection;
+    type V = String;
+
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
+        match v.to_ascii_uppercase().as_str() {
+            "META" => Ok(Self::Meta),
+            "STATES" => Ok(Self::States),
+            "SETTINGS" => Ok(Self::Settings),
+            "SAMPLES" => Ok(Self::Samples),
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
+        }
+    }
+
+    // TODO: This should never error, so doesn't need a Result here!
+    fn value(&self) -> RBoxErr<Self::V> {
+        match self {
+            Self::Meta => Ok("META".to_string()),
+            Self::States => Ok("STATES".to_string()),
+            Self::Settings => Ok("SETTINGS".to_string()),
+            Self::Samples => Ok("SAMPLES".to_string()),
+        }
+    }
+}
+
+impl ProjectRawFileSection {
+    fn start_string(self: &Self) -> String {
+        format!("[{}]", self.value().unwrap())
+    }
+    fn end_string(self: &Self) -> String {
+        format!("[/{}]", self.value().unwrap())
+    }
+}
+
+/// Extract ASCII string project data for a specified section as a HashMap of k-v pairs.
+
+fn string_to_hashmap(
+    data: &String,
+    section: &ProjectRawFileSection,
+) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+    let start_idx: usize = data.find(&section.start_string()).unwrap();
+    let start_idx_shifted: usize = start_idx + &section.start_string().len();
+    let end_idx: usize = data.find(&section.end_string()).unwrap();
+
+    let section: String = data[start_idx_shifted..end_idx].to_string();
+
+    let mut hmap: HashMap<String, String> = HashMap::new();
+    let mut trig_mode_midi_field_idx = 1;
+
+    for split_s in section.split("\r\n") {
+        // new line splits returns empty fields :/
+
+        if split_s != "" {
+            let key_pair_string = split_s.to_string();
+            let mut key_pair_split: Vec<&str> = key_pair_string.split("=").into_iter().collect();
+
+            // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
+            // but the keys do not have track number indicators. i assume they're
+            // stored in order of the midi track number, and each subsequent one we
+            // read is the next track.
+            let key_renamed: String = format!("trig_mode_midi_track_{}", &trig_mode_midi_field_idx);
+            if key_pair_split[0] == "TRIG_MODE_MIDI" {
+                key_pair_split[0] = key_renamed.as_str();
+                trig_mode_midi_field_idx += 1;
+            }
+
+            hmap.insert(
+                key_pair_split[0].to_string().to_ascii_lowercase(),
+                key_pair_split[1].to_string(),
+            );
+        }
+    }
+
+    Ok(hmap)
+}
+
+fn sslots_vec_to_string(v: &Vec<ProjectSampleSlot>) -> String {
+    let sslots_mapped: Vec<String> = v.iter().map(|x| x.to_string().unwrap()).collect();
+    let sslots_string = sslots_mapped.join("\r\n\r\n");
+    sslots_string
+}
 
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -63,6 +214,23 @@ impl Project {
     }
 }
 
+impl Default for Project {
+    fn default() -> Self {
+        let metadata = ProjectMetadata::default();
+        let states = ProjectStates::default();
+        let settings = ProjectSettings::default();
+
+        let slots: Vec<ProjectSampleSlot> = ProjectSampleSlot::default_vec();
+
+        Project {
+            metadata,
+            settings,
+            states,
+            slots,
+        }
+    }
+}
+
 impl ProjectToString for Project {
     /// Turn a Project struct into a String configuration, ready for writing to binary data files
 
@@ -81,8 +249,7 @@ impl ProjectToString for Project {
         let states_string: String = self.states.to_string()?;
         let settings_string: String = self.settings.to_string()?;
 
-        let slots_string_vec: Vec<String> =
-            self.slots.iter().map(|x| x.to_string().unwrap()).collect();
+        let sslots_string = sslots_vec_to_string(&self.slots);
 
         let mut v: Vec<String> = Vec::new();
 
@@ -92,9 +259,7 @@ impl ProjectToString for Project {
         v.push(states_header);
         v.push(states_string);
         v.push(slots_header);
-        for slot in slots_string_vec {
-            v.push(slot);
-        }
+        v.push(sslots_string);
         v.push(footer);
 
         let mut project_string = v.join("\r\n\r\n");
@@ -145,21 +310,17 @@ mod tests {
         // can read a project file without errors
         #[test]
         fn test_read_default_project_work_file() {
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             assert!(Project::from_pathbuf(&infile).is_ok());
         }
 
         // test that the metadata section is correct
         #[test]
         fn test_read_default_project_work_file_metadata() {
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             let p = Project::from_pathbuf(&infile).unwrap();
 
-            let correct = ProjectMetadata {
-                filetype: "OCTATRACK DPS-1 PROJECT".to_string(),
-                project_version: 19,
-                os_version: "R0177     1.40B".to_string(),
-            };
+            let correct = ProjectMetadata::default();
 
             assert_eq!(p.metadata, correct);
         }
@@ -167,26 +328,10 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_states() {
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             let p = Project::from_pathbuf(&infile).unwrap();
 
-            let correct = ProjectStates {
-                bank: 0,
-                pattern: 0,
-                arrangement: 0,
-                arrangement_mode: 0,
-                part: 0,
-                track: 0,
-                track_othermode: 0,
-                scene_a_mute: false,
-                scene_b_mute: false,
-                track_cue_mask: 0,
-                track_mute_mask: 0,
-                track_solo_mask: 0,
-                midi_track_mute_mask: 0,
-                midi_track_solo_mask: 0,
-                midi_mode: 0,
-            };
+            let correct = ProjectStates::default();
 
             assert_eq!(p.states, correct);
         }
@@ -194,111 +339,10 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_settings() {
-            use crate::projects::options::ProjectMidiChannels;
-            use crate::projects::settings::control_menu::{
-                AudioControlPage, ControlMenu, InputControlPage, MemoryControlPage,
-                MetronomeControlPage, MidiChannelsMidiPage, MidiControlMidiPage,
-                MidiSequencerControlPage, MidiSubMenu, MidiSyncMidiPage, SequencerControlPage,
-            };
-            use crate::projects::settings::{
-                mixer::MixerMenu, tempo::TempoMenu, trig_mode_midi_tracks::MidiTrackTrigModes,
-            };
-
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             let p = Project::from_pathbuf(&infile).unwrap();
 
-            let correct = ProjectSettings {
-                write_protected: false,
-                control: ControlMenu {
-                    audio: AudioControlPage {
-                        master_track: false,
-                        cue_studio_mode: false,
-                    },
-                    input: InputControlPage {
-                        gate_ab: 127,
-                        gate_cd: 127,
-                        input_delay_compensation: false,
-                    },
-                    sequencer: SequencerControlPage {
-                        pattern_change_chain_behaviour: 0,
-                        pattern_change_auto_silence_tracks: false,
-                        pattern_change_auto_trig_lfos: false,
-                    },
-                    midi_sequencer: MidiSequencerControlPage {},
-                    memory: MemoryControlPage {
-                        load_24bit_flex: false,
-                        dynamic_recorders: false,
-                        record_24bit: false,
-                        reserved_recorder_count: 8,
-                        reserved_recorder_length: 16,
-                    },
-                    metronome: MetronomeControlPage {
-                        metronome_time_signature: 3,
-                        metronome_time_signature_denominator: 2,
-                        metronome_preroll: 0,
-                        metronome_cue_volume: 32,
-                        metronome_main_volume: 0,
-                        metronome_pitch: 12,
-                        metronome_tonal: true,
-                        metronome_enabled: false,
-                    },
-                    midi: MidiSubMenu {
-                        control: MidiControlMidiPage {
-                            midi_audio_track_cc_in: true,
-                            midi_audio_track_cc_out: 3,
-                            midi_audio_track_note_in: 1,
-                            midi_audio_track_note_out: 3,
-                            midi_midi_track_cc_in: 1,
-                        },
-                        sync: MidiSyncMidiPage {
-                            midi_clock_send: false,
-                            midi_clock_receive: false,
-                            midi_transport_send: false,
-                            midi_transport_receive: false,
-                            midi_progchange_send: false,
-                            midi_progchange_send_channel: ProjectMidiChannels::Disabled,
-                            midi_progchange_receive: false,
-                            midi_progchange_receive_channel: ProjectMidiChannels::Disabled,
-                        },
-                        channels: MidiChannelsMidiPage {
-                            midi_trig_ch1: 0,
-                            midi_trig_ch2: 1,
-                            midi_trig_ch3: 2,
-                            midi_trig_ch4: 3,
-                            midi_trig_ch5: 4,
-                            midi_trig_ch6: 5,
-                            midi_trig_ch7: 6,
-                            midi_trig_ch8: 7,
-                            midi_auto_channel: 10,
-                        },
-                    },
-                },
-                midi_soft_thru: false,
-                mixer: MixerMenu {
-                    gain_ab: 64,
-                    gain_cd: 64,
-                    dir_ab: 0,
-                    dir_cd: 0,
-                    phones_mix: 64,
-                    main_to_cue: 0,
-                    main_level: 64,
-                    cue_level: 64,
-                },
-                tempo: TempoMenu {
-                    tempo: 120,
-                    pattern_tempo_enabled: false,
-                },
-                midi_tracks_trig_mode: MidiTrackTrigModes {
-                    trig_mode_midi_track_1: 0,
-                    trig_mode_midi_track_2: 0,
-                    trig_mode_midi_track_3: 0,
-                    trig_mode_midi_track_4: 0,
-                    trig_mode_midi_track_5: 0,
-                    trig_mode_midi_track_6: 0,
-                    trig_mode_midi_track_7: 0,
-                    trig_mode_midi_track_8: 0,
-                },
-            };
+            let correct = ProjectSettings::default();
 
             assert_eq!(p.settings, correct);
         }
@@ -306,119 +350,22 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_sslots() {
-            use crate::projects::options::ProjectSampleSlotType;
-            use crate::samples::options::{
-                SampleAttributeLoopMode, SampleAttributeTimestrechMode,
-                SampleAttributeTrigQuantizationMode,
-            };
-
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             let p = Project::from_pathbuf(&infile).unwrap();
 
-            let correct: Vec<ProjectSampleSlot> = [
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::Flex,
-                    slot_id: 129,
-                    path: PathBuf::from("../AUDIO/flex.wav"),
-                    trim_bars: 1.73,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Normal,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 48,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 130,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 131,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 132,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 133,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 134,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 135,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 136,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-            ]
-            .to_vec();
+            // todo: need to check and sort out these values for a completely new blank projecct
+            // first slot (129) below is apparently a flex assigned slot in the current BLANK
+            // project in the test data directory.
 
-            assert_eq!(p.slots, correct);
+            let default_sslots = ProjectSampleSlot::default_vec();
+
+            assert_eq!(p.slots, default_sslots);
         }
-    }
-
-    mod test_read_write {
-
-        use super::*;
 
         // test that reading and writing a single project gives the same outputs
         #[test]
         fn test_read_write_default_project_work_file() {
-            let infile = PathBuf::from("./data/tests/projects/blank.work");
+            let infile = PathBuf::from("data/tests/blank-project/project.work");
             let outfile = PathBuf::from("/tmp/default_1.work");
             let p = Project::from_pathbuf(&infile).unwrap();
             let _ = p.to_pathbuf(&outfile);
@@ -429,238 +376,36 @@ mod tests {
         }
 
         #[test]
-        fn test_write_from_scratch() {
-            use crate::projects::options::ProjectMidiChannels;
-            use crate::projects::settings::control_menu::{
-                AudioControlPage, ControlMenu, InputControlPage, MemoryControlPage,
-                MetronomeControlPage, MidiChannelsMidiPage, MidiControlMidiPage,
-                MidiSequencerControlPage, MidiSubMenu, MidiSyncMidiPage, SequencerControlPage,
-            };
-            use crate::projects::settings::{
-                mixer::MixerMenu, tempo::TempoMenu, trig_mode_midi_tracks::MidiTrackTrigModes,
-            };
-            use crate::samples::options::{
-                SampleAttributeLoopMode, SampleAttributeTimestrechMode,
-                SampleAttributeTrigQuantizationMode,
-            };
+        fn test_full_to_string() {
+            let valid = "############################\r\n# Project Settings\r\n############################\r\n\r\n[META]\r\nTYPE=OCTATRACK DPS-1 PROJECT\r\nVERSION=19\r\nOS_VERSION=R0177     1.40B\r\n[/META]\r\n\r\n[SETTINGS]\r\nWRITEPROTECTED=0\r\nTEMPOx24=2880\r\nPATTERN_TEMPO_ENABLED=0\r\nMIDI_CLOCK_SEND=0\r\nMIDI_CLOCK_RECEIVE=0\r\nMIDI_TRANSPORT_SEND=0\r\nMIDI_TRANSPORT_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_SEND=0\r\nMIDI_PROGRAM_CHANGE_SEND_CH=-1\r\nMIDI_PROGRAM_CHANGE_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_RECEIVE_CH=-1\r\nMIDI_TRIG_CH1=0\r\nMIDI_TRIG_CH2=1\r\nMIDI_TRIG_CH3=2\r\nMIDI_TRIG_CH4=3\r\nMIDI_TRIG_CH5=4\r\nMIDI_TRIG_CH6=5\r\nMIDI_TRIG_CH7=6\r\nMIDI_TRIG_CH8=7\r\nMIDI_AUTO_CHANNEL=10\r\nMIDI_SOFT_THRU=0\r\nMIDI_AUDIO_TRK_CC_IN=1\r\nMIDI_AUDIO_TRK_CC_OUT=3\r\nMIDI_AUDIO_TRK_NOTE_IN=1\r\nMIDI_AUDIO_TRK_NOTE_OUT=3\r\nMIDI_MIDI_TRK_CC_IN=1\r\nPATTERN_CHANGE_CHAIN_BEHAVIOR=0\r\nPATTERN_CHANGE_AUTO_SILENCE_TRACKS=0\r\nPATTERN_CHANGE_AUTO_TRIG_LFOS=0\r\nLOAD_24BIT_FLEX=0\r\nDYNAMIC_RECORDERS=0\r\nRECORD_24BIT=0\r\nRESERVED_RECORDER_COUNT=8\r\nRESERVED_RECORDER_LENGTH=16\r\nINPUT_DELAY_COMPENSATION=0\r\nGATE_AB=127\r\nGATE_CD=127\r\nGAIN_AB=64\r\nGAIN_CD=64\r\nDIR_AB=0\r\nDIR_CD=0\r\nPHONES_MIX=64\r\nMAIN_TO_CUE=0\r\nMASTER_TRACK=0\r\nCUE_STUDIO_MODE=0\r\nMAIN_LEVEL=64\r\nCUE_LEVEL=64\r\nMETRONOME_TIME_SIGNATURE=3\r\nMETRONOME_TIME_SIGNATURE_DENOMINATOR=2\r\nMETRONOME_PREROLL=0\r\nMETRONOME_CUE_VOLUME=32\r\nMETRONOME_MAIN_VOLUME=0\r\nMETRONOME_PITCH=12\r\nMETRONOME_TONAL=1\r\nMETRONOME_ENABLED=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\n[/SETTINGS]\r\n\r\n############################\r\n# Project States\r\n############################\r\n\r\n[STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]\r\n\r\n############################\r\n# Samples\r\n############################\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=129\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=130\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=131\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=132\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=133\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=134\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=135\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=136\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n############################\r\n\r\n";
+            assert_eq!(Project::default().to_string().unwrap(), valid);
+        }
 
-            let metadata = ProjectMetadata {
-                filetype: "OCTATRACK DPS-1 PROJECT".to_string(),
-                project_version: 19,
-                os_version: "R0177     1.40B".to_string(),
-            };
+        #[test]
+        fn test_metadata_to_string() {
+            let valid = "[META]\r\nTYPE=OCTATRACK DPS-1 PROJECT\r\nVERSION=19\r\nOS_VERSION=R0177     1.40B\r\n[/META]";
+            assert_eq!(ProjectMetadata::default().to_string().unwrap(), valid);
+        }
 
-            let states = ProjectStates {
-                bank: 0,
-                pattern: 0,
-                arrangement: 0,
-                arrangement_mode: 0,
-                part: 0,
-                track: 0,
-                track_othermode: 0,
-                scene_a_mute: false,
-                scene_b_mute: false,
-                track_cue_mask: 0,
-                track_mute_mask: 0,
-                track_solo_mask: 0,
-                midi_track_mute_mask: 0,
-                midi_track_solo_mask: 0,
-                midi_mode: 0,
-            };
+        #[test]
+        fn test_states_to_string() {
+            let valid = "[STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]";
+            assert_eq!(ProjectStates::default().to_string().unwrap(), valid);
+        }
 
-            let settings = ProjectSettings {
-                write_protected: false,
-                control: ControlMenu {
-                    audio: AudioControlPage {
-                        master_track: false,
-                        cue_studio_mode: false,
-                    },
-                    input: InputControlPage {
-                        gate_ab: 127,
-                        gate_cd: 127,
-                        input_delay_compensation: false,
-                    },
-                    sequencer: SequencerControlPage {
-                        pattern_change_chain_behaviour: 0,
-                        pattern_change_auto_silence_tracks: false,
-                        pattern_change_auto_trig_lfos: false,
-                    },
-                    midi_sequencer: MidiSequencerControlPage {},
-                    memory: MemoryControlPage {
-                        load_24bit_flex: false,
-                        dynamic_recorders: false,
-                        record_24bit: false,
-                        reserved_recorder_count: 8,
-                        reserved_recorder_length: 16,
-                    },
-                    metronome: MetronomeControlPage {
-                        metronome_time_signature: 3,
-                        metronome_time_signature_denominator: 2,
-                        metronome_preroll: 0,
-                        metronome_cue_volume: 32,
-                        metronome_main_volume: 0,
-                        metronome_pitch: 12,
-                        metronome_tonal: true,
-                        metronome_enabled: false,
-                    },
-                    midi: MidiSubMenu {
-                        control: MidiControlMidiPage {
-                            midi_audio_track_cc_in: true,
-                            midi_audio_track_cc_out: 3,
-                            midi_audio_track_note_in: 1,
-                            midi_audio_track_note_out: 3,
-                            midi_midi_track_cc_in: 1,
-                        },
-                        sync: MidiSyncMidiPage {
-                            midi_clock_send: false,
-                            midi_clock_receive: false,
-                            midi_transport_send: false,
-                            midi_transport_receive: false,
-                            midi_progchange_send: false,
-                            midi_progchange_send_channel: ProjectMidiChannels::Disabled,
-                            midi_progchange_receive: false,
-                            midi_progchange_receive_channel: ProjectMidiChannels::Disabled,
-                        },
-                        channels: MidiChannelsMidiPage {
-                            midi_trig_ch1: 0,
-                            midi_trig_ch2: 1,
-                            midi_trig_ch3: 2,
-                            midi_trig_ch4: 3,
-                            midi_trig_ch5: 4,
-                            midi_trig_ch6: 5,
-                            midi_trig_ch7: 6,
-                            midi_trig_ch8: 7,
-                            midi_auto_channel: 10,
-                        },
-                    },
-                },
-                midi_soft_thru: false,
-                mixer: MixerMenu {
-                    gain_ab: 64,
-                    gain_cd: 64,
-                    dir_ab: 0,
-                    dir_cd: 0,
-                    phones_mix: 64,
-                    main_to_cue: 0,
-                    main_level: 64,
-                    cue_level: 64,
-                },
-                tempo: TempoMenu {
-                    tempo: 120,
-                    pattern_tempo_enabled: false,
-                },
-                midi_tracks_trig_mode: MidiTrackTrigModes {
-                    trig_mode_midi_track_1: 0,
-                    trig_mode_midi_track_2: 0,
-                    trig_mode_midi_track_3: 0,
-                    trig_mode_midi_track_4: 0,
-                    trig_mode_midi_track_5: 0,
-                    trig_mode_midi_track_6: 0,
-                    trig_mode_midi_track_7: 0,
-                    trig_mode_midi_track_8: 0,
-                },
-            };
+        #[test]
+        fn test_settings_to_string() {
+            let valid = "[SETTINGS]\r\nWRITEPROTECTED=0\r\nTEMPOx24=2880\r\nPATTERN_TEMPO_ENABLED=0\r\nMIDI_CLOCK_SEND=0\r\nMIDI_CLOCK_RECEIVE=0\r\nMIDI_TRANSPORT_SEND=0\r\nMIDI_TRANSPORT_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_SEND=0\r\nMIDI_PROGRAM_CHANGE_SEND_CH=-1\r\nMIDI_PROGRAM_CHANGE_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_RECEIVE_CH=-1\r\nMIDI_TRIG_CH1=0\r\nMIDI_TRIG_CH2=1\r\nMIDI_TRIG_CH3=2\r\nMIDI_TRIG_CH4=3\r\nMIDI_TRIG_CH5=4\r\nMIDI_TRIG_CH6=5\r\nMIDI_TRIG_CH7=6\r\nMIDI_TRIG_CH8=7\r\nMIDI_AUTO_CHANNEL=10\r\nMIDI_SOFT_THRU=0\r\nMIDI_AUDIO_TRK_CC_IN=1\r\nMIDI_AUDIO_TRK_CC_OUT=3\r\nMIDI_AUDIO_TRK_NOTE_IN=1\r\nMIDI_AUDIO_TRK_NOTE_OUT=3\r\nMIDI_MIDI_TRK_CC_IN=1\r\nPATTERN_CHANGE_CHAIN_BEHAVIOR=0\r\nPATTERN_CHANGE_AUTO_SILENCE_TRACKS=0\r\nPATTERN_CHANGE_AUTO_TRIG_LFOS=0\r\nLOAD_24BIT_FLEX=0\r\nDYNAMIC_RECORDERS=0\r\nRECORD_24BIT=0\r\nRESERVED_RECORDER_COUNT=8\r\nRESERVED_RECORDER_LENGTH=16\r\nINPUT_DELAY_COMPENSATION=0\r\nGATE_AB=127\r\nGATE_CD=127\r\nGAIN_AB=64\r\nGAIN_CD=64\r\nDIR_AB=0\r\nDIR_CD=0\r\nPHONES_MIX=64\r\nMAIN_TO_CUE=0\r\nMASTER_TRACK=0\r\nCUE_STUDIO_MODE=0\r\nMAIN_LEVEL=64\r\nCUE_LEVEL=64\r\nMETRONOME_TIME_SIGNATURE=3\r\nMETRONOME_TIME_SIGNATURE_DENOMINATOR=2\r\nMETRONOME_PREROLL=0\r\nMETRONOME_CUE_VOLUME=32\r\nMETRONOME_MAIN_VOLUME=0\r\nMETRONOME_PITCH=12\r\nMETRONOME_TONAL=1\r\nMETRONOME_ENABLED=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\n[/SETTINGS]";
+            assert_eq!(ProjectSettings::default().to_string().unwrap(), valid);
+        }
 
-            let slots: Vec<ProjectSampleSlot> = [
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::Flex,
-                    slot_id: 129,
-                    path: PathBuf::from("../AUDIO/flex.wav"),
-                    trim_bars: 1.73,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Normal,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 48,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 130,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 131,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 132,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 133,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 134,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 135,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-                ProjectSampleSlot {
-                    sample_type: ProjectSampleSlotType::RecorderBuffer,
-                    slot_id: 136,
-                    path: PathBuf::from(""),
-                    trim_bars: 0.0,
-                    timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                    loop_mode: SampleAttributeLoopMode::Off,
-                    trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
-                    gain: 72,
-                    bpm: 120,
-                },
-            ]
-            .to_vec();
-
-            let project = Project {
-                metadata,
-                settings,
-                states,
-                slots,
-            };
-            let valid = "############################\r\n# Project Settings\r\n############################\r\n\r\n[META]\r\nTYPE=OCTATRACK DPS-1 PROJECT\r\nVERSION=19\r\nOS_VERSION=R0177     1.40B\r\n[/META]\r\n\r\n[SETTINGS]\r\nWRITEPROTECTED=0\r\nTEMPOx24=2880\r\nPATTERN_TEMPO_ENABLED=0\r\nMIDI_CLOCK_SEND=0\r\nMIDI_CLOCK_RECEIVE=0\r\nMIDI_TRANSPORT_SEND=0\r\nMIDI_TRANSPORT_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_SEND=0\r\nMIDI_PROGRAM_CHANGE_SEND_CH=-1\r\nMIDI_PROGRAM_CHANGE_RECEIVE=0\r\nMIDI_PROGRAM_CHANGE_RECEIVE_CH=-1\r\nMIDI_TRIG_CH1=0\r\nMIDI_TRIG_CH2=1\r\nMIDI_TRIG_CH3=2\r\nMIDI_TRIG_CH4=3\r\nMIDI_TRIG_CH5=4\r\nMIDI_TRIG_CH6=5\r\nMIDI_TRIG_CH7=6\r\nMIDI_TRIG_CH8=7\r\nMIDI_AUTO_CHANNEL=10\r\nMIDI_SOFT_THRU=0\r\nMIDI_AUDIO_TRK_CC_IN=1\r\nMIDI_AUDIO_TRK_CC_OUT=3\r\nMIDI_AUDIO_TRK_NOTE_IN=1\r\nMIDI_AUDIO_TRK_NOTE_OUT=3\r\nMIDI_MIDI_TRK_CC_IN=1\r\nPATTERN_CHANGE_CHAIN_BEHAVIOR=0\r\nPATTERN_CHANGE_AUTO_SILENCE_TRACKS=0\r\nPATTERN_CHANGE_AUTO_TRIG_LFOS=0\r\nLOAD_24BIT_FLEX=0\r\nDYNAMIC_RECORDERS=0\r\nRECORD_24BIT=0\r\nRESERVED_RECORDER_COUNT=8\r\nRESERVED_RECORDER_LENGTH=16\r\nINPUT_DELAY_COMPENSATION=0\r\nGATE_AB=127\r\nGATE_CD=127\r\nGAIN_AB=64\r\nGAIN_CD=64\r\nDIR_AB=0\r\nDIR_CD=0\r\nPHONES_MIX=64\r\nMAIN_TO_CUE=0\r\nMASTER_TRACK=0\r\nCUE_STUDIO_MODE=0\r\nMAIN_LEVEL=64\r\nCUE_LEVEL=64\r\nMETRONOME_TIME_SIGNATURE=3\r\nMETRONOME_TIME_SIGNATURE_DENOMINATOR=2\r\nMETRONOME_PREROLL=0\r\nMETRONOME_CUE_VOLUME=32\r\nMETRONOME_MAIN_VOLUME=0\r\nMETRONOME_PITCH=12\r\nMETRONOME_TONAL=1\r\nMETRONOME_ENABLED=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\nTRIG_MODE_MIDI=0\r\n[/SETTINGS]\r\n\r\n############################\r\n# Project States\r\n############################\r\n\r\n[STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]\r\n\r\n############################\r\n# Samples\r\n############################\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=129\r\nPATH=../AUDIO/flex.wav\r\nTRIM_BARSx100=173\r\nTSMODE=2\r\nLOOPMODE=1\r\nGAIN=48\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=130\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=131\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=132\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=133\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=134\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=135\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=136\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n############################\r\n\r\n";
-            assert_eq!(project.to_string().unwrap(), valid);
+        #[test]
+        fn test_sslots_to_string() {
+            let valid = "[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=129\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=130\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=131\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=132\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=133\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=134\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=135\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=136\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]";
+            assert_eq!(
+                sslots_vec_to_string(&ProjectSampleSlot::default_vec()),
+                valid
+            );
         }
     }
 }

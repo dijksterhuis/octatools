@@ -1,6 +1,6 @@
 //! Enums for Octatrack options realted to `SampleAttribute` files (`.ot` files).
 
-use crate::common::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
+use crate::{OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors};
 use serde::{Deserialize, Serialize};
 
 /// Sample attributes Timestrech options.
@@ -199,8 +199,8 @@ mod test_spec {
     mod ot_trig_quantize_mode {
 
         mod value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeTrigQuantizationMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_direct() {
@@ -365,8 +365,8 @@ mod test_spec {
         }
 
         mod from_value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeTrigQuantizationMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_error() {
@@ -504,8 +504,8 @@ mod test_spec {
     mod ot_timestrech_mode {
 
         mod value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeTimestrechMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_off_value() {
@@ -522,8 +522,8 @@ mod test_spec {
         }
 
         mod from_value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeTimestrechMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_error() {
@@ -564,8 +564,8 @@ mod test_spec {
     mod ot_loop_mode {
 
         mod value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeLoopMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_off_value() {
@@ -582,8 +582,8 @@ mod test_spec {
         }
 
         mod from_value {
-            use crate::common::OptionEnumValueConvert;
             use crate::samples::options::SampleAttributeLoopMode;
+            use crate::OptionEnumValueConvert;
 
             #[test]
             fn test_error() {

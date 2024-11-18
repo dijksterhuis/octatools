@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 
-use crate::common::{FromHashMap, ParseHashMapValueAs};
+use crate::projects::{parse_hashmap_string_value, FromHashMap};
 
 /// Global `MIXER` UI menu.
 
@@ -42,8 +42,6 @@ pub struct MixerMenu {
     pub cue_level: u8, // no idea what params max mins are here
 }
 
-impl ParseHashMapValueAs for MixerMenu {}
-
 impl FromHashMap for MixerMenu {
     type A = String;
     type B = String;
@@ -51,14 +49,14 @@ impl FromHashMap for MixerMenu {
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
         Ok(Self {
-            gain_ab: Self::parse_hashmap_value::<u8>(&hmap, "gain_ab")?,
-            gain_cd: Self::parse_hashmap_value::<u8>(&hmap, "gain_cd")?,
-            dir_ab: Self::parse_hashmap_value::<u8>(&hmap, "dir_ab")?,
-            dir_cd: Self::parse_hashmap_value::<u8>(&hmap, "dir_cd")?,
-            phones_mix: Self::parse_hashmap_value::<u8>(&hmap, "phones_mix")?,
-            main_to_cue: Self::parse_hashmap_value::<u8>(&hmap, "main_to_cue")?,
-            main_level: Self::parse_hashmap_value::<u8>(&hmap, "main_level")?,
-            cue_level: Self::parse_hashmap_value::<u8>(&hmap, "cue_level")?,
+            gain_ab: parse_hashmap_string_value::<u8>(hmap, "gain_ab", None)?,
+            gain_cd: parse_hashmap_string_value::<u8>(hmap, "gain_cd", None)?,
+            dir_ab: parse_hashmap_string_value::<u8>(hmap, "dir_ab", None)?,
+            dir_cd: parse_hashmap_string_value::<u8>(hmap, "dir_cd", None)?,
+            phones_mix: parse_hashmap_string_value::<u8>(hmap, "phones_mix", None)?,
+            main_to_cue: parse_hashmap_string_value::<u8>(hmap, "main_to_cue", None)?,
+            main_level: parse_hashmap_string_value::<u8>(hmap, "main_level", None)?,
+            cue_level: parse_hashmap_string_value::<u8>(hmap, "cue_level", None)?,
         })
     }
 }

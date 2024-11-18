@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 
-use crate::common::{FromHashMap, ParseHashMapValueAs};
+use crate::projects::{parse_hashmap_string_value, parse_hashmap_string_value_bool, FromHashMap};
 
 /// Global `TEMPO` UI menu.
 
@@ -21,8 +21,6 @@ pub struct TempoMenu {
     pub pattern_tempo_enabled: bool,
 }
 
-impl ParseHashMapValueAs for TempoMenu {}
-
 impl FromHashMap for TempoMenu {
     type A = String;
     type B = String;
@@ -30,8 +28,12 @@ impl FromHashMap for TempoMenu {
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
         Ok(Self {
-            tempo: Self::parse_hashmap_value::<u32>(&hmap, "tempox24")? / 24,
-            pattern_tempo_enabled: Self::parse_hashmap_value_bool(&hmap, "pattern_tempo_enabled")?,
+            tempo: parse_hashmap_string_value::<u32>(hmap, "tempox24", None)? / 24,
+            pattern_tempo_enabled: parse_hashmap_string_value_bool(
+                hmap,
+                "pattern_tempo_enabled",
+                None,
+            )?,
         })
     }
 }

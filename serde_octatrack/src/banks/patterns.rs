@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 
 /// A Trig's parameter locks on the Playback/Machine page for an Audio Track.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

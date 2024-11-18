@@ -1,12 +1,14 @@
 //! Module for various utility functions and structs.
 
 use crate::audio::wav::WavFile;
+use crate::common::RBoxErr;
 use crate::common::RVoidError;
 use serde::{Deserialize, Serialize};
-use serde_octatrack::common::RBoxErr;
-use serde_octatrack::constants::DEFAULT_SAMPLE_RATE;
-use serde_octatrack::projects::slots::ProjectSampleSlot;
-use serde_octatrack::samples::slices::{Slice, Slices};
+use serde_octatrack::{
+    constants::DEFAULT_SAMPLE_RATE,
+    projects::slots::ProjectSampleSlot,
+    samples::slices::{Slice, Slices},
+};
 use std::error::Error;
 use std::path::PathBuf;
 

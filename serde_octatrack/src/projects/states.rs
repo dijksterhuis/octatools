@@ -3,9 +3,9 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    common::{ParseHashMapValueAs, ProjectFromString, ProjectToString},
-    projects::{common::string_to_hashmap, common::ProjectRawFileSection},
+use crate::projects::{
+    parse_hashmap_string_value, parse_hashmap_string_value_bool, string_to_hashmap,
+    ProjectFromString, ProjectRawFileSection, ProjectToString,
 };
 
 // [STATES]\r\nBANK=0\r\nPATTERN=0\r\nARRANGEMENT=0\r\nARRANGEMENT_MODE=0\r\nPART=0\r\nTRACK=0\r\nTRACK_OTHERMODE=0\r\nSCENE_A_MUTE=0\r\nSCENE_B_MUTE=0\r\nTRACK_CUE_MASK=0\r\nTRACK_MUTE_MASK=0\r\nTRACK_SOLO_MASK=0\r\nMIDI_TRACK_MUTE_MASK=0\r\nMIDI_TRACK_SOLO_MASK=0\r\nMIDI_MODE=0\r\n[/STATES]
@@ -61,7 +61,27 @@ pub struct ProjectStates {
     pub midi_mode: u8,
 }
 
-impl ParseHashMapValueAs for ProjectStates {}
+impl Default for ProjectStates {
+    fn default() -> Self {
+        Self {
+            bank: 0,
+            pattern: 0,
+            arrangement: 0,
+            arrangement_mode: 0,
+            part: 0,
+            track: 0,
+            track_othermode: 0,
+            scene_a_mute: false,
+            scene_b_mute: false,
+            track_cue_mask: 0,
+            track_mute_mask: 0,
+            track_solo_mask: 0,
+            midi_track_mute_mask: 0,
+            midi_track_solo_mask: 0,
+            midi_mode: 0,
+        }
+    }
+}
 
 impl ProjectFromString for ProjectStates {
     type T = Self;
@@ -71,21 +91,29 @@ impl ProjectFromString for ProjectStates {
         let hmap = string_to_hashmap(&s, &ProjectRawFileSection::States)?;
 
         Ok(Self {
-            bank: Self::parse_hashmap_value::<u8>(&hmap, "bank")?,
-            pattern: Self::parse_hashmap_value::<u8>(&hmap, "pattern")?,
-            arrangement: Self::parse_hashmap_value::<u8>(&hmap, "arrangement")?,
-            arrangement_mode: Self::parse_hashmap_value::<u8>(&hmap, "arrangement_mode")?,
-            part: Self::parse_hashmap_value::<u8>(&hmap, "part")?,
-            track: Self::parse_hashmap_value::<u8>(&hmap, "track")?,
-            track_othermode: Self::parse_hashmap_value::<u8>(&hmap, "track_othermode")?,
-            scene_a_mute: Self::parse_hashmap_value_bool(&hmap, "scene_a_mute")?,
-            scene_b_mute: Self::parse_hashmap_value_bool(&hmap, "scene_b_mute")?,
-            track_cue_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_cue_mask")?,
-            track_mute_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_mute_mask")?,
-            track_solo_mask: Self::parse_hashmap_value::<u8>(&hmap, "track_solo_mask")?,
-            midi_track_mute_mask: Self::parse_hashmap_value::<u8>(&hmap, "midi_track_mute_mask")?,
-            midi_track_solo_mask: Self::parse_hashmap_value::<u8>(&hmap, "midi_track_solo_mask")?,
-            midi_mode: Self::parse_hashmap_value::<u8>(&hmap, "midi_mode")?,
+            bank: parse_hashmap_string_value::<u8>(&hmap, "bank", None)?,
+            pattern: parse_hashmap_string_value::<u8>(&hmap, "pattern", None)?,
+            arrangement: parse_hashmap_string_value::<u8>(&hmap, "arrangement", None)?,
+            arrangement_mode: parse_hashmap_string_value::<u8>(&hmap, "arrangement_mode", None)?,
+            part: parse_hashmap_string_value::<u8>(&hmap, "part", None)?,
+            track: parse_hashmap_string_value::<u8>(&hmap, "track", None)?,
+            track_othermode: parse_hashmap_string_value::<u8>(&hmap, "track_othermode", None)?,
+            scene_a_mute: parse_hashmap_string_value_bool(&hmap, "scene_a_mute", None)?,
+            scene_b_mute: parse_hashmap_string_value_bool(&hmap, "scene_b_mute", None)?,
+            track_cue_mask: parse_hashmap_string_value::<u8>(&hmap, "track_cue_mask", None)?,
+            track_mute_mask: parse_hashmap_string_value::<u8>(&hmap, "track_mute_mask", None)?,
+            track_solo_mask: parse_hashmap_string_value::<u8>(&hmap, "track_solo_mask", None)?,
+            midi_track_mute_mask: parse_hashmap_string_value::<u8>(
+                &hmap,
+                "midi_track_mute_mask",
+                None,
+            )?,
+            midi_track_solo_mask: parse_hashmap_string_value::<u8>(
+                &hmap,
+                "midi_track_solo_mask",
+                None,
+            )?,
+            midi_mode: parse_hashmap_string_value::<u8>(&hmap, "midi_mode", None)?,
         })
     }
 }

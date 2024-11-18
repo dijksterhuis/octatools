@@ -8,11 +8,12 @@ use log::{debug, error, info, trace, warn};
 
 use crate::actions::copy::utils::*;
 use crate::actions::copy::yaml::YamlCopyBankConfig;
+use crate::common::RBoxErr;
 use std::path::PathBuf;
 
 use serde_octatrack::{
-    common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot},
+    FromFileAtPathBuf, ToFileAtPathBuf,
 };
 
 /// ### Copy a bank from one project / bank to another project / bank.
@@ -56,18 +57,15 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
     let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Backing up destination bank to /tmp/ ...");
-    let _ = std::fs::copy(banks.dest.path.clone(), PathBuf::from("/tmp/bank.bak"))
+    let _ = std::fs::copy(&dest_bank_file_path, PathBuf::from("/tmp/bank.bak"))
         .expect("Could not back up destination bank file.");
 
     info!("Backing up destination project to /tmp/ ...");
-    let _ = std::fs::copy(
-        projects.dest.path.clone(),
-        PathBuf::from("/tmp/project.bak"),
-    )
-    .expect("Could not back up destination bank file.");
+    let _ = std::fs::copy(&projects.dest.path, PathBuf::from("/tmp/project.bak"))
+        .expect("Could not back up destination bank file.");
 
     info!("Finding free sample slots in destination project ...");
-    let (mut free_static, mut free_flex) = find_free_sslots(projects.clone())
+    let (mut free_static, mut free_flex) = find_free_sslots(&projects)
         .expect("Error while searching for free sample slots in destination project.");
 
     info!(
@@ -106,7 +104,7 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
 
     info!("Finding 'active' sample slots (actually used in source bank) ...");
     // read the source bank, looking for sample slots in active use
-    let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src.bank)
+    let active_slots = get_active_sslot_ids(&projects.src.project.slots, &banks.src)
         .expect("Error while finding active sample slots in source bank.");
 
     info!(
@@ -114,7 +112,6 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
         active_slots,
     );
 
-    let mut src_proj = projects.src.project.clone();
     let mut updated_sample_slots: Vec<ProjectSampleSlot> = vec![];
 
     // edit the bank data in place, updating:
@@ -132,7 +129,7 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
                 let dest_slot_id = free_static.pop().expect("No more destination slots.");
 
                 update_sslot_references_static(
-                    &mut src_proj,
+                    &mut projects.src.project,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
@@ -145,7 +142,7 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
                 let dest_slot_id = free_flex.pop().expect("No more destination slots.");
 
                 update_sslot_references_flex(
-                    &mut src_proj,
+                    &mut projects.src.project,
                     &mut banks,
                     active_slot.slot_id,
                     dest_slot_id,
@@ -160,17 +157,20 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
             }
         };
 
-        let src_project_slot = src_proj
+        let src_project_slot = projects
+            .src
+            .project
             .slots
-            .clone()
-            .into_iter()
+            .iter()
             .find(|x| x.slot_id == new_slot_id as u16);
 
         if !src_project_slot.is_none() {
-            let mut s = src_project_slot.expect("Empty sample slots in source project.");
+            let mut s: ProjectSampleSlot = src_project_slot
+                .expect("Empty sample slots in source project.")
+                .clone();
 
             if s.sample_type != ProjectSampleSlotType::RecorderBuffer {
-                let _ = copy_sslot_sample_files(&projects, &mut s);
+                let _ = copy_sslot_sample_files(&projects, &s);
                 s.path = get_relative_audio_pool_path_audio_file(&s).expect(
                     "Could not get new file path for sample to transfer to destination project.",
                 );
@@ -181,15 +181,22 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
     }
 
     info!("Inserting 'active' sample slots from source project to destination project ...");
-    let mut dest_sample_slots: Vec<ProjectSampleSlot> = projects.dest.project.slots.clone();
+    let mut dest_sample_slots: Vec<ProjectSampleSlot> = projects.dest.project.slots;
     dest_sample_slots.append(&mut updated_sample_slots);
-    projects.dest.project.slots = dest_sample_slots;
 
     info!("Writing sample slots to destination project ...");
-    let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
+    projects.dest.project.slots = dest_sample_slots;
+    let _ = projects
+        .dest
+        .project
+        .to_pathbuf(&projects.dest.path)
+        .expect("Could not write project to file");
 
     info!("Writing new bank within project ...");
-    let _ = banks.dest.bank.to_pathbuf(dest_bank_file_path);
+    let _ = banks
+        .dest
+        .to_pathbuf(dest_bank_file_path)
+        .expect("Could not write bank to file");
 
     info!("Bank copy complete.");
     Ok(())

@@ -10,6 +10,21 @@ use std::error::Error;
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
 pub type RVoidError<T> = Result<T, ()>;
 
+#[derive(Debug)]
+pub enum OctatoolErrors {
+    PathNotADirectory,
+    Unknown,
+}
+impl std::fmt::Display for OctatoolErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::PathNotADirectory => write!(f, "pathbuf is not a directory"),
+            Self::Unknown => write!(f, "unknown error (please investigate/report)"),
+        }
+    }
+}
+impl std::error::Error for OctatoolErrors {}
+
 pub trait ToYamlFile
 where
     Self: Serialize,

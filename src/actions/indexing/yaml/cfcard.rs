@@ -5,10 +5,10 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use serde_octatrack::common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
+use serde_octatrack::{FromFileAtPathBuf, ToFileAtPathBuf};
 
 /// A single row of data written to the index file.
-use crate::common::{FromYamlFile, ToYamlFile};
+use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};
 use crate::octatrack_sets::OctatrackSet;
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]

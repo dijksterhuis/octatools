@@ -1,10 +1,8 @@
 //! Helper / Grouped configs for sample attribute files (`SampleAttributes`).
 
-use std::error::Error;
-
+use crate::RBoxErr;
 use crate::{
-    common::OptionEnumValueConvert, samples::options::SampleAttributeLoopMode,
-    samples::SampleAttributes,
+    samples::options::SampleAttributeLoopMode, samples::SampleAttributes, OptionEnumValueConvert,
 };
 
 /// An OT Sample's Trim settings
@@ -19,16 +17,16 @@ pub struct SampleTrimConfig {
     pub length: u32,
 }
 
-// impl SampleTrimConfig {
-//     pub fn from_decoded(decoded: &SampleChain) -> Result<Self, Box<dyn Error>> {
-//         let new = SampleTrimConfig {
-//             start: decoded.trim_start,
-//             end: decoded.trim_end,
-//             length: decoded.trim_len,
-//         };
-//         Ok(new)
-//     }
-// }
+impl SampleTrimConfig {
+    pub fn from_decoded(decoded: &SampleAttributes) -> RBoxErr<Self> {
+        let new = SampleTrimConfig {
+            start: decoded.trim_start,
+            end: decoded.trim_end,
+            length: decoded.trim_len,
+        };
+        Ok(new)
+    }
+}
 
 /// An OT Sample's Loop settings
 
@@ -45,22 +43,21 @@ pub struct SampleLoopConfig {
 }
 
 impl SampleLoopConfig {
-    pub fn new(start: u32, length: u32, mode: SampleAttributeLoopMode) -> Self {
-        SampleLoopConfig {
+    pub fn new(start: u32, length: u32, mode: SampleAttributeLoopMode) -> RBoxErr<Self> {
+        Ok(Self {
             start,
             length,
             mode,
-        }
+        })
     }
 
-    pub fn from_decoded(decoded: &SampleAttributes) -> Result<Self, Box<dyn Error>> {
-        let new: Self = Self::new(
+    pub fn from_decoded(decoded: &SampleAttributes) -> RBoxErr<Self> {
+        Ok(Self::new(
             decoded.loop_start,
             decoded.loop_len,
             SampleAttributeLoopMode::from_value(&decoded.loop_mode)
                 .unwrap_or(SampleAttributeLoopMode::Off),
-        );
-        Ok(new)
+        )?)
     }
 }
 
@@ -75,7 +72,7 @@ mod tests {
             #[test]
             fn test_new_sample_loop_config_loop_off() {
                 assert_eq!(
-                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Off),
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Off).unwrap(),
                     SampleLoopConfig {
                         start: 0,
                         length: 10,
@@ -87,7 +84,8 @@ mod tests {
             #[test]
             fn test_new_sample_loop_config_umin_start_umax_length() {
                 assert_eq!(
-                    SampleLoopConfig::new(u32::MIN, u32::MAX, SampleAttributeLoopMode::Off),
+                    SampleLoopConfig::new(u32::MIN, u32::MAX, SampleAttributeLoopMode::Off)
+                        .unwrap(),
                     SampleLoopConfig {
                         start: u32::MIN,
                         length: u32::MAX,
@@ -99,7 +97,7 @@ mod tests {
             #[test]
             fn test_new_sample_loop_config_loop_normal() {
                 assert_eq!(
-                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Normal),
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::Normal).unwrap(),
                     SampleLoopConfig {
                         start: 0,
                         length: 10,
@@ -111,7 +109,7 @@ mod tests {
             #[test]
             fn test_new_sample_loop_config_loop_pingpong() {
                 assert_eq!(
-                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::PingPong),
+                    SampleLoopConfig::new(0, 10, SampleAttributeLoopMode::PingPong).unwrap(),
                     SampleLoopConfig {
                         start: 0,
                         length: 10,
@@ -125,19 +123,18 @@ mod tests {
     mod test_from_decoded {
 
         use crate::{
-            common::OptionEnumValueConvert,
             samples::{
                 configs::{SampleAttributeLoopMode, SampleLoopConfig},
                 slices::Slice,
                 SampleAttributes,
             },
+            OptionEnumValueConvert,
         };
 
         #[test]
         fn test_umin_start_umax_len() {
             let decoded = SampleAttributes {
-                header: [0_u8; 16],
-                blank: [0_u8; 7],
+                header: [0_u8; 23],
                 tempo: 128000,
                 trim_len: 0,
                 loop_len: u32::MAX,
@@ -170,8 +167,7 @@ mod tests {
         #[test]
         fn test_loop_off() {
             let decoded = SampleAttributes {
-                header: [0_u8; 16],
-                blank: [0_u8; 7],
+                header: [0_u8; 23],
                 tempo: 128000,
                 trim_len: 0,
                 loop_len: 10,
@@ -204,8 +200,7 @@ mod tests {
         #[test]
         fn test_loop_normal() {
             let decoded = SampleAttributes {
-                header: [0_u8; 16],
-                blank: [0_u8; 7],
+                header: [0_u8; 23],
                 tempo: 128000,
                 trim_len: 0,
                 loop_len: 10,
@@ -238,8 +233,7 @@ mod tests {
         #[test]
         fn test_loop_pingpong() {
             let decoded = SampleAttributes {
-                header: [0_u8; 16],
-                blank: [0_u8; 7],
+                header: [0_u8; 23],
                 tempo: 128000,
                 trim_len: 0,
                 loop_len: 10,

@@ -3,9 +3,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{
-    common::{ParseHashMapValueAs, ProjectFromString, ProjectToString},
-    projects::common::{string_to_hashmap, ProjectRawFileSection},
+use crate::projects::{
+    parse_hashmap_string_value, string_to_hashmap, ProjectFromString, ProjectRawFileSection,
+    ProjectToString,
 };
 
 /// Project metadata read from a parsed Octatrack Project file
@@ -36,7 +36,15 @@ pub struct ProjectMetadata {
     pub os_version: String,
 }
 
-impl ParseHashMapValueAs for ProjectMetadata {}
+impl Default for ProjectMetadata {
+    fn default() -> Self {
+        Self {
+            filetype: "OCTATRACK DPS-1 PROJECT".to_string(),
+            project_version: 19,
+            os_version: "R0177     1.40B".to_string(),
+        }
+    }
+}
 
 impl ProjectFromString for ProjectMetadata {
     type T = Self;
@@ -47,9 +55,9 @@ impl ProjectFromString for ProjectMetadata {
         let hmap: HashMap<String, String> = string_to_hashmap(&data, &ProjectRawFileSection::Meta)?;
 
         Ok(Self {
-            filetype: Self::parse_hashmap_value::<String>(&hmap, "type")?,
-            project_version: Self::parse_hashmap_value::<u32>(&hmap, "version")?,
-            os_version: Self::parse_hashmap_value::<String>(&hmap, "os_version")?,
+            filetype: parse_hashmap_string_value::<String>(&hmap, "type", None)?,
+            project_version: parse_hashmap_string_value::<u32>(&hmap, "version", None)?,
+            os_version: parse_hashmap_string_value::<String>(&hmap, "os_version", None)?,
         })
     }
 }

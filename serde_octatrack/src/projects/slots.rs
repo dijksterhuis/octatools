@@ -10,18 +10,17 @@
 
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, convert::TryFrom, error::Error, path::PathBuf, str::FromStr};
+use std::{collections::HashMap, convert::TryFrom, path::PathBuf, str::FromStr};
 
 use crate::{
-    common::{
-        FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs, ProjectFromString,
-        ProjectToString, RBoxErr,
+    projects::{
+        options::ProjectSampleSlotType, parse_hashmap_string_value, FromHashMap, ProjectFromString,
+        ProjectToString,
     },
-    projects::options::ProjectSampleSlotType,
     samples::options::{
         SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
     },
-    // utils::SampleFilePair,
+    OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
 };
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -37,9 +36,6 @@ pub struct ProjectSampleSlot {
 
     /// Relative path to the file on the card from the project directory.
     pub path: PathBuf,
-
-    // /// The sample's file pair (audio file and optional attributes file).
-    // pub file_pair: Option<SampleFilePair>,
 
     // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current bar trim (float). This is multiplied by 100 on the machine.
@@ -57,14 +53,158 @@ pub struct ProjectSampleSlot {
 
     // TODO: Need to scale this to -24.0 dB <= x <= 24.0 dB
     /// Sample gain. 48 is default as per sample attributes file. maximum 96, minimum 0.
-    pub gain: u8,
+    pub gain: i8,
 
     // TODO: Need to scale this down by 24.
     /// BPM of the sample in this slot.
     pub bpm: u16,
 }
 
-impl ParseHashMapValueAs for ProjectSampleSlot {}
+impl ProjectSampleSlot {
+    /// Create a default vector of Projet Sample Slots; 8x Recorder Buffers.
+    pub fn default_vec() -> Vec<Self> {
+        [
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 129,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 130,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 131,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 132,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 133,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 134,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 135,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+            ProjectSampleSlot {
+                sample_type: ProjectSampleSlotType::RecorderBuffer,
+                slot_id: 136,
+                path: PathBuf::from(""),
+                trim_bars: 0.0,
+                timestrech_mode: SampleAttributeTimestrechMode::Normal,
+                loop_mode: SampleAttributeLoopMode::Off,
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                gain: 24,
+                bpm: 120,
+            },
+        ]
+        .to_vec()
+    }
+}
+
+fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
+    println!("{hmap:#?}");
+
+    let x = parse_hashmap_string_value::<u16>(hmap, "slot", None);
+
+    // ParseIntError doesn't allow ? usage
+    if x.is_err() {
+        return Err(Box::new(
+            SerdeOctatrackErrors::ProjectSampleSlotParsingError,
+        ));
+    }
+
+    Ok(x.unwrap())
+}
+
+fn parse_trim_bars(hmap: &HashMap<String, String>) -> RBoxErr<f32> {
+    let x = parse_hashmap_string_value::<f32>(hmap, "trim_barsx100", Some("0")).unwrap_or(0.0_f32);
+    Ok(x / 100.0_f32)
+}
+
+fn parse_loop_mode(hmap: &HashMap<String, String>) -> RBoxErr<SampleAttributeLoopMode> {
+    let x = parse_hashmap_string_value::<u32>(hmap, "loopmode", Some("0")).unwrap_or(0_u32);
+    Ok(SampleAttributeLoopMode::from_value(&x)?)
+}
+
+fn parse_tstrech_mode(hmap: &HashMap<String, String>) -> RBoxErr<SampleAttributeTimestrechMode> {
+    let x = parse_hashmap_string_value::<u32>(hmap, "tsmode", Some("0")).unwrap_or(0_u32);
+    Ok(SampleAttributeTimestrechMode::from_value(&x)?)
+}
+
+fn parse_trig_quantize_mode(
+    hmap: &HashMap<String, String>,
+) -> RBoxErr<SampleAttributeTrigQuantizationMode> {
+    let x_i16 =
+        parse_hashmap_string_value::<i16>(hmap, "trigquantization", Some("255")).unwrap_or(255_i16);
+    let x_u32 = u32::try_from(x_i16).unwrap_or(255_u32);
+    Ok(SampleAttributeTrigQuantizationMode::from_value(&x_u32)?)
+}
+
+fn parse_gain(hmap: &HashMap<String, String>) -> RBoxErr<i8> {
+    let x = parse_hashmap_string_value::<i8>(hmap, "gain", Some("48")).unwrap_or(48_i8);
+    Ok(x - 48_i8)
+}
+
+fn parse_tempo(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
+    let x = parse_hashmap_string_value::<u16>(hmap, "bpm", Some("2880")).unwrap_or(2880_u16);
+    Ok(x / 24_u16)
+}
 
 // cannot use FromProjectStringData because it expects a lone Self result, rather than a Vec.
 impl FromHashMap for ProjectSampleSlot {
@@ -73,66 +213,25 @@ impl FromHashMap for ProjectSampleSlot {
     type T = ProjectSampleSlot;
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> RBoxErr<Self::T> {
-        // Flex Sample slots with ID > 128 are recording buffers
-        // TODO: Make this part of the ProjectSampleSlotType from_value method?
-        let mut sample_slot_type = hmap.get("type").unwrap().clone();
-        let slot_id = Self::parse_hashmap_value::<u16>(&hmap, "slot")?;
+        let slot_id = parse_id(&hmap)?;
 
-        if sample_slot_type == "FLEX" && slot_id > 129 {
-            sample_slot_type = "RECORDER".to_string();
-        }
+        // recorder buffers are the only slots with IDs > 128
+        // TODO: Make this part of the ProjectSampleSlotType from_value method?
+        let sample_slot_type = if slot_id >= 129 {
+            "RECORDER".to_string()
+        } else {
+            hmap.get("type").unwrap().to_string()
+        };
 
         let sample_type = ProjectSampleSlotType::from_value(&sample_slot_type)?;
-
-        let path = PathBuf::from_str(hmap.get("path").unwrap()).unwrap();
-
-        // TODO: Will never find the respective OT file as
-        // the ^ path is alwys relative to project dir on CF card
-
-        // let mut file_pair = None;
-        // if path.file_name() != PathBuf::from("").file_name() {
-        //     file_pair = Some(SampleFilePair::from_audio_pathbuf(&path).unwrap());
-        // }
-
-        let trim_bars = hmap
-            .get("trim_barsx100")
-            .unwrap_or(&"0.0".to_string())
-            .clone()
-            .parse::<f32>()
-            .unwrap()
-            / 100.0;
-
-        let loop_mode = SampleAttributeLoopMode::from_value(
-            &hmap.get("loopmode").unwrap().parse::<u32>().unwrap(),
-        )
-        .unwrap();
-
-        let timestrech_mode = SampleAttributeTimestrechMode::from_value(
-            &hmap.get("tsmode").unwrap().parse::<u32>().unwrap(),
-        )
-        .unwrap();
-
-        let tq_i16: i16 = hmap
-            .get("trigquantization")
-            .unwrap()
-            .clone()
-            .parse::<i16>()
-            .unwrap();
-
-        let tq_u32: u32 = u32::try_from(tq_i16).unwrap_or(255_u32);
-
-        let trig_quantization_mode =
-            SampleAttributeTrigQuantizationMode::from_value(&tq_u32).unwrap();
-
-        let gain = hmap.get("gain").unwrap().clone().parse::<u8>().unwrap();
-
-        let bpm = hmap
-            .get("bpm")
-            .unwrap_or(&"2880".to_string())
-            .clone()
-            .parse::<u16>()
-            .unwrap_or(2880)
-            / 24_u16;
+        let path = PathBuf::from_str(hmap.get("path").unwrap())?;
+        let trim_bars = parse_trim_bars(hmap)?;
+        let loop_mode = parse_loop_mode(hmap)?;
+        let timestrech_mode = parse_tstrech_mode(hmap)?;
+        let trig_quantization_mode = parse_trig_quantize_mode(hmap)?;
+        // todo: check gain transformation values
+        let gain = parse_gain(hmap)?;
+        let bpm = parse_tempo(hmap)?;
 
         let sample_struct = Self {
             sample_type,
@@ -144,7 +243,6 @@ impl FromHashMap for ProjectSampleSlot {
             loop_mode,
             trig_quantization_mode,
             gain,
-            // bpm: hmap.get("bpm").unwrap().clone().parse::<u16>().unwrap(),
             bpm,
         };
 
@@ -156,7 +254,7 @@ impl ProjectFromString for ProjectSampleSlot {
     type T = Vec<Self>;
 
     /// Load project 'samples' data from the raw project ASCII file.
-    fn from_string(data: &String) -> Result<Vec<Self>, Box<dyn std::error::Error>> {
+    fn from_string(data: &String) -> RBoxErr<Vec<Self>> {
         let footer_stripped = data
             .strip_suffix("\r\n\r\n############################\r\n\r\n")
             .unwrap();
@@ -232,7 +330,7 @@ impl ProjectToString for ProjectSampleSlot {
         s.push_str("\r\n");
         s.push_str(format!("LOOPMODE={}", self.loop_mode.value().unwrap()).as_str());
         s.push_str("\r\n");
-        s.push_str(format!("GAIN={}", self.gain).as_str());
+        s.push_str(format!("GAIN={}", self.gain + 48).as_str());
         s.push_str("\r\n");
         s.push_str(
             format!(
@@ -244,5 +342,79 @@ impl ProjectToString for ProjectSampleSlot {
         s.push_str("\r\n[/SAMPLE]");
 
         Ok(s)
+    }
+}
+
+mod tests {
+
+    use super::*;
+
+    #[test]
+    fn test_parse_id_correct() {
+        let mut hmap = HashMap::new();
+        hmap.insert("slot".to_string(), "1".to_string());
+
+        let slot_id = parse_id(&hmap);
+
+        assert_eq!(1, slot_id.unwrap());
+    }
+
+    #[test]
+    fn test_parse_id_err_bad_value_type_err() {
+        let mut hmap = HashMap::new();
+        hmap.insert("slot".to_string(), "AAAA".to_string());
+        let slot_id = parse_id(&hmap);
+        assert!(slot_id.is_err());
+    }
+
+    #[test]
+    fn test_parse_trim_bars_correct() {
+        let mut hmap = HashMap::new();
+        hmap.insert("trim_barsx100".to_string(), "100".to_string());
+        let r = parse_trim_bars(&hmap);
+        assert_eq!(1.0_f32, r.unwrap());
+    }
+
+    #[test]
+    fn test_parse_trim_bars_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert(
+            "trim_barsx100".to_string(),
+            "AAAFSFSFSSFfssafAA".to_string(),
+        );
+        let r = parse_trim_bars(&hmap);
+        assert_eq!(r.unwrap(), 0.0_f32);
+    }
+
+    #[test]
+    fn test_parse_loop_mode_correct_off() {
+        let mut hmap = HashMap::new();
+        hmap.insert("loopmode".to_string(), "0".to_string());
+        let r = parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Off);
+    }
+
+    #[test]
+    fn test_parse_loop_mode_correct_normal() {
+        let mut hmap = HashMap::new();
+        hmap.insert("loopmode".to_string(), "1".to_string());
+        let r = parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Normal);
+    }
+
+    #[test]
+    fn test_parse_loop_mode_correct_pingpong() {
+        let mut hmap = HashMap::new();
+        hmap.insert("loopmode".to_string(), "2".to_string());
+        let r = parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), SampleAttributeLoopMode::PingPong);
+    }
+
+    #[test]
+    fn test_parse_loop_mode_bad_value_type_default_return() {
+        let mut hmap = HashMap::new();
+        hmap.insert("loopmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
+        let r = parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Off);
     }
 }

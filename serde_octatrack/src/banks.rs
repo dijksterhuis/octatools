@@ -11,8 +11,7 @@ use serde_big_array::{Array, BigArray};
 
 use crate::{
     banks::{parts::Part, patterns::Pattern},
-    common::RBoxErr,
-    common::{FromFileAtPathBuf, ToFileAtPathBuf},
+    FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf,
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
@@ -114,7 +113,7 @@ impl ToFileAtPathBuf for BankRawBytes {
 #[cfg(test)]
 mod tests {
     use crate::banks::Bank;
-    use crate::common::{FromFileAtPathBuf, ToFileAtPathBuf};
+    use crate::{FromFileAtPathBuf, ToFileAtPathBuf};
     use std::path::PathBuf;
 
     #[test]

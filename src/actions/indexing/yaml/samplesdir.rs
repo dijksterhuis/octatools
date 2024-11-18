@@ -7,12 +7,11 @@ use base64ct::{Base64, Encoding};
 use log::{debug, error, info};
 use md5::Digest;
 use serde::{Deserialize, Serialize};
-use serde_octatrack::common::RBoxErr;
 use std::fs::canonicalize;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
-use crate::common::{FromYamlFile, ToYamlFile};
+use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};
 
 fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> Result<String, ()> {
     debug!("Getting file path's file name: file={pathbuf:#?}");

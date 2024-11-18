@@ -2,12 +2,13 @@
 
 use std::path::PathBuf;
 
+use crate::common::RBoxErr;
 use serde_octatrack::{
     arrangements::{ArrangementFile, ArrangementFileRawBytes},
     banks::{Bank, BankRawBytes},
-    common::{FromFileAtPathBuf, RBoxErr},
     projects::Project,
     samples::{SampleAttributes, SampleAttributesRawBytes},
+    FromFileAtPathBuf,
 };
 
 /// Show deserialised representation of a Bank for a given bank file at `path`

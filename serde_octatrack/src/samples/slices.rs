@@ -1,7 +1,8 @@
 //! Slice data structs for sample attribute files (`SampleAttributes`).
 
 // use crate::audio::wavfile::WavFile;
-use crate::common::{RBoxErr, SwapBytes};
+use crate::samples::SwapBytes;
+use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 
 /// Positions of a 'slice' within a single WAV file
@@ -26,7 +27,7 @@ impl SwapBytes for Slice {
 
     /// Swap the bytes of all struct fields.
     /// Must be applied to the `SampleAttributes` file to deal with litle-endian/big-endian systems.
-    fn swap_bytes(&self) -> RBoxErr<Self::T> {
+    fn swap_bytes(self) -> RBoxErr<Self::T> {
         let bswapped = Self {
             trim_start: self.trim_start.swap_bytes(),
             trim_end: self.trim_end.swap_bytes(),

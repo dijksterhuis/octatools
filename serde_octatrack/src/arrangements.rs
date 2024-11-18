@@ -27,7 +27,7 @@
 //!   - Unknown block 2
 //!
 
-use crate::common::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
+use crate::{FromFileAtPathBuf, RBoxErr, ToFileAtPathBuf};
 use bincode;
 use log::{debug, error, info, trace, warn};
 use serde::de::SeqAccess;

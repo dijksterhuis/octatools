@@ -4,7 +4,7 @@
 
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
-use serde_octatrack::common::FromFileAtPathBuf;
+use serde_octatrack::FromFileAtPathBuf;
 use serde_yml::Error as SerdeYmlError;
 use std::path::PathBuf;
 

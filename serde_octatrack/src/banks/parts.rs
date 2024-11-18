@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 
 /// Audio Track MAIN and CUE volume.
 /// Both are 108 by default.

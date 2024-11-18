@@ -6,9 +6,9 @@ use log::{debug, trace};
 
 use std::path::PathBuf;
 
-use serde_octatrack::common::{FromFileAtPathBuf, RBoxErr};
+use serde_octatrack::FromFileAtPathBuf;
 
-use crate::common::ToYamlFile;
+use crate::common::{RBoxErr, ToYamlFile};
 use yaml::cfcard::CompactFlashDrive;
 use yaml::samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple};
 

@@ -1,7 +1,7 @@
 //! Various utilities realted to Octatrack data files, but not used during
 //! Serialization / Deserialization.
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use std::{ffi::OsStr, fmt::Error, path::PathBuf};
 
 #[allow(dead_code)]

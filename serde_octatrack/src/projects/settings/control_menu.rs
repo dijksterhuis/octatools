@@ -1,11 +1,14 @@
 //! Data structures for the Octatrack Project Settings 'Control Menu'.
 
-use crate::projects::options::ProjectMidiChannels;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 
-use crate::common::{FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs};
+use crate::projects::{
+    options::ProjectMidiChannels, parse_hashmap_string_value, parse_hashmap_string_value_bool,
+    FromHashMap,
+};
+use crate::OptionEnumValueConvert;
 
 /// Convenience struct for all data related to the Octatrack Project Settings 'Control' Menu.
 
@@ -34,7 +37,6 @@ pub struct ControlMenu {
     pub midi: MidiSubMenu,
 }
 
-impl ParseHashMapValueAs for ControlMenu {}
 impl FromHashMap for ControlMenu {
     type A = String;
     type B = String;
@@ -65,7 +67,6 @@ pub struct MidiSubMenu {
     // control_midi_turbo: todo!(),
 }
 
-impl ParseHashMapValueAs for MidiSubMenu {}
 impl FromHashMap for MidiSubMenu {
     type A = String;
     type B = String;
@@ -95,7 +96,6 @@ pub struct AudioControlPage {
     pub cue_studio_mode: bool,
 }
 
-impl ParseHashMapValueAs for AudioControlPage {}
 impl FromHashMap for AudioControlPage {
     type A = String;
     type B = String;
@@ -103,8 +103,8 @@ impl FromHashMap for AudioControlPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            master_track: Self::parse_hashmap_value_bool(&hmap, "master_track")?,
-            cue_studio_mode: Self::parse_hashmap_value_bool(&hmap, "cue_studio_mode")?,
+            master_track: parse_hashmap_string_value_bool(hmap, "master_track", None)?,
+            cue_studio_mode: parse_hashmap_string_value_bool(hmap, "cue_studio_mode", None)?,
         })
     }
 }
@@ -126,7 +126,6 @@ pub struct InputControlPage {
     pub input_delay_compensation: bool,
 }
 
-impl ParseHashMapValueAs for InputControlPage {}
 impl FromHashMap for InputControlPage {
     type A = String;
     type B = String;
@@ -134,11 +133,12 @@ impl FromHashMap for InputControlPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            gate_ab: Self::parse_hashmap_value::<u8>(&hmap, "gate_ab")?,
-            gate_cd: Self::parse_hashmap_value::<u8>(&hmap, "gate_cd")?,
-            input_delay_compensation: Self::parse_hashmap_value_bool(
-                &hmap,
+            gate_ab: parse_hashmap_string_value::<u8>(hmap, "gate_ab", None)?,
+            gate_cd: parse_hashmap_string_value::<u8>(hmap, "gate_cd", None)?,
+            input_delay_compensation: parse_hashmap_string_value_bool(
+                hmap,
                 "input_delay_compensation",
+                None,
             )?,
         })
     }
@@ -166,7 +166,6 @@ pub struct SequencerControlPage {
     pub pattern_change_auto_trig_lfos: bool,
 }
 
-impl ParseHashMapValueAs for SequencerControlPage {}
 impl FromHashMap for SequencerControlPage {
     type A = String;
     type B = String;
@@ -174,17 +173,20 @@ impl FromHashMap for SequencerControlPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            pattern_change_chain_behaviour: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            pattern_change_chain_behaviour: parse_hashmap_string_value::<u8>(
+                hmap,
                 "pattern_change_chain_behavior",
+                None,
             )?,
-            pattern_change_auto_silence_tracks: Self::parse_hashmap_value_bool(
-                &hmap,
+            pattern_change_auto_silence_tracks: parse_hashmap_string_value_bool(
+                hmap,
                 "pattern_change_auto_trig_lfos",
+                None,
             )?,
-            pattern_change_auto_trig_lfos: Self::parse_hashmap_value_bool(
-                &hmap,
+            pattern_change_auto_trig_lfos: parse_hashmap_string_value_bool(
+                hmap,
                 "pattern_change_auto_trig_lfos",
+                None,
             )?,
         })
     }
@@ -222,7 +224,6 @@ pub struct MemoryControlPage {
     pub reserved_recorder_length: u32,
 }
 
-impl ParseHashMapValueAs for MemoryControlPage {}
 impl FromHashMap for MemoryControlPage {
     type A = String;
     type B = String;
@@ -230,16 +231,18 @@ impl FromHashMap for MemoryControlPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            load_24bit_flex: Self::parse_hashmap_value_bool(&hmap, "load_24bit_flex")?,
-            dynamic_recorders: Self::parse_hashmap_value_bool(&hmap, "dynamic_recorders")?,
-            record_24bit: Self::parse_hashmap_value_bool(&hmap, "record_24bit")?,
-            reserved_recorder_count: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            load_24bit_flex: parse_hashmap_string_value_bool(hmap, "load_24bit_flex", None)?,
+            dynamic_recorders: parse_hashmap_string_value_bool(hmap, "dynamic_recorders", None)?,
+            record_24bit: parse_hashmap_string_value_bool(hmap, "record_24bit", None)?,
+            reserved_recorder_count: parse_hashmap_string_value::<u8>(
+                hmap,
                 "reserved_recorder_count",
+                None,
             )?,
-            reserved_recorder_length: Self::parse_hashmap_value::<u32>(
-                &hmap,
+            reserved_recorder_length: parse_hashmap_string_value::<u32>(
+                hmap,
                 "reserved_recorder_length",
+                None,
             )?,
         })
     }
@@ -285,7 +288,6 @@ pub struct MetronomeControlPage {
     pub metronome_enabled: bool,
 }
 
-impl ParseHashMapValueAs for MetronomeControlPage {}
 impl FromHashMap for MetronomeControlPage {
     type A = String;
     type B = String;
@@ -293,20 +295,30 @@ impl FromHashMap for MetronomeControlPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            metronome_time_signature: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            metronome_time_signature: parse_hashmap_string_value::<u8>(
+                hmap,
                 "metronome_time_signature",
+                None,
             )?,
-            metronome_time_signature_denominator: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            metronome_time_signature_denominator: parse_hashmap_string_value::<u8>(
+                hmap,
                 "metronome_time_signature_denominator",
+                None,
             )?,
-            metronome_preroll: Self::parse_hashmap_value::<u8>(&hmap, "metronome_preroll")?,
-            metronome_cue_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_cue_volume")?,
-            metronome_main_volume: Self::parse_hashmap_value::<u8>(&hmap, "metronome_main_volume")?,
-            metronome_pitch: Self::parse_hashmap_value::<u8>(&hmap, "metronome_pitch")?,
-            metronome_tonal: Self::parse_hashmap_value_bool(&hmap, "metronome_tonal")?,
-            metronome_enabled: Self::parse_hashmap_value_bool(&hmap, "metronome_enabled")?,
+            metronome_preroll: parse_hashmap_string_value::<u8>(hmap, "metronome_preroll", None)?,
+            metronome_cue_volume: parse_hashmap_string_value::<u8>(
+                hmap,
+                "metronome_cue_volume",
+                None,
+            )?,
+            metronome_main_volume: parse_hashmap_string_value::<u8>(
+                hmap,
+                "metronome_main_volume",
+                None,
+            )?,
+            metronome_pitch: parse_hashmap_string_value::<u8>(hmap, "metronome_pitch", None)?,
+            metronome_tonal: parse_hashmap_string_value_bool(hmap, "metronome_tonal", None)?,
+            metronome_enabled: parse_hashmap_string_value_bool(hmap, "metronome_enabled", None)?,
         })
     }
 }
@@ -351,7 +363,6 @@ pub struct MidiControlMidiPage {
     pub midi_midi_track_cc_in: u8,
 }
 
-impl ParseHashMapValueAs for MidiControlMidiPage {}
 impl FromHashMap for MidiControlMidiPage {
     type A = String;
     type B = String;
@@ -359,20 +370,31 @@ impl FromHashMap for MidiControlMidiPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            midi_audio_track_cc_in: Self::parse_hashmap_value_bool(&hmap, "midi_audio_trk_cc_in")?,
-            midi_audio_track_cc_out: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            midi_audio_track_cc_in: parse_hashmap_string_value_bool(
+                hmap,
+                "midi_audio_trk_cc_in",
+                None,
+            )?,
+            midi_audio_track_cc_out: parse_hashmap_string_value::<u8>(
+                hmap,
                 "midi_audio_trk_cc_out",
+                None,
             )?,
-            midi_audio_track_note_in: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            midi_audio_track_note_in: parse_hashmap_string_value::<u8>(
+                hmap,
                 "midi_audio_trk_note_in",
+                None,
             )?,
-            midi_audio_track_note_out: Self::parse_hashmap_value::<u8>(
-                &hmap,
+            midi_audio_track_note_out: parse_hashmap_string_value::<u8>(
+                hmap,
                 "midi_audio_trk_note_out",
+                None,
             )?,
-            midi_midi_track_cc_in: Self::parse_hashmap_value::<u8>(&hmap, "midi_midi_trk_cc_in")?,
+            midi_midi_track_cc_in: parse_hashmap_string_value::<u8>(
+                hmap,
+                "midi_midi_trk_cc_in",
+                None,
+            )?,
         })
     }
 }
@@ -424,7 +446,6 @@ pub struct MidiSyncMidiPage {
     pub midi_progchange_receive_channel: ProjectMidiChannels,
 }
 
-impl ParseHashMapValueAs for MidiSyncMidiPage {}
 impl FromHashMap for MidiSyncMidiPage {
     type A = String;
     type B = String;
@@ -432,29 +453,36 @@ impl FromHashMap for MidiSyncMidiPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            midi_clock_send: Self::parse_hashmap_value_bool(&hmap, "midi_clock_send")?,
-            midi_clock_receive: Self::parse_hashmap_value_bool(&hmap, "midi_clock_receive")?,
-            midi_transport_send: Self::parse_hashmap_value_bool(&hmap, "midi_transport_send")?,
-            midi_transport_receive: Self::parse_hashmap_value_bool(
-                &hmap,
-                "midi_transport_receive",
+            midi_clock_send: parse_hashmap_string_value_bool(hmap, "midi_clock_send", None)?,
+            midi_clock_receive: parse_hashmap_string_value_bool(hmap, "midi_clock_receive", None)?,
+            midi_transport_send: parse_hashmap_string_value_bool(
+                hmap,
+                "midi_transport_send",
+                None,
             )?,
-            midi_progchange_send: Self::parse_hashmap_value_bool(
-                &hmap,
+            midi_transport_receive: parse_hashmap_string_value_bool(
+                hmap,
+                "midi_transport_receive",
+                None,
+            )?,
+            midi_progchange_send: parse_hashmap_string_value_bool(
+                hmap,
                 "midi_program_change_send",
+                None,
             )?,
             // TODO: Unwrap
             midi_progchange_send_channel: ProjectMidiChannels::from_value(
-                &Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_send_ch")?,
+                &parse_hashmap_string_value::<i8>(hmap, "midi_program_change_send_ch", None)?,
             )
             .unwrap(),
-            midi_progchange_receive: Self::parse_hashmap_value_bool(
-                &hmap,
+            midi_progchange_receive: parse_hashmap_string_value_bool(
+                hmap,
                 "midi_program_change_receive",
+                None,
             )?,
             // TODO: Unwrap
             midi_progchange_receive_channel: ProjectMidiChannels::from_value(
-                &Self::parse_hashmap_value::<i8>(&hmap, "midi_program_change_receive_ch")?,
+                &parse_hashmap_string_value::<i8>(hmap, "midi_program_change_receive_ch", None)?,
             )
             .unwrap(),
         })
@@ -511,7 +539,6 @@ pub struct MidiChannelsMidiPage {
     pub midi_auto_channel: u8,
 }
 
-impl ParseHashMapValueAs for MidiChannelsMidiPage {}
 impl FromHashMap for MidiChannelsMidiPage {
     type A = String;
     type B = String;
@@ -519,15 +546,15 @@ impl FromHashMap for MidiChannelsMidiPage {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            midi_trig_ch1: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch1")?,
-            midi_trig_ch2: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch2")?,
-            midi_trig_ch3: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch3")?,
-            midi_trig_ch4: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch4")?,
-            midi_trig_ch5: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch5")?,
-            midi_trig_ch6: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch6")?,
-            midi_trig_ch7: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch7")?,
-            midi_trig_ch8: Self::parse_hashmap_value::<u8>(&hmap, "midi_trig_ch8")?,
-            midi_auto_channel: Self::parse_hashmap_value::<u8>(&hmap, "midi_auto_channel")?,
+            midi_trig_ch1: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch1", None)?,
+            midi_trig_ch2: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch2", None)?,
+            midi_trig_ch3: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch3", None)?,
+            midi_trig_ch4: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch4", None)?,
+            midi_trig_ch5: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch5", None)?,
+            midi_trig_ch6: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch6", None)?,
+            midi_trig_ch7: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch7", None)?,
+            midi_trig_ch8: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch8", None)?,
+            midi_auto_channel: parse_hashmap_string_value::<u8>(hmap, "midi_auto_channel", None)?,
         })
     }
 }

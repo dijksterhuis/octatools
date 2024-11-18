@@ -9,21 +9,18 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::common::RBoxErr;
 use crate::utils::SampleFilePair;
 
-use serde_octatrack::{
-    banks::Bank,
-    common::{FromFileAtPathBuf, RBoxErr, RVoidError},
-    projects::Project,
-};
+use serde_octatrack::{banks::Bank, projects::Project, FromFileAtPathBuf};
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
 /// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
 pub trait SearchForOctatrackSampleFilePair {
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
-    fn scan_dir_path_for_samples(dir_path: &PathBuf) -> RVoidError<Vec<SampleFilePair>> {
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dir_path).unwrap();
+    fn scan_dir_path_for_samples(dir_path: &PathBuf) -> RBoxErr<Vec<SampleFilePair>> {
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dir_path)?;
 
         let ot_sample_files: Vec<SampleFilePair> = wav_file_paths
             .into_iter()
@@ -59,10 +56,10 @@ impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
 
 impl OctatrackSetProject {
     /// Create a new `OctatrackSetProject` from the dirpath `PathBuf`.
-    pub fn from_pathbuf(dirpath: &PathBuf) -> RVoidError<Self> {
+    pub fn from_pathbuf(dirpath: &PathBuf) -> RBoxErr<Self> {
         // TODO: Handle looking for .work / .strd
         if !dirpath.is_dir() {
-            return Err(());
+            return Err(Box::new(crate::common::OctatoolErrors::PathNotADirectory));
         }
 
         let banks: Vec<Bank> = WalkDir::new(dirpath)
@@ -81,7 +78,6 @@ impl OctatrackSetProject {
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
             dirpath: dirpath.clone(),
-            // samples: scan_dir_for_ot_files(path).unwrap_or(Vec::new()).clone()
             sample_filepaths: Self::scan_dir_path_for_samples(&dirpath).unwrap(),
             project_work: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
             banks,
@@ -111,7 +107,7 @@ impl OctatrackSetAudioPool {
     /// Create a new `OctatrackSetAudioPool` from a `PathBuf`.
     /// **NOTE**: the `PathBuf` must point to the correct directory.
 
-    pub fn from_pathbuf(path: &PathBuf) -> RVoidError<Self> {
+    pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self> {
         Ok(Self {
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.clone(),

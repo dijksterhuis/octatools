@@ -6,19 +6,23 @@ pub mod mixer;
 pub mod tempo;
 pub mod trig_mode_midi_tracks;
 
-use serde::{Deserialize, Serialize};
-
-use crate::common::{
-    FromHashMap, OptionEnumValueConvert, ParseHashMapValueAs, ProjectFromString, ProjectToString,
+use control_menu::{
+    AudioControlPage, ControlMenu, InputControlPage, MemoryControlPage, MetronomeControlPage,
+    MidiChannelsMidiPage, MidiControlMidiPage, MidiSequencerControlPage, MidiSubMenu,
+    MidiSyncMidiPage, SequencerControlPage,
 };
 
+use mixer::MixerMenu;
+use tempo::TempoMenu;
+use trig_mode_midi_tracks::MidiTrackTrigModes;
+
+use serde::{Deserialize, Serialize};
+
+use crate::OptionEnumValueConvert;
+
 use crate::projects::{
-    common::string_to_hashmap,
-    common::ProjectRawFileSection,
-    settings::{
-        control_menu::ControlMenu, mixer::MixerMenu, tempo::TempoMenu,
-        trig_mode_midi_tracks::MidiTrackTrigModes,
-    },
+    options::ProjectMidiChannels, parse_hashmap_string_value_bool, string_to_hashmap, FromHashMap,
+    ProjectFromString, ProjectRawFileSection, ProjectToString,
 };
 
 /// Project settings read from a parsed Octatrack Project file
@@ -44,7 +48,102 @@ pub struct ProjectSettings {
     pub midi_tracks_trig_mode: MidiTrackTrigModes,
 }
 
-impl ParseHashMapValueAs for ProjectSettings {}
+impl Default for ProjectSettings {
+    fn default() -> Self {
+        Self {
+            write_protected: false,
+            control: ControlMenu {
+                audio: AudioControlPage {
+                    master_track: false,
+                    cue_studio_mode: false,
+                },
+                input: InputControlPage {
+                    gate_ab: 127,
+                    gate_cd: 127,
+                    input_delay_compensation: false,
+                },
+                sequencer: SequencerControlPage {
+                    pattern_change_chain_behaviour: 0,
+                    pattern_change_auto_silence_tracks: false,
+                    pattern_change_auto_trig_lfos: false,
+                },
+                midi_sequencer: MidiSequencerControlPage {},
+                memory: MemoryControlPage {
+                    load_24bit_flex: false,
+                    dynamic_recorders: false,
+                    record_24bit: false,
+                    reserved_recorder_count: 8,
+                    reserved_recorder_length: 16,
+                },
+                metronome: MetronomeControlPage {
+                    metronome_time_signature: 3,
+                    metronome_time_signature_denominator: 2,
+                    metronome_preroll: 0,
+                    metronome_cue_volume: 32,
+                    metronome_main_volume: 0,
+                    metronome_pitch: 12,
+                    metronome_tonal: true,
+                    metronome_enabled: false,
+                },
+                midi: MidiSubMenu {
+                    control: MidiControlMidiPage {
+                        midi_audio_track_cc_in: true,
+                        midi_audio_track_cc_out: 3,
+                        midi_audio_track_note_in: 1,
+                        midi_audio_track_note_out: 3,
+                        midi_midi_track_cc_in: 1,
+                    },
+                    sync: MidiSyncMidiPage {
+                        midi_clock_send: false,
+                        midi_clock_receive: false,
+                        midi_transport_send: false,
+                        midi_transport_receive: false,
+                        midi_progchange_send: false,
+                        midi_progchange_send_channel: ProjectMidiChannels::Disabled,
+                        midi_progchange_receive: false,
+                        midi_progchange_receive_channel: ProjectMidiChannels::Disabled,
+                    },
+                    channels: MidiChannelsMidiPage {
+                        midi_trig_ch1: 0,
+                        midi_trig_ch2: 1,
+                        midi_trig_ch3: 2,
+                        midi_trig_ch4: 3,
+                        midi_trig_ch5: 4,
+                        midi_trig_ch6: 5,
+                        midi_trig_ch7: 6,
+                        midi_trig_ch8: 7,
+                        midi_auto_channel: 10,
+                    },
+                },
+            },
+            midi_soft_thru: false,
+            mixer: MixerMenu {
+                gain_ab: 64,
+                gain_cd: 64,
+                dir_ab: 0,
+                dir_cd: 0,
+                phones_mix: 64,
+                main_to_cue: 0,
+                main_level: 64,
+                cue_level: 64,
+            },
+            tempo: TempoMenu {
+                tempo: 120,
+                pattern_tempo_enabled: false,
+            },
+            midi_tracks_trig_mode: MidiTrackTrigModes {
+                trig_mode_midi_track_1: 0,
+                trig_mode_midi_track_2: 0,
+                trig_mode_midi_track_3: 0,
+                trig_mode_midi_track_4: 0,
+                trig_mode_midi_track_5: 0,
+                trig_mode_midi_track_6: 0,
+                trig_mode_midi_track_7: 0,
+                trig_mode_midi_track_8: 0,
+            },
+        }
+    }
+}
 
 impl ProjectFromString for ProjectSettings {
     type T = Self;
@@ -54,9 +153,9 @@ impl ProjectFromString for ProjectSettings {
         let hmap = string_to_hashmap(&s, &ProjectRawFileSection::Settings)?;
 
         Ok(Self {
-            write_protected: Self::parse_hashmap_value_bool(&hmap, "writeprotected")?,
+            write_protected: parse_hashmap_string_value_bool(&hmap, "writeprotected", None)?,
             // Unknown: Whether MIDI 'Thru' is enabled/disabled?
-            midi_soft_thru: Self::parse_hashmap_value_bool(&hmap, "midi_soft_thru")?,
+            midi_soft_thru: parse_hashmap_string_value_bool(&hmap, "midi_soft_thru", None)?,
             //
             control: ControlMenu::from_hashmap(&hmap).unwrap(),
             mixer: MixerMenu::from_hashmap(&hmap)?,
