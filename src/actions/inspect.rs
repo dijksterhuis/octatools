@@ -29,9 +29,14 @@ pub fn show_patterns(path: &PathBuf) -> RBoxErr<()> {
 
 /// Show deserialised representation of one Pattern for a given bank file at `path`
 pub fn show_pattern(path: &PathBuf, index: usize) -> RBoxErr<()> {
+
+    if index < 1 || index > 16 {
+        panic!("Octatrack Patterns are indexed from 1 to 16");
+    }
+
     let b = &Bank::from_pathbuf(&path)
         .expect("Could not load bank file")
-        .patterns[index];
+        .patterns[index - 1];
     println!("{b:#?}");
     Ok(())
 }
@@ -47,9 +52,12 @@ pub fn show_parts(path: &PathBuf) -> RBoxErr<()> {
 
 /// Show deserialised representation of one part for a given bank file at `path`
 pub fn show_part(path: &PathBuf, index: usize) -> RBoxErr<()> {
+    if index < 1 || index > 8 {
+        panic!("Octatrack Parts are indexed from 1 to 8");
+    }
     let b = &Bank::from_pathbuf(&path)
         .expect("Could not load bank file")
-        .parts[index];
+        .parts[index - 1];
     println!("{b:#?}");
     Ok(())
 }
