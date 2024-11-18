@@ -67,7 +67,6 @@ impl FromPathBuf for CompactFlashDrive {
     }
 }
 
-
 /*
 # TODO
 
