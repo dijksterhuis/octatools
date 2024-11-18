@@ -13,56 +13,64 @@ use serde_octatrack::{
 
 /// Show deserialised representation of a Bank for a given bank file at `path`
 pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path)?;
+    let b = Bank::from_pathbuf(&path).expect("Could not load bank file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of all Patterns for a given bank file at `path`
 pub fn show_patterns(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path)?.patterns;
+    let b = Bank::from_pathbuf(&path)
+        .expect("Could not load bank file")
+        .patterns;
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of one Pattern for a given bank file at `path`
 pub fn show_pattern(path: &PathBuf, index: usize) -> RBoxErr<()> {
-    let b = &Bank::from_pathbuf(&path)?.patterns[index];
+    let b = &Bank::from_pathbuf(&path)
+        .expect("Could not load bank file")
+        .patterns[index];
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of all Parts for a given bank file at `path`
 pub fn show_parts(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path)?.parts;
+    let b = Bank::from_pathbuf(&path)
+        .expect("Could not load bank file")
+        .parts;
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of one part for a given bank file at `path`
 pub fn show_part(path: &PathBuf, index: usize) -> RBoxErr<()> {
-    let b = &Bank::from_pathbuf(&path)?.parts[index];
+    let b = &Bank::from_pathbuf(&path)
+        .expect("Could not load bank file")
+        .parts[index];
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of a Project for a given project file at `path`
 pub fn show_project(path: &PathBuf) -> RBoxErr<()> {
-    let b = Project::from_pathbuf(&path)?;
+    let b = Project::from_pathbuf(&path).expect("Could not load project file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of a Sample Attributes file at `path`
 pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
-    let b = SampleAttributes::from_pathbuf(&path)?;
+    let b = SampleAttributes::from_pathbuf(&path).expect("Could not load ot file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of an Arrangement for a given arrangement file at `path`
 pub fn show_arrangement(path: &PathBuf) -> RBoxErr<()> {
-    let b = ArrangementFile::from_pathbuf(&path);
+    let b = ArrangementFile::from_pathbuf(&path).expect("Could not load arrangement file");
     println!("{b:#?}");
     Ok(())
 }
@@ -88,7 +96,10 @@ pub fn show_arrangement_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        ArrangementFileRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        ArrangementFileRawBytes::from_pathbuf(&path)
+            .expect("Could not load arrangement file")
+            .data
+            .to_vec(),
         start_idx,
         len,
     );
@@ -103,7 +114,10 @@ pub fn show_bank_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        BankRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        BankRawBytes::from_pathbuf(&path)
+            .expect("Could not load bank file")
+            .data
+            .to_vec(),
         start_idx,
         len,
     );
@@ -118,7 +132,10 @@ pub fn show_ot_file_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        SampleAttributesRawBytes::from_pathbuf(&path)?.data.to_vec(),
+        SampleAttributesRawBytes::from_pathbuf(&path)
+            .expect("Could not load ot file")
+            .data
+            .to_vec(),
         start_idx,
         len,
     );
