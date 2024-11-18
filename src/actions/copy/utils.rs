@@ -163,7 +163,8 @@ pub fn get_active_sslot_ids(
         }
     }
 
-    for (part_idx, part) in bank.parts.iter().enumerate() {
+    // parts_unsaved
+    for (part_idx, part) in bank.parts_unsaved.iter().enumerate() {
         for (track_idx, audio_track_slots) in part.audio_track_machine_slots.iter().enumerate() {
             // the default sample slot for Static/Flex machines is the track ID.
             // so we check if there is an actual sample assigned to a machine's slot
@@ -179,7 +180,7 @@ pub fn get_active_sslot_ids(
                     sample_type: ProjectSampleSlotType::Static,
                 };
                 active_slots.insert(static_machine);
-                info!("Found active Static machine usage: Part: {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.static_slot_id);
+                info!("Found active Static machine usage: Part (unsaved state): {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.static_slot_id);
             }
 
             if project_sample_slot_is_populated(
@@ -192,7 +193,42 @@ pub fn get_active_sslot_ids(
                     sample_type: ProjectSampleSlotType::Flex,
                 };
                 active_slots.insert(flex_machine);
-                info!("Found active Flex machine usage: Part: {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.flex_slot_id);
+                info!("Found active Flex machine usage: Part (unsaved state): {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.flex_slot_id);
+            }
+        }
+    }
+
+    // parts_saved
+    for (part_idx, part) in bank.parts_saved.iter().enumerate() {
+        for (track_idx, audio_track_slots) in part.audio_track_machine_slots.iter().enumerate() {
+            // the default sample slot for Static/Flex machines is the track ID.
+            // so we check if there is an actual sample assigned to a machine's slot
+            // to work out if the machine actually has an 'active' sample slot assignment or not.
+
+            if project_sample_slot_is_populated(
+                project_slots,
+                &(audio_track_slots.static_slot_id as u16),
+                &ProjectSampleSlotType::Static,
+            )? {
+                let static_machine = ActiveSampleSlot {
+                    slot_id: audio_track_slots.static_slot_id,
+                    sample_type: ProjectSampleSlotType::Static,
+                };
+                active_slots.insert(static_machine);
+                info!("Found active Static machine usage: Part (saved state): {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.static_slot_id);
+            }
+
+            if project_sample_slot_is_populated(
+                project_slots,
+                &(audio_track_slots.flex_slot_id as u16),
+                &ProjectSampleSlotType::Flex,
+            )? {
+                let flex_machine = ActiveSampleSlot {
+                    slot_id: audio_track_slots.flex_slot_id,
+                    sample_type: ProjectSampleSlotType::Flex,
+                };
+                active_slots.insert(flex_machine);
+                info!("Found active Flex machine usage: Part (saved state): {part_idx:#?} Track: {track_idx:#?} StaticSlot:{:#?}", audio_track_slots.flex_slot_id);
             }
         }
     }
@@ -207,8 +243,12 @@ pub fn update_sslot_references_static(
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
-    debug!("Updating static sample slots for static machines in parts ...");
-    for part in banks.src.parts.iter_mut() {
+    debug!("Updating static sample slots for static machines in saved Part states ...");
+    for part in banks.src.parts_saved.iter_mut() {
+        part.update_static_machine_slot(&active_slot_id, &dest_slot_id)?;
+    }
+    debug!("Updating static sample slots for static machines in unsaved Part states ...");
+    for part in banks.src.parts_unsaved.iter_mut() {
         part.update_static_machine_slot(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating static sample slots for static plocks in patterns ...");
@@ -232,8 +272,12 @@ pub fn update_sslot_references_flex(
     active_slot_id: u8,
     dest_slot_id: u8,
 ) -> RBoxErr<()> {
-    debug!("Updating flex sample slots for flex machines in parts ...");
-    for part in banks.src.parts.iter_mut() {
+    debug!("Updating flex sample slots for flex machines in saved Part states ...");
+    for part in banks.src.parts_saved.iter_mut() {
+        part.update_flex_machine_slot(&active_slot_id, &dest_slot_id)?;
+    }
+    debug!("Updating flex sample slots for flex machines in unsaved Part states ...");
+    for part in banks.src.parts_unsaved.iter_mut() {
         part.update_flex_machine_slot(&active_slot_id, &dest_slot_id)?;
     }
     debug!("Updating flex sample slots for flex plocks in patterns ...");

@@ -33,11 +33,15 @@ pub struct Bank {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub patterns: Box<Array<Pattern, 16>>,
 
-    /// Part data for a Bank.
-    /// Note: There are 8 `PART` sections.
-    /// One batch of 4x `PART` sections will be related to previous saved Part state for reloading.
-    // note -- stack overflow if tring to use #[serde(with = "BigArray")]
-    pub parts: Box<Array<Part, 8>>,
+    /// Unsaved Part data for a Bank.
+    ///
+    /// Part state prior to before saving a Part is captured here.
+    pub parts_unsaved: Box<Array<Part, 4>>,
+
+    /// Saved Part data for a Bank.
+    ///
+    /// Part state once the Part has been saved is stored here.
+    pub parts_saved: Box<Array<Part, 4>>,
 
     /// Unknown what these bytes refer to.
     #[serde(with = "BigArray")]
