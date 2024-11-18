@@ -11,55 +11,83 @@ use serde_octatrack::{
     FromPathBuf,
 };
 
-/// Show deserialised representation of a Bank for a given bank file at `path`
+/// Show deserialised representation of a Bank state
 pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
     let b = Bank::from_pathbuf(&path).expect("Could not load bank file");
     println!("{b:#?}");
     Ok(())
 }
 
-/// Show deserialised representation of all Patterns for a given bank file at `path`
-pub fn show_patterns(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path)
-        .expect("Could not load bank file")
-        .patterns;
-    println!("{b:#?}");
-    Ok(())
-}
+/// Show deserialised representation of Pattern state
+pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
 
-/// Show deserialised representation of one Pattern for a given bank file at `path`
-pub fn show_pattern(path: &PathBuf, index: usize) -> RBoxErr<()> {
-    if index < 1 || index > 16 {
-        panic!("Octatrack Patterns are indexed from 1 to 16");
+    if indexes.len() == 0 {
+        panic!("No Pattern numbers specified!");
+    };
+    if *indexes.iter().max().unwrap() > 16 || *indexes.iter().min().unwrap() < 1 {
+        panic!("Invalid Pattern numbers specified! Only 1-16 are allowed.");
     }
 
     let b = &Bank::from_pathbuf(&path)
-        .expect("Could not load bank file")
-        .patterns[index - 1];
-    println!("{b:#?}");
+        .expect("Could not load bank file");
+
+    for index in indexes {
+        if index < 1 || index > 16 {
+            panic!("Octatrack Patterns are indexed from 1 to 16");
+        }
+        let x = &b.patterns[index - 1];
+        println!("{x:#?}");
+    };
+        
     Ok(())
 }
 
-/// Show deserialised representation of all Parts for a given bank file at `path`
-pub fn show_parts(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path)
-        .expect("Could not load bank file")
-        .parts;
-    println!("{b:#?}");
-    Ok(())
-}
-
-/// Show deserialised representation of one part for a given bank file at `path`
-pub fn show_part(path: &PathBuf, index: usize) -> RBoxErr<()> {
-    if index < 1 || index > 8 {
-        panic!("Octatrack Parts are indexed from 1 to 8");
+/// Show deserialised representation of Part unsaved state
+pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
+    if indexes.len() == 0 {
+        panic!("No Part numbers specified!");
+    };
+    if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
+        panic!("Invalid Part numbers specified! Only 1-4 are allowed.");
     }
+
     let b = &Bank::from_pathbuf(&path)
-        .expect("Could not load bank file")
-        .parts[index - 1];
-    println!("{b:#?}");
+        .expect("Could not load bank file");
+
+    for index in indexes {
+        if index < 1 || index > 4 {
+            panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
+        }
+        let x = &b.parts_saved[index - 1];
+        println!("{x:#?}");    
+    };
     Ok(())
 }
+
+
+/// Show deserialised representation of Part's saved state
+pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
+    if indexes.len() == 0 {
+        panic!("No Part numbers specified!");
+    };
+    if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
+        panic!("Invalid Part numbers specified! Only 1, 2, 3, 4 are allowed");
+    }
+
+    let b = &Bank::from_pathbuf(&path)
+        .expect("Could not load bank file");
+
+    for index in indexes {
+        if index < 1 || index > 4 {
+            panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
+        }
+        let x = &b.parts_saved[index - 1];
+        println!("{x:#?}");    
+    };
+
+    Ok(())
+}
+
 
 /// Show deserialised representation of a Project for a given project file at `path`
 pub fn show_project(path: &PathBuf) -> RBoxErr<()> {

@@ -25,7 +25,7 @@ use actions::{
     },
     inspect::{
         show_arrangement, show_arrangement_bytes, show_bank, show_bank_bytes, show_ot_file,
-        show_ot_file_bytes, show_part, show_parts, show_pattern, show_patterns, show_project,
+        show_ot_file_bytes, show_saved_parts, show_unsaved_parts, show_pattern, show_project,
     },
     list::list_project_sample_slots,
 };
@@ -51,17 +51,13 @@ fn main() -> () {
                 info!("Showing bank: path={path:#?}");
                 let _ = show_bank(&path);
             }
-            cli::Inspect::Parts { path } => {
-                info!("Showing parts in bank: path={path:#?}");
-                let _ = show_parts(&path);
-            }
-            cli::Inspect::Part { path, index } => {
+            cli::Inspect::PartSaved { path, index } => {
                 info!("Showing specific part in bank: path={path:#?}");
-                let _ = show_part(&path, index);
+                let _ = show_saved_parts(&path, index);
             }
-            cli::Inspect::Patterns { path } => {
-                info!("Showing patterns in bank: path={path:#?}");
-                let _ = show_patterns(&path);
+            cli::Inspect::PartUnsaved { path, index } => {
+                info!("Showing specific part in bank: path={path:#?}");
+                let _ = show_unsaved_parts(&path, index);
             }
             cli::Inspect::Pattern { path, index } => {
                 info!("Showing specific pattern in bank: path={path:#?}");

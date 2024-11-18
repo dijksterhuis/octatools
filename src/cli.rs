@@ -67,24 +67,20 @@ pub enum Inspect {
         path: PathBuf,
     },
 
-    /// Inspect all the Parts data within a Bank
-    Parts {
-        /// Path to the Bank file containing all the Parts to inspect.
-        path: PathBuf,
-    },
-
-    /// Inspect a specific Part within a Bank
-    Part {
+    /// Inspect a specific saved Part state within a Bank
+    PartSaved {
         /// Path to the Bank file containing a specific Part to inspect.
         path: PathBuf,
         /// The Part number (1/2/3/4)
-        index: usize,
+        index: Vec<usize>,
     },
 
-    /// Inspect all the Patterns within a Bank
-    Patterns {
-        /// Path to the Bank file containing all the Patterns to inspect.
+    /// Inspect a specific unsaved Part state within a Bank
+    PartUnsaved {
+        /// Path to the Bank file containing a specific Part to inspect.
         path: PathBuf,
+        /// The Part number (1/2/3/4)
+        index: Vec<usize>,
     },
 
     /// Inspect a specific Pattern within a Bank
@@ -92,7 +88,7 @@ pub enum Inspect {
         /// Path to the Bank file containing a specific Pattern to inspect.
         path: PathBuf,
         /// The Pattern number (1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16)
-        index: usize,
+        index: Vec<usize>,
     },
 
     /// Inspect a Sample Attributes file for an audio sample
