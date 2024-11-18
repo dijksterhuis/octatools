@@ -90,10 +90,9 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 
 ### TODOs / Other Ideas
 
-- Clean up CLI commands, sort out CLI options etc via CLAP.
-- Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
-- Actually make the rust code idiomatic and 'clean' and optimised.
+#### `serde_octatrack`
 - Ser/De to Enum/String/etc types instead of u8.
+- PyO3 bindings for creating a python interface to `serde_octatrack`
 - Finish reverse engineering files 
   - Banks:
     - `MidiTrackParameterLocks.unknown` --> space for sample locks? but no samples for MIDI.
@@ -119,6 +118,21 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
     - `ArrangementBlock.unknown_2`
     - `ArrangementFile.unknown_1`
     - `ArrangementFile.unknown_2`
+- More tests.
+- Even more tests.
+
+### `octatools`
+
+- Clean up CLI commands, sort out CLI options etc via CLAP.
+  - go the `docker container/volume/network` route
+    - `octatools project`
+    - `octatools sample`
+    - `octatools bank`
+    - `octatools arrangement`
+    - etc.
+- Refactor the copy_bank code -- it is a mess. 
+- Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
+- Make the code more idiomatic / 'clean' / optimised.
 - Cross-compilation / CI builds on Windows 10/11 and macOS.
 - Consolidation:
   - Audio files from a Project into a Set's Audio Pool.
@@ -126,21 +140,20 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
   - Audio files from all Project into a Set Audio Pools.
   - Audio files from all Set Audio Pools into Projects.
 - Minor sample editing for sample chains (normalisation, fades, reverses, etc).
-- PyO3 bindings for creating a python interface to `serde_octatrack`
 - Handle AIFF files (and switching between AIFF and WAV within the code -- probably needs an abstraction).
 - List all Sets, Projects, Samples. 
-- octatool specific clean up:
-  - Sane Logging messages
-  - Sane Error handling
-- Create Nx randomly slices in a long audio file.
+- Sane Logging messages
+- Sane Error handling
+- Work out some better chainer CLI command names.
+- Create Nx random slices in a long audio file.
 - Templates
   - Projects -- YAML project spec -> Octatrack project file
   - Parts -- load the same template onto all parts in all banks in a project 
 - Inspect RIFF header issues with `hound` on samples from mars files
+- CI release builds ($$$$)
+- Deal with over use of `.clone()` absolutely everywhere.
 - More tests.
 - Even more tests.
-- CI release builds
-- Deal with over use of `.clone()` absolutely everywhere.
 
 ### What this software is not
 - A clone of DigiChain
