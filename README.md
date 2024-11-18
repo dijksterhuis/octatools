@@ -96,20 +96,48 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 
 - Clean up CLI commands, sort out CLI options etc via CLAP.
 - Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
-- List all Sets, Projects, Sample Slots, Samples. 
-- Finish reverse engineering bank files (MIDI Track Pattern trigs, the massive block in Parameter Locks).
-- Cross-compilation / CI builds on Windows 10/11 and macOS.
-- Consolidate all audio files from Projects within a Set into a Set's Audio Pool.
-- Consolidate relevant audio files from a Set's Audio Pool to other Project(s).
-- Minor sample editing (normalisation, fades, reverses, etc).
-- PyO3 bindings for creating a python interface to `serde_octatrack`
 - Actually make the rust code idiomatic and 'clean' and optimised.
 - Ser/De to Enum/String/etc types instead of u8.
+- Finish reverse engineering files 
+  - Banks:
+    - Which parts in the Part array are the previous saved version?!!
+    - `MidiTrackParameterLocks.unknown` --> looks like space for sample locks, but no samples to lock.
+    - `AudioTrackTrigs.unknown_1`
+    - `AudioTrackTrigs.unknown_2`
+    - `AudioTrackTrigs.unknown_3` --> big 192 length block?!
+    - `MidiTrackTrigMasks.unknown` --> looks like trig mask, but no trig trypes remain?
+    - `MidiTrackTrigs.unknown_1`
+    - `MidiTrackTrigs.unknown_2` --> no idea what this is, some kind of mask?
+    - `MidiTrackTrigs.unknown_3` --> big 128 length block?!
+    - `Pattern.unknown`
+    - `MidiTrackParamsValues.unknown` --> space for sample select?
+  - Projects:
+    - `ProjectSettings.midi_soft_thru` --> what is this for? no menu option named like this.
+    - `MidiControlMidiPage.midi_midi_track_cc_in` -- no menu option for this?
+    - `ProjectStates.track_othermode` -- ??
+    - `ProjectStates.midi_mode` -- no idea.
+  - Arrangements:
+    - `ArrangementBlock.unknown_1`
+    - `ArrangementBlock.unknown_2`
+    - `ArrangementFile.unknown_1`
+    - `ArrangementFile.unknown_2`
+- Cross-compilation / CI builds on Windows 10/11 and macOS.
+- Consolidation:
+  - Audio files from a Project into a Set's Audio Pool.
+  - Audio files from a Set Audio Pool into a Project (only get what is needed).
+  - Audio files from all Project into a Set Audio Pools.
+  - Audio files from all Set Audio Pools into Projects.
+- Minor sample editing for sample chains (normalisation, fades, reverses, etc).
+- PyO3 bindings for creating a python interface to `serde_octatrack`
 - Handle AIFF files (and switching between AIFF and WAV within the code -- probably needs an abstraction).
-- Logging pass over.
-- Random slices for a long audio file.
-- Template project command: YAML project -> Octatrack project files
-- As above, but with Parts for a bank.
+- List all Sets, Projects, Samples. 
+- octatool specific clean up:
+  - Sane Logging messages
+  - Sane Error handling
+- Create Nx randomly slices in a long audio file.
+- Templates
+  - Projects -- YAML project spec -> Octatrack project file
+  - Parts -- load the same template onto all parts in all banks in a project 
 - Inspect RIFF header issues with `hound` on samples from mars files
 - More tests.
 - Even more tests.
