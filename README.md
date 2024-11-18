@@ -100,8 +100,7 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 - Ser/De to Enum/String/etc types instead of u8.
 - Finish reverse engineering files 
   - Banks:
-    - Which parts in the Part array are the previous saved version?!!
-    - `MidiTrackParameterLocks.unknown` --> looks like space for sample locks, but no samples to lock.
+    - `MidiTrackParameterLocks.unknown` --> space for sample locks? but no samples for MIDI.
     - `AudioTrackTrigs.unknown_1`
     - `AudioTrackTrigs.unknown_2`
     - `AudioTrackTrigs.unknown_3` --> big 192 length block?!
