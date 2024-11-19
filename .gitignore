@@ -7,3 +7,4 @@ infiles/
 outfiles/
 inchains/
 *.xml
+.qlty/
