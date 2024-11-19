@@ -30,11 +30,21 @@ octatools transfer banks <YAML_CONFIG_FILE_PATH>
 
 - Create 1x sliced Sample Chain via CLI
 ```bash
-octatools chains create-chain  <CHAIN_NAME> <OUT_DIR_PATH> [WAV_FILE_PATHS]...
+octatools chains create-chain <CHAIN_NAME> <OUT_DIR_PATH> [WAV_FILE_PATHS]...
 ```
 - Create Nx sliced Sample Chains via YAML
 ```bash
-octatools chains create-chains  <YAML_CONFIG_FILE_PATH>
+octatools chains create-chains <YAML_CONFIG_FILE_PATH>
+```
+
+- Create an linear slice grid for an exisitng wav file via CLI
+```bash
+octatools chains grid-linear <WAV_FILE_PATH> <OUT_OT_PATH> <N_SLICES>
+```
+
+- Create an random slice grid for an exisitng wav file via CLI
+```bash
+octatools chains grid-random <WAV_FILE_PATH> <OUT_OT_PATH> <N_SLICES>
 ```
 
 - Deconstruct 1x sliced Sample Chain into a WAV file per slice via the CLI
@@ -91,7 +101,7 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 ### TODOs / Other Ideas
 
 #### `serde_octatrack`
-- Ser/De to Enum/String/etc types instead of u8.
+- Ser/De to Enum/String/etc types instead of u8 -- possible with `serde_repr`, but don't know if it's desirable to do this ... adds a lot of complexity for now.
 - PyO3 bindings for creating a python interface to `serde_octatrack`
 - Finish reverse engineering files 
   - Banks:
@@ -145,7 +155,6 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 - Sane Logging messages
 - Sane Error handling
 - Work out some better chainer CLI command names.
-- Create Nx random slices in a long audio file.
 - Templates
   - Projects -- YAML project spec -> Octatrack project file
   - Parts -- load the same template onto all parts in all banks in a project 
