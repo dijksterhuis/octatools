@@ -133,6 +133,8 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 
 ### `octatools`
 
+- Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
+- Work out some better chainer CLI command names.
 - Clean up CLI commands, sort out CLI options etc via CLAP.
   - go the `docker container/volume/network` route
     - `octatools project`
@@ -141,24 +143,21 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
     - `octatools arrangement`
     - etc.
 - Refactor the copy_bank code -- it is a mess. 
-- Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
 - Make the code more idiomatic / 'clean' / optimised.
 - Cross-compilation / CI builds on Windows 10/11 and macOS.
+- Templates
+  - Projects -- YAML project spec -> Octatrack project file
+  - Parts -- load the same template onto all parts in all banks in a project 
 - Consolidation:
   - Audio files from a Project into a Set's Audio Pool.
   - Audio files from a Set Audio Pool into a Project (only get what is needed).
   - Audio files from all Project into a Set Audio Pools.
   - Audio files from all Set Audio Pools into Projects.
-- Minor sample editing for sample chains (normalisation, fades, reverses, etc).
 - Handle AIFF files (and switching between AIFF and WAV within the code -- probably needs an abstraction).
-- List all Sets, Projects, Samples. 
+- Inspect RIFF header issues with `hound` on samples from mars files
+- List all Sets, Projects, Samples, changed (non-default) banks, changed (non-default) parts, changed (non-default) patterns
 - Sane Logging messages
 - Sane Error handling
-- Work out some better chainer CLI command names.
-- Templates
-  - Projects -- YAML project spec -> Octatrack project file
-  - Parts -- load the same template onto all parts in all banks in a project 
-- Inspect RIFF header issues with `hound` on samples from mars files
 - CI release builds ($$$$)
 - Deal with over use of `.clone()` absolutely everywhere.
 - More tests.
