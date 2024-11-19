@@ -267,7 +267,6 @@ pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<
 /// Given a wavfile, create Nx random slices stored in a sample attributes file.
 pub fn create_randomly_sliced_sample(
     wav_fp: &PathBuf,
-    out_ot_path: &PathBuf,
     n_slices: usize,
 ) -> RBoxErr<()> {
     if n_slices > 64 {
@@ -334,11 +333,9 @@ pub fn create_randomly_sliced_sample(
     )
     .expect("Could not create sample attributes data for sample chain.");
 
-    let mut ot_outpath = out_ot_path.clone();
-    if ot_outpath.extension().unwrap().to_str().unwrap() != "ot" {
-        ot_outpath.set_extension("ot");
-    };
-
+    let mut ot_outpath = wav_fp.clone();
+    ot_outpath.set_extension("ot");
+    
     chain_data.to_pathbuf(&ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")
     });
@@ -349,7 +346,6 @@ pub fn create_randomly_sliced_sample(
 /// Given a wavfile, create Nx equal length slices stored in a sample attributes file.
 pub fn create_equally_sliced_sample(
     wav_fp: &PathBuf,
-    out_ot_path: &PathBuf,
     n_slices: usize,
 ) -> RBoxErr<()> {
     if n_slices > 64 {
@@ -414,10 +410,8 @@ pub fn create_equally_sliced_sample(
     )
     .expect("Could not create sample attributes data for sample chain.");
 
-    let mut ot_outpath = out_ot_path.clone();
-    if ot_outpath.extension().unwrap().to_str().unwrap() != "ot" {
-        ot_outpath.set_extension("ot");
-    };
+    let mut ot_outpath = wav_fp.clone();
+    ot_outpath.set_extension("ot");
 
     chain_data.to_pathbuf(&ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")

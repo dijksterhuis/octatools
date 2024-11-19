@@ -192,21 +192,19 @@ fn main() {
                 info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
                 let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
             }
-            cli::Chains::GridRandom {
+            cli::Chains::Random {
                 wav_file_path,
-                out_ot_path,
                 n_slices,
             } => {
                 // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = create_randomly_sliced_sample(&wav_file_path, &out_ot_path, n_slices);
+                let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
             }
             cli::Chains::GridLinear {
                 wav_file_path,
-                out_ot_path,
                 n_slices,
             } => {
                 // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = create_equally_sliced_sample(&wav_file_path, &out_ot_path, n_slices);
+                let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
             }
         },
         /* =========================================================================== */

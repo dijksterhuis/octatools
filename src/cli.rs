@@ -196,20 +196,20 @@ pub enum Chains {
         /// File path of the YAML file for batched samplechains construction.
         yaml_file_path: PathBuf,
     },
-    /// Create a single sample chain from the cli
-    GridRandom {
+    /// Create random slices for an audio file
+    Random {
+        /// Location of the audio file to generate a random slices for
         wav_file_path: PathBuf,
 
-        out_ot_path: PathBuf,
-
+        /// How many random slices to create
         n_slices: usize,
     },
     /// Create a single sample chain from the cli
     GridLinear {
+        /// Location of the audio file to generate a linear grid for
         wav_file_path: PathBuf,
 
-        out_ot_path: PathBuf,
-
+        /// How many slices to put in the slice grid
         n_slices: usize,
     },
 
