@@ -63,7 +63,7 @@ impl FromPathBuf for WavFile {
     /// Crete a new struct by reading a file located at `path`.
     fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
         trace!("Reading WAV file from path: {path:#?}");
-        let mut reader = WavFile::open(&path).unwrap();
+        let mut reader = WavFile::open(path).unwrap();
 
         trace!("Reading WAV Spec: path={path:#?}");
         let spec = WavFile::read_spec(&mut reader).unwrap();
@@ -87,7 +87,7 @@ impl ToPathBuf for WavFile {
     /// Crete a new file at the path from the current struct
     fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
         trace!("Writing WAV data to file: path={path:#?}");
-        let mut writer = hound::WavWriter::create(&path, self.spec)?;
+        let mut writer = hound::WavWriter::create(path, self.spec)?;
 
         let samples_i32: Vec<i32> = self
             .samples
@@ -100,7 +100,7 @@ impl ToPathBuf for WavFile {
 
         trace!("Writing WAV samples: path={path:#?}");
         for sample in samples_i32 {
-            let _res = writer.write_sample(sample)?;
+            writer.write_sample(sample)?;
         }
 
         debug!("Wrote new WAV file: path={path:#?}");

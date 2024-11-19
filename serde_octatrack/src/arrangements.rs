@@ -126,7 +126,7 @@ impl<'de> Visitor<'de> for ObjVisitor {
             v.push(n);
         }
 
-        let data = match v[0] {
+        match v[0] {
             0 => {
                 let midi_transpose: [u8; 8] = from_fn(|x| v[x + 14]);
                 let x = ArrangeRow::PatternRow {
@@ -175,8 +175,7 @@ impl<'de> Visitor<'de> for ObjVisitor {
                 };
                 Ok(x)
             }
-        };
-        data
+        }
     }
 
     // fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>

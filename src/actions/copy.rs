@@ -57,7 +57,7 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
     let _ = projects.dest.project.to_pathbuf(&projects.dest.path);
 
     info!("Backing up destination bank to /tmp/ ...");
-    let _ = std::fs::copy(&dest_bank_file_path, PathBuf::from("/tmp/bank.bak"))
+    let _ = std::fs::copy(dest_bank_file_path, PathBuf::from("/tmp/bank.bak"))
         .expect("Could not back up destination bank file.");
 
     info!("Backing up destination project to /tmp/ ...");
@@ -164,7 +164,7 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
             .iter()
             .find(|x| x.slot_id == new_slot_id as u16);
 
-        if !src_project_slot.is_none() {
+        if src_project_slot.is_some() {
             let mut s: ProjectSampleSlot = src_project_slot
                 .expect("Empty sample slots in source project.")
                 .clone();
@@ -186,14 +186,14 @@ pub fn copy_bank(source_bank_file_path: &PathBuf, dest_bank_file_path: &PathBuf)
 
     info!("Writing sample slots to destination project ...");
     projects.dest.project.slots = dest_sample_slots;
-    let _ = projects
+    projects
         .dest
         .project
         .to_pathbuf(&projects.dest.path)
         .expect("Could not write project to file");
 
     info!("Writing new bank within project ...");
-    let _ = banks
+    banks
         .dest
         .to_pathbuf(dest_bank_file_path)
         .expect("Could not write bank to file");

@@ -73,7 +73,7 @@ fn parse_hashmap_string_value_bool(
     default_str: Option<&str>,
 ) -> Result<bool, Box<dyn std::error::Error>> {
     Ok(
-        match parse_hashmap_string_value::<u8>(&hmap, &key, default_str)? {
+        match parse_hashmap_string_value::<u8>(hmap, key, default_str)? {
             1 => true,
             _ => false,
         },
@@ -114,10 +114,10 @@ impl OptionEnumValueConvert for ProjectRawFileSection {
 }
 
 impl ProjectRawFileSection {
-    fn start_string(self: &Self) -> String {
+    fn start_string(&self) -> String {
         format!("[{}]", self.value().unwrap())
     }
-    fn end_string(self: &Self) -> String {
+    fn end_string(&self) -> String {
         format!("[/{}]", self.value().unwrap())
     }
 }
@@ -140,9 +140,9 @@ fn string_to_hashmap(
     for split_s in section.split("\r\n") {
         // new line splits returns empty fields :/
 
-        if split_s != "" {
+        if !split_s.is_empty() {
             let key_pair_string = split_s.to_string();
-            let mut key_pair_split: Vec<&str> = key_pair_string.split("=").into_iter().collect();
+            let mut key_pair_split: Vec<&str> = key_pair_string.split('=').collect();
 
             // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
             // but the keys do not have track number indicators. i assume they're
@@ -166,8 +166,8 @@ fn string_to_hashmap(
 
 fn sslots_vec_to_string(v: &Vec<ProjectSampleSlot>) -> String {
     let sslots_mapped: Vec<String> = v.iter().map(|x| x.to_string().unwrap()).collect();
-    let sslots_string = sslots_mapped.join("\r\n\r\n");
-    sslots_string
+
+    sslots_mapped.join("\r\n\r\n")
 }
 
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
@@ -203,7 +203,7 @@ impl Project {
             .find_position(|x| x.slot_id == *old_slot_id as u16 && x.sample_type == type_filt);
 
         // there are samples assigned to slots
-        if !sample_slot_find.is_none() {
+        if sample_slot_find.is_some() {
             println!("Found matchin slot id");
             let mut sample_slot = sample_slot_find.clone().unwrap().1;
             sample_slot.slot_id = *new_slot_id as u16;

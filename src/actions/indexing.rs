@@ -18,7 +18,7 @@ pub fn create_index_compact_flash_drive_yaml(
 ) -> RBoxErr<()> {
     debug!("Indexing CF card: path={cfcard_dir_path:#?}");
     let cf = CompactFlashDrive::from_pathbuf(cfcard_dir_path)
-        .expect(format!("Failed to create CF card index: path={cfcard_dir_path:#?}").as_str());
+        .unwrap_or_else(|_| panic!("Failed to create CF card index: path={cfcard_dir_path:#?}"));
 
     // todo: as_ref usage? seems to be due to using an option in CLI definitions
     if !yaml_file_path.is_none() {
@@ -37,8 +37,9 @@ pub fn create_index_samples_dir_simple(
     yaml_file_path: &Option<PathBuf>,
 ) -> RBoxErr<()> {
     debug!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
-    let sample_index = SamplesDirIndexSimple::new(samples_dir_path)
-        .expect(format!("Failed to create SamplesDir index: path={samples_dir_path:#?}").as_str());
+    let sample_index = SamplesDirIndexSimple::new(samples_dir_path).unwrap_or_else(|_| {
+        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
+    });
 
     // TODO: clone
     if !yaml_file_path.is_none() {
@@ -57,8 +58,9 @@ pub fn create_index_samples_dir_full(
     samples_dir_path: &PathBuf,
     yaml_file_path: &Option<PathBuf>,
 ) -> RBoxErr<()> {
-    let sample_index = SamplesDirIndexFull::new(samples_dir_path)
-        .expect(format!("Failed to create SamplesDir index: path={samples_dir_path:#?}").as_str());
+    let sample_index = SamplesDirIndexFull::new(samples_dir_path).unwrap_or_else(|_| {
+        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
+    });
 
     // TODO: clone
     if !yaml_file_path.is_none() {

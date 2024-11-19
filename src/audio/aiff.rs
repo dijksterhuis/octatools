@@ -76,7 +76,7 @@ impl AiffFile {
         let samples = AiffFile::read_samples(&mut reader)?;
 
         trace!("Getting AIFF sample length: path={path:#?}");
-        let length = info.sample_len.clone().unwrap() as u32;
+        let length = info.sample_len.unwrap() as u32;
 
         debug!("Read AIFF file: path={path:#?}");
         Ok(AiffFile {

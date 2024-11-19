@@ -12,7 +12,7 @@ fn direntry_is_dir(entry: &DirEntry) -> bool {
 }
 
 fn direntry_is_not_posix_hidden(entry: &DirEntry) -> bool {
-    !entry.file_name().to_string_lossy().starts_with(".")
+    !entry.file_name().to_string_lossy().starts_with('.')
 }
 
 fn direntry_has_file_extension(entry: &DirEntry, v: &str) -> bool {
@@ -42,7 +42,7 @@ fn direntry_is_compat_aiff(entry: &DirEntry) -> bool {
 /// A filter for walkdir rescursive search: only files that have the 'wav' file extension
 fn file_path_is_compat_wav(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening WAV file: path={path:#?}");
-    let mut reader = WavFile::open(&path)?;
+    let mut reader = WavFile::open(path)?;
 
     trace!("Opening WAV spec: path={path:#?}");
     let spec = WavFile::read_spec(&mut reader)?;
@@ -50,7 +50,7 @@ fn file_path_is_compat_wav(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Creating serde_octatrack AudioSpec: path={path:#?}");
     let audio_spec = serde_octatrack::constants::AudioSpec {
         channels: spec.channels as u8,
-        sample_rate: spec.sample_rate as u32,
+        sample_rate: spec.sample_rate,
         bit_depth: spec.bits_per_sample as u8,
     };
 
@@ -61,7 +61,7 @@ fn file_path_is_compat_wav(path: &PathBuf) -> RBoxErr<bool> {
 /// A filter for walkdir rescursive search: only files that have the 'aiff' file extension
 fn file_path_is_compat_aiff(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening AIFF file: path={path:#?}");
-    let mut reader = AiffFile::open(&path)?;
+    let mut reader = AiffFile::open(path)?;
 
     trace!("Opening AIFF spec: path={path:#?}");
     let spec = AiffFile::read_spec(&mut reader)?;
@@ -94,8 +94,8 @@ pub fn scan_dir_path_for_audio_files(dir_path: &PathBuf) -> RBoxErr<Vec<PathBuf>
                 // need to ensure we recurse through dirs in the tree
                 // need to filter them out below (only want audio files)
                 direntry_is_dir(e)
-                    || { direntry_has_file_extension(&e, "wav") && direntry_is_compat_wav(&e) }
-                    || { direntry_has_file_extension(&e, "aiff") && direntry_is_compat_aiff(&e) }
+                    || { direntry_has_file_extension(e, "wav") && direntry_is_compat_wav(e) }
+                    || { direntry_has_file_extension(e, "aiff") && direntry_is_compat_aiff(e) }
             }
         })
         .map(|x| x.unwrap())

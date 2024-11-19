@@ -20,7 +20,7 @@ use crate::audio::utils::scan_dir_path_for_audio_files;
 pub trait SearchForOctatrackSampleFilePair {
     /// Recursively search through a directory tree for audio 'samples' (`.wav` files).
     fn scan_dir_path_for_samples(dir_path: &PathBuf) -> RBoxErr<Vec<SampleFilePair>> {
-        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(&dir_path)?;
+        let wav_file_paths: Vec<PathBuf> = scan_dir_path_for_audio_files(dir_path)?;
 
         let ot_sample_files: Vec<SampleFilePair> = wav_file_paths
             .into_iter()
@@ -78,7 +78,7 @@ impl OctatrackSetProject {
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
             dirpath: dirpath.clone(),
-            sample_filepaths: Self::scan_dir_path_for_samples(&dirpath).unwrap(),
+            sample_filepaths: Self::scan_dir_path_for_samples(dirpath).unwrap(),
             project_work: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
             banks,
         })
@@ -111,7 +111,7 @@ impl OctatrackSetAudioPool {
         Ok(Self {
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.clone(),
-            samples: Self::scan_dir_path_for_samples(&path).unwrap(),
+            samples: Self::scan_dir_path_for_samples(path).unwrap(),
         })
     }
 }
@@ -145,14 +145,14 @@ impl OctatrackSet {
             .min_depth(1)
             .into_iter()
             .filter_entry(|e: &DirEntry| {
-                e.file_type().is_dir() && !e.file_name().to_str().unwrap_or(".").starts_with(".")
+                e.file_type().is_dir() && !e.file_name().to_str().unwrap_or(".").starts_with('.')
             })
             .map(|e: Result<DirEntry, walkdir::Error>| {
                 let unwrapped = e.unwrap();
                 let ot_set_path = unwrapped.path().to_path_buf();
                 let ot_set = Self::from_pathbuf(&ot_set_path);
-                let unwrapped_set = ot_set.unwrap();
-                unwrapped_set
+
+                ot_set.unwrap()
             })
             .filter(|o: &Option<Self>| !o.is_none())
             .map(|o: Option<Self>| o.unwrap())

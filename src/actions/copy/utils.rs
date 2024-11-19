@@ -35,7 +35,7 @@ impl TransferProjectMeta {
 
     /// Create a `ProjectMetaStore` for easier references to project data when copying banks.
     fn from_pathbuf(fpath: &PathBuf) -> RBoxErr<Self> {
-        let dirpath = Self::get_project_dirpath_from_bank_fpath(&fpath)?;
+        let dirpath = Self::get_project_dirpath_from_bank_fpath(fpath)?;
         let path = dirpath.join("project.work");
         let project = Project::from_pathbuf(&path).unwrap();
 
@@ -116,7 +116,7 @@ fn project_sample_slot_is_populated(
         .iter()
         .find(|x| x.slot_id == *slot_id && x.sample_type == *sample_type);
 
-    Ok(!static_exists_in_project_slots.is_none())
+    Ok(static_exists_in_project_slots.is_some())
 }
 
 /// Find sample slot locations from a `Project` which are being used in a `Bank`
@@ -131,33 +131,31 @@ pub fn get_active_sslot_ids(
     for (pattern_idx, pattern) in bank.patterns.iter().enumerate() {
         for (track_idx, audio_track_trigs) in pattern.audio_track_trigs.iter().enumerate() {
             for (plock_idx, plock) in audio_track_trigs.plocks.iter().enumerate() {
-                if plock.sample_lock_static < 128 {
-                    if project_sample_slot_is_populated(
+                if plock.sample_lock_static < 128
+                    && project_sample_slot_is_populated(
                         project_slots,
                         &(plock.sample_lock_static as u16),
                         &ProjectSampleSlotType::Static,
-                    )? {
-                        let x = ActiveSampleSlot {
-                            slot_id: plock.sample_lock_static,
-                            sample_type: ProjectSampleSlotType::Static,
-                        };
-                        info!("Found active Static sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_static);
-                        active_slots.insert(x);
-                    }
+                    )?
+                {
+                    let x = ActiveSampleSlot {
+                        slot_id: plock.sample_lock_static,
+                        sample_type: ProjectSampleSlotType::Static,
+                    };
+                    info!("Found active Static sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_static);
+                    active_slots.insert(x);
                 }
-                if plock.sample_lock_flex < 128 {
-                    if project_sample_slot_is_populated(
+                if plock.sample_lock_flex < 128 && project_sample_slot_is_populated(
                         project_slots,
                         &(plock.sample_lock_flex as u16),
                         &ProjectSampleSlotType::Flex,
                     )? {
-                        let x = ActiveSampleSlot {
-                            slot_id: plock.sample_lock_flex,
-                            sample_type: ProjectSampleSlotType::Flex,
-                        };
-                        info!("Found active Flex sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_flex);
-                        active_slots.insert(x);
-                    }
+                    let x = ActiveSampleSlot {
+                        slot_id: plock.sample_lock_flex,
+                        sample_type: ProjectSampleSlotType::Flex,
+                    };
+                    info!("Found active Flex sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_flex);
+                    active_slots.insert(x);
                 }
             }
         }
@@ -309,7 +307,7 @@ fn get_abs_paths_for_sslot_audio_file(
     trace!("Getting absolute file paths for sample slot audio file.");
     let true_src_path = src_proj_dirpath.join(&slot.path);
 
-    let fname = get_sslot_audio_file_fname(&slot)?;
+    let fname = get_sslot_audio_file_fname(slot)?;
     let true_dest_path = dest_proj_dirpath
         .parent()
         .unwrap()
@@ -322,7 +320,7 @@ fn get_abs_paths_for_sslot_audio_file(
 /// Create a new relative path for an audio file in an audio pool.
 /// From a project saple slot the audio pool path is always: "../AUDIO/fname.ext"
 pub fn get_relative_audio_pool_path_audio_file(slot: &ProjectSampleSlot) -> RBoxErr<PathBuf> {
-    let fname = get_sslot_audio_file_fname(&slot).unwrap();
+    let fname = get_sslot_audio_file_fname(slot).unwrap();
     let relative_path = PathBuf::from("../AUDIO").join(fname);
 
     Ok(relative_path)
@@ -356,10 +354,10 @@ pub fn copy_sslot_sample_files(
     debug!("Copying audio file for sample slot ...");
 
     let (src_path, dest_path) =
-        get_abs_paths_for_sslot_audio_file(&projects.src.dirpath, &projects.dest.dirpath, &slot)?;
+        get_abs_paths_for_sslot_audio_file(&projects.src.dirpath, &projects.dest.dirpath, slot)?;
 
     let _ = copy_file(&src_path, &dest_path)?;
-    let _ = maybe_copy_ot_attr_file(&src_path, &dest_path)?;
+    maybe_copy_ot_attr_file(&src_path, &dest_path)?;
 
     Ok(())
 }

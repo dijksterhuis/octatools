@@ -34,7 +34,7 @@ use actions::{
 use cli::{Cli, Commands};
 
 #[doc(hidden)]
-fn main() -> () {
+fn main() {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);
     logger.target(Target::Stdout).init();

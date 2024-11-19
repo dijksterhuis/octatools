@@ -13,24 +13,24 @@ use serde_octatrack::{
 
 /// Show deserialised representation of a Bank state
 pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_pathbuf(&path).expect("Could not load bank file");
+    let b = Bank::from_pathbuf(path).expect("Could not load bank file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of Pattern state
 pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
-    if indexes.len() == 0 {
+    if indexes.is_empty() {
         panic!("No Pattern numbers specified!");
     };
     if *indexes.iter().max().unwrap() > 16 || *indexes.iter().min().unwrap() < 1 {
         panic!("Invalid Pattern numbers specified! Only 1-16 are allowed.");
     }
 
-    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(path).expect("Could not load bank file");
 
     for index in indexes {
-        if index < 1 || index > 16 {
+        if !(1..=16).contains(&index) {
             panic!("Octatrack Patterns are indexed from 1 to 16");
         }
         let x = &b.patterns[index - 1];
@@ -42,17 +42,17 @@ pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
 
 /// Show deserialised representation of Part unsaved state
 pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
-    if indexes.len() == 0 {
+    if indexes.is_empty() {
         panic!("No Part numbers specified!");
     };
     if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
         panic!("Invalid Part numbers specified! Only 1-4 are allowed.");
     }
 
-    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(path).expect("Could not load bank file");
 
     for index in indexes {
-        if index < 1 || index > 4 {
+        if !(1..=4).contains(&index) {
             panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
         }
         let x = &b.parts_saved[index - 1];
@@ -63,17 +63,17 @@ pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
 
 /// Show deserialised representation of Part's saved state
 pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
-    if indexes.len() == 0 {
+    if indexes.is_empty() {
         panic!("No Part numbers specified!");
     };
     if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
         panic!("Invalid Part numbers specified! Only 1, 2, 3, 4 are allowed");
     }
 
-    let b = &Bank::from_pathbuf(&path).expect("Could not load bank file");
+    let b = &Bank::from_pathbuf(path).expect("Could not load bank file");
 
     for index in indexes {
-        if index < 1 || index > 4 {
+        if !(1..=4).contains(&index) {
             panic!("Octatrack Parts are indexed from 1 to 4: partNumber={index:#?}");
         }
         let x = &b.parts_saved[index - 1];
@@ -85,21 +85,21 @@ pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
 
 /// Show deserialised representation of a Project for a given project file at `path`
 pub fn show_project(path: &PathBuf) -> RBoxErr<()> {
-    let b = Project::from_pathbuf(&path).expect("Could not load project file");
+    let b = Project::from_pathbuf(path).expect("Could not load project file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of a Sample Attributes file at `path`
 pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
-    let b = SampleAttributes::from_pathbuf(&path).expect("Could not load ot file");
+    let b = SampleAttributes::from_pathbuf(path).expect("Could not load ot file");
     println!("{b:#?}");
     Ok(())
 }
 
 /// Show deserialised representation of an Arrangement for a given arrangement file at `path`
 pub fn show_arrangement(path: &PathBuf) -> RBoxErr<()> {
-    let b = ArrangementFile::from_pathbuf(&path).expect("Could not load arrangement file");
+    let b = ArrangementFile::from_pathbuf(path).expect("Could not load arrangement file");
     println!("{b:#?}");
     Ok(())
 }
@@ -125,7 +125,7 @@ pub fn show_arrangement_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        ArrangementFileRawBytes::from_pathbuf(&path)
+        ArrangementFileRawBytes::from_pathbuf(path)
             .expect("Could not load arrangement file")
             .data
             .to_vec(),
@@ -143,7 +143,7 @@ pub fn show_bank_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        BankRawBytes::from_pathbuf(&path)
+        BankRawBytes::from_pathbuf(path)
             .expect("Could not load bank file")
             .data
             .to_vec(),
@@ -161,7 +161,7 @@ pub fn show_ot_file_bytes(
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let bytes = get_bytes_slice(
-        SampleAttributesRawBytes::from_pathbuf(&path)
+        SampleAttributesRawBytes::from_pathbuf(path)
             .expect("Could not load ot file")
             .data
             .to_vec(),

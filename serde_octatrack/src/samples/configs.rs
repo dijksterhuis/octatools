@@ -52,12 +52,12 @@ impl SampleLoopConfig {
     }
 
     pub fn from_decoded(decoded: &SampleAttributes) -> RBoxErr<Self> {
-        Ok(Self::new(
+        Self::new(
             decoded.loop_start,
             decoded.loop_len,
             SampleAttributeLoopMode::from_value(&decoded.loop_mode)
                 .unwrap_or(SampleAttributeLoopMode::Off),
-        )?)
+        )
     }
 }
 

@@ -209,7 +209,7 @@ impl SampleAttributes {
             trim_len: trim_config.length,
             loop_start: loop_config.start,
             loop_len: loop_config.length,
-            loop_mode: loop_config.mode.value()? as u32,
+            loop_mode: loop_config.mode.value()?,
             slices: slices.slices,
             slices_len: slices.count,
             checksum: 0,
@@ -289,11 +289,11 @@ impl SampleAttributes {
 
         // tempo is multiplied by 24 when written to encoded file
         // reference: Octainer
-        bswapd.tempo = bswapd.tempo / 24;
+        bswapd.tempo /= 24;
 
         // gan is normalised to the -24 <= x <= 24 range when written to encoded file
         // reference: Octainer
-        bswapd.gain = bswapd.gain - 48;
+        bswapd.gain -= 48;
 
         // trim length is multiplied by 100 when written to encoded file
         // reference: Octainer

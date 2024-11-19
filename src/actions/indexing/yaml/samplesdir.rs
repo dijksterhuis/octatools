@@ -40,7 +40,7 @@ fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> Result<String, ()> {
 fn get_md5_hash_from_pathbuf(pathbuf: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
     debug!("Getting md5 hash: file={pathbuf:#?}");
 
-    let mut f: File = File::open(&pathbuf)?;
+    let mut f: File = File::open(pathbuf)?;
     let mut buf: Vec<u8> = vec![];
     let _: usize = f.read_to_end(&mut buf)?;
     let md5_hash: Digest = md5::compute(buf);

@@ -63,7 +63,7 @@ impl ProjectFromString for ProjectMetadata {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
 
     fn from_string(data: &String) -> Result<Self, Box<dyn std::error::Error>> {
-        let hmap: HashMap<String, String> = string_to_hashmap(&data, &ProjectRawFileSection::Meta)?;
+        let hmap: HashMap<String, String> = string_to_hashmap(data, &ProjectRawFileSection::Meta)?;
 
         Ok(Self {
             filetype: parse_hashmap_string_value::<String>(&hmap, "type", None)?,

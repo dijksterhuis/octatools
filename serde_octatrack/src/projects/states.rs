@@ -35,7 +35,7 @@ MIDI_MODE=0
 /// Project state from a parsed Octatrack `project.*` file.
 /// This is the current 'UX focus' state, i.e. what parts, patterns, tracks are currently selected etc.
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Default)]
 pub struct ProjectStates {
     /// Current active bank
     pub bank: u8,
@@ -83,34 +83,12 @@ pub struct ProjectStates {
     pub midi_mode: u8,
 }
 
-impl Default for ProjectStates {
-    fn default() -> Self {
-        Self {
-            bank: 0,
-            pattern: 0,
-            arrangement: 0,
-            arrangement_mode: 0,
-            part: 0,
-            track: 0,
-            track_othermode: 0,
-            scene_a_mute: false,
-            scene_b_mute: false,
-            track_cue_mask: 0,
-            track_mute_mask: 0,
-            track_solo_mask: 0,
-            midi_track_mute_mask: 0,
-            midi_track_solo_mask: 0,
-            midi_mode: 0,
-        }
-    }
-}
-
 impl ProjectFromString for ProjectStates {
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
     fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
-        let hmap = string_to_hashmap(&s, &ProjectRawFileSection::States)?;
+        let hmap = string_to_hashmap(s, &ProjectRawFileSection::States)?;
 
         Ok(Self {
             bank: parse_hashmap_string_value::<u8>(&hmap, "bank", None)?,

@@ -29,12 +29,12 @@ pub trait ToYamlFile
 where
     Self: Serialize,
 {
-    fn to_yaml(self: &Self, yaml_file_path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    fn to_yaml(&self, yaml_file_path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Writing data to YAML file: {:#?}", yaml_file_path);
 
         debug!("Opened file: {:#?}", yaml_file_path);
 
-        let written = serde_yml::to_writer(
+        serde_yml::to_writer(
             std::fs::File::options()
                 .read(true)
                 .write(true)
@@ -46,7 +46,7 @@ where
         debug!("Write file: {:#?}", yaml_file_path);
 
         info!("Wrote data to YAML file: {:#?}", yaml_file_path);
-        Ok(written)
+        Ok(())
     }
 }
 

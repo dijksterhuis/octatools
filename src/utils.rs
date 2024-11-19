@@ -14,10 +14,13 @@ use std::path::PathBuf;
 
 /// Create a `Slice` object for an unchained wavfile.
 /// The starting `offset` position should be the sample index within the eventual chained wavfile.
-pub fn create_slice_from_wavfile(wavfile: &WavFile, offset: u32) -> Result<Slice, Box<dyn Error>> {
+pub fn create_slice_from_wavfile(
+    wavfile: &WavFile,
+    trim_start: u32,
+) -> Result<Slice, Box<dyn Error>> {
     Ok(Slice {
-        trim_start: 0 + offset,
-        trim_end: offset + wavfile.len,
+        trim_start,
+        trim_end: trim_start + wavfile.len,
         loop_start: 0xFFFFFFFF,
     })
 }
@@ -27,12 +30,12 @@ pub fn get_vec_from_wavfiles(
     wavfiles: &Vec<WavFile>,
     initial_offset: &u32,
 ) -> Result<Vec<Slice>, Box<dyn Error>> {
-    let mut off = initial_offset.clone();
+    let mut off = *initial_offset;
     let mut slices: Vec<Slice> = Vec::new();
 
     for w in wavfiles.iter() {
         slices.push(create_slice_from_wavfile(w, off).unwrap());
-        off += w.len as u32;
+        off += w.len;
     }
 
     Ok(slices)
@@ -43,7 +46,7 @@ pub fn create_slices_from_wavfiles(
     wavfiles: &Vec<WavFile>,
     offset: u32,
 ) -> Result<Slices, Box<dyn Error>> {
-    let new_slices: _ = get_vec_from_wavfiles(&wavfiles, &offset).unwrap();
+    let new_slices: _ = get_vec_from_wavfiles(wavfiles, &offset).unwrap();
 
     let default_slice = Slice {
         trim_end: 0,
@@ -53,7 +56,7 @@ pub fn create_slices_from_wavfiles(
 
     let mut slices_arr: [Slice; 64] = [default_slice; 64];
     for (i, slice_vec) in new_slices.iter().enumerate() {
-        slices_arr[i] = slice_vec.clone();
+        slices_arr[i] = *slice_vec;
     }
 
     Ok(Slices {
@@ -79,7 +82,7 @@ pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxEr
 /// Assumes four beats per bar.
 
 pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -> RBoxErr<u32> {
-    let total_samples: u32 = wavs.iter().map(|x| x.len as u32).sum();
+    let total_samples: u32 = wavs.iter().map(|x| x.len).sum();
     let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
     let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
     bars -= bars % 0.25;

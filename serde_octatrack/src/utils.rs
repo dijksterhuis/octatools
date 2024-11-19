@@ -9,7 +9,7 @@ fn pathbuf_to_fname(path: &PathBuf) -> RBoxErr<String> {
     let name = path
         .clone()
         .file_name()
-        .unwrap_or(&OsStr::new("err"))
+        .unwrap_or(OsStr::new("err"))
         .to_str()
         .unwrap_or("err")
         .to_string();

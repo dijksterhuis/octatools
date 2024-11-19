@@ -218,7 +218,7 @@ impl ProjectFromString for ProjectSettings {
 
     /// Load project 'state' data from the raw project ASCII file.
     fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
-        let hmap = string_to_hashmap(&s, &ProjectRawFileSection::Settings)?;
+        let hmap = string_to_hashmap(s, &ProjectRawFileSection::Settings)?;
 
         Ok(Self {
             write_protected: parse_hashmap_string_value_bool(&hmap, "writeprotected", None)?,
@@ -374,10 +374,9 @@ impl ProjectToString for ProjectSettings {
         );
         s.push_str("\r\n");
         s.push_str(
-            format!(
-                "MIDI_AUDIO_TRK_NOTE_IN={}",
-                self.control.midi.control.midi_audio_track_note_in as u8
-            )
+            format!("MIDI_AUDIO_TRK_NOTE_IN={}", {
+                self.control.midi.control.midi_audio_track_note_in
+            })
             .as_str(),
         );
         s.push_str("\r\n");

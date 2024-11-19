@@ -44,13 +44,13 @@ impl FromHashMap for ControlMenu {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            audio: AudioControlPage::from_hashmap(&hmap)?,
-            input: InputControlPage::from_hashmap(&hmap)?,
-            sequencer: SequencerControlPage::from_hashmap(&hmap)?,
+            audio: AudioControlPage::from_hashmap(hmap)?,
+            input: InputControlPage::from_hashmap(hmap)?,
+            sequencer: SequencerControlPage::from_hashmap(hmap)?,
             midi_sequencer: MidiSequencerControlPage {},
-            memory: MemoryControlPage::from_hashmap(&hmap)?,
-            metronome: MetronomeControlPage::from_hashmap(&hmap)?,
-            midi: MidiSubMenu::from_hashmap(&hmap)?,
+            memory: MemoryControlPage::from_hashmap(hmap)?,
+            metronome: MetronomeControlPage::from_hashmap(hmap)?,
+            midi: MidiSubMenu::from_hashmap(hmap)?,
         })
     }
 }
@@ -74,9 +74,9 @@ impl FromHashMap for MidiSubMenu {
 
     fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
-            control: MidiControlMidiPage::from_hashmap(&hmap)?,
-            sync: MidiSyncMidiPage::from_hashmap(&hmap)?,
-            channels: MidiChannelsMidiPage::from_hashmap(&hmap)?,
+            control: MidiControlMidiPage::from_hashmap(hmap)?,
+            sync: MidiSyncMidiPage::from_hashmap(hmap)?,
+            channels: MidiChannelsMidiPage::from_hashmap(hmap)?,
         })
     }
 }

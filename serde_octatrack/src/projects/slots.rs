@@ -193,12 +193,12 @@ fn parse_trim_bars(hmap: &HashMap<String, String>) -> RBoxErr<f32> {
 
 fn parse_loop_mode(hmap: &HashMap<String, String>) -> RBoxErr<SampleAttributeLoopMode> {
     let x = parse_hashmap_string_value::<u32>(hmap, "loopmode", Some("0")).unwrap_or(0_u32);
-    Ok(SampleAttributeLoopMode::from_value(&x)?)
+    SampleAttributeLoopMode::from_value(&x)
 }
 
 fn parse_tstrech_mode(hmap: &HashMap<String, String>) -> RBoxErr<SampleAttributeTimestrechMode> {
     let x = parse_hashmap_string_value::<u32>(hmap, "tsmode", Some("0")).unwrap_or(0_u32);
-    Ok(SampleAttributeTimestrechMode::from_value(&x)?)
+    SampleAttributeTimestrechMode::from_value(&x)
 }
 
 fn parse_trig_quantize_mode(
@@ -207,7 +207,7 @@ fn parse_trig_quantize_mode(
     let x_i16 =
         parse_hashmap_string_value::<i16>(hmap, "trigquantization", Some("255")).unwrap_or(255_i16);
     let x_u32 = u32::try_from(x_i16).unwrap_or(255_u32);
-    Ok(SampleAttributeTrigQuantizationMode::from_value(&x_u32)?)
+    SampleAttributeTrigQuantizationMode::from_value(&x_u32)
 }
 
 fn parse_gain(hmap: &HashMap<String, String>) -> RBoxErr<i8> {
@@ -227,7 +227,7 @@ impl FromHashMap for ProjectSampleSlot {
     type T = ProjectSampleSlot;
 
     fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> RBoxErr<Self::T> {
-        let slot_id = parse_id(&hmap)?;
+        let slot_id = parse_id(hmap)?;
 
         // recorder buffers are the only slots with IDs > 128
         // TODO: Make this part of the ProjectSampleSlotType from_value method?
@@ -275,10 +275,9 @@ impl ProjectFromString for ProjectSampleSlot {
 
         let data_window: Vec<&str> = footer_stripped
             .split("############################\r\n# Samples\r\n############################")
-            .into_iter()
             .collect();
 
-        let mut samples_string: Vec<&str> = data_window[1].split("[/SAMPLE]").into_iter().collect();
+        let mut samples_string: Vec<&str> = data_window[1].split("[/SAMPLE]").collect();
 
         // last one is always a blank string.
         samples_string.pop();
@@ -292,8 +291,7 @@ impl ProjectFromString for ProjectSampleSlot {
                     .strip_suffix("\r\n")
                     .unwrap()
                     .split("\r\n")
-                    .into_iter()
-                    .map(|x: &str| x.split("=").into_iter().collect_vec())
+                    .map(|x: &str| x.split('=').collect_vec())
                     .filter(|x: &Vec<&str>| x.len() == 2)
                     .collect_vec()
             })
@@ -336,7 +334,7 @@ impl ProjectToString for ProjectSampleSlot {
         s.push_str("\r\n");
         s.push_str(format!("SLOT={}", self.slot_id).as_str());
         s.push_str("\r\n");
-        s.push_str(format!("PATH={:#?}", self.path).replace("\"", "").as_str());
+        s.push_str(format!("PATH={:#?}", self.path).replace('"', "").as_str());
         s.push_str("\r\n");
         s.push_str(format!("TRIM_BARSx100={}", (self.trim_bars * 100.0) as u16).as_str());
         s.push_str("\r\n");
@@ -361,221 +359,219 @@ impl ProjectToString for ProjectSampleSlot {
 
 mod test {
 
-    use super::*;
-
     #[test]
     fn test_parse_id_correct() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("slot".to_string(), "1".to_string());
 
-        let slot_id = parse_id(&hmap);
+        let slot_id = crate::projects::slots::parse_id(&hmap);
 
         assert_eq!(1, slot_id.unwrap());
     }
 
     #[test]
     fn test_parse_id_err_bad_value_type_err() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("slot".to_string(), "AAAA".to_string());
-        let slot_id = parse_id(&hmap);
+        let slot_id = crate::projects::slots::parse_id(&hmap);
         assert!(slot_id.is_err());
     }
 
     #[test]
     fn test_parse_tempo_correct_default() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("bpm".to_string(), "2880".to_string());
-        let r = parse_tempo(&hmap);
+        let r = crate::projects::slots::parse_tempo(&hmap);
         assert_eq!(120_u16, r.unwrap());
     }
 
     #[test]
     fn test_parse_tempo_correct_min() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("bpm".to_string(), "720".to_string());
-        let r = parse_tempo(&hmap);
+        let r = crate::projects::slots::parse_tempo(&hmap);
         assert_eq!(30_u16, r.unwrap());
     }
 
     #[test]
     fn test_parse_tempo_correct_max() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("bpm".to_string(), "7200".to_string());
-        let r = parse_tempo(&hmap);
+        let r = crate::projects::slots::parse_tempo(&hmap);
         assert_eq!(300_u16, r.unwrap());
     }
 
     #[test]
     fn test_parse_tempo_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("bpm".to_string(), "AAAFSFSFSSFfssafAA".to_string());
-        let r = parse_tempo(&hmap);
+        let r = crate::projects::slots::parse_tempo(&hmap);
         assert_eq!(r.unwrap(), 120_u16);
     }
 
     #[test]
     fn test_parse_gain_correct() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("gain".to_string(), "72".to_string());
-        let r = parse_gain(&hmap);
+        let r = crate::projects::slots::parse_gain(&hmap);
         assert_eq!(24_i8, r.unwrap());
     }
 
     #[test]
     fn test_parse_gain_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("gain".to_string(), "AAAFSFSFSSFfssafAA".to_string());
-        let r = parse_gain(&hmap);
+        let r = crate::projects::slots::parse_gain(&hmap);
         assert_eq!(r.unwrap(), 0_i8);
     }
 
     #[test]
     fn test_parse_trim_bars_correct() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trim_barsx100".to_string(), "100".to_string());
-        let r = parse_trim_bars(&hmap);
+        let r = crate::projects::slots::parse_trim_bars(&hmap);
         assert_eq!(1.0_f32, r.unwrap());
     }
 
     #[test]
     fn test_parse_trim_bars_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert(
             "trim_barsx100".to_string(),
             "AAAFSFSFSSFfssafAA".to_string(),
         );
-        let r = parse_trim_bars(&hmap);
+        let r = crate::projects::slots::parse_trim_bars(&hmap);
         assert_eq!(r.unwrap(), 0.0_f32);
     }
 
     #[test]
     fn test_parse_loop_mode_correct_off() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "0".to_string());
-        let r = parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Off);
+        let r = crate::projects::slots::parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Off);
     }
 
     #[test]
     fn test_parse_loop_mode_correct_normal() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "1".to_string());
-        let r = parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Normal);
+        let r = crate::projects::slots::parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Normal);
     }
 
     #[test]
     fn test_parse_loop_mode_correct_pingpong() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "2".to_string());
-        let r = parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), SampleAttributeLoopMode::PingPong);
+        let r = crate::projects::slots::parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::PingPong);
     }
 
     #[test]
     fn test_parse_loop_mode_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
-        let r = parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), SampleAttributeLoopMode::Off);
+        let r = crate::projects::slots::parse_loop_mode(&hmap);
+        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Off);
     }
 
     #[test]
     fn test_parse_tstretch_correct_off() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "0".to_string());
-        let r = parse_tstrech_mode(&hmap);
-        assert_eq!(SampleAttributeTimestrechMode::Off, r.unwrap());
+        let r = crate::projects::slots::parse_tstrech_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Off, r.unwrap());
     }
 
     #[test]
     fn test_parse_tstretch_correct_normal() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "2".to_string());
-        let r = parse_tstrech_mode(&hmap);
-        assert_eq!(SampleAttributeTimestrechMode::Normal, r.unwrap());
+        let r = crate::projects::slots::parse_tstrech_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Normal, r.unwrap());
     }
 
     #[test]
     fn test_parse_tstretch_correct_beat() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "3".to_string());
-        let r = parse_tstrech_mode(&hmap);
-        assert_eq!(SampleAttributeTimestrechMode::Beat, r.unwrap());
+        let r = crate::projects::slots::parse_tstrech_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Beat, r.unwrap());
     }
 
     #[test]
     fn test_parse_tstretch_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
-        let r = parse_tstrech_mode(&hmap);
-        assert_eq!(r.unwrap(), SampleAttributeTimestrechMode::Off);
+        let r = crate::projects::slots::parse_tstrech_mode(&hmap);
+        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeTimestrechMode::Off);
     }
 
     #[test]
     fn test_parse_tquantize_correct_off() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "255".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
         assert_eq!(
-            SampleAttributeTrigQuantizationMode::PatternLength,
+            crate::samples::options::SampleAttributeTrigQuantizationMode::PatternLength,
             r.unwrap()
         );
     }
 
     #[test]
     fn test_parse_tquantize_correct_direct() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "0".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
-        assert_eq!(SampleAttributeTrigQuantizationMode::Direct, r.unwrap());
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::Direct, r.unwrap());
     }
 
     #[test]
     fn test_parse_tquantize_correct_onestep() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "1".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
-        assert_eq!(SampleAttributeTrigQuantizationMode::OneStep, r.unwrap());
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::OneStep, r.unwrap());
     }
 
     #[test]
     fn test_parse_tquantize_correct_twostep() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "2".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
-        assert_eq!(SampleAttributeTrigQuantizationMode::TwoSteps, r.unwrap());
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::TwoSteps, r.unwrap());
     }
 
     #[test]
     fn test_parse_tquantize_correct_threestep() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "3".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
-        assert_eq!(SampleAttributeTrigQuantizationMode::ThreeSteps, r.unwrap());
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::ThreeSteps, r.unwrap());
     }
 
     #[test]
     fn test_parse_tquantize_correct_fourstep() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "4".to_string());
-        let r = parse_trig_quantize_mode(&hmap);
-        assert_eq!(SampleAttributeTrigQuantizationMode::FourSteps, r.unwrap());
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
+        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::FourSteps, r.unwrap());
     }
 
     // i'm not going to test every single option. we do that already elsewhere.
 
     #[test]
     fn test_parse_tquantize_bad_value_type_default_return() {
-        let mut hmap = HashMap::new();
+        let mut hmap = std::collections::HashMap::new();
         hmap.insert(
             "trigquantization".to_string(),
             "AAAFSFSFSSFfssafAA".to_string(),
         );
-        let r = parse_trig_quantize_mode(&hmap);
+        let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
         assert_eq!(
             r.unwrap(),
-            SampleAttributeTrigQuantizationMode::PatternLength
+            crate::samples::options::SampleAttributeTrigQuantizationMode::PatternLength
         );
     }
 }

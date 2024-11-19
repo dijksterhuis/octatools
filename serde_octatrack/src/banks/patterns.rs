@@ -30,8 +30,7 @@ pub fn get_halfpage_trigs_from_bitmask_value(bitmask: &u8) -> RBoxErr<[bool; 8]>
 pub fn get_track_trigs_from_bitmasks(bitmasks: &[u8; 8]) -> RBoxErr<[bool; 64]> {
     let trigs: [bool; 64] = bitmasks
         .iter()
-        .map(|x: &u8| get_halfpage_trigs_from_bitmask_value(x).unwrap())
-        .flatten()
+        .flat_map(|x: &u8| get_halfpage_trigs_from_bitmask_value(x).unwrap())
         .collect::<Vec<bool>>()
         .try_into()
         .unwrap();
@@ -559,7 +558,6 @@ mod test {
 
         #[test]
         fn test_all_track_trigs_from_bitmasks() {
-
             let x: [u8; 8] = std::array::from_fn(|_| 255);
             let y: [bool; 64] = std::array::from_fn(|_| true);
 
@@ -571,7 +569,6 @@ mod test {
 
         #[test]
         fn test_no_track_trigs_from_bitmasks() {
-
             let x: [u8; 8] = std::array::from_fn(|_| 0);
             let y: [bool; 64] = std::array::from_fn(|_| false);
 
