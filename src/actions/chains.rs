@@ -3,7 +3,7 @@
 mod yaml;
 
 use log::{debug, info, trace};
-use std::path::PathBuf;
+use std::{array::from_fn, path::PathBuf};
 
 use crate::common::{FromYamlFile, RBoxErr};
 use serde_octatrack::{
@@ -13,6 +13,7 @@ use serde_octatrack::{
             SampleAttributeLoopMode, SampleAttributeTimestrechMode,
             SampleAttributeTrigQuantizationMode,
         },
+        slices::{Slice, Slices},
         SampleAttributes,
     },
     FromPathBuf, ToPathBuf,
@@ -20,7 +21,10 @@ use serde_octatrack::{
 
 use crate::{
     audio::{aiff::AiffFile, wav::WavFile},
-    utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles},
+    utils::{
+        create_slices_from_wavfiles, get_otsample_nbars_from_wavfile,
+        get_otsample_nbars_from_wavfiles,
+    },
 };
 
 use yaml::{create::YamlChainCreate, deconstruct::YamlChainDeconstruct};
@@ -53,11 +57,6 @@ pub fn chain_wavfiles_64_batch(
 
     trace!("Creating singular sample of samples in each batch.");
     let mut chains: Vec<(WavFile, Vec<WavFile>)> = vec![];
-
-    // slice_vecs.iter().map(
-    //     |x| {
-    //     }
-    // );
 
     for slice_vec in slice_vecs {
         let mut single_chain_wav: WavFile = slice_vec[0].clone();
@@ -276,6 +275,169 @@ pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<
         );
     }
 
+    Ok(())
+}
+
+/// Given a wavfile, create Nx random slices stored in a sample attributes file.
+pub fn create_randomly_sliced_sample(
+    wav_fp: &PathBuf,
+    out_ot_path: &PathBuf,
+    n_slices: usize,
+) -> RBoxErr<()> {
+    if n_slices > 64 {
+        panic!("Maximum number of slices in a sample file is 64.");
+    };
+
+    use rand::Rng;
+    let wavfile = WavFile::from_pathbuf(wav_fp).expect("Could not read wav file.");
+
+    if wavfile.len < 64 {
+        panic!("Wav file too short, needs to be at least 64 samples in length.");
+    };
+
+    let mut rng = rand::thread_rng();
+
+    let default_slice = Slice {
+        trim_end: 0,
+        trim_start: 0,
+        loop_start: 0,
+    };
+
+    let mut slices_arr: [Slice; 64] = [default_slice; 64];
+
+    for i in 0..n_slices {
+        let trim_start: u32 = rng.gen_range(0..=(wavfile.len - 64));
+        let trim_end: u32 = rng.gen_range(trim_start..=wavfile.len);
+        let loop_start: u32 = trim_start;
+
+        let slice = Slice {
+            trim_start,
+            trim_end,
+            loop_start,
+        };
+
+        slices_arr[i] = slice;
+    }
+
+    let slices = Slices {
+        slices: slices_arr,
+        count: n_slices as u32,
+    };
+
+    let bars = get_otsample_nbars_from_wavfile(&wavfile, &120.0)?;
+
+    let trim_config = SampleTrimConfig {
+        start: 0,
+        end: wavfile.len,
+        length: bars,
+    };
+
+    let loop_config = SampleLoopConfig {
+        start: 0,
+        length: bars,
+        mode: SampleAttributeLoopMode::default(),
+    };
+
+    let chain_data = SampleAttributes::new(
+        &120.0,
+        &SampleAttributeTimestrechMode::default(),
+        &SampleAttributeTrigQuantizationMode::default(),
+        &0.0,
+        &trim_config,
+        &loop_config,
+        &slices,
+    )
+    .expect("Could not create sample attributes data for sample chain.");
+
+    let mut ot_outpath = out_ot_path.clone();
+    if ot_outpath.extension().unwrap().to_str().unwrap() != "ot" {
+        ot_outpath.set_extension("ot");
+    };
+
+    let _ = chain_data.to_pathbuf(&ot_outpath).expect(
+        format!("Could not write sample chain attributes file: path={ot_outpath:#?}").as_str(),
+    );
+    info!("Created chain attributes file: {ot_outpath:#?}");
+    Ok(())
+}
+
+/// Given a wavfile, create Nx equal length slices stored in a sample attributes file.
+pub fn create_equally_sliced_sample(
+    wav_fp: &PathBuf,
+    out_ot_path: &PathBuf,
+    n_slices: usize,
+) -> RBoxErr<()> {
+    if n_slices > 64 {
+        panic!("Maximum number of slices in a sample file is 64.");
+    };
+
+    let wavfile = WavFile::from_pathbuf(wav_fp).expect("Could not read wav file.");
+
+    if wavfile.len < 64 {
+        panic!("Wav file too short, needs to be at least 64 samples in length.");
+    };
+
+    let default_slice = Slice {
+        trim_end: 0,
+        trim_start: 0,
+        loop_start: 0,
+    };
+    let mut slices_arr: [Slice; 64] = [default_slice; 64];
+    let len = wavfile.len / (n_slices as u32);
+
+    for i in 0..n_slices {
+        let trim_start: u32 = (i as u32) * len;
+        let trim_end: u32 = trim_start + len;
+        let loop_start: u32 = trim_start;
+
+        let slice = Slice {
+            trim_start,
+            trim_end,
+            loop_start,
+        };
+
+        slices_arr[i] = slice;
+    }
+
+    let slices = Slices {
+        slices: slices_arr,
+        count: n_slices as u32,
+    };
+
+    let bars = get_otsample_nbars_from_wavfile(&wavfile, &120.0)?;
+
+    let trim_config = SampleTrimConfig {
+        start: 0,
+        end: wavfile.len,
+        length: bars,
+    };
+
+    let loop_config = SampleLoopConfig {
+        start: 0,
+        length: bars,
+        mode: SampleAttributeLoopMode::default(),
+    };
+
+    let chain_data = SampleAttributes::new(
+        &120.0,
+        &SampleAttributeTimestrechMode::default(),
+        &SampleAttributeTrigQuantizationMode::default(),
+        &0.0,
+        &trim_config,
+        &loop_config,
+        &slices,
+    )
+    .expect("Could not create sample attributes data for sample chain.");
+
+    let mut ot_outpath = out_ot_path.clone();
+    if ot_outpath.extension().unwrap().to_str().unwrap() != "ot" {
+        ot_outpath.set_extension("ot");
+    };
+
+    let _ = chain_data.to_pathbuf(&ot_outpath).expect(
+        format!("Could not write sample chain attributes file: path={ot_outpath:#?}").as_str(),
+    );
+    info!("Created chain attributes file: {ot_outpath:#?}");
     Ok(())
 }
 

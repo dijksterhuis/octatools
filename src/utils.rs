@@ -62,6 +62,13 @@ pub fn create_slices_from_wavfiles(
     })
 }
 
+pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxErr<u32> {
+    let beats = wav.len as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
+    let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
+    bars -= bars % 0.25;
+    Ok((bars * 100.0) as u32)
+}
+
 // TODO: Change to taking number of samples as argument
 // so we can pass in a single wav or a vvector worth of wavs
 // otherwise we have to mess around with switching about types

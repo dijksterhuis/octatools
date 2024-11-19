@@ -15,6 +15,7 @@ use log::{info, LevelFilter};
 
 use actions::{
     chains::{
+        create_equally_sliced_sample, create_randomly_sliced_sample,
         create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
         deconstruct_samplechain_from_pathbufs_only, deconstruct_samplechains_from_yaml,
     },
@@ -190,6 +191,22 @@ fn main() -> () {
             cli::Chains::DeconstructYaml { yaml_file_path } => {
                 info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
                 let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
+            }
+            cli::Chains::GridRandom {
+                wav_file_path,
+                out_ot_path,
+                n_slices,
+            } => {
+                // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
+                let _ = create_randomly_sliced_sample(&wav_file_path, &out_ot_path, n_slices);
+            }
+            cli::Chains::GridLinear {
+                wav_file_path,
+                out_ot_path,
+                n_slices,
+            } => {
+                // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
+                let _ = create_equally_sliced_sample(&wav_file_path, &out_ot_path, n_slices);
             }
         },
         /* =========================================================================== */

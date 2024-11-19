@@ -196,6 +196,23 @@ pub enum Chains {
         /// File path of the YAML file for batched samplechains construction.
         yaml_file_path: PathBuf,
     },
+    /// Create a single sample chain from the cli
+    GridRandom {
+        wav_file_path: PathBuf,
+
+        out_ot_path: PathBuf,
+
+        n_slices: usize,
+    },
+    /// Create a single sample chain from the cli
+    GridLinear {
+        wav_file_path: PathBuf,
+
+        out_ot_path: PathBuf,
+
+        n_slices: usize,
+    },
+
     /// Use the CLI to deconstruct an individual sliced samplechain.
     Deconstruct {
         /// Path to the '.ot' file to use for deconstruction.
