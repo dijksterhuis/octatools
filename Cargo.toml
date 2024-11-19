@@ -26,6 +26,7 @@ hound = "3.5.1"
 itertools = "0.13.0"
 log = "0.4.22"
 md5 = "0.7.0"
+rand = "0.8.5"
 serde = { version = "1.0.210", features = ["serde_derive"] }
 serde-big-array = "0.5.1"
 serde_yml = "0.0.12"
