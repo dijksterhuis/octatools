@@ -11,7 +11,7 @@ mod utils;
 
 use clap::Parser;
 use env_logger::{Builder, Target};
-use log::{info, LevelFilter};
+use log::LevelFilter;
 
 use actions::{
     chains::{
@@ -20,6 +20,7 @@ use actions::{
         deconstruct_samplechain_from_pathbufs_only, deconstruct_samplechains_from_yaml,
     },
     copy::{batch_copy_banks, copy_bank},
+    dump::{dump_arrangement, dump_bank, dump_ot_file, dump_project},
     indexing::{
         create_index_compact_flash_drive_yaml, create_index_samples_dir_full,
         create_index_samples_dir_simple,
@@ -29,6 +30,7 @@ use actions::{
         show_ot_file_bytes, show_pattern, show_project, show_saved_parts, show_unsaved_parts,
     },
     list::list_project_sample_slots,
+    load::{load_arrangement, load_bank, load_ot_file, load_project},
 };
 
 use cli::{Cli, Commands};
@@ -41,194 +43,310 @@ fn main() {
 
     let args = Cli::parse();
 
+    println!("ARGS: {:#?}", args);
+
     match args.command {
-        /* =========================================================================== */
-        Commands::Inspect(x) => match x {
-            cli::Inspect::Project { path } => {
-                info!("Showing project: path={path:#?}");
+        Commands::Drive(x) => match x {
+            crate::cli::Drive::Dump {cfcard_dir_path, yaml_file_path} => {
+                let _ = create_index_compact_flash_drive_yaml(
+                    &cfcard_dir_path,
+                    &yaml_file_path,
+                );
+            }
+        },
+        Commands::Projects(x) => match x {
+            crate::cli::Projects::Inspect { path } => {
                 let _ = show_project(&path);
             }
-            cli::Inspect::Bank { path } => {
-                info!("Showing bank: path={path:#?}");
-                let _ = show_bank(&path);
+            crate::cli::Projects::Settings(y) => match y {
+                crate::cli::ProjectData::Inspect { path } => {
+                    unimplemented!();
+                }
+            },
+            crate::cli::Projects::Metadata(y) => match y {
+                crate::cli::ProjectData::Inspect { path } => {
+                    unimplemented!();
+                }
+            },
+            crate::cli::Projects::State(y) => match y {
+                crate::cli::ProjectData::Inspect { path } => {
+                    unimplemented!();
+                }
+            },
+            crate::cli::Projects::Sampleslots(y) => match y {
+                crate::cli::SampleSlots::Inspect { path } => {
+                    unimplemented!();
+                }
+                crate::cli::SampleSlots::List { path } => {
+                    let _ = list_project_sample_slots(&path);
+                }
+                crate::cli::SampleSlots::Purge { path } => {
+                    unimplemented!();
+                }
+                crate::cli::SampleSlots::Consolidate { path } => {
+                    unimplemented!();
+                }
+                crate::cli::SampleSlots::Centralise { path } => {
+                    unimplemented!();
+                }
+            },
+            crate::cli::Projects::Dump {
+                project_file_path,
+                yaml_file_path,
+            } => {
+                let _ = dump_project(&project_file_path, &yaml_file_path);
             }
-            cli::Inspect::PartsSaved { path, index } => {
-                info!("Showing specific part in bank: path={path:#?}");
-                let _ = show_saved_parts(&path, index);
+            crate::cli::Projects::Load {
+                yaml_file_path,
+                project_file_path,
+            } => {
+                let _ = load_project(&yaml_file_path, &project_file_path);
             }
-            cli::Inspect::PartsUnsaved { path, index } => {
-                info!("Showing specific part in bank: path={path:#?}");
-                let _ = show_unsaved_parts(&path, index);
-            }
-            cli::Inspect::Patterns { path, index } => {
-                info!("Showing specific pattern in bank: path={path:#?}");
-                let _ = show_pattern(&path, index);
-            }
-            cli::Inspect::Sample { path } => {
-                info!("Showing sample attributes: path={path:#?}");
-                let _ = show_ot_file(&path);
-            }
-            cli::Inspect::Arrangement { path } => {
-                info!("Showing arrangement file: path={path:#?}");
+        },
+        Commands::Arrangements(x) => match x {
+            crate::cli::Arrangements::Inspect { path } => {
                 let _ = show_arrangement(&path);
             }
-            cli::Inspect::Markers { path } => {
-                info!("Showing markers file: path={path:#?}");
-                todo!()
+            crate::cli::Arrangements::InspectBytes {
+                path,
+                byte_start_idx,
+                n_bytes,
+            } => {
+                let _ = show_arrangement_bytes(&path, &byte_start_idx, &n_bytes);
             }
-            cli::Inspect::Bytes(y) => match y {
-                cli::InspectBytes::Bank {
-                    path,
-                    start_idx,
-                    nbytes,
+            crate::cli::Arrangements::Dump {
+                arrangement_file_path,
+                yaml_file_path,
+            } => {
+                let _ = dump_arrangement(&arrangement_file_path, &yaml_file_path);
+            }
+            crate::cli::Arrangements::Load {
+                yaml_file_path,
+                arrangement_file_path,
+            } => {
+                let _ = load_arrangement(&yaml_file_path, &arrangement_file_path);
+            }
+        },
+        Commands::Banks(x) => match x {
+            crate::cli::Banks::Inspect { path } => {
+                let _ = show_bank(&path);
+            }
+            crate::cli::Banks::InspectBytes {
+                path,
+                byte_start_idx,
+                n_bytes,
+            } => {
+                let _ = show_bank_bytes(&path, &byte_start_idx, &n_bytes);
+            }
+            crate::cli::Banks::Copy {
+                src_bank_file_path,
+                dest_bank_file_path,
+            } => {
+                let _ = copy_bank(&src_bank_file_path, &dest_bank_file_path);
+            }
+            crate::cli::Banks::CopyN { yaml_file_path } => {
+                let _ = batch_copy_banks(&yaml_file_path);
+            }
+            crate::cli::Banks::Dump {
+                bank_file_path,
+                yaml_file_path,
+            } => {
+                let _ = dump_bank(&bank_file_path, &yaml_file_path);
+            }
+            crate::cli::Banks::Load {
+                yaml_file_path,
+                bank_file_path,
+            } => {
+                let _ = load_bank(&yaml_file_path, &bank_file_path);
+            }
+        },
+        Commands::Patterns(x) => match x {
+            crate::cli::Patterns::Inspect {
+                bank_file_path,
+                index,
+            } => {
+                let _ = show_pattern(&bank_file_path, index);
+            }
+            crate::cli::Patterns::Copy {
+                src_bank_file_path,
+                src_pattern_index,
+                dest_bank_file_path,
+                dest_pattern_index,
+            } => {
+                unimplemented!();
+            }
+            crate::cli::Patterns::CopyN { yaml_file_path } => {
+                unimplemented!();
+            }
+            crate::cli::Patterns::Dump {
+                bank_file_path,
+                pattern_index,
+                yaml_file_path,
+            } => {
+                unimplemented!();
+            }
+            crate::cli::Patterns::Load {
+                yaml_file_path,
+                bank_file_path,
+                pattern_index,
+            } => {
+                unimplemented!();
+            }
+        },
+        Commands::Parts(x) => match x {
+            crate::cli::Parts::Saved(y) => match y {
+                crate::cli::PartsCmd::Inspect {
+                    bank_file_path,
+                    index,
                 } => {
-                    info!("Showing bank bytes: path={path:#?}");
-                    let _ = show_bank_bytes(&path, &start_idx, &nbytes);
+                    let _ = show_saved_parts(&bank_file_path, index);
                 }
-                cli::InspectBytes::Sample {
-                    path,
-                    start_idx,
-                    nbytes,
+                crate::cli::PartsCmd::Copy {
+                    src_bank_file_path,
+                    src_part_index,
+                    dest_bank_file_path,
+                    dest_part_index,
                 } => {
-                    info!("Showing sample attributes bytes: path={path:#?}");
-                    let _ = show_ot_file_bytes(&path, &start_idx, &nbytes);
+                    unimplemented!();
                 }
-                cli::InspectBytes::Arrangement {
-                    path,
-                    start_idx,
-                    nbytes,
+                crate::cli::PartsCmd::CopyN { yaml_file_path } => {
+                    unimplemented!();
+                }
+                crate::cli::PartsCmd::Dump {
+                    bank_file_path,
+                    part_index,
+                    yaml_file_path,
                 } => {
-                    info!("Showing arrangement file bytes: path={path:#?}");
-                    let _ = show_arrangement_bytes(&path, &start_idx, &nbytes);
+                    unimplemented!();
+                }
+                crate::cli::PartsCmd::Load {
+                    yaml_file_path,
+                    bank_file_path,
+                    part_index,
+                } => {
+                    unimplemented!();
+                }
+            },
+            crate::cli::Parts::Unsaved(y) => match y {
+                crate::cli::PartsCmd::Inspect {
+                    bank_file_path,
+                    index,
+                } => {
+                    let _ = show_unsaved_parts(&bank_file_path, index);
+                }
+                crate::cli::PartsCmd::Copy {
+                    src_bank_file_path,
+                    src_part_index,
+                    dest_bank_file_path,
+                    dest_part_index,
+                } => {
+                    unimplemented!();
+                }
+                crate::cli::PartsCmd::CopyN { yaml_file_path } => {
+                    unimplemented!();
+                }
+                crate::cli::PartsCmd::Dump {
+                    bank_file_path,
+                    part_index,
+                    yaml_file_path,
+                } => {
+                    unimplemented!();
+                }
+                crate::cli::PartsCmd::Load {
+                    yaml_file_path,
+                    bank_file_path,
+                    part_index,
+                } => {
+                    unimplemented!();
                 }
             },
         },
-        /* =========================================================================== */
-        Commands::List(x) => match x {
-            cli::List::Arrangements { path } => {
-                info!("Listing arrangements: arrangePath={path:#?}");
-                todo!()
-            }
-            cli::List::ProjectSlots { path } => {
-                info!("Listing Project sample slots: projectPath={path:#?}");
-                let _ = list_project_sample_slots(&path);
-            }
+        Commands::Samples(x) => match x {
+            crate::cli::Samples::Chain(y) => match y {
+                crate::cli::SampleChains::Create {
+                    chain_name,
+                    out_dir_path,
+                    wav_file_paths,
+                } => {
+                    let _ = create_samplechain_from_pathbufs_only(
+                        &wav_file_paths,
+                        &out_dir_path,
+                        &chain_name,
+                    );
+                }
+                crate::cli::SampleChains::CreateN { yaml_file_path } => {
+                    let _ = create_samplechains_from_yaml(&yaml_file_path);
+                }
+                crate::cli::SampleChains::Deconstruct {
+                    ot_file_path,
+                    audio_file_path,
+                    out_dir_path,
+                } => {
+                    let _ = deconstruct_samplechain_from_pathbufs_only(
+                        &audio_file_path,
+                        &ot_file_path,
+                        &out_dir_path,
+                    );
+                }
+                crate::cli::SampleChains::DeconstructN { yaml_file_path } => {
+                    let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
+                }
+            },
+            crate::cli::Samples::Grid(y) => match y {
+                crate::cli::SampleSliceGrid::Random {
+                    wav_file_path,
+                    n_slices,
+                } => {
+                    let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
+                }
+                crate::cli::SampleSliceGrid::Linear {
+                    wav_file_path,
+                    n_slices,
+                } => {
+                    let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
+                }
+            },
+            crate::cli::Samples::Otfile(y) => match y {
+                crate::cli::Otfile::Inspect { path } => {
+                    let _ = show_ot_file(&path);
+                }
+                crate::cli::Otfile::InspectBytes {
+                    path,
+                    byte_start_idx,
+                    n_bytes,
+                } => {
+                    let _ = show_ot_file_bytes(&path, &byte_start_idx, &n_bytes);
+                }
+                crate::cli::Otfile::CreateDefault { wav_file_path } => {
+                    unimplemented!();
+                }
+                crate::cli::Otfile::Dump {
+                    ot_file_path,
+                    yaml_file_path,
+                } => {
+                    let _ = dump_ot_file(&ot_file_path, &yaml_file_path);
+                }
+                crate::cli::Otfile::Load {
+                    yaml_file_path,
+                    ot_file_path,
+                } => {
+                    let _ = load_ot_file(&yaml_file_path, &ot_file_path);
+                }
+            },
+            crate::cli::Samples::Search(y) => match y {
+                crate::cli::SampleSearch::Simple {
+                    samples_dir_path,
+                    yaml_file_path,
+                } => {
+                    let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
+                }
+                crate::cli::SampleSearch::Full {
+                    samples_dir_path,
+                    yaml_file_path,
+                } => {
+                    let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
+                }
+            },
         },
-
-        /* =========================================================================== */
-        Commands::Consolidate(x) => match x {
-            cli::ConsolidateSamples::ToPool { path } => {
-                info!("Consolidating Project samples to Set's Audio Pool: projectPath={path:#?}");
-                todo!()
-            }
-            cli::ConsolidateSamples::ToProject { path } => {
-                info!("Consolidating Project samples to Project: projectPath={path:#?}");
-                todo!()
-            }
-        },
-
-        /* =========================================================================== */
-        Commands::Transfer(x) => match x {
-            cli::Transfer::Bank {
-                source_bank_file_path,
-                dest_bank_file_path,
-            } => {
-                info!("Copying bank: src={source_bank_file_path:#?} dest={dest_bank_file_path:#?}");
-                let _ = copy_bank(&source_bank_file_path, &dest_bank_file_path);
-            }
-            cli::Transfer::Banks { yaml_config_path } => {
-                info!("Batch copying banks: {yaml_config_path:#?}");
-                let _ = batch_copy_banks(&yaml_config_path);
-            }
-            cli::Transfer::Project {
-                source_project,
-                dest_set_dir_path,
-            } => {
-                info!("Copying project: src={source_project:#?} dest={dest_set_dir_path:#?}");
-                todo!()
-            }
-            cli::Transfer::Projects { yaml_config_path } => {
-                info!("Batch copying projects: yaml={yaml_config_path:#?}");
-                todo!()
-            }
-        },
-        /* =========================================================================== */
-        Commands::Chains(x) => match x {
-            cli::Chains::Create {
-                chain_name,
-                out_dir_path,
-                wav_file_paths,
-            } => {
-                info!(
-                    "Creating sliced sample chain: outdir={:#?} name={:#?} wavs={:#?}",
-                    out_dir_path, chain_name, wav_file_paths,
-                );
-                let _ = create_samplechain_from_pathbufs_only(
-                    &wav_file_paths,
-                    &out_dir_path,
-                    &chain_name,
-                );
-            }
-            cli::Chains::CreateYaml { yaml_file_path } => {
-                info!("Creating sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = create_samplechains_from_yaml(&yaml_file_path);
-            }
-            cli::Chains::Deconstruct {
-                ot_file_path,
-                audio_file_path,
-                out_dir_path,
-            } => {
-                info!(
-                    "Deconstructing sliced sample chain: sample={:#?} otfile={:#?} outdir={:#?}",
-                    audio_file_path, ot_file_path, out_dir_path,
-                );
-                let _ = deconstruct_samplechain_from_pathbufs_only(
-                    &audio_file_path,
-                    &ot_file_path,
-                    &out_dir_path,
-                );
-            }
-            cli::Chains::DeconstructYaml { yaml_file_path } => {
-                info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
-            }
-            cli::Chains::Random {
-                wav_file_path,
-                n_slices,
-            } => {
-                // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
-            }
-            cli::Chains::GridLinear {
-                wav_file_path,
-                n_slices,
-            } => {
-                // info!("Batch deconstructing sliced sample chains: yaml={yaml_file_path:#?}");
-                let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
-            }
-        },
-        /* =========================================================================== */
-        Commands::Index(x) => match x {
-            cli::Indexing::Cfcard {
-                cfcard_dir_path,
-                yaml_file_path,
-            } => {
-                info!("Indexing CF card: path={cfcard_dir_path:#?}");
-                let _ = create_index_compact_flash_drive_yaml(&cfcard_dir_path, &yaml_file_path);
-            }
-            cli::Indexing::SamplesdirSimple {
-                samples_dir_path,
-                yaml_file_path,
-            } => {
-                let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
-            }
-            cli::Indexing::SamplesdirFull {
-                samples_dir_path,
-                yaml_file_path,
-            } => {
-                info!("Indexing samples directory with 'full' output: path={samples_dir_path:#?}");
-                let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
-            }
-        },
-    }
+    };
 }

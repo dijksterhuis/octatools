@@ -3,9 +3,9 @@
 //! (2) inspect the current state of sample use across an CF Card.
 
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use serde_octatrack::FromPathBuf;
+use serde_octatrack::FromPath;
 
 /// A single row of data written to the index file.
 use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};
@@ -50,16 +50,16 @@ pub struct CompactFlashDrive {
 impl FromYamlFile for CompactFlashDrive {}
 impl ToYamlFile for CompactFlashDrive {}
 
-impl FromPathBuf for CompactFlashDrive {
+impl FromPath for CompactFlashDrive {
     type T = CompactFlashDrive;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self::T> {
+    fn from_path(path: &Path) -> RBoxErr<Self::T> {
         let ot_sets = OctatrackSet::from_cfcard_pathbuf(path).unwrap();
 
         let cf = CompactFlashDrive {
             // todo: clone :/
-            cfcard_path: path.clone(),
+            cfcard_path: path.to_path_buf(),
             ot_sets,
         };
 
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn test_indexing_cfcard_sets() {
         let cfcard_path = PathBuf::from("data/tests/index-cf/");
-        let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_pathbuf(&cfcard_path);
+        let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_path(&cfcard_path);
         assert!(res.is_ok());
     }
 }

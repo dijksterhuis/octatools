@@ -6,7 +6,7 @@ use log::debug;
 
 use std::path::PathBuf;
 
-use serde_octatrack::FromPathBuf;
+use serde_octatrack::FromPath;
 
 use crate::common::{RBoxErr, ToYamlFile};
 use yaml::cfcard::CompactFlashDrive;
@@ -17,7 +17,7 @@ pub fn create_index_compact_flash_drive_yaml(
     yaml_file_path: &Option<PathBuf>,
 ) -> RBoxErr<()> {
     debug!("Indexing CF card: path={cfcard_dir_path:#?}");
-    let cf = CompactFlashDrive::from_pathbuf(cfcard_dir_path)
+    let cf = CompactFlashDrive::from_path(cfcard_dir_path)
         .unwrap_or_else(|_| panic!("Failed to create CF card index: path={cfcard_dir_path:#?}"));
 
     // todo: as_ref usage? seems to be due to using an option in CLI definitions

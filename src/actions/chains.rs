@@ -16,7 +16,7 @@ use serde_octatrack::{
         slices::{Slice, Slices},
         SampleAttributes,
     },
-    FromPathBuf, ToPathBuf,
+    FromPath, ToPath,
 };
 
 use crate::{
@@ -122,7 +122,7 @@ pub fn create_samplechain_from_pathbufs_only(
     let wavfiles: Vec<WavFile> = wav_fps
         .iter()
         .map(|fp: &PathBuf| {
-            WavFile::from_pathbuf(fp)
+            WavFile::from_path(fp)
                 .unwrap_or_else(|_| panic!("Could not read wav file: path={fp:#?}"))
         })
         .collect();
@@ -182,12 +182,20 @@ pub fn create_samplechain_from_pathbufs_only(
 
         let mut wav_sliced_outpath = base_outchain_path;
         wav_sliced_outpath.set_extension("wav");
-        single_wav.to_pathbuf(&wav_sliced_outpath).unwrap_or_else(|_| panic!("Could not write sample chain wav file: idx={idx:#?} path={wav_sliced_outpath:#?}"));
+        single_wav.to_path(&wav_sliced_outpath).unwrap_or_else(|_| {
+            panic!(
+                "Could not write sample chain wav file: idx={idx:#?} path={wav_sliced_outpath:#?}"
+            )
+        });
         info!("Creating chain audio file: {wav_sliced_outpath:#?}");
 
         let mut ot_outpath = wav_sliced_outpath.clone();
         ot_outpath.set_extension("ot");
-        chain_data.to_pathbuf(&ot_outpath).unwrap_or_else(|_| panic!("Could not write sample chain attributes file: idx={idx:#?} path={ot_outpath:#?}"));
+        chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
+            panic!(
+                "Could not write sample chain attributes file: idx={idx:#?} path={ot_outpath:#?}"
+            )
+        });
         info!("Created chain attributes file: {ot_outpath:#?}");
     }
     info!("Created sample chain: name={outchain_name:#?}");
@@ -205,8 +213,10 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
         panic!("Output dirpath argument is not a directory. Must be a directory.");
     }
 
-    let wavfile = WavFile::from_pathbuf(audio_fpath).expect("Could not read wavfile.");
-    let attrs = SampleAttributes::from_pathbuf(attributes_fpath).unwrap_or_else(|_| panic!("Could not read `.ot` attributes file: path={attributes_fpath:#?}"));
+    let wavfile = WavFile::from_path(audio_fpath).expect("Could not read wavfile.");
+    let attrs = SampleAttributes::from_path(attributes_fpath).unwrap_or_else(|_| {
+        panic!("Could not read `.ot` attributes file: path={attributes_fpath:#?}")
+    });
     // todo: this feels fragile
     let base_sample_fname = audio_fpath
         .file_stem()
@@ -232,7 +242,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
         out_fpath.set_extension("wav");
 
         wavslice
-            .to_pathbuf(&out_fpath)
+            .to_path(&out_fpath)
             .unwrap_or_else(|_| panic!("Could not write slice to wavfile: path={out_fpath:#?}"));
 
         out_fpaths.push(out_fpath);
@@ -265,15 +275,12 @@ pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<
 }
 
 /// Given a wavfile, create Nx random slices stored in a sample attributes file.
-pub fn create_randomly_sliced_sample(
-    wav_fp: &PathBuf,
-    n_slices: usize,
-) -> RBoxErr<()> {
+pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxErr<()> {
     if n_slices > 64 {
         panic!("Maximum number of slices in a sample file is 64.");
     };
 
-    let wavfile = WavFile::from_pathbuf(wav_fp).expect("Could not read wav file.");
+    let wavfile = WavFile::from_path(wav_fp).expect("Could not read wav file.");
 
     if wavfile.len < 64 {
         panic!("Wav file too short, needs to be at least 64 samples in length.");
@@ -335,8 +342,8 @@ pub fn create_randomly_sliced_sample(
 
     let mut ot_outpath = wav_fp.clone();
     ot_outpath.set_extension("ot");
-    
-    chain_data.to_pathbuf(&ot_outpath).unwrap_or_else(|_| {
+
+    chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")
     });
     info!("Created chain attributes file: {ot_outpath:#?}");
@@ -344,15 +351,12 @@ pub fn create_randomly_sliced_sample(
 }
 
 /// Given a wavfile, create Nx equal length slices stored in a sample attributes file.
-pub fn create_equally_sliced_sample(
-    wav_fp: &PathBuf,
-    n_slices: usize,
-) -> RBoxErr<()> {
+pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxErr<()> {
     if n_slices > 64 {
         panic!("Maximum number of slices in a sample file is 64.");
     };
 
-    let wavfile = WavFile::from_pathbuf(wav_fp).expect("Could not read wav file.");
+    let wavfile = WavFile::from_path(wav_fp).expect("Could not read wav file.");
 
     if wavfile.len < 64 {
         panic!("Wav file too short, needs to be at least 64 samples in length.");
@@ -413,7 +417,7 @@ pub fn create_equally_sliced_sample(
     let mut ot_outpath = wav_fp.clone();
     ot_outpath.set_extension("ot");
 
-    chain_data.to_pathbuf(&ot_outpath).unwrap_or_else(|_| {
+    chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")
     });
     info!("Created chain attributes file: {ot_outpath:#?}");
@@ -467,7 +471,7 @@ mod tests {
         use crate::common::RBoxErr;
 
         use crate::audio::wav::WavFile;
-        use serde_octatrack::FromPathBuf;
+        use serde_octatrack::FromPath;
 
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},
@@ -512,7 +516,7 @@ mod tests {
         ) -> RBoxErr<(SampleLoopConfig, SampleTrimConfig, Slices)> {
             let mut wavs: Vec<WavFile> = Vec::new();
             for fp in wav_fps {
-                let wav = WavFile::from_pathbuf(&fp).unwrap();
+                let wav = WavFile::from_path(&fp).unwrap();
                 wavs.push(wav);
             }
 
@@ -536,7 +540,7 @@ mod tests {
         }
 
         fn read_valid_sample_chain(path: &PathBuf) -> RBoxErr<SampleAttributes> {
-            let read_chain = SampleAttributes::from_pathbuf(path).unwrap();
+            let read_chain = SampleAttributes::from_path(path).unwrap();
             Ok(read_chain)
         }
 

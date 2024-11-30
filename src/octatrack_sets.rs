@@ -6,13 +6,13 @@
 
 use log::debug;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::common::RBoxErr;
 use crate::utils::SampleFilePair;
 
-use serde_octatrack::{banks::Bank, projects::Project, FromPathBuf};
+use serde_octatrack::{banks::Bank, projects::Project, FromPath};
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
@@ -72,14 +72,14 @@ impl OctatrackSetProject {
             })
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
-            .map(|x| Bank::from_pathbuf(&x).unwrap())
+            .map(|x| Bank::from_path(&x).unwrap())
             .collect();
 
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
             dirpath: dirpath.clone(),
             sample_filepaths: Self::scan_dir_path_for_samples(dirpath).unwrap(),
-            project_work: Project::from_pathbuf(&dirpath.join("project.work")).unwrap(),
+            project_work: Project::from_path(&dirpath.join("project.work")).unwrap(),
             banks,
         })
     }
@@ -138,7 +138,7 @@ impl OctatrackSet {
 
     /// Create a collection of `OctatrackSet`s by recursively
     /// searching through a directory tree, starting at a given `PathBuf`
-    pub fn from_cfcard_pathbuf(path: &PathBuf) -> RBoxErr<Vec<Self>> {
+    pub fn from_cfcard_pathbuf(path: &Path) -> RBoxErr<Vec<Self>> {
         let ot_sets: Vec<Self> = WalkDir::new(path)
             .sort_by_file_name()
             .max_depth(1)

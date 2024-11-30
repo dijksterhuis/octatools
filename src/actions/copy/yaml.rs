@@ -4,9 +4,9 @@
 
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
-use serde_octatrack::FromPathBuf;
+use serde_octatrack::FromPath;
 use serde_yml::Error as SerdeYmlError;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// YAML section determining the input/output files for an individual sample chain.
 
@@ -21,12 +21,12 @@ pub struct YamlCopyBankConfig {
     pub bank_copies: Vec<YamlCopyBankDetails>,
 }
 
-impl FromPathBuf for YamlCopyBankConfig {
+impl FromPath for YamlCopyBankConfig {
     type T = Self;
 
     /// Read yaml config from file.
 
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn std::error::Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn std::error::Error>> {
         debug!("Reading YAML config file: {:#?}", &path);
 
         let f = std::fs::File::open(path)?;

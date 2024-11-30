@@ -5,8 +5,13 @@
 use crate::common::RBoxErr;
 use hound::{self, WavReader, WavSpec};
 use log::{debug, trace};
-use serde_octatrack::{FromPathBuf, ToPathBuf};
-use std::{error::Error, fs::File, io::BufReader, path::PathBuf};
+use serde_octatrack::{FromPath, ToPath};
+use std::{
+    error::Error,
+    fs::File,
+    io::BufReader,
+    path::{Path, PathBuf},
+};
 
 /// Representation of a wav audio file
 
@@ -27,7 +32,7 @@ pub struct WavFile {
 
 impl WavFile {
     /// Open a wav file into a read buffer
-    pub fn open(path: &PathBuf) -> Result<WavReader<BufReader<File>>, hound::Error> {
+    pub fn open(path: &Path) -> Result<WavReader<BufReader<File>>, hound::Error> {
         trace!("Opening WAV file: path={path:#?}");
         hound::WavReader::open(path)
     }
@@ -57,11 +62,11 @@ impl WavFile {
     }
 }
 
-impl FromPathBuf for WavFile {
+impl FromPath for WavFile {
     type T = WavFile;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
         trace!("Reading WAV file from path: {path:#?}");
         let mut reader = WavFile::open(path).unwrap();
 
@@ -75,7 +80,7 @@ impl FromPathBuf for WavFile {
 
         debug!("Read new WAV file: path={path:#?}");
         Ok(WavFile {
-            file_path: path.clone(),
+            file_path: path.to_path_buf(),
             samples: samples.clone(),
             len: samples.len() as u32 / spec.channels as u32,
             spec,
@@ -83,9 +88,9 @@ impl FromPathBuf for WavFile {
     }
 }
 
-impl ToPathBuf for WavFile {
+impl ToPath for WavFile {
     /// Crete a new file at the path from the current struct
-    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
+    fn to_path(&self, path: &Path) -> RBoxErr<()> {
         trace!("Writing WAV data to file: path={path:#?}");
         let mut writer = hound::WavWriter::create(path, self.spec)?;
 

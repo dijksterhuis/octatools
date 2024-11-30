@@ -8,7 +8,7 @@ use crate::common::RBoxErr;
 use serde_octatrack::{
     banks::Bank,
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
-    FromPathBuf,
+    FromPath,
 };
 
 /// Helper struct for tracking sample slots being used within a `Bank`.
@@ -37,7 +37,7 @@ impl TransferProjectMeta {
     fn from_pathbuf(fpath: &PathBuf) -> RBoxErr<Self> {
         let dirpath = Self::get_project_dirpath_from_bank_fpath(fpath)?;
         let path = dirpath.join("project.work");
-        let project = Project::from_pathbuf(&path).unwrap();
+        let project = Project::from_path(&path).unwrap();
 
         Ok(TransferProjectMeta {
             path,
@@ -71,8 +71,8 @@ pub struct TransferBank {
 impl TransferBank {
     pub fn new(src: &PathBuf, dest: &PathBuf) -> RBoxErr<Self> {
         Ok(TransferBank {
-            src: Bank::from_pathbuf(src)?,
-            dest: Bank::from_pathbuf(dest)?,
+            src: Bank::from_path(src)?,
+            dest: Bank::from_path(dest)?,
         })
     }
 }
@@ -145,11 +145,13 @@ pub fn get_active_sslot_ids(
                     info!("Found active Static sample plock: Pattern: {pattern_idx:#?} Track: {track_idx:#?} Trig: {plock_idx:#?} FlexSlot:{:#?}", plock.sample_lock_static);
                     active_slots.insert(x);
                 }
-                if plock.sample_lock_flex < 128 && project_sample_slot_is_populated(
+                if plock.sample_lock_flex < 128
+                    && project_sample_slot_is_populated(
                         project_slots,
                         &(plock.sample_lock_flex as u16),
                         &ProjectSampleSlotType::Flex,
-                    )? {
+                    )?
+                {
                     let x = ActiveSampleSlot {
                         slot_id: plock.sample_lock_flex,
                         sample_type: ProjectSampleSlotType::Flex,
