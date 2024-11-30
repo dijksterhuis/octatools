@@ -8,7 +8,7 @@ pub mod states;
 
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::PathBuf,
+    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::Path,
     str::FromStr,
 };
 
@@ -17,7 +17,8 @@ use crate::{
         metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
         slots::ProjectSampleSlot, states::ProjectStates,
     },
-    FromPathBuf, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToPathBuf,
+    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToPath,
+    ToYamlFile,
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
@@ -268,11 +269,11 @@ impl ProjectToString for Project {
     }
 }
 
-impl FromPathBuf for Project {
+impl FromPath for Project {
     type T = Project;
 
     /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
-    fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self> {
+    fn from_path(path: &Path) -> RBoxErr<Self> {
         let s = std::fs::read_to_string(path)?;
 
         let metadata = ProjectMetadata::from_string(&s)?;
@@ -290,8 +291,8 @@ impl FromPathBuf for Project {
     }
 }
 
-impl ToPathBuf for Project {
-    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
+impl ToPath for Project {
+    fn to_path(&self, path: &Path) -> RBoxErr<()> {
         let data = self.to_string()?;
         let mut f = File::create(path)?;
         f.write_all(data.as_bytes())?;
@@ -300,6 +301,9 @@ impl ToPathBuf for Project {
     }
 }
 
+impl ToYamlFile for Project {}
+impl FromYamlFile for Project {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -307,18 +311,20 @@ mod tests {
     mod test_read {
         use super::*;
 
+        use std::path::PathBuf;
+
         // can read a project file without errors
         #[test]
         fn test_read_default_project_work_file() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
-            assert!(Project::from_pathbuf(&infile).is_ok());
+            assert!(Project::from_path(&infile).is_ok());
         }
 
         // test that the metadata section is correct
         #[test]
         fn test_read_default_project_work_file_metadata() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
-            let p = Project::from_pathbuf(&infile).unwrap();
+            let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectMetadata::default();
 
@@ -329,7 +335,7 @@ mod tests {
         #[test]
         fn test_read_default_project_work_file_states() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
-            let p = Project::from_pathbuf(&infile).unwrap();
+            let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectStates::default();
 
@@ -340,7 +346,7 @@ mod tests {
         #[test]
         fn test_read_default_project_work_file_settings() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
-            let p = Project::from_pathbuf(&infile).unwrap();
+            let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectSettings::default();
 
@@ -351,7 +357,7 @@ mod tests {
         #[test]
         fn test_read_default_project_work_file_sslots() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
-            let p = Project::from_pathbuf(&infile).unwrap();
+            let p = Project::from_path(&infile).unwrap();
 
             // todo: need to check and sort out these values for a completely new blank projecct
             // first slot (129) below is apparently a flex assigned slot in the current BLANK
@@ -367,10 +373,10 @@ mod tests {
         fn test_read_write_default_project_work_file() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
             let outfile = PathBuf::from("/tmp/default_1.work");
-            let p = Project::from_pathbuf(&infile).unwrap();
-            let _ = p.to_pathbuf(&outfile);
+            let p = Project::from_path(&infile).unwrap();
+            let _ = p.to_path(&outfile);
 
-            let p_reread = Project::from_pathbuf(&outfile).unwrap();
+            let p_reread = Project::from_path(&outfile).unwrap();
 
             assert_eq!(p, p_reread)
         }

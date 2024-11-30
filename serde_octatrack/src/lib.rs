@@ -17,7 +17,10 @@ pub mod projects;
 pub mod samples;
 pub mod utils;
 
-use std::{error::Error, fmt::Debug, path::PathBuf};
+use std::{error::Error, fmt::Debug, path::Path};
+
+use serde::{Deserialize, Serialize};
+use serde_yml::Error as SerdeYmlError;
 
 // todo: sized errors so not necessary to keep Boxing error enum varients
 /// Shorthand type alias for a Result with a Boxed Error
@@ -69,16 +72,45 @@ trait OptionEnumValueConvert {
 }
 
 /// Trait to use when a new struct can be deserialised from some file or directory tree located at the specified path.
-pub trait FromPathBuf {
+pub trait FromPath {
     /// Type for `Self`
     type T;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn std::error::Error>>;
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn std::error::Error>>;
 }
 
 /// Trait to use when a new file(s) can be written at the specifed path by serializing a struct
-pub trait ToPathBuf {
+pub trait ToPath {
     /// Crete a new file at the path file location struct by serializing struct data.
-    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>>;
+    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>>;
+}
+
+pub trait ToYamlFile
+where
+    Self: Serialize,
+{
+    fn to_yaml(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        serde_yml::to_writer(
+            std::fs::File::options()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(path)
+                .unwrap(),
+            self,
+        )?;
+        Ok(())
+    }
+}
+
+pub trait FromYamlFile
+where
+    Self: for<'a> Deserialize<'a>,
+{
+    fn from_yaml(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+        let f = std::fs::File::open(path)?;
+        let data: Result<Self, SerdeYmlError> = serde_yml::from_reader(f);
+        Ok(data?)
+    }
 }

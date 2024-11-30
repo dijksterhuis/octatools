@@ -449,7 +449,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "0".to_string());
         let r = crate::projects::slots::parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Off);
+        assert_eq!(
+            r.unwrap(),
+            crate::samples::options::SampleAttributeLoopMode::Off
+        );
     }
 
     #[test]
@@ -457,7 +460,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "1".to_string());
         let r = crate::projects::slots::parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Normal);
+        assert_eq!(
+            r.unwrap(),
+            crate::samples::options::SampleAttributeLoopMode::Normal
+        );
     }
 
     #[test]
@@ -465,7 +471,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "2".to_string());
         let r = crate::projects::slots::parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::PingPong);
+        assert_eq!(
+            r.unwrap(),
+            crate::samples::options::SampleAttributeLoopMode::PingPong
+        );
     }
 
     #[test]
@@ -473,7 +482,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("loopmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
         let r = crate::projects::slots::parse_loop_mode(&hmap);
-        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeLoopMode::Off);
+        assert_eq!(
+            r.unwrap(),
+            crate::samples::options::SampleAttributeLoopMode::Off
+        );
     }
 
     #[test]
@@ -481,7 +493,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "0".to_string());
         let r = crate::projects::slots::parse_tstrech_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Off, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTimestrechMode::Off,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -489,7 +504,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "2".to_string());
         let r = crate::projects::slots::parse_tstrech_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Normal, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTimestrechMode::Normal,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -497,7 +515,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "3".to_string());
         let r = crate::projects::slots::parse_tstrech_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTimestrechMode::Beat, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTimestrechMode::Beat,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -505,7 +526,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("tsmode".to_string(), "AAAFSFSFSSFfssafAA".to_string());
         let r = crate::projects::slots::parse_tstrech_mode(&hmap);
-        assert_eq!(r.unwrap(), crate::samples::options::SampleAttributeTimestrechMode::Off);
+        assert_eq!(
+            r.unwrap(),
+            crate::samples::options::SampleAttributeTimestrechMode::Off
+        );
     }
 
     #[test]
@@ -524,7 +548,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "0".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::Direct, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTrigQuantizationMode::Direct,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -532,7 +559,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "1".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::OneStep, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTrigQuantizationMode::OneStep,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -540,7 +570,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "2".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::TwoSteps, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTrigQuantizationMode::TwoSteps,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -548,7 +581,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "3".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::ThreeSteps, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTrigQuantizationMode::ThreeSteps,
+            r.unwrap()
+        );
     }
 
     #[test]
@@ -556,7 +592,10 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trigquantization".to_string(), "4".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
-        assert_eq!(crate::samples::options::SampleAttributeTrigQuantizationMode::FourSteps, r.unwrap());
+        assert_eq!(
+            crate::samples::options::SampleAttributeTrigQuantizationMode::FourSteps,
+            r.unwrap()
+        );
     }
 
     // i'm not going to test every single option. we do that already elsewhere.

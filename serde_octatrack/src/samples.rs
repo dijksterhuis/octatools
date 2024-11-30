@@ -4,7 +4,7 @@ pub mod configs;
 pub mod options;
 pub mod slices;
 
-use std::{error::Error, fs::File, io::prelude::*, io::Write, path::PathBuf};
+use std::{error::Error, fs::File, io::prelude::*, io::Write, path::Path};
 
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
@@ -15,7 +15,7 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    FromPathBuf, OptionEnumValueConvert, RBoxErr, ToPathBuf,
+    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToPath, ToYamlFile,
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
@@ -307,11 +307,11 @@ impl SampleAttributes {
     }
 }
 
-impl FromPathBuf for SampleAttributes {
+impl FromPath for SampleAttributes {
     type T = SampleAttributes;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
         let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
@@ -322,9 +322,9 @@ impl FromPathBuf for SampleAttributes {
     }
 }
 
-impl ToPathBuf for SampleAttributes {
+impl ToPath for SampleAttributes {
     /// Crete a new file at the path from the current struct
-    fn to_pathbuf(&self, path: &PathBuf) -> RBoxErr<()> {
+    fn to_path(&self, path: &Path) -> RBoxErr<()> {
         let bytes: Vec<u8> = self.encode()?;
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
@@ -332,6 +332,9 @@ impl ToPathBuf for SampleAttributes {
         Ok(())
     }
 }
+
+impl ToYamlFile for SampleAttributes {}
+impl FromYamlFile for SampleAttributes {}
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
@@ -341,11 +344,11 @@ pub struct SampleAttributesRawBytes {
     pub data: [u8; 816],
 }
 
-impl FromPathBuf for SampleAttributesRawBytes {
+impl FromPath for SampleAttributesRawBytes {
     type T = SampleAttributesRawBytes;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
         let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
@@ -356,8 +359,8 @@ impl FromPathBuf for SampleAttributesRawBytes {
     }
 }
 
-impl ToPathBuf for SampleAttributesRawBytes {
-    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+impl ToPath for SampleAttributesRawBytes {
+    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());

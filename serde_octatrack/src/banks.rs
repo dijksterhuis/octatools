@@ -3,7 +3,7 @@
 pub mod parts;
 pub mod patterns;
 
-use std::{error::Error, fs::File, io::Read, io::Write, path::PathBuf};
+use std::{error::Error, fs::File, io::Read, io::Write, path::Path};
 
 use bincode;
 use serde::{Deserialize, Serialize};
@@ -11,7 +11,7 @@ use serde_big_array::{Array, BigArray};
 
 use crate::{
     banks::{parts::Part, patterns::Pattern},
-    FromPathBuf, RBoxErr, ToPathBuf,
+    FromPath, FromYamlFile, RBoxErr, ToPath, ToYamlFile,
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
@@ -57,11 +57,11 @@ pub struct Bank {
     pub remainder: [u8; 2],
 }
 
-impl FromPathBuf for Bank {
+impl FromPath for Bank {
     type T = Bank;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
         let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
@@ -72,8 +72,8 @@ impl FromPathBuf for Bank {
     }
 }
 
-impl ToPathBuf for Bank {
-    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+impl ToPath for Bank {
+    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
@@ -82,6 +82,9 @@ impl ToPathBuf for Bank {
     }
 }
 
+impl ToYamlFile for Bank {}
+impl FromYamlFile for Bank {}
+
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
 #[derive(Debug, Serialize, Deserialize)]
@@ -89,11 +92,11 @@ pub struct BankRawBytes {
     pub data: Box<Array<u8, 636113>>,
 }
 
-impl FromPathBuf for BankRawBytes {
+impl FromPath for BankRawBytes {
     type T = BankRawBytes;
 
     /// Crete a new struct by reading a file located at `path`.
-    fn from_pathbuf(path: &PathBuf) -> Result<Self::T, Box<dyn Error>> {
+    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
         let mut infile = File::open(path)?;
         let mut bytes: Vec<u8> = vec![];
         let _: usize = infile.read_to_end(&mut bytes)?;
@@ -104,8 +107,8 @@ impl FromPathBuf for BankRawBytes {
     }
 }
 
-impl ToPathBuf for BankRawBytes {
-    fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+impl ToPath for BankRawBytes {
+    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
         let bytes: Vec<u8> = bincode::serialize(&self)?;
         let mut file: File = File::create(path)?;
         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
@@ -117,14 +120,14 @@ impl ToPathBuf for BankRawBytes {
 #[cfg(test)]
 mod tests {
     use crate::banks::Bank;
-    use crate::{FromPathBuf, ToPathBuf};
+    use crate::{FromPath, ToPath};
     use std::path::PathBuf;
 
     #[test]
     fn test_read_bank_file_no_errors() {
         let bank_file_path: PathBuf =
             PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
-        let _: Bank = Bank::from_pathbuf(&bank_file_path).unwrap();
+        let _: Bank = Bank::from_path(&bank_file_path.as_path()).unwrap();
         assert!(true);
     }
 
@@ -133,8 +136,8 @@ mod tests {
         let src_file_path: PathBuf =
             PathBuf::from("data/tests/index-cf/DEV-OTsm/BLANK/bank01.work");
         let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
-        let bank: Bank = Bank::from_pathbuf(&src_file_path).unwrap();
-        let _ = bank.to_pathbuf(&dst_file_path);
+        let bank: Bank = Bank::from_path(&src_file_path).unwrap();
+        let _ = bank.to_path(&dst_file_path.as_path());
         assert!(true);
     }
 }
