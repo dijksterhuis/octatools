@@ -47,11 +47,11 @@ fn main() {
 
     match args.command {
         Commands::Drive(x) => match x {
-            crate::cli::Drive::Dump {cfcard_dir_path, yaml_file_path} => {
-                let _ = create_index_compact_flash_drive_yaml(
-                    &cfcard_dir_path,
-                    &yaml_file_path,
-                );
+            crate::cli::Drive::Dump {
+                cfcard_dir_path,
+                yaml_file_path,
+            } => {
+                let _ = create_index_compact_flash_drive_yaml(&cfcard_dir_path, &yaml_file_path);
             }
         },
         Commands::Projects(x) => match x {

@@ -8,8 +8,7 @@ pub mod states;
 
 use serde::{Deserialize, Serialize};
 use std::{
-    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::Path,
-    str::FromStr,
+    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::Path, str::FromStr,
 };
 
 use crate::{

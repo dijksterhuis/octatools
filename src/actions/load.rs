@@ -9,10 +9,7 @@ use serde_octatrack::{
 };
 
 /// Load binary file data from a YAML file
-pub fn load_from_yaml<T: FromYamlFile + ToPath>(
-    yaml_path: &Path,
-    outfile: &Path,
-) -> RBoxErr<()> {
+pub fn load_from_yaml<T: FromYamlFile + ToPath>(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
     let b = T::from_yaml(yaml_path).expect("Could not load YAML file");
     b.to_path(outfile).expect("Could not write data to file");
     Ok(())
