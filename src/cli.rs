@@ -158,10 +158,14 @@ pub enum Banks {
     // TODO: Change to Project Directory Path, then use Bank Numbers to select the bank file.
     // Safer as it guarantees the Octatrack directory structure is available.
     Copy {
-        /// File path of the source bank??.work or bank??.strd file
-        src_bank_file_path: PathBuf,
-        /// File path of the destination bank??.work or bank??.strd file
-        dest_bank_file_path: PathBuf,
+        /// File path of the source `bank??.work` or `bank??.strd` file
+        source_bank_filepath: PathBuf,
+        /// File path of the source project.work or project.strd file
+        source_project_filepath: PathBuf,
+        /// File path of the destination `bank??.work` or `bank??.strd` file
+        destination_bank_filepath: PathBuf,
+        /// File path of the destination `project.work` or `project.strd` file
+        destination_project_filepath: PathBuf,
     },
 
     /// Move Nx Banks from one location to another,

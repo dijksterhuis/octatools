@@ -200,13 +200,13 @@ impl Project {
             .slots
             .clone()
             .into_iter()
-            .find_position(|x| x.slot_id == *old_slot_id as u16 && x.sample_type == type_filt);
+            .find_position(|x| x.slot_id == *old_slot_id && x.sample_type == type_filt);
 
         // there are samples assigned to slots
         if sample_slot_find.is_some() {
             println!("Found matchin slot id");
             let mut sample_slot = sample_slot_find.clone().unwrap().1;
-            sample_slot.slot_id = *new_slot_id as u16;
+            sample_slot.slot_id = *new_slot_id;
             self.slots[sample_slot_find.unwrap().0] = sample_slot;
         }
 

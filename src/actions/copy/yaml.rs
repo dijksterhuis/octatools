@@ -11,9 +11,15 @@ use std::path::{Path, PathBuf};
 /// YAML section determining the input/output files for an individual sample chain.
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct YamlCopyDetails {
+    pub project: PathBuf,
+    pub bank: PathBuf,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YamlCopyBankDetails {
-    pub src: PathBuf,
-    pub dest: PathBuf,
+    pub src: YamlCopyDetails,
+    pub dest: YamlCopyDetails,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -139,10 +139,17 @@ fn main() {
                 let _ = show_bank_bytes(&path, &byte_start_idx, &n_bytes);
             }
             crate::cli::Banks::Copy {
-                src_bank_file_path,
-                dest_bank_file_path,
+                source_bank_filepath,
+                source_project_filepath,
+                destination_bank_filepath,
+                destination_project_filepath,
             } => {
-                let _ = copy_bank(&src_bank_file_path, &dest_bank_file_path);
+                let _ = copy_bank(
+                    &source_bank_filepath,
+                    &source_project_filepath,
+                    &destination_bank_filepath,
+                    &destination_project_filepath,
+                );
             }
             crate::cli::Banks::CopyN { yaml_file_path } => {
                 let _ = batch_copy_banks(&yaml_file_path);

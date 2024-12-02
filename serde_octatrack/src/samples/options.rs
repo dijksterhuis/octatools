@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Sample attributes Timestrech options.
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
-#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
+#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy, Hash, Eq)]
 pub enum SampleAttributeTimestrechMode {
     /// No timestreching applied.
     #[default]
@@ -43,7 +43,7 @@ impl OptionEnumValueConvert for SampleAttributeTimestrechMode {
 /// Sample attributes Loop mode options.
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
 
-#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
+#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy, Hash, Eq)]
 pub enum SampleAttributeLoopMode {
     /// Loop points are ignored and sample will never loop.
     #[default]
@@ -82,7 +82,7 @@ impl OptionEnumValueConvert for SampleAttributeLoopMode {
 /// (quantization when manually triggering samples via track buttons).
 /// See Octatrack Manaul section 13.2.4 ATTRIBUTES
 
-#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy)]
+#[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy, Hash, Eq)]
 pub enum SampleAttributeTrigQuantizationMode {
     /// Play back immediately, no quantization.
     #[default]

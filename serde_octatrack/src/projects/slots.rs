@@ -37,7 +37,7 @@ use crate::{
     OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
 };
 
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Eq, Hash)]
 pub struct ProjectSampleSlot {
     // TODO: Should recording buffers be treated as a separate slot type?
     /// Type of sample: STATIC or FLEX
@@ -46,14 +46,14 @@ pub struct ProjectSampleSlot {
     /// String ID Number of the slot the sample is assigned to e.g. 001, 002, 003...
     /// Maximum of 128 entries for STATIC sample slots, but can be up to 136 for flex
     /// slots as there are 8 recorders + 128 flex slots.
-    pub slot_id: u16,
+    pub slot_id: u8,
 
     /// Relative path to the file on the card from the project directory.
     pub path: PathBuf,
 
     // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current bar trim (float). This is multiplied by 100 on the machine.
-    pub trim_bars: f32,
+    pub trim_bars_x100: u16,
 
     /// Current `SampleTimestrechModes` setting for the specific slot. Example: `TSMODE=2`
     pub timestrech_mode: SampleAttributeTimestrechMode,
@@ -75,6 +75,31 @@ pub struct ProjectSampleSlot {
 }
 
 impl ProjectSampleSlot {
+    pub fn new(
+        sample_type: ProjectSampleSlotType,
+        slot_id: u8,
+        path: PathBuf,
+        trim_bars_x100: Option<u16>,
+        timestretch_mode: Option<SampleAttributeTimestrechMode>,
+        loop_mode: Option<SampleAttributeLoopMode>,
+        trig_quantization_mode: Option<SampleAttributeTrigQuantizationMode>,
+        gain: Option<i8>,
+        bpm: Option<u16>,
+    ) -> RBoxErr<Self> {
+        Ok(ProjectSampleSlot {
+            sample_type,
+            slot_id,
+            path,
+            trim_bars_x100: trim_bars_x100.unwrap_or(0),
+            timestrech_mode: timestretch_mode.unwrap_or(SampleAttributeTimestrechMode::Normal),
+            loop_mode: loop_mode.unwrap_or(SampleAttributeLoopMode::Off),
+            trig_quantization_mode: trig_quantization_mode
+                .unwrap_or(SampleAttributeTrigQuantizationMode::PatternLength),
+            gain: gain.unwrap_or(24),
+            bpm: bpm.unwrap_or(120),
+        })
+    }
+
     /// Create a default vector of Projet Sample Slots; 8x Recorder Buffers.
     pub fn default_vec() -> Vec<Self> {
         [
@@ -82,7 +107,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 129,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -93,7 +118,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 130,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -104,7 +129,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 131,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -115,7 +140,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 132,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -126,7 +151,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 133,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -137,7 +162,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 134,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -148,7 +173,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 135,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -159,7 +184,7 @@ impl ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 136,
                 path: PathBuf::from(""),
-                trim_bars: 0.0,
+                trim_bars_x100: 0,
                 timestrech_mode: SampleAttributeTimestrechMode::Normal,
                 loop_mode: SampleAttributeLoopMode::Off,
                 trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
@@ -171,10 +196,10 @@ impl ProjectSampleSlot {
     }
 }
 
-fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
+fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u8> {
     println!("{hmap:#?}");
 
-    let x = parse_hashmap_string_value::<u16>(hmap, "slot", None);
+    let x = parse_hashmap_string_value::<u8>(hmap, "slot", None);
 
     // ParseIntError doesn't allow ? usage
     if x.is_err() {
@@ -186,9 +211,9 @@ fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
     Ok(x.unwrap())
 }
 
-fn parse_trim_bars(hmap: &HashMap<String, String>) -> RBoxErr<f32> {
-    let x = parse_hashmap_string_value::<f32>(hmap, "trim_barsx100", Some("0")).unwrap_or(0.0_f32);
-    Ok(x / 100.0_f32)
+fn parse_trim_bars(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
+    let x = parse_hashmap_string_value::<u16>(hmap, "trim_barsx100", Some("0")).unwrap_or(0);
+    Ok(x)
 }
 
 fn parse_loop_mode(hmap: &HashMap<String, String>) -> RBoxErr<SampleAttributeLoopMode> {
@@ -252,7 +277,7 @@ impl FromHashMap for ProjectSampleSlot {
             slot_id,
             path,
             // file_pair,
-            trim_bars,
+            trim_bars_x100: trim_bars,
             timestrech_mode,
             loop_mode,
             trig_quantization_mode,
@@ -336,7 +361,7 @@ impl ProjectToString for ProjectSampleSlot {
         s.push_str("\r\n");
         s.push_str(format!("PATH={:#?}", self.path).replace('"', "").as_str());
         s.push_str("\r\n");
-        s.push_str(format!("TRIM_BARSx100={}", (self.trim_bars * 100.0) as u16).as_str());
+        s.push_str(format!("TRIM_BARSx100={}", self.trim_bars_x100).as_str());
         s.push_str("\r\n");
         s.push_str(format!("TSMODE={}", self.timestrech_mode.value().unwrap()).as_str());
         s.push_str("\r\n");
@@ -430,7 +455,7 @@ mod test {
         let mut hmap = std::collections::HashMap::new();
         hmap.insert("trim_barsx100".to_string(), "100".to_string());
         let r = crate::projects::slots::parse_trim_bars(&hmap);
-        assert_eq!(1.0_f32, r.unwrap());
+        assert_eq!(100, r.unwrap());
     }
 
     #[test]
@@ -441,7 +466,7 @@ mod test {
             "AAAFSFSFSSFfssafAA".to_string(),
         );
         let r = crate::projects::slots::parse_trim_bars(&hmap);
-        assert_eq!(r.unwrap(), 0.0_f32);
+        assert_eq!(r.unwrap(), 0);
     }
 
     #[test]

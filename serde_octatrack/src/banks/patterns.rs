@@ -1,9 +1,12 @@
 //! Serialization and Deserialization of Pattern related data for Bank files.
 
-use crate::banks::parts::{
-    AudioTrackAmpParamsValues, AudioTrackFxParamsValues, LfoParamsValues, MidiTrackArpParamsValues,
-    MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues, MidiTrackLfoParamsValues,
-    MidiTrackMidiParamsValues,
+use crate::{
+    banks::parts::{
+        AudioTrackAmpParamsValues, AudioTrackFxParamsValues, LfoParamsValues,
+        MidiTrackArpParamsValues, MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues,
+        MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
+    },
+    projects::options::ProjectSampleSlotType,
 };
 
 use serde::{Deserialize, Serialize};
@@ -57,8 +60,10 @@ pub struct AudioTrackParameterLocks {
     pub amp: AudioTrackAmpParamsValues,
     pub fx1: AudioTrackFxParamsValues,
     pub fx2: AudioTrackFxParamsValues,
-    pub sample_lock_static: u8,
-    pub sample_lock_flex: u8,
+    /// P-Lock to change an audio track's static machine sample slot assignment per trig
+    pub static_slot_id: u8,
+    /// P-Lock to change an audio track's flex machine sample slot assignment per trig
+    pub flex_slot_id: u8,
 }
 
 /// MIDI Track parameter locks.
@@ -531,11 +536,26 @@ pub struct Pattern {
 }
 
 impl Pattern {
-    pub fn update_static_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
+    pub fn update_plock_sample_slots(
+        &mut self,
+        sample_type: &ProjectSampleSlotType,
+        old: &u8,
+        new: &u8,
+    ) -> RBoxErr<()> {
         for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
             for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
-                if plock.sample_lock_static == *old {
-                    plock.sample_lock_static = *new;
+                match sample_type {
+                    ProjectSampleSlotType::Static => {
+                        if plock.static_slot_id == *old {
+                            plock.static_slot_id = *new;
+                        }
+                    }
+                    ProjectSampleSlotType::Flex => {
+                        if plock.flex_slot_id == *old {
+                            plock.flex_slot_id = *new;
+                        }
+                    }
+                    ProjectSampleSlotType::RecorderBuffer => {}
                 }
             }
         }
@@ -544,8 +564,8 @@ impl Pattern {
     pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
         for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
             for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
-                if plock.sample_lock_flex == *old {
-                    plock.sample_lock_flex = *new;
+                if plock.flex_slot_id == *old {
+                    plock.flex_slot_id = *new;
                 }
             }
         }

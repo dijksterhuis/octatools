@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
-use crate::RBoxErr;
+use crate::{projects::options::ProjectSampleSlotType, RBoxErr};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub enum OnOrOff {
@@ -660,10 +660,25 @@ pub struct Part {
 }
 
 impl Part {
-    pub fn update_static_machine_slot(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
+    pub fn update_machine_sample_slot(
+        &mut self,
+        sample_type: &ProjectSampleSlotType,
+        old: &u8,
+        new: &u8,
+    ) -> RBoxErr<()> {
         for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
-            if audio_track_slots.static_slot_id == *old {
-                audio_track_slots.static_slot_id = *new;
+            match sample_type {
+                ProjectSampleSlotType::Static => {
+                    if audio_track_slots.static_slot_id == *old {
+                        audio_track_slots.static_slot_id = *new;
+                    }
+                }
+                ProjectSampleSlotType::Flex => {
+                    if audio_track_slots.flex_slot_id == *old {
+                        audio_track_slots.flex_slot_id = *new;
+                    }
+                }
+                ProjectSampleSlotType::RecorderBuffer => {}
             }
         }
 
