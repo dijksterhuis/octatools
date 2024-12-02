@@ -94,7 +94,8 @@ octatools index cfcard <CF_CARD_PATH> [OUTPUT_YAML_FILE_PATH]
 
 - `./assets/` contains the project logo.
 - `./data/tests/` contains data for running the tests, or trying out some commands.
-- `./examples/yaml/` contains some examples on how to do batch operations for copying banks and creating sample chains.
+- `./examples/yaml/confs` contains some examples on how to do batch operations for copying banks and creating sample chains.
+- `./examples/yaml/dumps` contains some example yaml dumps of Octatrack data structures
 - `./serde_octatrack` contains the library for serialization and deserialization of octatrack files. 
 - `./src` contains the CLI commands code.
 
