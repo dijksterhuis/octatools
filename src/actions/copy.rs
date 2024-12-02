@@ -41,12 +41,11 @@ mod yaml;
 use log::{debug, error, info, warn};
 use serde_octatrack::projects::Project;
 
-// use crate::actions::copy::utils::find_free_sample_slot_ids;
 use crate::actions::copy::yaml::YamlCopyBankConfig;
 use crate::common::RBoxErr;
 use std::{
     collections::HashSet,
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
 
 use serde_octatrack::{
@@ -225,24 +224,24 @@ fn find_active_sample_slots(
     Ok(active_slots.into_iter().collect())
 }
 
-/// ### Copy a bank from one project / bank to another project / bank.
+/// ### Copy a bank from one project to another project.
 ///
 /// Main function for the `octatools copy bank` command, making it possible to
 /// (somewhat safely) move any Octatrack Bank to a new location.
 ///
 /// During a transfers, this
-/// 1. searches for 'active' sample slots in the source Project
-/// 2. copies source slots over to available free sample slots in the destination Project
-/// 3. mutates all references to the source sample slots in the source Bank
-/// 4. copys the source sample files to the Project's Set Audio Pool -- TODO: not working yet?
-/// 5. writes over the destination Project and Bank with new data.
+/// 1. searches for 'active' project sample slots used in the source bank
+/// 2. copies source slots over to available free sample slots in the destination project
+/// 3. mutates all references to the source sample slots in the source bank
+/// 4. copys the source sample files to the project's audio pool
+/// 5. writes over the destination project and bank with new data.
 ///
 /// A couple of important quirks to highlight:
 /// - All 'active' sample files from the source project are consolidated into the
 /// destination Set audio pool (the Set which the destination Project belongs to).
-/// - Sample slots are not de-duplicated or tested for uniqueness. If you have a
-/// lot of duplicate sample slots across Banks you are transferring then you may need to
-/// perform some clean up later.
+/// - Sample slots are not de-duplicated or tested for uniqueness against existing
+/// destination sample slots. If you have a lot of duplicate sample slots across
+/// banks then you may need to do some clean up.
 /// - 'Inactive' sample files will not be moved or copied. Only sample slots that
 /// match the following criteria will be copied:
 ///     - have been assigned to a sample slot within the source Project
