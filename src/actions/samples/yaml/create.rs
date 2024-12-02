@@ -9,7 +9,7 @@ use serde_octatrack::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 
-use crate::common::{FromYamlFile, ToYamlFile};
+use serde_octatrack::{FromYamlFile, ToYamlFile};
 
 // TODO: normalization
 // TODO: fades

@@ -439,22 +439,22 @@ pub enum Drive {
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     #[command(subcommand)]
-    Drive(Drive),
-
-    #[command(subcommand)]
-    Projects(Projects),
-
-    #[command(subcommand)]
     Arrangements(Arrangements),
 
     #[command(subcommand)]
     Banks(Banks),
 
     #[command(subcommand)]
-    Patterns(Patterns),
+    Drive(Drive),
 
     #[command(subcommand)]
     Parts(Parts),
+
+    #[command(subcommand)]
+    Patterns(Patterns),
+
+    #[command(subcommand)]
+    Projects(Projects),
 
     #[command(subcommand)]
     Samples(Samples),

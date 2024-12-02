@@ -35,24 +35,62 @@ PROJECT FILES
 - DEST WITH JUST ENOUGH FREE SAMPLE SLOTS (test that sample slot counts are correct)
 */
 
-mod utils;
 mod yaml;
 
 use log::{debug, error, info, warn};
 use serde_octatrack::projects::Project;
 
-use crate::actions::copy::yaml::YamlCopyBankConfig;
-use crate::common::RBoxErr;
+use crate::{
+    actions::{banks::yaml::YamlCopyBankConfig, get_bytes_slice, load_from_yaml},
+    common::RBoxErr,
+};
 use std::{
     collections::HashSet,
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use serde_octatrack::{
-    banks::Bank,
+    banks::{Bank, BankRawBytes},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot},
-    FromPath, ToPath,
+    FromPath, ToPath, ToYamlFile,
 };
+
+/// Show deserialised representation of a Sample Attributes file at `path`
+pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
+    let b = Bank::from_path(path).expect("Could not load bank file");
+    println!("{b:#?}");
+    Ok(())
+}
+
+/// Show bytes output as u8 values for a Sample Attributes file located at `path`
+pub fn show_bank_bytes(
+    path: &PathBuf,
+    start_idx: &Option<usize>,
+    len: &Option<usize>,
+) -> RBoxErr<()> {
+    let bytes = get_bytes_slice(
+        BankRawBytes::from_path(path)
+            .expect("Could not load ot file")
+            .data
+            .to_vec(),
+        start_idx,
+        len,
+    );
+    println!("{:#?}", bytes);
+    Ok(())
+}
+
+/// Load Bank file data from a YAML file
+pub fn load_bank(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
+    load_from_yaml::<Bank>(yaml_path, outfile)
+}
+
+/// Dump Bank file data to a YAML file
+pub fn dump_bank(bank_path: &Path, yaml_path: &Path) -> RBoxErr<()> {
+    let b = Bank::from_path(bank_path).expect("Could not load bank file");
+    let _ = b.to_yaml(yaml_path);
+    Ok(())
+}
 
 /// Find free sample slot locations in a `Project`
 fn find_free_sample_slot_ids(

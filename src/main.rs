@@ -14,23 +14,19 @@ use env_logger::{Builder, Target};
 use log::LevelFilter;
 
 use actions::{
-    chains::{
-        create_equally_sliced_sample, create_randomly_sliced_sample,
+    arrangements::{dump_arrangement, load_arrangement, show_arrangement, show_arrangement_bytes},
+    banks::{batch_copy_banks, copy_bank, dump_bank, load_bank, show_bank, show_bank_bytes},
+    drive::create_index_compact_flash_drive_yaml,
+    parts::{show_saved_parts, show_unsaved_parts},
+    patterns::show_pattern,
+    projects::{dump_project, list_project_sample_slots, load_project, show_project},
+    samples::{
+        create_equally_sliced_sample, create_index_samples_dir_full,
+        create_index_samples_dir_simple, create_randomly_sliced_sample,
         create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
         deconstruct_samplechain_from_pathbufs_only, deconstruct_samplechains_from_yaml,
+        dump_ot_file, load_ot_file, show_ot_file, show_ot_file_bytes,
     },
-    copy::{batch_copy_banks, copy_bank},
-    dump::{dump_arrangement, dump_bank, dump_ot_file, dump_project},
-    indexing::{
-        create_index_compact_flash_drive_yaml, create_index_samples_dir_full,
-        create_index_samples_dir_simple,
-    },
-    inspect::{
-        show_arrangement, show_arrangement_bytes, show_bank, show_bank_bytes, show_ot_file,
-        show_ot_file_bytes, show_pattern, show_project, show_saved_parts, show_unsaved_parts,
-    },
-    list::list_project_sample_slots,
-    load::{load_arrangement, load_bank, load_ot_file, load_project},
 };
 
 use cli::{Cli, Commands};

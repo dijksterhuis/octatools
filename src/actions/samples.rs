@@ -4,7 +4,7 @@ mod yaml;
 
 use log::{debug, info, trace};
 use rand::Rng;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use serde_octatrack::{
     samples::{
@@ -14,21 +14,63 @@ use serde_octatrack::{
             SampleAttributeTrigQuantizationMode,
         },
         slices::{Slice, Slices},
-        SampleAttributes,
+        SampleAttributes, SampleAttributesRawBytes,
     },
-    FromPath, ToPath,
+    FromPath, FromYamlFile, ToPath, ToYamlFile,
 };
 
 use crate::{
+    actions::{get_bytes_slice, load_from_yaml},
     audio::wav::WavFile,
-    common::{FromYamlFile, RBoxErr},
+    common::RBoxErr,
     utils::{
         create_slices_from_wavfiles, get_otsample_nbars_from_wavfile,
         get_otsample_nbars_from_wavfiles,
     },
 };
 
-use yaml::{create::YamlChainCreate, deconstruct::YamlChainDeconstruct};
+use yaml::{
+    create::YamlChainCreate,
+    deconstruct::YamlChainDeconstruct,
+    samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple},
+};
+
+/// Show deserialised representation of a Sample Attributes file at `path`
+pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
+    let b = SampleAttributes::from_path(path).expect("Could not load ot file");
+    println!("{b:#?}");
+    Ok(())
+}
+
+/// Show bytes output as u8 values for a Sample Attributes file located at `path`
+pub fn show_ot_file_bytes(
+    path: &PathBuf,
+    start_idx: &Option<usize>,
+    len: &Option<usize>,
+) -> RBoxErr<()> {
+    let bytes = get_bytes_slice(
+        SampleAttributesRawBytes::from_path(path)
+            .expect("Could not load ot file")
+            .data
+            .to_vec(),
+        start_idx,
+        len,
+    );
+    println!("{:#?}", bytes);
+    Ok(())
+}
+
+/// Load Sample Attributes file data from a YAML file
+pub fn load_ot_file(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
+    load_from_yaml::<SampleAttributes>(yaml_path, outfile)
+}
+
+/// Dump Sample Attributes file data to a YAML file
+pub fn dump_ot_file(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
+    let b = SampleAttributes::from_path(path).expect("Could not load ot file");
+    let _ = b.to_yaml(yaml_path);
+    Ok(())
+}
 
 /// Chain together a wav sample vector into individual wav file(s).
 ///
@@ -434,7 +476,7 @@ mod tests {
 
     mod chain_deconstruct {
 
-        use crate::actions::chains::deconstruct_samplechain_from_pathbufs_only;
+        use crate::actions::samples::deconstruct_samplechain_from_pathbufs_only;
         use std::{fs, path::PathBuf};
         use walkdir::{DirEntry, WalkDir};
 
@@ -795,4 +837,46 @@ mod tests {
             assert!(composed_chain.is_err());
         }
     }
+}
+
+pub fn create_index_samples_dir_simple(
+    samples_dir_path: &PathBuf,
+    yaml_file_path: &Option<PathBuf>,
+) -> RBoxErr<()> {
+    debug!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
+    let sample_index = SamplesDirIndexSimple::new(samples_dir_path).unwrap_or_else(|_| {
+        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
+    });
+
+    // TODO: clone
+    if !yaml_file_path.is_none() {
+        let yml = yaml_file_path
+            .as_ref()
+            .expect("No option provided, cannot write to None!");
+
+        debug!("Writing SamplesDir index to yaml file: path={yml:#?}");
+        let _ = sample_index.to_yaml(yml);
+    };
+
+    Ok(())
+}
+
+pub fn create_index_samples_dir_full(
+    samples_dir_path: &PathBuf,
+    yaml_file_path: &Option<PathBuf>,
+) -> RBoxErr<()> {
+    let sample_index = SamplesDirIndexFull::new(samples_dir_path).unwrap_or_else(|_| {
+        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
+    });
+
+    // TODO: clone
+    if !yaml_file_path.is_none() {
+        let yml = yaml_file_path
+            .as_ref()
+            .expect("No option provided, cannot write to None!");
+
+        debug!("Writing SamplesDir index to yaml file: path={yml:#?}");
+        let _ = sample_index.to_yaml(yml);
+    }
+    Ok(())
 }

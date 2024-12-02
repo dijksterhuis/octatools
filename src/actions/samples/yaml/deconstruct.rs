@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use crate::common::{FromYamlFile, ToYamlFile};
+use serde_octatrack::{FromYamlFile, ToYamlFile};
 
 /// YAML section which globally affects all chains being created with the loaded config.
 #[derive(Debug, Serialize, Deserialize, Clone)]
