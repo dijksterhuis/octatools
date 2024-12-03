@@ -7,34 +7,9 @@ use std::path::{Path, PathBuf};
 
 use serde_octatrack::{FromPath, FromYamlFile, ToYamlFile};
 
-use crate::octatrack_sets::OctatrackSet;
+use crate::octatrack_sets::OctatrackSetFiles;
 /// A single row of data written to the index file.
 use crate::RBoxErr;
-
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct CompactFlashScanCsvRow {
-    /// Disk name of the card
-    cfcard: String,
-
-    /// Octatrack Set this row is a member of
-    set: String,
-
-    /// File name of an indexed audio file.
-    audio_name: String,
-
-    /// File path of an indexed audio file.
-    audio_filepath: PathBuf,
-
-    /// File path of an indexed `.ot` Octatrack sample metadata settings file.
-    ot_filepath: Option<PathBuf>,
-
-    /// Whether this these files are part of the Set's Audio Pool,
-    /// or contained in a specific Octatrack Project.
-    is_set_audio_pool: bool,
-
-    /// The Octatrack Project these files are related to.
-    project: Option<String>,
-}
 
 /// A compact flash card which we need to scan for audio files.
 
@@ -44,7 +19,7 @@ pub struct CompactFlashDrive {
     cfcard_path: PathBuf,
 
     /// Octatrack Sets on the compact flash card.
-    ot_sets: Vec<OctatrackSet>,
+    ot_sets: Vec<OctatrackSetFiles>,
 }
 
 impl FromYamlFile for CompactFlashDrive {}
@@ -55,7 +30,7 @@ impl FromPath for CompactFlashDrive {
 
     /// Crete a new struct by reading a file located at `path`.
     fn from_path(path: &Path) -> RBoxErr<Self::T> {
-        let ot_sets = OctatrackSet::from_cfcard_pathbuf(path).unwrap();
+        let ot_sets = OctatrackSetFiles::from_cfcard_pathbuf(path)?;
 
         let cf = CompactFlashDrive {
             // todo: clone :/
@@ -67,15 +42,22 @@ impl FromPath for CompactFlashDrive {
     }
 }
 
+
+
+
+
 #[cfg(test)]
-mod tests {
+mod test {
+    use serde_octatrack::FromYamlFile;
+
     use super::*;
 
-    // TODO: Need to test the output
     #[test]
-    fn test_indexing_cfcard_sets() {
-        let cfcard_path = PathBuf::from("data/tests/drive/");
-        let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_path(&cfcard_path);
-        assert!(res.is_ok());
+    fn from_yaml_ok() {
+        let testyaml = PathBuf::from("data/tests/drive/test.yml");
+
+        let r = CompactFlashDrive::from_yaml(&testyaml);
+        assert!(r.is_ok());
     }
+
 }

@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::utils::SampleFilePair;
-use crate::RBoxErr;
+use crate::{RBoxErr, OctatoolErrors};
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
@@ -33,7 +33,7 @@ pub trait SearchForOctatrackSampleFilePair {
 /// Octatrack Projects that are contained within an Octatrack Set.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct OctatrackSetProject {
+pub struct OctatrackSetProjectFiles {
     /// Name of this Project (directory basename)
     pub name: String,
 
@@ -56,14 +56,17 @@ pub struct OctatrackSetProject {
     pub markers: Vec<PathBuf>,
 }
 
-impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
+impl SearchForOctatrackSampleFilePair for OctatrackSetProjectFiles {}
 
-impl OctatrackSetProject {
+impl OctatrackSetProjectFiles {
     /// Create a new `OctatrackSetProject` from the dirpath `PathBuf`.
     pub fn from_pathbuf(dirpath: &PathBuf) -> RBoxErr<Self> {
         // TODO: Handle looking for .work / .strd
+        if !dirpath.exists() {
+            return Err(Box::new(OctatoolErrors::PathDoesNotExist));
+        }
         if !dirpath.is_dir() {
-            return Err(Box::new(crate::OctatoolErrors::PathNotADirectory));
+            return Err(Box::new(OctatoolErrors::PathIsNotADirectory));
         }
 
         let projects: Vec<PathBuf> = WalkDir::new(dirpath)
@@ -117,7 +120,7 @@ impl OctatrackSetProject {
 /// An Audio Pool from some Octatrack Set.
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct OctatrackSetAudioPool {
+pub struct OctatrackSetAudioPoolFiles {
     /// Name of this Audio Pool (directory basename). Should always be `'AUDIO'`.
     pub name: String,
 
@@ -129,9 +132,9 @@ pub struct OctatrackSetAudioPool {
     pub samples: Vec<SampleFilePair>,
 }
 
-impl SearchForOctatrackSampleFilePair for OctatrackSetAudioPool {}
+impl SearchForOctatrackSampleFilePair for OctatrackSetAudioPoolFiles {}
 
-impl OctatrackSetAudioPool {
+impl OctatrackSetAudioPoolFiles {
     /// Create a new `OctatrackSetAudioPool` from a `PathBuf`.
     pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self> {
         Ok(Self {
@@ -144,7 +147,7 @@ impl OctatrackSetAudioPool {
 
 /// An Octatrack 'Set'. Each 'Set' contains multiple Octatrack 'Project's and a single 'Audio Pool'.
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
-pub struct OctatrackSet {
+pub struct OctatrackSetFiles {
     /// Name of this set (the directory basename).
     pub name: String,
 
@@ -152,13 +155,13 @@ pub struct OctatrackSet {
     pub path: PathBuf,
 
     /// The 'Audio Pool' for this Set.
-    pub audio_pool: OctatrackSetAudioPool,
+    pub audio_pool: OctatrackSetAudioPoolFiles,
 
     /// Projects which are members of this Set.
-    pub projects: Vec<OctatrackSetProject>,
+    pub projects: Vec<OctatrackSetProjectFiles>,
 }
 
-impl OctatrackSet {
+impl OctatrackSetFiles {
     // TODO: Rename this?
 
     /// Create a collection of `OctatrackSet`s by recursively
@@ -187,24 +190,25 @@ impl OctatrackSet {
     }
 
     /// For a given `PathBuf` to a Set directory, gather information about Octatrack Projects and the Audio Pool.
-    pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Option<OctatrackSet>> {
+    pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Option<OctatrackSetFiles>> {
         if !path.exists() {
-            panic!("Path does not exist: path={path:#?}");
+            return Err(Box::new(OctatoolErrors::PathDoesNotExist));
         }
         if !path.is_dir() {
-            panic!("Path is not a directory: path={path:#?}");
+            return Err(Box::new(OctatoolErrors::PathIsNotADirectory));
         }
 
         let audio_pool_path = path.join("AUDIO");
         if !audio_pool_path.exists() {
-            panic!("Path is not a Set (no 'AUDIO' sub-directory found): path={path:#?}");
+            return Err(Box::new(OctatoolErrors::PathIsNotASet));
         }
 
-        let audio_pool = OctatrackSetAudioPool::from_pathbuf(&audio_pool_path).expect(
+        let audio_pool = OctatrackSetAudioPoolFiles::from_pathbuf(&audio_pool_path)
+        .expect(
             "Could not gather information about Set Audio Pool: audioPoolPath={audio_pool_path:#?}",
         );
 
-        let projects: Vec<OctatrackSetProject> = WalkDir::new(path)
+        let projects: Vec<OctatrackSetProjectFiles> = WalkDir::new(path)
             .sort_by_file_name()
             .max_depth(1)
             .min_depth(1)
@@ -213,16 +217,59 @@ impl OctatrackSet {
             .map(|d| {
                 let unwrapped = d.unwrap();
                 let project_path = unwrapped.path().to_path_buf();
-                let project = OctatrackSetProject::from_pathbuf(&project_path);
+                let project = OctatrackSetProjectFiles::from_pathbuf(&project_path);
                 project.unwrap()
             })
             .collect();
 
-        Ok(Some(OctatrackSet {
+        Ok(Some(OctatrackSetFiles {
             audio_pool,
             projects,
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
             path: path.clone(),
         }))
     }
+}
+
+#[cfg(test)]
+mod test {
+
+    use super::*;
+
+    #[test]
+    fn project_fails_to_load_bad_path() {
+        let fp = PathBuf::from("akfhjsdkjffskfhskjfhfshfjhfsdkjfsdksf");
+        let r = OctatrackSetProjectFiles::from_pathbuf(&fp);
+        assert!(r.is_err());
+    }
+
+    #[test]
+    fn project_fails_to_load_bad_dir() {
+        let fp = PathBuf::from("./README.md");
+        let r = OctatrackSetProjectFiles::from_pathbuf(&fp);
+        assert!(r.is_err());
+    }
+
+    #[test]
+    fn set_fails_to_load_bad_path() {
+        let fp = PathBuf::from("akfhjsdkjffskfhskjfhfshfjhfsdkjfsdksf");
+        let r = OctatrackSetFiles::from_pathbuf(&fp);
+        assert!(r.is_err());
+    }
+
+    #[test]
+    fn set_fails_to_load_bad_dir() {
+        let fp = PathBuf::from("./README.md");
+        let r = OctatrackSetFiles::from_pathbuf(&fp);
+        assert!(r.is_err());
+    }
+
+    #[test]
+    fn set_fails_to_load_not_a_set() {
+        let fp = PathBuf::from("./src/");
+        let r = OctatrackSetFiles::from_pathbuf(&fp);
+        assert!(r.is_err());
+    }
+
+
 }

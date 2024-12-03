@@ -19,7 +19,7 @@ use std::error::Error;
 use actions::{
     arrangements::{dump_arrangement, load_arrangement, show_arrangement, show_arrangement_bytes},
     banks::{batch_copy_banks, copy_bank, dump_bank, load_bank, show_bank, show_bank_bytes},
-    drive::create_index_compact_flash_drive_yaml,
+    drive::create_file_index_yaml,
     parts::{show_saved_parts, show_unsaved_parts},
     patterns::show_pattern,
     projects::{dump_project, list_project_sample_slots, load_project, show_project},
@@ -37,13 +37,27 @@ pub type RVoidError<T> = Result<T, ()>;
 
 #[derive(Debug)]
 pub enum OctatoolErrors {
-    PathNotADirectory,
+    PathDoesNotExist,
+    PathIsNotADirectory,
+    PathIsNotAFile,
+    PathIsNotASet,
+    CliInvalidPartIndices,
+    CliMissingPartIndices,
+    CliInvalidPatternIndices,
+    CliMissingPatternIndices,
     Unknown,
 }
 impl std::fmt::Display for OctatoolErrors {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Self::PathNotADirectory => write!(f, "pathbuf is not a directory"),
+            Self::PathDoesNotExist => write!(f, "path does not exist"),
+            Self::PathIsNotADirectory => write!(f, "path is not a directory"),
+            Self::PathIsNotAFile => write!(f, "path is not a file"),
+            Self::PathIsNotASet => write!(f, "path is not an Octatrack set directory (no 'AUDIO' subdirectory found)"),
+            Self::CliMissingPartIndices => write!(f, "Missing part number(s) - part number(s) between 1-4 must be be provided"),
+            Self::CliInvalidPartIndices => write!(f, "Invalid part number(s) - only part numbers between 1-4 can be provided"),
+            Self::CliMissingPatternIndices => write!(f, "Missing pattern number(s) - pattern number(s) between 1-16 must be be provided"),
+            Self::CliInvalidPatternIndices => write!(f, "Invalid pattern number(s) - only numbers between 1-16 can be provided"),
             Self::Unknown => write!(f, "unknown error (please investigate/report)"),
         }
     }
@@ -64,7 +78,7 @@ fn main() {
                 cfcard_dir_path,
                 yaml_file_path,
             } => {
-                let _ = create_index_compact_flash_drive_yaml(&cfcard_dir_path, &yaml_file_path);
+                let _ = create_file_index_yaml(&cfcard_dir_path, &yaml_file_path);
             }
         },
         Commands::Projects(x) => match x {

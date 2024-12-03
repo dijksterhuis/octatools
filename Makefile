@@ -5,6 +5,7 @@ examples-yaml-dumps:
 	rm -f ./examples/yaml/dumps/*
 	cargo r banks dump data/tests/blank-project/bank01.work ./examples/yaml/dumps/bank.yaml >/dev/null 2>&1
 	cargo r projects dump data/tests/blank-project/project.work ./examples/yaml/dumps/project.yaml >/dev/null 2>&1
+	cargo r drive dump data/tests/drive/DEMO-DRIVE-DATA/ ./examples/yaml/dumps/drive.yaml >/dev/null 2>&1
 
 examples-json-dumps:
 	echo "TODO"
@@ -33,6 +34,9 @@ docs:
 
 test:
 	cargo test
+
+cov:
+	cargo tarpaulin
 
 build:
 	cargo build

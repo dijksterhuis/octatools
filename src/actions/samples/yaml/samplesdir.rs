@@ -4,37 +4,27 @@ use std::path::PathBuf;
 use std::{fs::File, io::Read};
 
 use base64ct::{Base64, Encoding};
-use log::{debug, error, info};
+use log::{debug, info};
 use md5::Digest;
 use serde::{Deserialize, Serialize};
 use std::fs::canonicalize;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
-use crate::RBoxErr;
+use crate::{RBoxErr, OctatoolErrors};
 use serde_octatrack::{FromYamlFile, ToYamlFile};
 
-fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> Result<String, ()> {
-    debug!("Getting file path's file name: file={pathbuf:#?}");
+fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> RBoxErr<String> {
+    debug!("Getting file stem from pathbuf: file={pathbuf:#?}");
 
-    // TODO: More idiomatic way of handling None values
-    let fname_osstr = pathbuf.file_stem();
-    if fname_osstr.is_none() {
-        error!("Could not get file path's file name: file={pathbuf:#?}");
-        return Err(());
+    if !pathbuf.exists() {
+        return Err(Box::new(OctatoolErrors::PathDoesNotExist));
     }
-
-    // TODO: More idiomatic way of handling None values
-    let file_name_str = fname_osstr.unwrap().to_str();
-    if file_name_str.is_none() {
-        error!("Could not get file path's file name: file={pathbuf:#?}");
-        return Err(());
+    if pathbuf.is_dir() {
+        return Err(Box::new(OctatoolErrors::PathIsNotAFile));
     }
-
-    let file_name = file_name_str.unwrap().to_string();
-
-    debug!("Got file path's file name: file={pathbuf:#?} md5={file_name:#?}");
-
-    Ok(file_name)
+    let fname = pathbuf.file_stem().unwrap().to_str().unwrap().to_string();
+    debug!("Got file stem from pathbuf: file={pathbuf:#?}");
+    Ok(fname)
 }
 
 fn get_md5_hash_from_pathbuf(pathbuf: &PathBuf) -> Result<String, Box<dyn std::error::Error>> {
@@ -139,4 +129,25 @@ impl SamplesDirIndexSimple {
 
         Ok(index)
     }
+}
+
+
+mod test {
+    use super::*;
+
+    mod test_get_stem_from_pathbuf {
+        use super::*;
+
+        #[test]
+        fn fail_when_noexist() {
+            assert!(get_stem_from_pathbuf(&PathBuf::from("sfklsdfjsdkfdjsdslfdljfdlkj")).is_err())
+        }
+
+        #[test]
+        fn fail_when_file_is_dir() {
+            assert!(get_stem_from_pathbuf(&PathBuf::from("./src/")).is_err())
+        }
+
+    }
+
 }

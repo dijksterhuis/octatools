@@ -1,14 +1,13 @@
 //! Module for various utility functions and structs.
 
 use crate::audio::wav::WavFile;
-use crate::{RBoxErr, RVoidError};
+use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 use serde_octatrack::{
     constants::DEFAULT_SAMPLE_RATE,
     projects::slots::ProjectSampleSlot,
     samples::slices::{Slice, Slices},
 };
-use std::error::Error;
 use std::path::PathBuf;
 
 /// Create a `Slice` object for an unchained wavfile.
@@ -16,7 +15,7 @@ use std::path::PathBuf;
 pub fn create_slice_from_wavfile(
     wavfile: &WavFile,
     trim_start: u32,
-) -> Result<Slice, Box<dyn Error>> {
+) -> RBoxErr<Slice> {
     Ok(Slice {
         trim_start,
         trim_end: trim_start + wavfile.len,
@@ -24,28 +23,19 @@ pub fn create_slice_from_wavfile(
     })
 }
 
-/// Get a new `Vec` of Slices, given a `Vec` of `WavFile`s and a starting position offset.
-pub fn get_vec_from_wavfiles(
-    wavfiles: &Vec<WavFile>,
-    initial_offset: &u32,
-) -> Result<Vec<Slice>, Box<dyn Error>> {
-    let mut off = *initial_offset;
-    let mut slices: Vec<Slice> = Vec::new();
-
-    for w in wavfiles.iter() {
-        slices.push(create_slice_from_wavfile(w, off).unwrap());
-        off += w.len;
-    }
-
-    Ok(slices)
-}
-
 /// Get a new `Slices` struct, given a `Vec` of `WavFile`s.
 pub fn create_slices_from_wavfiles(
     wavfiles: &Vec<WavFile>,
     offset: u32,
-) -> Result<Slices, Box<dyn Error>> {
-    let new_slices: _ = get_vec_from_wavfiles(wavfiles, &offset).unwrap();
+) -> RBoxErr<Slices> {
+
+    let mut new_slices: Vec<Slice> = Vec::new();
+    let mut off = offset;
+
+    for w in wavfiles.iter() {
+        new_slices.push(create_slice_from_wavfile(w, off).unwrap());
+        off += w.len;
+    }
 
     let default_slice = Slice {
         trim_end: 0,
@@ -64,6 +54,8 @@ pub fn create_slices_from_wavfiles(
     })
 }
 
+/// Calculate the effective number of bars for a single wav file.
+/// Assumes four beats per bar.
 pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxErr<u32> {
     let beats = wav.len as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
     let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
@@ -71,15 +63,8 @@ pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxEr
     Ok((bars * 100.0) as u32)
 }
 
-// TODO: Change to taking number of samples as argument
-// so we can pass in a single wav or a vvector worth of wavs
-// otherwise we have to mess around with switching about types
-
-// TODO: Move to octatrack_common?
-
-/// Calculate the effective number of bars for a sample / slice.
+/// Calculate the effective number of bars for a vec of wav files.
 /// Assumes four beats per bar.
-
 pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -> RBoxErr<u32> {
     let total_samples: u32 = wavs.iter().map(|x| x.len).sum();
     let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
@@ -113,7 +98,7 @@ impl SampleFilePair {
     /// Create a new `OctatrackSampleFile` from the audio file path
     /// and an optional attributes file path.
 
-    pub fn from_pathbufs(audio_fp: &PathBuf, ot_fp: &Option<PathBuf>) -> RVoidError<Self> {
+    pub fn from_pathbufs(audio_fp: &PathBuf, ot_fp: &Option<PathBuf>) -> RBoxErr<Self> {
         Ok(Self {
             name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
             audio_filepath: audio_fp.clone(),
@@ -123,7 +108,7 @@ impl SampleFilePair {
 
     /// Create a new `OctatrackSampleFile` only from  the audio file path
 
-    pub fn from_audio_pathbuf(audio_fp: &PathBuf) -> RVoidError<Self> {
+    pub fn from_audio_pathbuf(audio_fp: &PathBuf) -> RBoxErr<Self> {
         // TODO: optimise this? so many clones
         let mut ot_file_path = audio_fp.clone();
         ot_file_path.set_extension("ot");
@@ -150,4 +135,260 @@ pub struct ProjectSamples {
 
     /// Samples in a project directory, but not loaded into a sample slot.
     inactive: Vec<SampleFilePair>,
+}
+
+
+
+mod test {
+
+    mod slice_from_wav {
+
+        use serde_octatrack::samples::slices::Slice;
+        use serde_octatrack::FromPath;
+        use crate::utils::create_slice_from_wavfile;
+        use crate::audio::wav::{WavFile};
+        use std::path::PathBuf;
+
+        #[test]
+        fn no_offset_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let valid = Slice {
+                trim_start: 0,
+                trim_end: wav.len,
+                loop_start: 0xFFFFFFFF,
+            };
+
+            assert!(create_slice_from_wavfile(&wav, 0).is_ok())
+        }
+
+        #[test]
+        fn no_offset_validated() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let valid = Slice {
+                trim_start: 0,
+                trim_end: wav.len,
+                loop_start: 0xFFFFFFFF,
+            };
+
+            assert_eq!(create_slice_from_wavfile(&wav, 0).unwrap(), valid)
+        }
+
+        #[test]
+        fn offset_100_validated() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let valid = Slice {
+                trim_start: 100,
+                trim_end: 100 + wav.len,
+                loop_start: 0xFFFFFFFF,
+            };
+
+            assert_eq!(create_slice_from_wavfile(&wav, 100).unwrap(), valid)
+        }
+
+    }
+
+
+    mod slices_from_wavs {
+
+        use serde_octatrack::samples::slices::Slice;
+        use serde_octatrack::FromPath;
+        use crate::utils::create_slices_from_wavfiles;
+        use crate::audio::wav::{WavFile};
+        use std::path::PathBuf;
+
+        #[test]
+        fn no_offset_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            assert!(create_slices_from_wavfiles(&wavs, 0).is_ok())
+        }
+
+
+        #[test]
+        fn offset_100_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            assert!(create_slices_from_wavfiles(&wavs, 100).is_ok())
+        }
+
+
+        #[test]
+        fn offset_30000_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            assert!(create_slices_from_wavfiles(&wavs, 30000).is_ok())
+        }
+
+    }
+
+
+
+    mod nbars_from_wav {
+
+        use serde_octatrack::samples::slices::Slice;
+        use serde_octatrack::FromPath;
+        use crate::utils::get_otsample_nbars_from_wavfile;
+        use crate::audio::wav::{WavFile};
+        use std::path::PathBuf;
+
+        #[test]
+        fn simple_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            assert!(get_otsample_nbars_from_wavfile(&wav, &120.0).is_ok())
+        }
+
+        #[test]
+        fn simple_120bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &120.0).unwrap();
+            assert_eq!(nbarsx100, 75)
+        }
+
+        #[test]
+        fn simple_300bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &300.0).unwrap();
+            assert_eq!(nbarsx100, 150)
+        }
+
+        #[test]
+        fn simple_150bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &150.0).unwrap();
+            assert_eq!(nbarsx100, 75)
+        }
+
+        #[test]
+        fn simple_200bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &200.0).unwrap();
+            assert_eq!(nbarsx100, 100)
+        }
+
+        #[test]
+        fn simple_30bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &30.0).unwrap();
+            assert_eq!(nbarsx100, 25)
+        }
+
+    }
+
+
+
+    mod nbars_from_wavs {
+
+        use serde_octatrack::samples::slices::Slice;
+        use serde_octatrack::FromPath;
+        use crate::utils::get_otsample_nbars_from_wavfiles;
+        use crate::audio::wav::{WavFile};
+        use std::path::PathBuf;
+
+        #[test]
+        fn simple_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            assert!(get_otsample_nbars_from_wavfiles(&wavs, &120.0).is_ok())
+        }
+
+        #[test]
+        fn simple_120bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &120.0).unwrap();
+            assert_eq!(nbarsx100, 325)
+        }
+
+        #[test]
+        fn simple_300bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &300.0).unwrap();
+            assert_eq!(nbarsx100, 800)
+        }
+
+        #[test]
+        fn simple_150bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &150.0).unwrap();
+            assert_eq!(nbarsx100, 400)
+        }
+
+        #[test]
+        fn simple_200bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &200.0).unwrap();
+            assert_eq!(nbarsx100, 525)
+        }
+
+        #[test]
+        fn simple_30bpm_valid() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [wav.clone(), wav.clone(), wav.clone(), wav.clone(), wav.clone()].to_vec();
+
+            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &30.0).unwrap();
+            assert_eq!(nbarsx100, 75)
+        }
+
+    }
+
+    mod sample_file_pair {
+
+        use crate::utils::SampleFilePair;
+        use std::path::PathBuf;
+
+        #[test]
+        fn test_read_audio_file_only_ok() {
+            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let r = SampleFilePair::from_audio_pathbuf(&fp);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_file_pair_ok() {
+            let fp = PathBuf::from("./data/tests/misc/pair.wav");
+            let r = SampleFilePair::from_audio_pathbuf(&fp);
+            assert!(r.is_ok())
+        }
+
+
+    }
+
 }

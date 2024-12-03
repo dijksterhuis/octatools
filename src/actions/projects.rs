@@ -36,3 +36,62 @@ pub fn dump_project(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
     let _ = b.to_yaml(yaml_path);
     Ok(())
 }
+
+
+
+
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_show_ok() {
+
+        let fp = PathBuf::from("data/tests/blank-project/project.work");
+        let r = show_project(&fp);
+        assert!(r.is_ok())
+    }
+
+    #[test]
+    fn test_list_sample_slots_ok() {
+
+        let fp = PathBuf::from("data/tests/blank-project/project.work");
+        let r = list_project_sample_slots(&fp);
+        assert!(r.is_ok())
+    }
+
+    #[test]
+    fn test_load_project_ok() {
+        let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-ok.work");
+        let yaml = PathBuf::from("data/tests/projects/project.yaml");
+        let r = load_project(&yaml, &outfile);
+
+        let _ = std::fs::remove_file(&outfile);
+        assert!(r.is_ok())
+    }
+
+    #[test]
+    fn test_load_project_matches_blank() {
+        let testfile = PathBuf::from("data/tests/projects/blank.work");
+        let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-full.work");
+        let yaml = PathBuf::from("data/tests/projects/project.yaml");
+
+        let _ = load_project(&yaml, &outfile);
+
+        let written = Project::from_path(&outfile).unwrap();
+        let valid = Project::from_path(&testfile).unwrap();
+
+        let _ = std::fs::remove_file(&outfile);
+        assert_eq!(written, valid)
+    }
+
+    #[test]
+    fn test_dump_project_ok() {
+        let infile = PathBuf::from("data/tests/projects/blank.work");
+        let outyaml = PathBuf::from("/tmp/project-test-dump-ok.yaml");
+        let r = dump_project(&infile, &outyaml);
+
+        let _ = std::fs::remove_file(&outyaml);
+        assert!(r.is_ok())
+    }
+
+}

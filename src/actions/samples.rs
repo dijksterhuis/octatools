@@ -466,6 +466,37 @@ pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxEr
     Ok(())
 }
 
+
+pub fn create_index_samples_dir_simple(
+    samples_dir_path: &PathBuf,
+    yaml_file_path: &Option<PathBuf>,
+) -> RBoxErr<()> {
+    debug!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
+    let sample_index = SamplesDirIndexSimple::new(samples_dir_path)?;
+
+    if !yaml_file_path.is_none() {
+        let _ = sample_index.to_yaml(yaml_file_path.as_ref().unwrap());
+    }
+
+    Ok(())
+}
+
+pub fn create_index_samples_dir_full(
+    samples_dir_path: &PathBuf,
+    yaml_file_path: &Option<PathBuf>,
+) -> RBoxErr<()> {
+    let sample_index = SamplesDirIndexFull::new(samples_dir_path)?;
+
+    // TODO: clone
+    if !yaml_file_path.is_none() {
+        let _ = sample_index.to_yaml(yaml_file_path.as_ref().unwrap());
+    }
+    Ok(())
+}
+
+
+
+
 /// Use input files from `resouces/test-data/` to create an OT file output
 /// and compare it to what should exist.
 /// Read relevant WAV files, create an OT file of some description, write
@@ -506,6 +537,7 @@ mod tests {
 
     mod chain_create {
 
+        use super::*;
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};
 
@@ -836,46 +868,79 @@ mod tests {
             assert!(composed_chain.is_err());
         }
     }
-}
 
-pub fn create_index_samples_dir_simple(
-    samples_dir_path: &PathBuf,
-    yaml_file_path: &Option<PathBuf>,
-) -> RBoxErr<()> {
-    debug!("Indexing samples directory with 'simple' output: path={samples_dir_path:#?}");
-    let sample_index = SamplesDirIndexSimple::new(samples_dir_path).unwrap_or_else(|_| {
-        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
-    });
+    mod indexing {
+        use std::path::PathBuf;
+        use serde_octatrack::FromYamlFile;
+        use crate::actions::samples::{create_index_samples_dir_full, create_index_samples_dir_simple, yaml::samplesdir::SamplesDirIndexFull, yaml::samplesdir::SamplesDirIndexSimple};
 
-    // TODO: clone
-    if !yaml_file_path.is_none() {
-        let yml = yaml_file_path
-            .as_ref()
-            .expect("No option provided, cannot write to None!");
+        #[test]
+        fn simple_no_yaml_ok() {
+            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let r = create_index_samples_dir_simple(&dirpath, &None);
+            assert!(r.is_ok())
+        }
 
-        debug!("Writing SamplesDir index to yaml file: path={yml:#?}");
-        let _ = sample_index.to_yaml(yml);
-    };
+        #[test]
+        fn full_no_yaml_ok() {
+            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let r = create_index_samples_dir_full(&dirpath, &None);
+            assert!(r.is_ok())
+            
+        }
 
-    Ok(())
-}
+        #[test]
+        fn simple_with_yaml_ok() {
+            let yamlpath = PathBuf::from("/tmp/test-samples-search-simple.yaml");
+            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let r = create_index_samples_dir_simple(&dirpath, &Some(yamlpath.clone()));
 
-pub fn create_index_samples_dir_full(
-    samples_dir_path: &PathBuf,
-    yaml_file_path: &Option<PathBuf>,
-) -> RBoxErr<()> {
-    let sample_index = SamplesDirIndexFull::new(samples_dir_path).unwrap_or_else(|_| {
-        panic!("Failed to create SamplesDir index: path={samples_dir_path:#?}")
-    });
+            let _ = std::fs::remove_file(yamlpath);
+            assert!(r.is_ok())
+        }
 
-    // TODO: clone
-    if !yaml_file_path.is_none() {
-        let yml = yaml_file_path
-            .as_ref()
-            .expect("No option provided, cannot write to None!");
+        #[test]
+        fn full_with_yaml_ok() {
+            let yamlpath = PathBuf::from("/tmp/test-samples-search-full.yaml");
+            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let r = create_index_samples_dir_full(&dirpath, &Some(yamlpath.clone()));
 
-        debug!("Writing SamplesDir index to yaml file: path={yml:#?}");
-        let _ = sample_index.to_yaml(yml);
+            let _ = std::fs::remove_file(yamlpath);
+            assert!(r.is_ok())
+            
+        }
+
+        #[test]
+        fn simple_with_yaml_matches_validation() {
+            let testpath = PathBuf::from("data/tests/samples/indexing/simple-valid.yaml");
+            let outpath = PathBuf::from("/tmp/test-samples-search-simple-validate.yaml");
+            let dirpath = PathBuf::from("./data/tests/samples/indexing/");
+            let _ = create_index_samples_dir_simple(&dirpath, &Some(outpath.clone()));
+
+            let valid = SamplesDirIndexSimple::from_yaml(&testpath).unwrap();
+            let written = SamplesDirIndexSimple::from_yaml(&outpath).unwrap();
+
+            let _ = std::fs::remove_file(outpath);
+            assert_eq!(written, valid)
+
+        }
+
+        #[test]
+        fn full_with_yaml_matches_validation() {
+            let testpath = PathBuf::from("data/tests/samples/indexing/full-valid.yaml");
+            let outpath = PathBuf::from("/tmp/test-samples-search-full-validate.yaml");
+            let dirpath = PathBuf::from("./data/tests/samples/indexing/");
+            let _ = create_index_samples_dir_full(&dirpath, &Some(outpath.clone()));
+
+            let valid = SamplesDirIndexFull::from_yaml(&testpath).unwrap();
+            let written = SamplesDirIndexFull::from_yaml(&outpath).unwrap();
+
+            let _ = std::fs::remove_file(outpath);
+            assert_eq!(written, valid)
+            
+        }
+
+
     }
-    Ok(())
+
 }

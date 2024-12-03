@@ -1,0 +1,171 @@
+metadata:
+  filetype: OCTATRACK DPS-1 PROJECT
+  project_version: 19
+  os_version: R0177     1.40B
+settings:
+  write_protected: false
+  control:
+    audio:
+      master_track: false
+      cue_studio_mode: false
+    input:
+      gate_ab: 127
+      gate_cd: 127
+      input_delay_compensation: false
+    sequencer:
+      pattern_change_chain_behaviour: 0
+      pattern_change_auto_silence_tracks: false
+      pattern_change_auto_trig_lfos: false
+    midi_sequencer: {}
+    memory:
+      load_24bit_flex: false
+      dynamic_recorders: false
+      record_24bit: false
+      reserved_recorder_count: 8
+      reserved_recorder_length: 16
+    metronome:
+      metronome_time_signature: 3
+      metronome_time_signature_denominator: 2
+      metronome_preroll: 0
+      metronome_cue_volume: 32
+      metronome_main_volume: 0
+      metronome_pitch: 12
+      metronome_tonal: true
+      metronome_enabled: false
+    midi:
+      control:
+        midi_audio_track_cc_in: true
+        midi_audio_track_cc_out: 3
+        midi_audio_track_note_in: 1
+        midi_audio_track_note_out: 3
+        midi_midi_track_cc_in: 1
+      sync:
+        midi_clock_send: false
+        midi_clock_receive: false
+        midi_transport_send: false
+        midi_transport_receive: false
+        midi_progchange_send: false
+        midi_progchange_send_channel: Disabled
+        midi_progchange_receive: false
+        midi_progchange_receive_channel: Disabled
+      channels:
+        midi_trig_ch1: 0
+        midi_trig_ch2: 1
+        midi_trig_ch3: 2
+        midi_trig_ch4: 3
+        midi_trig_ch5: 4
+        midi_trig_ch6: 5
+        midi_trig_ch7: 6
+        midi_trig_ch8: 7
+        midi_auto_channel: 10
+  midi_soft_thru: false
+  mixer:
+    gain_ab: 64
+    gain_cd: 64
+    dir_ab: 0
+    dir_cd: 0
+    phones_mix: 64
+    main_to_cue: 0
+    main_level: 64
+    cue_level: 64
+  tempo:
+    tempo: 120
+    pattern_tempo_enabled: false
+  midi_tracks_trig_mode:
+    trig_mode_midi_track_1: 0
+    trig_mode_midi_track_2: 0
+    trig_mode_midi_track_3: 0
+    trig_mode_midi_track_4: 0
+    trig_mode_midi_track_5: 0
+    trig_mode_midi_track_6: 0
+    trig_mode_midi_track_7: 0
+    trig_mode_midi_track_8: 0
+states:
+  bank: 0
+  pattern: 0
+  arrangement: 0
+  arrangement_mode: 0
+  part: 0
+  track: 0
+  track_othermode: 0
+  scene_a_mute: false
+  scene_b_mute: false
+  track_cue_mask: 0
+  track_mute_mask: 0
+  track_solo_mask: 0
+  midi_track_mute_mask: 0
+  midi_track_solo_mask: 0
+  midi_mode: 0
+slots:
+- sample_type: RecorderBuffer
+  slot_id: 129
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 130
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 131
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 132
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 133
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 134
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 135
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
+- sample_type: RecorderBuffer
+  slot_id: 136
+  path: ''
+  trim_bars_x100: 0
+  timestrech_mode: Normal
+  loop_mode: 'Off'
+  trig_quantization_mode: PatternLength
+  gain: 24
+  bpm: 120
