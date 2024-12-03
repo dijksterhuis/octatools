@@ -262,7 +262,9 @@ fn main() {
                 } => {
                     let _ = show_ot_file_bytes(&path, &byte_start_idx, &n_bytes);
                 }
-                crate::cli::Otfile::CreateDefault { wav_file_path: _wav_file_path } => {
+                crate::cli::Otfile::CreateDefault {
+                    wav_file_path: _wav_file_path,
+                } => {
                     unimplemented!();
                 }
                 crate::cli::Otfile::Dump {
