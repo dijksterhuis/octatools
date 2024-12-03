@@ -12,8 +12,6 @@ use walkdir::{DirEntry, WalkDir};
 use crate::common::RBoxErr;
 use crate::utils::SampleFilePair;
 
-use serde_octatrack::{banks::Bank, projects::Project, FromPath};
-
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
 /// Searching for audio 'sample' (`.wav` files only for now) within an Octatrack Set.
@@ -43,13 +41,20 @@ pub struct OctatrackSetProject {
     pub dirpath: PathBuf,
 
     /// 'Samples' which are members of this Project.
-    pub sample_filepaths: Vec<SampleFilePair>,
+    pub samples: Vec<SampleFilePair>,
 
-    /// Project level data
-    pub project_work: Project,
+    /// Project data files
+    pub projects: Vec<PathBuf>,
 
-    /// Banks within the project
-    pub banks: Vec<Bank>,
+    /// Arrangement data files
+    pub arrangements: Vec<PathBuf>,
+
+    /// Bank data files
+    pub banks: Vec<PathBuf>,
+
+    /// Marker data files
+    pub markers: Vec<PathBuf>,
+
 }
 
 impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
@@ -62,25 +67,60 @@ impl OctatrackSetProject {
             return Err(Box::new(crate::common::OctatoolErrors::PathNotADirectory));
         }
 
-        let banks: Vec<Bank> = WalkDir::new(dirpath)
+        let projects: Vec<PathBuf> = WalkDir::new(dirpath)
+            .sort_by_file_name()
+            .min_depth(1)
+            .into_iter()
+            .filter_entry(|e| {
+                e.file_name().to_string_lossy().starts_with("project")
+            })
+            .map(|x| x.unwrap())
+            .map(|x| x.path().to_path_buf())
+            .collect();
+
+        let banks: Vec<PathBuf> = WalkDir::new(dirpath)
             .sort_by_file_name()
             .min_depth(1)
             .into_iter()
             .filter_entry(|e| {
                 e.file_name().to_string_lossy().starts_with("bank")
-                    && e.file_name().to_string_lossy().ends_with("work")
             })
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
-            .map(|x| Bank::from_path(&x).unwrap())
             .collect();
+
+        let arrangements: Vec<PathBuf> = WalkDir::new(dirpath)
+            .sort_by_file_name()
+            .min_depth(1)
+            .into_iter()
+            .filter_entry(|e| {
+                e.file_name().to_string_lossy().starts_with("arr")
+            })
+            .map(|x| x.unwrap())
+            .map(|x| x.path().to_path_buf())
+            .collect();
+
+        let markers: Vec<PathBuf> = WalkDir::new(dirpath)
+            .sort_by_file_name()
+            .min_depth(1)
+            .into_iter()
+            .filter_entry(|e| {
+                e.file_name().to_string_lossy().starts_with("markers")
+            })
+            .map(|x| x.unwrap())
+            .map(|x| x.path().to_path_buf())
+            .collect();
+
 
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
             dirpath: dirpath.clone(),
-            sample_filepaths: Self::scan_dir_path_for_samples(dirpath).unwrap(),
-            project_work: Project::from_path(&dirpath.join("project.work")).unwrap(),
+            samples: Self::scan_dir_path_for_samples(dirpath).unwrap(),
+            projects,
             banks,
+            arrangements,
+            markers,
+
         })
     }
 }
@@ -89,8 +129,7 @@ impl OctatrackSetProject {
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct OctatrackSetAudioPool {
-    // TODO: this should always be AUDIO ...
-    /// Name of this Audio Pool (directory basename)
+    /// Name of this Audio Pool (directory basename). Should always be `'AUDIO'`.
     pub name: String,
 
     /// Explicit path to this Audio Pool
@@ -105,8 +144,6 @@ impl SearchForOctatrackSampleFilePair for OctatrackSetAudioPool {}
 
 impl OctatrackSetAudioPool {
     /// Create a new `OctatrackSetAudioPool` from a `PathBuf`.
-    /// **NOTE**: the `PathBuf` must point to the correct directory.
-
     pub fn from_pathbuf(path: &PathBuf) -> RBoxErr<Self> {
         Ok(Self {
             name: path.file_name().unwrap().to_str().unwrap().to_string(),
@@ -117,7 +154,6 @@ impl OctatrackSetAudioPool {
 }
 
 /// An Octatrack 'Set'. Each 'Set' contains multiple Octatrack 'Project's and a single 'Audio Pool'.
-
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct OctatrackSet {
     /// Name of this set (the directory basename).

@@ -99,7 +99,7 @@ mod tests {
     // TODO: Need to test the output
     #[test]
     fn test_indexing_cfcard_sets() {
-        let cfcard_path = PathBuf::from("data/tests/index-cf/");
+        let cfcard_path = PathBuf::from("data/tests/drive/");
         let res: RBoxErr<CompactFlashDrive> = CompactFlashDrive::from_path(&cfcard_path);
         assert!(res.is_ok());
     }
