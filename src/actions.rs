@@ -8,7 +8,7 @@ pub mod patterns;
 pub mod projects;
 pub mod samples;
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use serde_octatrack::{FromYamlFile, ToPath};
 use std::path::Path;
 

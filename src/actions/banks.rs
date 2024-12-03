@@ -42,7 +42,7 @@ use serde_octatrack::projects::Project;
 
 use crate::{
     actions::{banks::yaml::YamlCopyBankConfig, get_bytes_slice, load_from_yaml},
-    common::RBoxErr,
+    RBoxErr,
 };
 use std::{
     collections::HashSet,

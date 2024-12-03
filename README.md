@@ -15,7 +15,6 @@ Use at your own risk -- there are still edge cases and some jank.
 
 Only Linux supported at the moment.
 
-
 ### Current Features (mostly working-ish)
 - Copy banks from one project to another, moving relevant project sample slots with the bank
 - Create slice sample chains from multiple WAV files

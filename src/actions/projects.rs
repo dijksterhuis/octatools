@@ -1,6 +1,6 @@
 use serde_octatrack::{projects::Project, FromPath, ToYamlFile};
 
-use crate::{actions::load_from_yaml, common::RBoxErr};
+use crate::{actions::load_from_yaml, RBoxErr};
 use itertools::Itertools;
 use std::path::{Path, PathBuf};
 

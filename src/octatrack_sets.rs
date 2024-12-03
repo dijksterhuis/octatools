@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
-use crate::common::RBoxErr;
 use crate::utils::SampleFilePair;
+use crate::RBoxErr;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
@@ -54,7 +54,6 @@ pub struct OctatrackSetProject {
 
     /// Marker data files
     pub markers: Vec<PathBuf>,
-
 }
 
 impl SearchForOctatrackSampleFilePair for OctatrackSetProject {}
@@ -64,16 +63,14 @@ impl OctatrackSetProject {
     pub fn from_pathbuf(dirpath: &PathBuf) -> RBoxErr<Self> {
         // TODO: Handle looking for .work / .strd
         if !dirpath.is_dir() {
-            return Err(Box::new(crate::common::OctatoolErrors::PathNotADirectory));
+            return Err(Box::new(crate::OctatoolErrors::PathNotADirectory));
         }
 
         let projects: Vec<PathBuf> = WalkDir::new(dirpath)
             .sort_by_file_name()
             .min_depth(1)
             .into_iter()
-            .filter_entry(|e| {
-                e.file_name().to_string_lossy().starts_with("project")
-            })
+            .filter_entry(|e| e.file_name().to_string_lossy().starts_with("project"))
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
             .collect();
@@ -82,9 +79,7 @@ impl OctatrackSetProject {
             .sort_by_file_name()
             .min_depth(1)
             .into_iter()
-            .filter_entry(|e| {
-                e.file_name().to_string_lossy().starts_with("bank")
-            })
+            .filter_entry(|e| e.file_name().to_string_lossy().starts_with("bank"))
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
             .collect();
@@ -93,9 +88,7 @@ impl OctatrackSetProject {
             .sort_by_file_name()
             .min_depth(1)
             .into_iter()
-            .filter_entry(|e| {
-                e.file_name().to_string_lossy().starts_with("arr")
-            })
+            .filter_entry(|e| e.file_name().to_string_lossy().starts_with("arr"))
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
             .collect();
@@ -104,13 +97,10 @@ impl OctatrackSetProject {
             .sort_by_file_name()
             .min_depth(1)
             .into_iter()
-            .filter_entry(|e| {
-                e.file_name().to_string_lossy().starts_with("markers")
-            })
+            .filter_entry(|e| e.file_name().to_string_lossy().starts_with("markers"))
             .map(|x| x.unwrap())
             .map(|x| x.path().to_path_buf())
             .collect();
-
 
         Ok(Self {
             name: dirpath.file_name().unwrap().to_str().unwrap().to_string(),
@@ -120,7 +110,6 @@ impl OctatrackSetProject {
             banks,
             arrangements,
             markers,
-
         })
     }
 }

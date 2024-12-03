@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::canonicalize;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use serde_octatrack::{FromYamlFile, ToYamlFile};
 
 fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> Result<String, ()> {

@@ -5,11 +5,11 @@
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
-use serde_octatrack::FromPath;
+use serde_octatrack::{FromPath, FromYamlFile, ToYamlFile};
 
-/// A single row of data written to the index file.
-use crate::common::{FromYamlFile, RBoxErr, ToYamlFile};
 use crate::octatrack_sets::OctatrackSet;
+/// A single row of data written to the index file.
+use crate::RBoxErr;
 
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashScanCsvRow {
@@ -66,31 +66,6 @@ impl FromPath for CompactFlashDrive {
         Ok(cf)
     }
 }
-
-/*
-# TODO
-
-- directory structures and dummy contents for multiple integration tests
-  (include negative testing!)
-- grab list of acceptable audio file extensions from OctaChainer
-- use ^ OTChainer audio file extension list instead of exclusionary search
-- read audio file data and OT file data into the CSV file
-- test on the OT whether adding a sample to static/flex slots creates a new OT file
-  (there are a lot of wav files with no OT file ... makes life simpler if not needed!)
-- unit tests where possible!
-- think about a better data store format than CSV -- sqlite?
-  (csv works well for cli, less good for GUI ... focus on CLI w/ CSV for now)
-- general clean up, better results and error handling
-- turn this whole thing into a lib? with separate projects for cli and gui?
-- OT_IO: read multiple wavs and create a **sample chain OT file** has been done...
-  Need to handle writing of the wavs, with similar testing -- how to isolate tests?
-- Move integration tests to main.rs? or lib.rs? they test parts of the whole thing,
-  rather than individual units within a module.
-- Read up on results, error handling etc in rust. need to see about how to safely
-  handle edge cases i've not caught.
-- CLI design: commands + actions + flags a la `ot-sm sync pull`
-  or `ot-sm chain ./file_a.wav outfile --tempo 124.5 --gain 1.0 --quantize DIRECT`.
-*/
 
 #[cfg(test)]
 mod tests {

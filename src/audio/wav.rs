@@ -2,7 +2,7 @@
 //!
 //! **TODO**: Need to move this out into the binary crate.
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use hound::{self, WavReader, WavSpec};
 use log::{debug, trace};
 use serde_octatrack::{FromPath, ToPath};

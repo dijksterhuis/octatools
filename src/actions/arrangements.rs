@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::{actions::get_bytes_slice, common::RBoxErr};
+use crate::{actions::get_bytes_slice, RBoxErr};
 use serde_octatrack::{
     arrangements::{ArrangementFile, ArrangementFileRawBytes},
     FromPath,
@@ -32,11 +32,11 @@ pub fn show_arrangement_bytes(
 }
 
 /// Load Arrangement file data from a YAML file
-pub fn load_arrangement(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
+pub fn load_arrangement(_yaml_path: &Path, _outfile: &Path) -> RBoxErr<()> {
     unimplemented!("Need to deal with intermediate struct conversions.")
 }
 
 /// Dump Arrangement file data to a YAML file
-pub fn dump_arrangement(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
+pub fn dump_arrangement(_path: &Path, _yaml_path: &Path) -> RBoxErr<()> {
     unimplemented!("Need to deal with intermediate struct conversions.")
 }

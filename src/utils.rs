@@ -1,8 +1,7 @@
 //! Module for various utility functions and structs.
 
 use crate::audio::wav::WavFile;
-use crate::common::RBoxErr;
-use crate::common::RVoidError;
+use crate::{RBoxErr, RVoidError};
 use serde::{Deserialize, Serialize};
 use serde_octatrack::{
     constants::DEFAULT_SAMPLE_RATE,

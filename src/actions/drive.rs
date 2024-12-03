@@ -2,13 +2,10 @@
 
 mod yaml;
 
+use crate::RBoxErr;
 use log::debug;
-
+use serde_octatrack::{FromPath, ToYamlFile};
 use std::path::PathBuf;
-
-use serde_octatrack::FromPath;
-
-use crate::common::{RBoxErr, ToYamlFile};
 use yaml::cfcard::CompactFlashDrive;
 
 pub fn create_index_compact_flash_drive_yaml(

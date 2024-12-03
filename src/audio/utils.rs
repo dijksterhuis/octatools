@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::audio::{aiff::AiffFile, wav::WavFile};
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use serde_octatrack::constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS;
 
 /// A filter for walkdir rescursive search: include directories

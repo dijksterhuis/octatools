@@ -22,11 +22,11 @@ use serde_octatrack::{
 use crate::{
     actions::{get_bytes_slice, load_from_yaml},
     audio::wav::WavFile,
-    common::RBoxErr,
     utils::{
         create_slices_from_wavfiles, get_otsample_nbars_from_wavfile,
         get_otsample_nbars_from_wavfiles,
     },
+    RBoxErr,
 };
 
 use yaml::{
@@ -478,7 +478,6 @@ mod tests {
 
         use crate::actions::samples::deconstruct_samplechain_from_pathbufs_only;
         use std::{fs, path::PathBuf};
-        use walkdir::{DirEntry, WalkDir};
 
         #[test]
         fn test_basic() {
@@ -510,7 +509,7 @@ mod tests {
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};
 
-        use crate::common::RBoxErr;
+        use crate::RBoxErr;
 
         use crate::audio::wav::WavFile;
         use serde_octatrack::FromPath;

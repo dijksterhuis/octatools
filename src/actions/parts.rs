@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::common::RBoxErr;
+use crate::RBoxErr;
 use serde_octatrack::{banks::Bank, FromPath};
 
 /// Show deserialised representation of Part unsaved state

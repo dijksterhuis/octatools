@@ -13,6 +13,9 @@ use clap::Parser;
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 
+use cli::{Cli, Commands};
+use std::error::Error;
+
 use actions::{
     arrangements::{dump_arrangement, load_arrangement, show_arrangement, show_arrangement_bytes},
     banks::{batch_copy_banks, copy_bank, dump_bank, load_bank, show_bank, show_bank_bytes},
@@ -29,7 +32,23 @@ use actions::{
     },
 };
 
-use cli::{Cli, Commands};
+pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
+pub type RVoidError<T> = Result<T, ()>;
+
+#[derive(Debug)]
+pub enum OctatoolErrors {
+    PathNotADirectory,
+    Unknown,
+}
+impl std::fmt::Display for OctatoolErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::PathNotADirectory => write!(f, "pathbuf is not a directory"),
+            Self::Unknown => write!(f, "unknown error (please investigate/report)"),
+        }
+    }
+}
+impl std::error::Error for OctatoolErrors {}
 
 #[doc(hidden)]
 fn main() {
