@@ -58,8 +58,6 @@ fn main() {
 
     let args = Cli::parse();
 
-    println!("ARGS: {:#?}", args);
-
     match args.command {
         Commands::Drive(x) => match x {
             crate::cli::Drive::Dump {
@@ -74,34 +72,34 @@ fn main() {
                 let _ = show_project(&path);
             }
             crate::cli::Projects::Settings(y) => match y {
-                crate::cli::ProjectData::Inspect { path } => {
+                crate::cli::ProjectData::Inspect { path: _path } => {
                     unimplemented!();
                 }
             },
             crate::cli::Projects::Metadata(y) => match y {
-                crate::cli::ProjectData::Inspect { path } => {
+                crate::cli::ProjectData::Inspect { path: _path } => {
                     unimplemented!();
                 }
             },
             crate::cli::Projects::State(y) => match y {
-                crate::cli::ProjectData::Inspect { path } => {
+                crate::cli::ProjectData::Inspect { path: _path } => {
                     unimplemented!();
                 }
             },
             crate::cli::Projects::Sampleslots(y) => match y {
-                crate::cli::SampleSlots::Inspect { path } => {
+                crate::cli::SampleSlots::Inspect { path: _path } => {
                     unimplemented!();
                 }
                 crate::cli::SampleSlots::List { path } => {
                     let _ = list_project_sample_slots(&path);
                 }
-                crate::cli::SampleSlots::Purge { path } => {
+                crate::cli::SampleSlots::Purge { path: _path } => {
                     unimplemented!();
                 }
-                crate::cli::SampleSlots::Consolidate { path } => {
+                crate::cli::SampleSlots::Consolidate { path: _path } => {
                     unimplemented!();
                 }
-                crate::cli::SampleSlots::Centralise { path } => {
+                crate::cli::SampleSlots::Centralise { path: _path } => {
                     unimplemented!();
                 }
             },
@@ -189,31 +187,6 @@ fn main() {
             } => {
                 let _ = show_pattern(&bank_file_path, index);
             }
-            crate::cli::Patterns::Copy {
-                src_bank_file_path,
-                src_pattern_index,
-                dest_bank_file_path,
-                dest_pattern_index,
-            } => {
-                unimplemented!();
-            }
-            crate::cli::Patterns::CopyN { yaml_file_path } => {
-                unimplemented!();
-            }
-            crate::cli::Patterns::Dump {
-                bank_file_path,
-                pattern_index,
-                yaml_file_path,
-            } => {
-                unimplemented!();
-            }
-            crate::cli::Patterns::Load {
-                yaml_file_path,
-                bank_file_path,
-                pattern_index,
-            } => {
-                unimplemented!();
-            }
         },
         Commands::Parts(x) => match x {
             crate::cli::Parts::Saved(y) => match y {
@@ -223,31 +196,6 @@ fn main() {
                 } => {
                     let _ = show_saved_parts(&bank_file_path, index);
                 }
-                crate::cli::PartsCmd::Copy {
-                    src_bank_file_path,
-                    src_part_index,
-                    dest_bank_file_path,
-                    dest_part_index,
-                } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::CopyN { yaml_file_path } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::Dump {
-                    bank_file_path,
-                    part_index,
-                    yaml_file_path,
-                } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::Load {
-                    yaml_file_path,
-                    bank_file_path,
-                    part_index,
-                } => {
-                    unimplemented!();
-                }
             },
             crate::cli::Parts::Unsaved(y) => match y {
                 crate::cli::PartsCmd::Inspect {
@@ -255,31 +203,6 @@ fn main() {
                     index,
                 } => {
                     let _ = show_unsaved_parts(&bank_file_path, index);
-                }
-                crate::cli::PartsCmd::Copy {
-                    src_bank_file_path,
-                    src_part_index,
-                    dest_bank_file_path,
-                    dest_part_index,
-                } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::CopyN { yaml_file_path } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::Dump {
-                    bank_file_path,
-                    part_index,
-                    yaml_file_path,
-                } => {
-                    unimplemented!();
-                }
-                crate::cli::PartsCmd::Load {
-                    yaml_file_path,
-                    bank_file_path,
-                    part_index,
-                } => {
-                    unimplemented!();
                 }
             },
         },
@@ -339,7 +262,7 @@ fn main() {
                 } => {
                     let _ = show_ot_file_bytes(&path, &byte_start_idx, &n_bytes);
                 }
-                crate::cli::Otfile::CreateDefault { wav_file_path } => {
+                crate::cli::Otfile::CreateDefault { wav_file_path: _wav_file_path } => {
                     unimplemented!();
                 }
                 crate::cli::Otfile::Dump {

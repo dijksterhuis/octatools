@@ -202,31 +202,6 @@ pub enum Patterns {
         bank_file_path: PathBuf,
         index: Vec<usize>,
     },
-
-    /// Copy a Pattern from one location to another
-    Copy {
-        src_bank_file_path: PathBuf,
-        src_pattern_index: usize,
-        dest_bank_file_path: PathBuf,
-        dest_pattern_index: usize,
-    },
-
-    /// Copy Nx Patterns from one location to another,
-    CopyN { yaml_file_path: PathBuf },
-
-    /// Dump Pattern data from a Bank file to a YAML file
-    Dump {
-        bank_file_path: PathBuf,
-        pattern_index: usize,
-        yaml_file_path: PathBuf,
-    },
-
-    /// Write Pattern data in a Bank file with contents of a YAML file
-    Load {
-        yaml_file_path: PathBuf,
-        bank_file_path: PathBuf,
-        pattern_index: usize,
-    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -237,31 +212,6 @@ pub enum PartsCmd {
     Inspect {
         bank_file_path: PathBuf,
         index: Vec<usize>,
-    },
-
-    /// Copy a Part from one location to another
-    Copy {
-        src_bank_file_path: PathBuf,
-        src_part_index: usize,
-        dest_bank_file_path: PathBuf,
-        dest_part_index: usize,
-    },
-
-    /// Copy Nx Parts from one location to another,
-    CopyN { yaml_file_path: PathBuf },
-
-    /// Dump Part data from a Bank file to a YAML file
-    Dump {
-        bank_file_path: PathBuf,
-        part_index: usize,
-        yaml_file_path: PathBuf,
-    },
-
-    /// Write Part data in a Bank file with content of a YAML file
-    Load {
-        bank_file_path: PathBuf,
-        part_index: usize,
-        yaml_file_path: PathBuf,
     },
 }
 

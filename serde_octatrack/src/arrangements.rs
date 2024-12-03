@@ -27,7 +27,6 @@
 //!   - Unknown block 2
 //!
 
-use crate::{FromPath, FromYamlFile, RBoxErr, ToPath, ToYamlFile};
 use bincode;
 use serde::de::SeqAccess;
 use serde::de::{self, Visitor};
@@ -35,6 +34,7 @@ use serde::{Deserialize, Deserializer, Serialize};
 use serde_big_array::BigArray;
 use std::array::from_fn;
 use std::{error::Error, fmt, fs::File, io::Read, io::Write, path::Path, str};
+use crate::{FromPath, RBoxErr, ToPath};
 
 /// A Row in the Arrangement.
 #[derive(Debug)]
