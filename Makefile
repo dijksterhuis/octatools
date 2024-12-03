@@ -1,5 +1,5 @@
 all:
-	test build checks
+	docs test build checks
 
 examples-yaml-dumps:
 	rm -f ./examples/yaml/dumps/*
@@ -25,8 +25,14 @@ lint:
 fixup: lint
 	qlty check --filter clippy --fix
 
+docs-full:
+	cargo doc
+
+docs:
+	cargo doc --no-deps
+
 test:
-	cargo test &2>/dev/null
+	cargo test
 
 build:
 	cargo build
