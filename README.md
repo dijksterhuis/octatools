@@ -36,7 +36,7 @@ Only Linux supported at the moment.
 - `./serde_octatrack` contains the library for serialization and deserialization of octatrack files. 
 - `./src` contains the CLI commands code.
 
-### TODOs / Other Ideas
+### TODOs
 
 #### `serde_octatrack`
 - Ser/De to Enum/String/etc types instead of u8 -- possible with `serde_repr`, but don't know if it's desirable to do this ... adds a lot of complexity for now.
@@ -73,7 +73,6 @@ Only Linux supported at the moment.
 
 - Fixup the sample chain gain settings so they're easier to understand (not being translated properly for humans atm).
 - Sort out CLI optional arguments via CLAP.
-- Refactor the copy_bank code -- it is a mess. 
 - Make the code more idiomatic / 'clean' / optimised.
 - Cross-compilation / CI builds on Windows 10/11 and macOS.
 - Consolidation:
@@ -83,13 +82,10 @@ Only Linux supported at the moment.
   - Audio files from all Set Audio Pools into Projects.
 - Handle AIFF files (and switching between AIFF and WAV within the code -- probably needs an abstraction).
 - Inspect RIFF header issues with `hound` on samples from mars files
-- List all Sets, Projects, Samples, changed (non-default) banks, changed (non-default) parts, changed (non-default) patterns
 - Sane Logging messages
 - Sane Error handling
 - CI release builds ($$$$)
-- Deal with over use of `.clone()` absolutely everywhere.
-- More tests.
-- Even more tests.
+- Improve test coverage and test cases (negative tests).
 
 ### What this software is not
 - A clone of DigiChain
