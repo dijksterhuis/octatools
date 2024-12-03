@@ -1,0 +1,88 @@
+cfcard_path: data/tests/drive/
+ot_sets:
+- name: DEMO-SET-1
+  path: data/tests/drive/DEMO-SET-1
+  audio_pool:
+    name: AUDIO
+    path: data/tests/drive/DEMO-SET-1/AUDIO
+    samples:
+    - name: chain
+      audio_filepath: data/tests/drive/DEMO-SET-1/AUDIO/chain.wav
+      attributes_filepath: data/tests/drive/DEMO-SET-1/AUDIO/chain.ot
+  projects:
+  - name: BLANK
+    dirpath: data/tests/drive/DEMO-SET-1/BLANK
+    samples: []
+    projects:
+    - data/tests/drive/DEMO-SET-1/BLANK/project.work
+    arrangements:
+    - data/tests/drive/DEMO-SET-1/BLANK/arr01.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr02.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr03.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr04.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr05.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr06.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr07.work
+    - data/tests/drive/DEMO-SET-1/BLANK/arr08.work
+    banks:
+    - data/tests/drive/DEMO-SET-1/BLANK/bank01.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank02.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank03.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank04.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank05.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank06.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank07.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank08.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank09.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank10.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank11.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank12.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank13.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank14.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank15.work
+    - data/tests/drive/DEMO-SET-1/BLANK/bank16.work
+    markers:
+    - data/tests/drive/DEMO-SET-1/BLANK/markers.work
+- name: DEMO-SET-2
+  path: data/tests/drive/DEMO-SET-2
+  audio_pool:
+    name: AUDIO
+    path: data/tests/drive/DEMO-SET-2/AUDIO
+    samples:
+    - name: chain
+      audio_filepath: data/tests/drive/DEMO-SET-2/AUDIO/chain.wav
+      attributes_filepath: data/tests/drive/DEMO-SET-2/AUDIO/chain.ot
+  projects:
+  - name: BLANK
+    dirpath: data/tests/drive/DEMO-SET-2/BLANK
+    samples: []
+    projects:
+    - data/tests/drive/DEMO-SET-2/BLANK/project.work
+    arrangements:
+    - data/tests/drive/DEMO-SET-2/BLANK/arr01.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr02.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr03.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr04.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr05.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr06.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr07.work
+    - data/tests/drive/DEMO-SET-2/BLANK/arr08.work
+    banks:
+    - data/tests/drive/DEMO-SET-2/BLANK/bank01.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank02.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank03.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank04.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank05.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank06.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank07.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank08.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank09.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank10.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank11.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank12.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank13.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank14.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank15.work
+    - data/tests/drive/DEMO-SET-2/BLANK/bank16.work
+    markers:
+    - data/tests/drive/DEMO-SET-2/BLANK/markers.work
