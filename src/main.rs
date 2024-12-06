@@ -53,11 +53,26 @@ impl std::fmt::Display for OctatoolErrors {
             Self::PathDoesNotExist => write!(f, "path does not exist"),
             Self::PathIsNotADirectory => write!(f, "path is not a directory"),
             Self::PathIsNotAFile => write!(f, "path is not a file"),
-            Self::PathIsNotASet => write!(f, "path is not an Octatrack set directory (no 'AUDIO' subdirectory found)"),
-            Self::CliMissingPartIndices => write!(f, "Missing part number(s) - part number(s) between 1-4 must be be provided"),
-            Self::CliInvalidPartIndices => write!(f, "Invalid part number(s) - only part numbers between 1-4 can be provided"),
-            Self::CliMissingPatternIndices => write!(f, "Missing pattern number(s) - pattern number(s) between 1-16 must be be provided"),
-            Self::CliInvalidPatternIndices => write!(f, "Invalid pattern number(s) - only numbers between 1-16 can be provided"),
+            Self::PathIsNotASet => write!(
+                f,
+                "path is not an Octatrack set directory (no 'AUDIO' subdirectory found)"
+            ),
+            Self::CliMissingPartIndices => write!(
+                f,
+                "Missing part number(s) - part number(s) between 1-4 must be be provided"
+            ),
+            Self::CliInvalidPartIndices => write!(
+                f,
+                "Invalid part number(s) - only part numbers between 1-4 can be provided"
+            ),
+            Self::CliMissingPatternIndices => write!(
+                f,
+                "Missing pattern number(s) - pattern number(s) between 1-16 must be be provided"
+            ),
+            Self::CliInvalidPatternIndices => write!(
+                f,
+                "Invalid pattern number(s) - only numbers between 1-16 can be provided"
+            ),
             Self::Unknown => write!(f, "unknown error (please investigate/report)"),
         }
     }

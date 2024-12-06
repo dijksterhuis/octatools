@@ -313,15 +313,13 @@ mod tests {
 
         #[test]
         fn section_heading_from_value_no_match_is_err() {
-            assert!(
-                ProjectRawFileSection::from_value(&"skfsdkfjskdh".to_string()).is_err()
-            )
+            assert!(ProjectRawFileSection::from_value(&"skfsdkfjskdh".to_string()).is_err())
         }
 
         #[test]
         fn section_heading_from_value_uppercase_meta() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"META".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"META".to_string()).unwrap(),
                 ProjectRawFileSection::Meta,
             )
         }
@@ -329,7 +327,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_uppercase_states() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"STATES".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"STATES".to_string()).unwrap(),
                 ProjectRawFileSection::States,
             )
         }
@@ -337,7 +335,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_uppercase_settings() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"SETTINGS".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"SETTINGS".to_string()).unwrap(),
                 ProjectRawFileSection::Settings,
             )
         }
@@ -345,7 +343,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_uppercase_samples() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"SAMPLES".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"SAMPLES".to_string()).unwrap(),
                 ProjectRawFileSection::Samples,
             )
         }
@@ -353,7 +351,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_lowercase_meta() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"meta".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"meta".to_string()).unwrap(),
                 ProjectRawFileSection::Meta,
             )
         }
@@ -361,7 +359,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_lowercase_states() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"states".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"states".to_string()).unwrap(),
                 ProjectRawFileSection::States,
             )
         }
@@ -369,7 +367,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_lowercase_settings() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"settings".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"settings".to_string()).unwrap(),
                 ProjectRawFileSection::Settings,
             )
         }
@@ -377,7 +375,7 @@ mod tests {
         #[test]
         fn section_heading_from_value_lowercase_samples() {
             assert_eq!(
-                ProjectRawFileSection::from_value(&"samples".to_string()).unwrap(), 
+                ProjectRawFileSection::from_value(&"samples".to_string()).unwrap(),
                 ProjectRawFileSection::Samples,
             )
         }
@@ -385,7 +383,7 @@ mod tests {
         #[test]
         fn section_heading_value_meta() {
             assert_eq!(
-                ProjectRawFileSection::Meta.value().unwrap(), 
+                ProjectRawFileSection::Meta.value().unwrap(),
                 "META".to_string(),
             )
         }
@@ -393,27 +391,26 @@ mod tests {
         #[test]
         fn section_heading_value_states() {
             assert_eq!(
-                ProjectRawFileSection::States.value().unwrap(), 
-                "STATES".to_string(), 
+                ProjectRawFileSection::States.value().unwrap(),
+                "STATES".to_string(),
             )
         }
 
         #[test]
         fn section_heading_value_settings() {
             assert_eq!(
-                ProjectRawFileSection::Settings.value().unwrap(), 
-                "SETTINGS".to_string(), 
+                ProjectRawFileSection::Settings.value().unwrap(),
+                "SETTINGS".to_string(),
             )
         }
 
         #[test]
         fn section_heading_value_samples() {
             assert_eq!(
-                ProjectRawFileSection::Samples.value().unwrap(), 
-                "SAMPLES".to_string(), 
+                ProjectRawFileSection::Samples.value().unwrap(),
+                "SAMPLES".to_string(),
             )
         }
-
     }
 
     mod test_read {

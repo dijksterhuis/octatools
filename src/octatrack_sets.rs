@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use walkdir::{DirEntry, WalkDir};
 
 use crate::utils::SampleFilePair;
-use crate::{RBoxErr, OctatoolErrors};
+use crate::{OctatoolErrors, RBoxErr};
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
 
@@ -203,8 +203,7 @@ impl OctatrackSetFiles {
             return Err(Box::new(OctatoolErrors::PathIsNotASet));
         }
 
-        let audio_pool = OctatrackSetAudioPoolFiles::from_pathbuf(&audio_pool_path)
-        .expect(
+        let audio_pool = OctatrackSetAudioPoolFiles::from_pathbuf(&audio_pool_path).expect(
             "Could not gather information about Set Audio Pool: audioPoolPath={audio_pool_path:#?}",
         );
 
@@ -270,6 +269,4 @@ mod test {
         let r = OctatrackSetFiles::from_pathbuf(&fp);
         assert!(r.is_err());
     }
-
-
 }

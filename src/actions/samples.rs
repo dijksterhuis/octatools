@@ -466,7 +466,6 @@ pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxEr
     Ok(())
 }
 
-
 pub fn create_index_samples_dir_simple(
     samples_dir_path: &PathBuf,
     yaml_file_path: &Option<PathBuf>,
@@ -493,9 +492,6 @@ pub fn create_index_samples_dir_full(
     }
     Ok(())
 }
-
-
-
 
 /// Use input files from `resouces/test-data/` to create an OT file output
 /// and compare it to what should exist.
@@ -870,9 +866,12 @@ mod tests {
     }
 
     mod indexing {
-        use std::path::PathBuf;
+        use crate::actions::samples::{
+            create_index_samples_dir_full, create_index_samples_dir_simple,
+            yaml::samplesdir::SamplesDirIndexFull, yaml::samplesdir::SamplesDirIndexSimple,
+        };
         use serde_octatrack::FromYamlFile;
-        use crate::actions::samples::{create_index_samples_dir_full, create_index_samples_dir_simple, yaml::samplesdir::SamplesDirIndexFull, yaml::samplesdir::SamplesDirIndexSimple};
+        use std::path::PathBuf;
 
         #[test]
         fn simple_no_yaml_ok() {
@@ -886,7 +885,6 @@ mod tests {
             let dirpath = PathBuf::from("data/tests/samples/indexing/");
             let r = create_index_samples_dir_full(&dirpath, &None);
             assert!(r.is_ok())
-            
         }
 
         #[test]
@@ -907,7 +905,6 @@ mod tests {
 
             let _ = std::fs::remove_file(yamlpath);
             assert!(r.is_ok())
-            
         }
 
         #[test]
@@ -922,7 +919,6 @@ mod tests {
 
             let _ = std::fs::remove_file(outpath);
             assert_eq!(written, valid)
-
         }
 
         #[test]
@@ -937,10 +933,6 @@ mod tests {
 
             let _ = std::fs::remove_file(outpath);
             assert_eq!(written, valid)
-            
         }
-
-
     }
-
 }

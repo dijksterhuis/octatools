@@ -23,7 +23,6 @@ pub fn create_file_index_yaml(
     Ok(())
 }
 
-
 #[cfg(test)]
 mod test {
     use serde_octatrack::FromYamlFile;
@@ -51,5 +50,4 @@ mod test {
         let _ = std::fs::remove_file(&outyaml);
         assert_eq!(written, valid);
     }
-
 }

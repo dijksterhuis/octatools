@@ -42,10 +42,6 @@ impl FromPath for CompactFlashDrive {
     }
 }
 
-
-
-
-
 #[cfg(test)]
 mod test {
     use serde_octatrack::FromYamlFile;
@@ -59,5 +55,4 @@ mod test {
         let r = CompactFlashDrive::from_yaml(&testyaml);
         assert!(r.is_ok());
     }
-
 }
