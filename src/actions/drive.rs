@@ -15,7 +15,6 @@ pub fn create_file_index_yaml(
     debug!("Indexing CF card: path={cfcard_dir_path:#?}");
     let cf = CompactFlashDrive::from_path(cfcard_dir_path)?;
 
-    // todo: as_ref usage? seems to be due to using an option in CLI definitions
     if !yaml_file_path.is_none() {
         let _ = cf.to_yaml(&yaml_file_path.as_ref().unwrap());
     };

@@ -155,8 +155,6 @@ pub enum Banks {
 
     /// Move a Bank from one location to another,
     /// updating active sample slot assignments in destination Projects while moving.
-    // TODO: Change to Project Directory Path, then use Bank Numbers to select the bank file.
-    // Safer as it guarantees the Octatrack directory structure is available.
     Copy {
         /// File path of the source `bank??.work` or `bank??.strd` file
         source_bank_filepath: PathBuf,

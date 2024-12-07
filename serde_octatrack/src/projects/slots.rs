@@ -39,7 +39,6 @@ use crate::{
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Eq, Hash)]
 pub struct ProjectSampleSlot {
-    // TODO: Should recording buffers be treated as a separate slot type?
     /// Type of sample: STATIC or FLEX
     pub sample_type: ProjectSampleSlotType,
 
@@ -51,8 +50,8 @@ pub struct ProjectSampleSlot {
     /// Relative path to the file on the card from the project directory.
     pub path: PathBuf,
 
-    // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current bar trim (float). This is multiplied by 100 on the machine.
+    /// This is not used for recording buffer 'flex' tracks.
     pub trim_bars_x100: u16,
 
     /// Current `SampleTimestrechModes` setting for the specific slot. Example: `TSMODE=2`
@@ -61,15 +60,13 @@ pub struct ProjectSampleSlot {
     /// Current `SampleLoopModes` setting for the specific slot.
     pub loop_mode: SampleAttributeLoopMode,
 
-    // TODO: This is optional -- not used for recording buffer 'flex' tracks
     /// Current `SampleTrigQuantizationModes` setting for this specific slot.
+    /// This is not used for recording buffer 'flex' tracks.
     pub trig_quantization_mode: SampleAttributeTrigQuantizationMode,
 
-    // TODO: Need to scale this to -24.0 dB <= x <= 24.0 dB
     /// Sample gain. 48 is default as per sample attributes file. maximum 96, minimum 0.
     pub gain: i8,
 
-    // TODO: Need to scale this down by 24.
     /// BPM of the sample in this slot.
     pub bpm: u16,
 }
@@ -255,7 +252,6 @@ impl FromHashMap for ProjectSampleSlot {
         let slot_id = parse_id(hmap)?;
 
         // recorder buffers are the only slots with IDs > 128
-        // TODO: Make this part of the ProjectSampleSlotType from_value method?
         let sample_slot_type = if slot_id >= 129 {
             "RECORDER".to_string()
         } else {
@@ -276,7 +272,6 @@ impl FromHashMap for ProjectSampleSlot {
             sample_type,
             slot_id,
             path,
-            // file_pair,
             trim_bars_x100: trim_bars,
             timestrech_mode,
             loop_mode,

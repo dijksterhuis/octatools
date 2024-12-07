@@ -149,7 +149,7 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
 
 /// Remove audio sample files from the project directory which
 /// are not loaded in the project's samples slots.
-/// No such feature exists for a set audio pool, as the set audio pool is 
+/// No such feature exists for a set audio pool, as the set audio pool is
 /// supposed to have a bunch of possible samples available which may not be in use.
 pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
     let abs_project_fp = fs::canonicalize(project_file_path)?;

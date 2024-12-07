@@ -33,7 +33,6 @@ impl FromPath for CompactFlashDrive {
         let ot_sets = OctatrackSetFiles::from_cfcard_pathbuf(path)?;
 
         let cf = CompactFlashDrive {
-            // todo: clone :/
             cfcard_path: path.to_path_buf(),
             ot_sets,
         };

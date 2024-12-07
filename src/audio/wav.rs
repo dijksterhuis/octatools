@@ -1,6 +1,4 @@
 //! Reading and Writing .wav files.
-//!
-//! **TODO**: Need to move this out into the binary crate.
 
 use crate::RBoxErr;
 use hound::{self, WavReader, WavSpec};

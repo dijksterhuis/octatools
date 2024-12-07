@@ -1,6 +1,5 @@
 //! Read/Write a YAML file config related to Octatrack compatible sample chains.
 //! Reading a config and creating a sample chain is currently implemented.
-//! TODO: Writing a new YAML config from an existing sample chain (edit existing chains via YAML).
 
 use log::{debug, info};
 use serde::{Deserialize, Serialize};

@@ -61,7 +61,6 @@ impl SearchForOctatrackSampleFilePair for OctatrackSetProjectFiles {}
 impl OctatrackSetProjectFiles {
     /// Create a new `OctatrackSetProject` from the dirpath `PathBuf`.
     pub fn from_pathbuf(dirpath: &PathBuf) -> RBoxErr<Self> {
-        // TODO: Handle looking for .work / .strd
         if !dirpath.exists() {
             return Err(Box::new(OctatoolErrors::PathDoesNotExist));
         }
@@ -127,7 +126,6 @@ pub struct OctatrackSetAudioPoolFiles {
     /// Explicit path to this Audio Pool
     pub path: PathBuf,
 
-    // TODO: There can be zero samples!
     /// 'Samples' which are members of this Audio Pool.
     pub samples: Vec<SampleFilePair>,
 }
@@ -162,8 +160,6 @@ pub struct OctatrackSetFiles {
 }
 
 impl OctatrackSetFiles {
-    // TODO: Rename this?
-
     /// Create a collection of `OctatrackSet`s by recursively
     /// searching through a directory tree, starting at a given `PathBuf`
     pub fn from_cfcard_pathbuf(path: &Path) -> RBoxErr<Vec<Self>> {

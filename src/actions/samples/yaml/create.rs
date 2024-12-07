@@ -1,6 +1,5 @@
 //! Read/Write a YAML file config related to Octatrack compatible sample chains.
 //! Reading a config and creating a sample chain is currently implemented.
-//! TODO: Writing a new YAML config from an existing sample chain (edit existing chains via YAML).
 
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -10,13 +9,6 @@ use serde_octatrack::samples::options::{
 };
 
 use serde_octatrack::{FromYamlFile, ToYamlFile};
-
-// TODO: normalization
-// TODO: fades
-// TODO: reverses?
-// TODO: gated?
-// TODO: etc.
-// TODO: should normalization be per chain? separate settings struct?
 
 /// YAML section which globally affects all chains being created with the loaded config.
 

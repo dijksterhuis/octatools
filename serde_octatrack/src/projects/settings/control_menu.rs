@@ -193,7 +193,7 @@ impl FromHashMap for SequencerControlPage {
 }
 
 /// `PROJECT` -> `CONTROL` -> `MIDI SEQUENCER` UI menu.
-// TODO: ?!?!?!?! Where is the alue for this??!?!?!
+// TODO: ?!?!?!?! Where is the value for this??!?!?!
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct MidiSequencerControlPage {}
 
@@ -470,21 +470,17 @@ impl FromHashMap for MidiSyncMidiPage {
                 "midi_program_change_send",
                 None,
             )?,
-            // TODO: Unwrap
             midi_progchange_send_channel: ProjectMidiChannels::from_value(
                 &parse_hashmap_string_value::<i8>(hmap, "midi_program_change_send_ch", None)?,
-            )
-            .unwrap(),
+            )?,
             midi_progchange_receive: parse_hashmap_string_value_bool(
                 hmap,
                 "midi_program_change_receive",
                 None,
             )?,
-            // TODO: Unwrap
             midi_progchange_receive_channel: ProjectMidiChannels::from_value(
                 &parse_hashmap_string_value::<i8>(hmap, "midi_program_change_receive_ch", None)?,
-            )
-            .unwrap(),
+            )?,
         })
     }
 }

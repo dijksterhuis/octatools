@@ -76,10 +76,6 @@ pub fn dump_ot_file(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
 ///
 /// Each individual output can have a maximum of 64 samples,
 /// so results are batched up with a max size of 64.
-// TODO: this needs to return a hashmap so the yaml chain generator can
-//       read the underlying sample information for a batch.
-// TODO: Split this up into two functions --> wavfile_vec_to_batch64 and wavfile_batch64_to_wavfile
-// TODO: Looks like there's a new struct, or a new datatype there...
 pub fn chain_wavfiles_64_batch(
     wavfiles: &Vec<WavFile>,
 ) -> Result<Vec<(WavFile, Vec<WavFile>)>, ()> {
@@ -182,7 +178,6 @@ pub fn create_samplechain_from_pathbufs_only(
             idx + 1,
             wavfiles_batched.len()
         );
-        // TODO -- can use single wavfile here?! would make the funtion more generally applicable.
         let bars = get_otsample_nbars_from_wavfiles(vec_wavs, &125.0).unwrap();
 
         trace!(
@@ -486,7 +481,6 @@ pub fn create_index_samples_dir_full(
 ) -> RBoxErr<()> {
     let sample_index = SamplesDirIndexFull::new(samples_dir_path)?;
 
-    // TODO: clone
     if !yaml_file_path.is_none() {
         let _ = sample_index.to_yaml(yaml_file_path.as_ref().unwrap());
     }

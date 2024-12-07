@@ -124,7 +124,6 @@ pub struct TrackPatternSettings {
     pub trig_quant: u8,
 
     /// Whether to play the track as a `ONESHOT` track.
-    /// TODO -- better docs.
     pub oneshot_trk: u8,
 }
 

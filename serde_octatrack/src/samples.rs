@@ -249,19 +249,13 @@ impl SampleAttributes {
 
         let mut bytes: Vec<u8> = bincode::serialize(&bswapd)?;
 
-        // TODO: I'm only doing this to confirm a struct decoded from file and written
-        // straight out is exactly the same as the read file (which it is).
-        // so it's not file writes or encoding causing the problem with checksums
+        // no checksum created yet
         if bswapd.checksum == 0 {
             let mut i: usize = 16;
             let mut checksum: u16 = 0;
 
             while i < bytes.len() - 2 {
-                let incr = bytes[i] as u16;
-
-                // TODO: Was getting overflow errors....
-                // if u16::MAX - checksum < incr {break};
-                checksum += incr;
+                checksum += bytes[i] as u16;
                 i += 1;
             }
             bswapd.checksum = checksum;

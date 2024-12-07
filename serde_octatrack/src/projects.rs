@@ -103,7 +103,7 @@ impl OptionEnumValueConvert for ProjectRawFileSection {
         }
     }
 
-    // TODO: This should never error, so doesn't need a Result here!
+    // TODO: doesn't need a Result here as should never error
     fn value(&self) -> RBoxErr<Self::V> {
         match self {
             Self::Meta => Ok("META".to_string()),
@@ -115,11 +115,11 @@ impl OptionEnumValueConvert for ProjectRawFileSection {
 }
 
 impl ProjectRawFileSection {
-    fn start_string(&self) -> String {
-        format!("[{}]", self.value().unwrap())
+    fn start_string(&self) -> RBoxErr<String> {
+        Ok(format!("[{}]", self.value()?))
     }
-    fn end_string(&self) -> String {
-        format!("[/{}]", self.value().unwrap())
+    fn end_string(&self) -> RBoxErr<String> {
+        Ok(format!("[/{}]", self.value()?))
     }
 }
 
@@ -129,9 +129,9 @@ fn string_to_hashmap(
     data: &String,
     section: &ProjectRawFileSection,
 ) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
-    let start_idx: usize = data.find(&section.start_string()).unwrap();
-    let start_idx_shifted: usize = start_idx + &section.start_string().len();
-    let end_idx: usize = data.find(&section.end_string()).unwrap();
+    let start_idx: usize = data.find(&section.start_string()?).unwrap();
+    let start_idx_shifted: usize = start_idx + section.start_string()?.len();
+    let end_idx: usize = data.find(&section.end_string()?).unwrap();
 
     let section: String = data[start_idx_shifted..end_idx].to_string();
 
@@ -279,7 +279,6 @@ impl FromPath for Project {
         let metadata = ProjectMetadata::from_string(&s)?;
         let states = ProjectStates::from_string(&s)?;
         let settings = ProjectSettings::from_string(&s)?;
-        // todo? Get sample file pairs, pop the ones that are active, the rest are inactive.
         let slots = ProjectSampleSlot::from_string(&s)?;
 
         Ok(Self {
@@ -463,11 +462,6 @@ mod tests {
         fn test_read_default_project_work_file_sslots() {
             let infile = PathBuf::from("data/tests/blank-project/project.work");
             let p = Project::from_path(&infile).unwrap();
-
-            // todo: need to check and sort out these values for a completely new blank projecct
-            // first slot (129) below is apparently a flex assigned slot in the current BLANK
-            // project in the test data directory.
-
             let default_sslots = ProjectSampleSlot::default_vec();
 
             assert_eq!(p.slots, default_sslots);

@@ -38,6 +38,17 @@ fn get_md5_hash_from_pathbuf(pathbuf: &PathBuf) -> Result<String, Box<dyn std::e
     let mut buf = [0u8; 32];
 
     // TODO: hard exit on error
+    /*
+    the trait bound `InvalidLengthError: StdError` is not satisfied
+
+    the following other types implement trait `FromResidual<R>`:
+    `Result<T, F>` implements `FromResidual<Result<Infallible, E>>`
+    `Result<T, F>` implements `FromResidual<Yeet<E>>`
+
+    required for `Box<dyn StdError>` to implement `From<InvalidLengthError>`
+    required for `Result<std::string::String, Box<dyn StdError>>` to implement `FromResidual<Result<Infallible, InvalidLengthError>>`rustc(Click for full compiler diagnostic)
+    */
+
     let md5_hash_string = Base64::encode(&md5_hash[..], &mut buf).unwrap().to_string();
 
     debug!("Got md5 hash: file={pathbuf:#?} md5={md5_hash_string:#?}");
@@ -119,7 +130,6 @@ impl SamplesDirIndexSimple {
 
         let samples: Vec<PathBuf> = scan_dir_path_for_audio_files(dirpath)?;
 
-        // todo: clone
         let index = SamplesDirIndexSimple {
             samples,
             dirpath: canonicalize(dirpath)?,

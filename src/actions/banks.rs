@@ -1,40 +1,6 @@
 //! Functions for CLI actions related to copying Octatrack data,
 //! such as `Bank`s, `Pattern`s, `Part`s or `Project`s.
 
-/*
-########## TODOs ##########
-
-- Flag for copying to new project directory instead of new projet's Set Audio Pool
-- Check audio file copying into new project's audio pool
-- RECORDER BUFFER SAMPLE SLOT RESOLUTION WHEN PATH IS NOT AN EMPTY STRING?
-
-note: a FLEX ASSIGNED RECORDER is a RECODER BUFFER track which has a sample assigned to it,
-making it an extra flex machine. will be ignoring any recordings, as that data is not
-persisted to the card and can't do anything with it.
-
-########## TESTING DATA NEEDED ##########
-
-AUDIO FILES
-- 1x short WAV, reuse for static/flex/flex recorder
-
-BANK FILES
-- ONE FLEX SLOT TRIG SAMPLE LOCK
-- ONE FLEX ASSIGNED RECORDER SLOT TRIG SAMPLE LOCK
-- ONE STATIC SLOT TRIG SAMPLE LOCK
-- ONE STATIC SLOT + ONE FLEX SLOT + FLEX ASSIGNED RECORDER SLOT TRIG SAMPLE LOCKS
-- ONE FLEX SLOT ASSIGNED TO PART AUDIO TRACK
-- ONE FLEX ASSIGNED RECORDER ASSIGNED TO PART AUDIO TRACK
-- ONE STATIC SLOT ASSIGNED TO PART AUDIO TRACK
-- ONE STATIC SLOT + ONE FLEX SLOT + FLEX ASSIGNED RECORDER SLOT ASSIGNED TO PART AUDIO TRACK
-
-PROJECT FILES
-- SOURCE WITH 1 STATIC, 1 FLEX, 1 FLEX RECORDER SAMPLE SLOTS ASSIGNED (re-use use for the different bank tests)
-- DEST WITH FIRST Nx SAMPLE SLOTS ASSIGNED (test that moved sample slots are placed after existing)
-- DEST WITH FIRST SAMPLE SLOT + FREE SPACE + Nx AFTER ASSIGNED (test that moved sample slots will fill in early blanks)
-- DEST WITH 126 SAMPLE SLOTS ASSIGNED (test that nothing is changed in files for safety)
-- DEST WITH JUST ENOUGH FREE SAMPLE SLOTS (test that sample slot counts are correct)
-*/
-
 mod yaml;
 
 use log::{debug, error, info, warn};
