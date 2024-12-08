@@ -17,7 +17,7 @@ use crate::{
         slots::ProjectSampleSlot, states::ProjectStates,
     },
     FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToPath,
-    ToYamlFile,
+    ToYamlFile, ToJsonFile, FromJsonFile
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
@@ -302,6 +302,8 @@ impl ToPath for Project {
 
 impl ToYamlFile for Project {}
 impl FromYamlFile for Project {}
+impl ToJsonFile for Project {}
+impl FromJsonFile for Project {}
 
 #[cfg(test)]
 mod tests {

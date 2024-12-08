@@ -713,4 +713,6 @@ impl FromPath for ArrangementFile {
 
 // Todo; need to deal with intermediate structs
 // impl ToYamlFile for ArrangementFile {}
-// impl FromYamlFile for Project {}
+// impl FromYamlFile for ArrangementFile {}
+// impl ToJsonFile for ArrangementFile {}
+// impl FromJsonFile for ArrangementFile {}

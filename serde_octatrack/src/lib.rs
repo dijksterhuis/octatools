@@ -21,6 +21,8 @@ use std::{error::Error, fmt::Debug, path::Path};
 
 use serde::{Deserialize, Serialize};
 use serde_yml::Error as SerdeYmlError;
+use serde_json::Error as SerdeJsonError;
+
 
 // todo: sized errors so not necessary to keep Boxing error enum varients
 /// Shorthand type alias for a Result with a Boxed Error
@@ -111,6 +113,36 @@ where
     fn from_yaml(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
         let f = std::fs::File::open(path)?;
         let data: Result<Self, SerdeYmlError> = serde_yml::from_reader(f);
+        Ok(data?)
+    }
+}
+
+
+pub trait ToJsonFile
+where
+    Self: Serialize,
+{
+    fn to_json(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        serde_json::to_writer(
+            std::fs::File::options()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(path)
+                .unwrap(),
+            self,
+        )?;
+        Ok(())
+    }
+}
+
+pub trait FromJsonFile
+where
+    Self: for<'a> Deserialize<'a>,
+{
+    fn from_json(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+        let f = std::fs::File::open(path)?;
+        let data: Result<Self, SerdeJsonError> = serde_json::from_reader(f);
         Ok(data?)
     }
 }

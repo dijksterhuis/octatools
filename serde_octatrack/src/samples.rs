@@ -15,7 +15,7 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToPath, ToYamlFile,
+    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToPath, ToYamlFile, ToJsonFile, FromJsonFile
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
@@ -329,6 +329,8 @@ impl ToPath for SampleAttributes {
 
 impl ToYamlFile for SampleAttributes {}
 impl FromYamlFile for SampleAttributes {}
+impl ToJsonFile for SampleAttributes {}
+impl FromJsonFile for SampleAttributes {}
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.

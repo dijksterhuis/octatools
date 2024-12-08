@@ -12,6 +12,7 @@ use serde_big_array::{Array, BigArray};
 use crate::{
     banks::{parts::Part, patterns::Pattern},
     FromPath, FromYamlFile, RBoxErr, ToPath, ToYamlFile,
+    FromJsonFile, ToJsonFile,
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
@@ -84,6 +85,8 @@ impl ToPath for Bank {
 
 impl ToYamlFile for Bank {}
 impl FromYamlFile for Bank {}
+impl ToJsonFile for Bank {}
+impl FromJsonFile for Bank {}
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
