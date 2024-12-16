@@ -20,6 +20,9 @@ Only Linux supported at the moment.
 - Create slice sample chains from multiple WAV files
 - Deconstruct a slice sample chain into multiple WAV files
 - Create a linear/random slice grid for an exisitng wav file
+- Consolidate Project sample slot files into Project audio folder
+- Centralize Project sample slot files into Set's Audio pool folder
+- Purge Project's audio folder of any audio files not present in Project sample slots
 - Write a new data file from YAML (project/bank/sample)
 - Dump data to YAML (project/bank/sample/part/pattern)
 - Inspect various data files (project/arrangement/bank/part/pattern/sample) 
