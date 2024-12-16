@@ -3,12 +3,11 @@ name = "octatools"
 version = "0.0.1"
 edition = "2021"
 readme = "README.md"
-exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*"]
+exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*", "./data/*", "./assets/*", "./examples/*", "./outchains/*"]
 license-file = "./LICENSE.md"
 description = "CLI Tools for the Elektron Octatrack DPS-1"
 homepage = "https://gitlab.come/dijksterhuis/octatools/"
 repository = "https://gitlab.come/dijksterhuis/octatools/"
-exclude = ["./data/*", "./assets/*", "./examples/*", "./outchains/*"]
 
 [[bin]]
 name = "octatools"
