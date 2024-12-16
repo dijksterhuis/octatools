@@ -1,5 +1,4 @@
 global_settings:
-  # TODO: need to set up normalization ... normalize each or per chain? New Enum for options if so *sighs*
   normalize: false
   out_dir_path: "./outchains/"
 
