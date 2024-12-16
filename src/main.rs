@@ -22,7 +22,10 @@ use actions::{
     drive::create_file_index_yaml,
     parts::{show_saved_parts, show_unsaved_parts},
     patterns::show_pattern,
-    projects::{dump_project, list_project_sample_slots, load_project, show_project},
+    projects::{
+        consolidate_sample_slots_to_audio_pool, consolidate_sample_slots_to_project_pool,
+        dump_project, list_project_sample_slots, load_project, purge_project_pool, show_project,
+    },
     samples::{
         create_equally_sliced_sample, create_index_samples_dir_full,
         create_index_samples_dir_simple, create_randomly_sliced_sample,
@@ -122,14 +125,14 @@ fn main() {
                 crate::cli::SampleSlots::List { path } => {
                     let _ = list_project_sample_slots(&path);
                 }
-                crate::cli::SampleSlots::Purge { path: _path } => {
-                    unimplemented!();
+                crate::cli::SampleSlots::Purge { path } => {
+                    let _ = purge_project_pool(&path);
                 }
-                crate::cli::SampleSlots::Consolidate { path: _path } => {
-                    unimplemented!();
+                crate::cli::SampleSlots::Consolidate { path } => {
+                    let _ = consolidate_sample_slots_to_project_pool(&path);
                 }
-                crate::cli::SampleSlots::Centralise { path: _path } => {
-                    unimplemented!();
+                crate::cli::SampleSlots::Centralise { path } => {
+                    let _ = consolidate_sample_slots_to_audio_pool(&path);
                 }
             },
             crate::cli::Projects::Dump {
