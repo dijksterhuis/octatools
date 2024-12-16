@@ -15,7 +15,8 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToPath, ToYamlFile, ToJsonFile, FromJsonFile
+    FromJsonFile, FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToJsonFile, ToPath,
+    ToYamlFile,
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)

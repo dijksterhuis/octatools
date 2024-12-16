@@ -16,8 +16,8 @@ use crate::{
         metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
         slots::ProjectSampleSlot, states::ProjectStates,
     },
-    FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors, ToPath,
-    ToYamlFile, ToJsonFile, FromJsonFile
+    FromJsonFile, FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
+    ToJsonFile, ToPath, ToYamlFile,
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.

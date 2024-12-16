@@ -20,9 +20,8 @@ pub mod utils;
 use std::{error::Error, fmt::Debug, path::Path};
 
 use serde::{Deserialize, Serialize};
-use serde_yml::Error as SerdeYmlError;
 use serde_json::Error as SerdeJsonError;
-
+use serde_yml::Error as SerdeYmlError;
 
 // todo: sized errors so not necessary to keep Boxing error enum varients
 /// Shorthand type alias for a Result with a Boxed Error
@@ -116,7 +115,6 @@ where
         Ok(data?)
     }
 }
-
 
 pub trait ToJsonFile
 where

@@ -11,8 +11,7 @@ use serde_big_array::{Array, BigArray};
 
 use crate::{
     banks::{parts::Part, patterns::Pattern},
-    FromPath, FromYamlFile, RBoxErr, ToPath, ToYamlFile,
-    FromJsonFile, ToJsonFile,
+    FromJsonFile, FromPath, FromYamlFile, RBoxErr, ToJsonFile, ToPath, ToYamlFile,
 };
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
