@@ -10,3 +10,4 @@ inchains/
 .qlty/
 # generated directory contents
 data/tests/projects/sample-slots/**/test/
+*.theia*
