@@ -15,10 +15,11 @@ examples-json-dumps:
 
 install-qlty:
 	curl https://qlty.sh | bash
+	qlty init
 
 checks:
 	qlty check --filter clippy
-	qlty smells ./src/ ./serde_octatrack/
+	qlty smells ./serde_octatrack/ ./octatools-*/
 
 lint:
 	cargo fmt
