@@ -27,6 +27,8 @@ Only Linux OSs are supported at the moment.
 
 ## `octatools-bin` -- Octatools (CLI Binary Executable)
 
+Command line binary executable to interact with Octatrack data files.
+
 ### Current Features (mostly working-ish)
 - Copy banks from one project to another, moving relevant project sample slots with the bank
 - Create slice sample chains from multiple WAV files
@@ -42,7 +44,15 @@ Only Linux OSs are supported at the moment.
 - Find compatible WAV files in a local directory and write their file paths to a YAML file
 - Scan a Compact Flash card and dumpy Octatrack file information to YAML
 
+## `octatools-gui` -- Octatools (CLI Binary Executable)
+
+Eventually I'd like to create a simple cross-platform GUI application for people to perform all the octatools tasks alongside a cli binary.
+This package is a placeholder to act as a guilt trip every time I look at the repository.
+
 ## `serde_octatrack` -- Ser/De library
+
+Library used for reading/writing octatrack binary data.
+Most of this is just the [`serde` crate](https://serde.rs).
 
 ### Current Features (mostly working-ish)
 - Deserialise all Octatrack data structures from binarized data
