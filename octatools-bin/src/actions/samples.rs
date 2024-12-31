@@ -502,8 +502,8 @@ mod tests {
 
         #[test]
         fn test_basic() {
-            let audio_fpath = PathBuf::from("data/tests/chains/deconstruct/test.wav");
-            let attributes_fpath = PathBuf::from("data/tests/chains/deconstruct/test.ot");
+            let audio_fpath = PathBuf::from("../data/tests/chains/deconstruct/test.wav");
+            let attributes_fpath = PathBuf::from("../data/tests/chains/deconstruct/test.ot");
             let outdir = PathBuf::from("/tmp/");
 
             let res = deconstruct_samplechain_from_pathbufs_only(
@@ -609,7 +609,7 @@ mod tests {
 
         #[test]
         fn test_default_10_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/1/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/1/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -623,7 +623,7 @@ mod tests {
                 &slices,
             );
 
-            let valid_ot_fp = PathBuf::from("data/tests/1/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/1/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(
@@ -634,7 +634,7 @@ mod tests {
 
         #[test]
         fn test_default_3_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/2/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/2/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -649,7 +649,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = PathBuf::from("data/tests/2/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/2/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(
@@ -661,7 +661,7 @@ mod tests {
         #[ignore]
         #[test]
         fn test_default_64_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/3/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -676,7 +676,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -691,7 +691,7 @@ mod tests {
         #[ignore]
         #[test]
         fn test_default_67_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/3/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -706,7 +706,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -767,7 +767,7 @@ mod tests {
         #[ignore]
         #[test]
         fn test_non_default_quantize_3_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/3/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -782,7 +782,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -796,7 +796,7 @@ mod tests {
         #[ignore]
         #[test]
         fn test_non_default_gain_3_samples() {
-            let wav_fps = get_test_wav_paths("data/tests/3/wavs/").unwrap();
+            let wav_fps = get_test_wav_paths("../data/tests/3/wavs/").unwrap();
             let (loop_config, trim_config, slices) =
                 create_sample_chain_encoded_from_wavfiles(wav_fps).unwrap();
 
@@ -811,7 +811,7 @@ mod tests {
             )
             .unwrap();
 
-            let valid_ot_fp = PathBuf::from("data/tests/3/chain.ot");
+            let valid_ot_fp = PathBuf::from("../data/tests/3/chain.ot");
             let valid_sample_chain = read_valid_sample_chain(&valid_ot_fp).unwrap();
 
             assert_eq!(composed_chain, valid_sample_chain,);
@@ -869,14 +869,14 @@ mod tests {
 
         #[test]
         fn simple_no_yaml_ok() {
-            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_simple(&dirpath, &None);
             assert!(r.is_ok())
         }
 
         #[test]
         fn full_no_yaml_ok() {
-            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_full(&dirpath, &None);
             assert!(r.is_ok())
         }
@@ -884,7 +884,7 @@ mod tests {
         #[test]
         fn simple_with_yaml_ok() {
             let yamlpath = PathBuf::from("/tmp/test-samples-search-simple.yaml");
-            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_simple(&dirpath, &Some(yamlpath.clone()));
 
             let _ = std::fs::remove_file(yamlpath);
@@ -894,7 +894,7 @@ mod tests {
         #[test]
         fn full_with_yaml_ok() {
             let yamlpath = PathBuf::from("/tmp/test-samples-search-full.yaml");
-            let dirpath = PathBuf::from("data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_full(&dirpath, &Some(yamlpath.clone()));
 
             let _ = std::fs::remove_file(yamlpath);
@@ -903,9 +903,9 @@ mod tests {
 
         #[test]
         fn simple_with_yaml_matches_validation() {
-            let testpath = PathBuf::from("data/tests/samples/indexing/simple-valid.yaml");
+            let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
             let outpath = PathBuf::from("/tmp/test-samples-search-simple-validate.yaml");
-            let dirpath = PathBuf::from("./data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let _ = create_index_samples_dir_simple(&dirpath, &Some(outpath.clone()));
 
             let valid = SamplesDirIndexSimple::from_yaml(&testpath).unwrap();
@@ -917,9 +917,9 @@ mod tests {
 
         #[test]
         fn full_with_yaml_matches_validation() {
-            let testpath = PathBuf::from("data/tests/samples/indexing/full-valid.yaml");
+            let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
             let outpath = PathBuf::from("/tmp/test-samples-search-full-validate.yaml");
-            let dirpath = PathBuf::from("./data/tests/samples/indexing/");
+            let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let _ = create_index_samples_dir_full(&dirpath, &Some(outpath.clone()));
 
             let valid = SamplesDirIndexFull::from_yaml(&testpath).unwrap();

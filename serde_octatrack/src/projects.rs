@@ -422,14 +422,14 @@ mod tests {
         // can read a project file without errors
         #[test]
         fn test_read_default_project_work_file() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             assert!(Project::from_path(&infile).is_ok());
         }
 
         // test that the metadata section is correct
         #[test]
         fn test_read_default_project_work_file_metadata() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectMetadata::default();
@@ -440,7 +440,7 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_states() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectStates::default();
@@ -451,7 +451,7 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_settings() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let p = Project::from_path(&infile).unwrap();
 
             let correct = ProjectSettings::default();
@@ -462,7 +462,7 @@ mod tests {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_sslots() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let p = Project::from_path(&infile).unwrap();
             let default_sslots = ProjectSampleSlot::default_vec();
 
@@ -472,7 +472,7 @@ mod tests {
         // test that reading and writing a single project gives the same outputs
         #[test]
         fn test_read_write_default_project_work_file() {
-            let infile = PathBuf::from("data/tests/blank-project/project.work");
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let outfile = PathBuf::from("/tmp/default_1.work");
             let p = Project::from_path(&infile).unwrap();
             let _ = p.to_path(&outfile);

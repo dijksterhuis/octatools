@@ -223,14 +223,14 @@ mod test {
 
     #[test]
     fn test_show_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/project.work");
+        let fp = PathBuf::from("../data/tests/blank-project/project.work");
         let r = show_project(&fp);
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_list_sample_slots_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/project.work");
+        let fp = PathBuf::from("../data/tests/blank-project/project.work");
         let r = list_project_sample_slots(&fp);
         assert!(r.is_ok())
     }
@@ -238,7 +238,7 @@ mod test {
     #[test]
     fn test_load_project_ok() {
         let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-ok.work");
-        let yaml = PathBuf::from("data/tests/projects/project.yaml");
+        let yaml = PathBuf::from("../data/tests/projects/project.yaml");
         let r = load_project(&yaml, &outfile);
 
         let _ = std::fs::remove_file(&outfile);
@@ -247,9 +247,9 @@ mod test {
 
     #[test]
     fn test_load_project_matches_blank() {
-        let testfile = PathBuf::from("data/tests/projects/blank.work");
+        let testfile = PathBuf::from("../data/tests/projects/blank.work");
         let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-full.work");
-        let yaml = PathBuf::from("data/tests/projects/project.yaml");
+        let yaml = PathBuf::from("../data/tests/projects/project.yaml");
 
         let _ = load_project(&yaml, &outfile);
 
@@ -262,7 +262,7 @@ mod test {
 
     #[test]
     fn test_dump_project_ok() {
-        let infile = PathBuf::from("data/tests/projects/blank.work");
+        let infile = PathBuf::from("../data/tests/projects/blank.work");
         let outyaml = PathBuf::from("/tmp/project-test-dump-ok.yaml");
         let r = dump_project(&infile, &outyaml);
 
@@ -275,31 +275,31 @@ mod test {
         let _ = fs::create_dir(base_path.join("test/AUDIO"));
         let _ = fs::create_dir(base_path.join("test/PROJECT"));
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/test.wav"),
+            PathBuf::from("./../data/tests/misc/test.wav"),
             base_path.join("test/AUDIO/first-0.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/test.wav"),
+            PathBuf::from("./../data/tests/misc/test.wav"),
             base_path.join("test/AUDIO/second-0.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.wav"),
+            PathBuf::from("./../data/tests/misc/pair.wav"),
             base_path.join("test/AUDIO/third-0.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.ot"),
+            PathBuf::from("./../data/tests/misc/pair.ot"),
             base_path.join("test/AUDIO/third-0.ot"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/test.wav"),
+            PathBuf::from("./../data/tests/misc/test.wav"),
             base_path.join("test/PROJECT/fourth-0.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.wav"),
+            PathBuf::from("./../data/tests/misc/pair.wav"),
             base_path.join("test/PROJECT/fifth-0.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.ot"),
+            PathBuf::from("./../data/tests/misc/pair.ot"),
             base_path.join("test/PROJECT/fifth-0.ot"),
         );
     }
@@ -307,7 +307,7 @@ mod test {
     #[test]
     fn test_consolidate_sslots_audio_pool_ok() {
         let base_path =
-            PathBuf::from("./data/tests/projects/sample-slots/consolidation/to_audio_pool/");
+            PathBuf::from("./../data/tests/projects/sample-slots/consolidation/to_audio_pool/");
 
         if base_path.join("test/").exists() {
             let _ = std::fs::remove_dir_all(&base_path.join("test/"));
@@ -341,7 +341,7 @@ mod test {
     #[test]
     fn test_consolidate_sslots_project_pool_ok() {
         let base_path =
-            PathBuf::from("./data/tests/projects/sample-slots/consolidation/to_project_pool/");
+            PathBuf::from("./../data/tests/projects/sample-slots/consolidation/to_project_pool/");
 
         if base_path.join("test/").exists() {
             let _ = std::fs::remove_dir_all(&base_path.join("test/"));
@@ -374,7 +374,7 @@ mod test {
 
     #[test]
     fn test_purge_project_pool_ok() {
-        let base_path = PathBuf::from("./data/tests/projects/sample-slots/purge/project_pool/");
+        let base_path = PathBuf::from("./../data/tests/projects/sample-slots/purge/project_pool/");
 
         if base_path.join("test/").exists() {
             let _ = std::fs::remove_dir_all(&base_path.join("test/"));
@@ -383,15 +383,15 @@ mod test {
         make_sslot_mock_set_dir(&base_path);
 
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.wav"),
+            PathBuf::from("./../data/tests/misc/pair.wav"),
             base_path.join("test/PROJECT/deleteme1.wav"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/pair.ot"),
+            PathBuf::from("./../data/tests/misc/pair.ot"),
             base_path.join("test/PROJECT/deleteme1.ot"),
         );
         let _ = fs::copy(
-            PathBuf::from("./data/tests/misc/test.wav"),
+            PathBuf::from("./../data/tests/misc/test.wav"),
             base_path.join("test/PROJECT/deleteme2.wav"),
         );
 

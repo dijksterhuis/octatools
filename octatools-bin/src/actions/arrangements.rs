@@ -46,42 +46,42 @@ mod test {
 
     #[test]
     fn test_show_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement(&fp);
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_show_bytes_first_all_bytes_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement_bytes(&fp, &None, &None);
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_show_bytes_first_100_bytes_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement_bytes(&fp, &Some(0), &Some(100));
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_show_bytes_1_byte_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement_bytes(&fp, &Some(0), &Some(1));
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_show_bytes_100_bytes_offset_100_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement_bytes(&fp, &Some(100), &Some(100));
         assert!(r.is_ok())
     }
 
     #[test]
     fn test_show_bytes_maxlen_ok() {
-        let fp = PathBuf::from("data/tests/blank-project/arr01.work");
+        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
         let r = show_arrangement_bytes(&fp, &Some(0), &Some(11336));
         assert!(r.is_ok())
     }

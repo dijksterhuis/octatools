@@ -127,14 +127,14 @@ mod tests {
 
     #[test]
     fn test_read_bank_file_no_errors() {
-        let bank_file_path: PathBuf = PathBuf::from("data/tests/blank-project/bank01.work");
+        let bank_file_path: PathBuf = PathBuf::from("../data/tests/blank-project/bank01.work");
         let _: Bank = Bank::from_path(&bank_file_path.as_path()).unwrap();
         assert!(true);
     }
 
     #[test]
     fn test_read_and_write_bank_file_no_errors() {
-        let src_file_path: PathBuf = PathBuf::from("data/tests/blank-project/bank01.work");
+        let src_file_path: PathBuf = PathBuf::from("../data/tests/blank-project/bank01.work");
         let dst_file_path: PathBuf = PathBuf::from("/tmp/bank01.work");
         let bank: Bank = Bank::from_path(&src_file_path).unwrap();
         let _ = bank.to_path(&dst_file_path.as_path());

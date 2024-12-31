@@ -49,7 +49,7 @@ mod test {
 
     #[test]
     fn from_yaml_ok() {
-        let testyaml = PathBuf::from("data/tests/drive/test.yml");
+        let testyaml = PathBuf::from("../data/tests/drive/test.yml");
 
         let r = CompactFlashDrive::from_yaml(&testyaml);
         assert!(r.is_ok());

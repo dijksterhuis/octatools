@@ -142,7 +142,7 @@ mod test {
 
         #[test]
         fn no_offset_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let valid = Slice {
@@ -156,7 +156,7 @@ mod test {
 
         #[test]
         fn no_offset_validated() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let valid = Slice {
@@ -170,7 +170,7 @@ mod test {
 
         #[test]
         fn offset_100_validated() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let valid = Slice {
@@ -193,7 +193,7 @@ mod test {
 
         #[test]
         fn no_offset_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -209,7 +209,7 @@ mod test {
 
         #[test]
         fn offset_100_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -225,7 +225,7 @@ mod test {
 
         #[test]
         fn offset_30000_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -250,7 +250,7 @@ mod test {
 
         #[test]
         fn simple_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             assert!(get_otsample_nbars_from_wavfile(&wav, &120.0).is_ok())
@@ -258,7 +258,7 @@ mod test {
 
         #[test]
         fn simple_120bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &120.0).unwrap();
@@ -267,7 +267,7 @@ mod test {
 
         #[test]
         fn simple_300bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &300.0).unwrap();
@@ -276,7 +276,7 @@ mod test {
 
         #[test]
         fn simple_150bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &150.0).unwrap();
@@ -285,7 +285,7 @@ mod test {
 
         #[test]
         fn simple_200bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &200.0).unwrap();
@@ -294,7 +294,7 @@ mod test {
 
         #[test]
         fn simple_30bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
             let nbarsx100 = get_otsample_nbars_from_wavfile(&wav, &30.0).unwrap();
@@ -312,7 +312,7 @@ mod test {
 
         #[test]
         fn simple_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -328,7 +328,7 @@ mod test {
 
         #[test]
         fn simple_120bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -345,7 +345,7 @@ mod test {
 
         #[test]
         fn simple_300bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -362,7 +362,7 @@ mod test {
 
         #[test]
         fn simple_150bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -379,7 +379,7 @@ mod test {
 
         #[test]
         fn simple_200bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -396,7 +396,7 @@ mod test {
 
         #[test]
         fn simple_30bpm_valid() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
             let wavs = [
                 wav.clone(),
@@ -419,14 +419,14 @@ mod test {
 
         #[test]
         fn test_read_audio_file_only_ok() {
-            let fp = PathBuf::from("./data/tests/misc/test.wav");
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
             let r = SampleFilePair::from_audio_pathbuf(&fp);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_file_pair_ok() {
-            let fp = PathBuf::from("./data/tests/misc/pair.wav");
+            let fp = PathBuf::from("../data/tests/misc/pair.wav");
             let r = SampleFilePair::from_audio_pathbuf(&fp);
             assert!(r.is_ok())
         }

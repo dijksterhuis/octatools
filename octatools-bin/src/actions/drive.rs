@@ -30,16 +30,17 @@ mod test {
 
     #[test]
     fn test_drive_file_index_yaml_ok() {
-        let indir = PathBuf::from("data/tests/drive/DEMO-DRIVE-DATA/");
+        let indir = PathBuf::from("../data/tests/drive/DEMO-DRIVE-DATA/");
         let res = create_file_index_yaml(&indir, &None);
+        println!("HELP {:#?}", res);
         assert!(res.is_ok());
     }
 
     #[test]
     fn test_drive_file_index_yaml_correct() {
-        let indir = PathBuf::from("data/tests/drive/DEMO-DRIVE-DATA/");
+        let indir = PathBuf::from("../data/tests/drive/DEMO-DRIVE-DATA/");
         let outyaml = PathBuf::from("/tmp/test-drive-file-inex-correctness.yaml");
-        let testyaml = PathBuf::from("data/tests/drive/test.yml");
+        let testyaml = PathBuf::from("../data/tests/drive/test.yml");
 
         let _ = create_file_index_yaml(&indir, &Some(outyaml.clone()));
 

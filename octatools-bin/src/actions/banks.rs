@@ -537,19 +537,19 @@ mod tests {
     fn test_copy_bank() {
         use copy_dir;
 
-        let audio_pool = PathBuf::from("./data/tests/copy/bank/AUDIO-TEST");
+        let audio_pool = PathBuf::from("../data/tests/copy/bank/AUDIO-TEST");
 
-        let inbank = PathBuf::from("./data/tests/copy/bank/BANK-COPY-SRC/bank01.work");
-        let outbank = PathBuf::from("./data/tests/copy/bank/BANK-COPY-DUMMY/bank01.work");
+        let inbank = PathBuf::from("../data/tests/copy/bank/BANK-COPY-SRC/bank01.work");
+        let outbank = PathBuf::from("../data/tests/copy/bank/BANK-COPY-DUMMY/bank01.work");
 
-        let inproject = PathBuf::from("./data/tests/copy/bank/BANK-COPY-SRC/project.work");
-        let outproject = PathBuf::from("./data/tests/copy/bank/BANK-COPY-DUMMY/project.work");
+        let inproject = PathBuf::from("../data/tests/copy/bank/BANK-COPY-SRC/project.work");
+        let outproject = PathBuf::from("../data/tests/copy/bank/BANK-COPY-DUMMY/project.work");
 
         let _ = std::fs::create_dir(&audio_pool);
 
         // copy test destination project to a new directory, so we have a fresh test each time
         let _ = copy_dir::copy_dir(
-            PathBuf::from("./data/tests/copy/bank/BANK-COPY-DEST/"),
+            PathBuf::from("../data/tests/copy/bank/BANK-COPY-DEST/"),
             outbank.parent().unwrap(),
         );
 
