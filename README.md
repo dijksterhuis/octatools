@@ -25,7 +25,7 @@ Only Linux OSs are supported at the moment.
 - A clone of OctaEdit
 - A clone of Octachainer
 
-## `ocatools-bin` -- Octatools (CLI Binary Executable)
+## `octatools-bin` -- Octatools (CLI Binary Executable)
 
 ### Current Features (mostly working-ish)
 - Copy banks from one project to another, moving relevant project sample slots with the bank
