@@ -335,6 +335,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "octatools-bin"
+version = "0.1.0"
+dependencies = [
+ "aifc",
+ "base16ct",
+ "base64ct",
+ "bincode",
+ "clap",
+ "copy_dir",
+ "env_logger",
+ "hex-literal",
+ "hound",
+ "itertools",
+ "log",
+ "md5",
+ "rand",
+ "serde_octatrack",
+ "walkdir",
+]
+
+[[package]]
+name = "octatools-gui"
+version = "0.1.0"
+
+[[package]]
 name = "ppv-lite86"
 version = "0.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -474,6 +499,24 @@ dependencies = [
  "memchr",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "serde_octatrack"
+version = "0.1.0"
+dependencies = [
+ "base16ct",
+ "base64ct",
+ "bincode",
+ "env_logger",
+ "hex-literal",
+ "itertools",
+ "log",
+ "serde",
+ "serde-big-array",
+ "serde_json",
+ "serde_yml",
+ "walkdir",
 ]
 
 [[package]]

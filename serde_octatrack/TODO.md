@@ -1,0 +1,30 @@
+# TODO
+- Ser/De to Enum/String/etc types instead of u8 -- possible with `serde_repr`, but don't know if it's desirable to do this ... adds a lot of complexity for now.
+- PyO3 bindings for creating a python interface to `serde_octatrack`
+- Finish reverse engineering files 
+  - Banks:
+    - `MidiTrackParameterLocks.unknown` --> space for sample locks? but no samples for MIDI.
+    - `AudioTrackTrigs.unknown_1`
+    - `AudioTrackTrigs.unknown_2`
+    - `AudioTrackTrigs.unknown_3` --> big 192 length block?!
+    - `MidiTrackTrigMasks.unknown` --> looks like trig mask, but no trig trypes remain?
+    - `MidiTrackTrigs.unknown_1`
+    - `MidiTrackTrigs.unknown_2` --> no idea what this is, some kind of mask?
+    - `MidiTrackTrigs.unknown_3` --> big 128 length block?!
+    - `Pattern.unknown`
+    - `AudioTrackSceneParams.unknown_1` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)
+    - `AudioTrackSceneParams.unknown_2` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)
+    - `SceneTrackXlv.unknown_` only 2 length
+    - `MidiTrackParamsValues.unknown` --> space for sample select?
+  - Projects:
+    - `ProjectSettings.midi_soft_thru` --> what is this for? no menu option named like this.
+    - `MidiControlMidiPage.midi_midi_track_cc_in` -- no menu option for this?
+    - `ProjectStates.track_othermode` -- ??
+    - `ProjectStates.midi_mode` -- no idea.
+  - Arrangements:
+    - `ArrangementBlock.unknown_1`
+    - `ArrangementBlock.unknown_2`
+    - `ArrangementFile.unknown_1`
+    - `ArrangementFile.unknown_2`
+- More tests.
+- Even more tests.

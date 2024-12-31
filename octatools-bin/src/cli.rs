@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use clap::{command, Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[command(version, long_about = None, about = "CLI tools for the Elektron Octatrack DPS (Dynamic Performance Sampler).")]
+#[command(version, long_about = None, about = "CLI tool for handling Elektron Octatrack DPS-1 data files.")]
 #[command(propagate_version = true)]
 pub struct Cli {
     #[command(subcommand)]

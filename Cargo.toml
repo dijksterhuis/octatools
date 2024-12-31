@@ -5,17 +5,20 @@ edition = "2021"
 readme = "README.md"
 exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*", "./data/*", "./assets/*", "./examples/*", "./outchains/*"]
 license-file = "./LICENSE.md"
-description = "CLI Tools for the Elektron Octatrack DPS-1"
+description = "Utilities for the Elektron Octatrack DPS-1"
 homepage = "https://gitlab.come/dijksterhuis/octatools/"
 repository = "https://gitlab.come/dijksterhuis/octatools/"
 
 [[bin]]
-name = "octatools"
-path = "src/main.rs"
+name = "octatools-bin"
+path = "octatools-bin/src/main.rs"
 
 [lib]
 name = "serde_octatrack"
 path = "serde_octatrack/src/lib.rs"
+
+[workspace]
+members = ["octatools-bin", "octatools-gui", "serde_octatrack"]
 
 [dependencies]
 aifc = "0.5.3"
