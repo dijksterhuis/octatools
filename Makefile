@@ -17,33 +17,37 @@ install-qlty:
 	curl https://qlty.sh | bash
 	qlty init
 
+
 checks:
 	qlty check --filter clippy
 	qlty smells ./serde_octatrack/ ./octatools-*/
 
 lint:
-	cargo fmt
+	cargo fmt --all
 
 fixup: lint
 	qlty check --filter clippy --fix
 
 docs-full:
-	cargo doc
+	cargo doc --workspace
 
 docs:
-	cargo doc --no-deps
+	cargo doc --workspace --no-deps
 
 test:
-	cargo test
+	cargo test --workspace --no-fail-fast
 
 cov:
-	cargo tarpaulin
+	cargo tarpaulin --workspace
 
 build:
-	cargo build
+	cargo build --workspace
+
+run:
+	cargo run
 
 release:
-	cargo build --release
+	cargo build --workspace --release
 
 clean:
 	rm -rf ./target/
