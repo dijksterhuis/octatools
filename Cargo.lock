@@ -358,6 +358,9 @@ dependencies = [
 [[package]]
 name = "octatools-gui"
 version = "0.1.0"
+dependencies = [
+ "serde_octatrack",
+]
 
 [[package]]
 name = "ppv-lite86"
