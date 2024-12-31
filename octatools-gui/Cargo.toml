@@ -1,12 +1,18 @@
 [package]
 name = "octatools-gui"
-version = "0.1.0"
-edition = "2021"
-readme = "../README.md"
-license-file = "../LICENSE.md"
 description = "GUI tool for managing Elektron Octatrack DPS-1 data files"
-homepage = "https://gitlab.come/dijksterhuis/octatools/"
-repository = "https://gitlab.come/dijksterhuis/octatools/"
+
+version.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+homepage.workspace = true
+repository.workspace = true
 
 [dependencies]
 serde_octatrack = { path = "../serde_octatrack" }
+bincode.workspace = true
+itertools.workspace = true
+serde.workspace = true
+serde_yml.workspace = true
+walkdir.workspace = true

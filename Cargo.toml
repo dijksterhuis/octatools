@@ -1,41 +1,19 @@
-[package]
-name = "octatools"
-version = "0.0.1"
+[workspace]
+members = ["serde_octatrack", "octatools-bin", "octatools-gui"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
 edition = "2021"
-readme = "README.md"
-exclude = ["/.git/*", "/.github/*", "/.gitignore", "/.vscode/*", "./data/*", "./assets/*", "./examples/*", "./outchains/*"]
+readme = "./README.md"
 license-file = "./LICENSE.md"
-description = "Utilities for the Elektron Octatrack DPS-1"
 homepage = "https://gitlab.come/dijksterhuis/octatools/"
 repository = "https://gitlab.come/dijksterhuis/octatools/"
 
-[[bin]]
-name = "octatools-bin"
-path = "octatools-bin/src/main.rs"
-
-[lib]
-name = "serde_octatrack"
-path = "serde_octatrack/src/lib.rs"
-
-[workspace]
-members = ["octatools-bin", "octatools-gui", "serde_octatrack"]
-
-[dependencies]
-aifc = "0.5.3"
-base16ct = "0.2.0"
-base64ct = "1.6.0"
+[workspace.dependencies]
 bincode = "1.3.3"
-clap = { version = "4.5.20", features = ["derive"] }
-copy_dir = "0.1.3"
-env_logger = "0.11.5"
-hex-literal = "0.4.1"
-hound = "3.5.1"
 itertools = "0.13.0"
-log = "0.4.22"
-md5 = "0.7.0"
-rand = "0.8.5"
 serde = { version = "1.0.210", features = ["serde_derive"] }
-serde-big-array = "0.5.1"
 serde_json = "1.0.133"
 serde_yml = "0.0.12"
 walkdir = "2.5.0"
