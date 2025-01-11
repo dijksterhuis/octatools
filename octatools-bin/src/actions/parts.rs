@@ -1,18 +1,23 @@
+use crate::{OctatoolErrors, RBoxErr};
+use serde_octatrack::{banks::Bank, read_type_from_bin_file};
 use std::path::PathBuf;
 
-use crate::{OctatoolErrors, RBoxErr};
-use serde_octatrack::{banks::Bank, FromPath};
+fn part_index_is_valid(indexes: &Vec<usize>) -> bool {
+    let max_elem = *indexes.iter().max().unwrap();
+    let min_elem = *indexes.iter().min().unwrap();
+    max_elem <= 4 && min_elem >= 1
+}
 
-/// Show deserialised representation of Part unsaved state
+/// Show deserialized representation of Part unsaved state
 pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
     if indexes.is_empty() {
         return Err(Box::new(OctatoolErrors::CliMissingPatternIndices));
     };
-    if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
+    if !part_index_is_valid(&indexes) {
         return Err(Box::new(OctatoolErrors::CliInvalidPartIndices));
     }
 
-    let b = &Bank::from_path(path).expect("Could not load bank file");
+    let b = read_type_from_bin_file::<Bank>(&path).expect("Could not load bank file");
 
     for index in indexes {
         let x = &b.parts_saved[index - 1];
@@ -21,16 +26,16 @@ pub fn show_unsaved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
     Ok(())
 }
 
-/// Show deserialised representation of Part's saved state
+/// Show deserialized representation of Part's saved state
 pub fn show_saved_parts(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
     if indexes.is_empty() {
         return Err(Box::new(OctatoolErrors::CliMissingPatternIndices));
     };
-    if *indexes.iter().max().unwrap() > 4 || *indexes.iter().min().unwrap() < 1 {
+    if !part_index_is_valid(&indexes) {
         return Err(Box::new(OctatoolErrors::CliInvalidPartIndices));
     }
 
-    let b = &Bank::from_path(path).expect("Could not load bank file");
+    let b = read_type_from_bin_file::<Bank>(&path).expect("Could not load bank file");
 
     for index in indexes {
         let x = &b.parts_saved[index - 1];

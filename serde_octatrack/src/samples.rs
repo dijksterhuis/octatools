@@ -15,8 +15,7 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    FromJsonFile, FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, ToJsonFile, ToPath,
-    ToYamlFile,
+    Decode, Encode, OptionEnumValueConvert, RBoxErr,
 };
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
@@ -216,14 +215,51 @@ impl SampleAttributes {
             checksum: 0,
         })
     }
+}
 
+// For samples, need to run special decodee method as need to flip bytes depending on endianness
+impl Decode for SampleAttributes {
+    /// Decode raw bytes of a `.ot` data file into a new struct,
+    /// swap byte values if system is little-endian then do some minor
+    /// post-processing to get user friendly settings values.
+    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
+        let decoded: Self = bincode::deserialize(&bytes[..]).unwrap();
+        let mut bswapd = decoded.clone();
+
+        // swapping bytes is one required when running on little-endian systems
+        if cfg!(target_endian = "little") {
+            bswapd = decoded.swap_bytes().unwrap();
+        }
+
+        // tempo is multiplied by 24 when written to encoded file
+        // reference: Octainer
+        bswapd.tempo /= 24;
+
+        // gan is normalised to the -24 <= x <= 24 range when written to encoded file
+        // reference: Octainer
+        bswapd.gain -= 48;
+
+        // trim length is multiplied by 100 when written to encoded file
+        // reference: Octainer
+        // bswapd.trim_len = bswapd.trim_len / 100;
+
+        // loop length is multiplied by 100 when written to encoded file
+        // reference: Octainer
+        // bswapd.loop_len = bswapd.loop_len / 100;
+
+        Ok(bswapd)
+    }
+}
+
+// For sample data, need swap bytes depending on endianness and calculate a checksum
+impl Encode for SampleAttributes {
     /// Encodes struct data to binary representation, after some pre-processing.
     ///
     /// Beore serializing, will:
     /// 1. modify tempo and gain values to machine ranges
     /// 2. swaps bytes of values (when current system is little-endian)
     /// 3. generate checksum value
-    pub fn encode(&self) -> RBoxErr<Vec<u8>> {
+    fn encode(&self) -> RBoxErr<Vec<u8>> {
         // clone instead of mutable borrwed reference -- don't want to bytes swap or
         // modify current values
         let mut bswapd = self.clone();
@@ -268,70 +304,7 @@ impl SampleAttributes {
 
         Ok(bytes)
     }
-
-    /// Decode raw bytes of a `.ot` data file into a new struct,
-    /// swap byte values if system is little-endian then do some minor
-    /// post-processing to get user friendly settings values.
-
-    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
-        let decoded: Self = bincode::deserialize(&bytes[..]).unwrap();
-        let mut bswapd = decoded.clone();
-
-        // swapping bytes is one required when running on little-endian systems
-        if cfg!(target_endian = "little") {
-            bswapd = decoded.swap_bytes().unwrap();
-        }
-
-        // tempo is multiplied by 24 when written to encoded file
-        // reference: Octainer
-        bswapd.tempo /= 24;
-
-        // gan is normalised to the -24 <= x <= 24 range when written to encoded file
-        // reference: Octainer
-        bswapd.gain -= 48;
-
-        // trim length is multiplied by 100 when written to encoded file
-        // reference: Octainer
-        // bswapd.trim_len = bswapd.trim_len / 100;
-
-        // loop length is multiplied by 100 when written to encoded file
-        // reference: Octainer
-        // bswapd.loop_len = bswapd.loop_len / 100;
-
-        Ok(bswapd)
-    }
 }
-
-impl FromPath for SampleAttributes {
-    type T = SampleAttributes;
-
-    /// Crete a new struct by reading a file located at `path`.
-    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
-        let mut infile = File::open(path)?;
-        let mut bytes: Vec<u8> = vec![];
-        let _: usize = infile.read_to_end(&mut bytes)?;
-
-        let decoded = Self::decode(&bytes)?;
-
-        Ok(decoded)
-    }
-}
-
-impl ToPath for SampleAttributes {
-    /// Crete a new file at the path from the current struct
-    fn to_path(&self, path: &Path) -> RBoxErr<()> {
-        let bytes: Vec<u8> = self.encode()?;
-        let mut file: File = File::create(path)?;
-        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-
-        Ok(())
-    }
-}
-
-impl ToYamlFile for SampleAttributes {}
-impl FromYamlFile for SampleAttributes {}
-impl ToJsonFile for SampleAttributes {}
-impl FromJsonFile for SampleAttributes {}
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
@@ -341,27 +314,5 @@ pub struct SampleAttributesRawBytes {
     pub data: [u8; 816],
 }
 
-impl FromPath for SampleAttributesRawBytes {
-    type T = SampleAttributesRawBytes;
-
-    /// Crete a new struct by reading a file located at `path`.
-    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
-        let mut infile = File::open(path)?;
-        let mut bytes: Vec<u8> = vec![];
-        let _: usize = infile.read_to_end(&mut bytes)?;
-
-        let new: Self = bincode::deserialize(&bytes[..])?;
-
-        Ok(new)
-    }
-}
-
-impl ToPath for SampleAttributesRawBytes {
-    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        let bytes: Vec<u8> = bincode::serialize(&self)?;
-        let mut file: File = File::create(path)?;
-        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-
-        Ok(())
-    }
-}
+impl Decode for SampleAttributesRawBytes {}
+impl Encode for SampleAttributesRawBytes {}

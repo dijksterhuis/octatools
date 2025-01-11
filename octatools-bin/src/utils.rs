@@ -137,7 +137,6 @@ mod test {
         use crate::audio::wav::WavFile;
         use crate::utils::create_slice_from_wavfile;
         use serde_octatrack::samples::slices::Slice;
-        use serde_octatrack::FromPath;
         use std::path::PathBuf;
 
         #[test]
@@ -188,7 +187,6 @@ mod test {
         use crate::audio::wav::WavFile;
         use crate::utils::create_slices_from_wavfiles;
         use serde_octatrack::samples::slices::Slice;
-        use serde_octatrack::FromPath;
         use std::path::PathBuf;
 
         #[test]
@@ -245,7 +243,6 @@ mod test {
         use crate::audio::wav::WavFile;
         use crate::utils::get_otsample_nbars_from_wavfile;
         use serde_octatrack::samples::slices::Slice;
-        use serde_octatrack::FromPath;
         use std::path::PathBuf;
 
         #[test]
@@ -307,7 +304,6 @@ mod test {
         use crate::audio::wav::WavFile;
         use crate::utils::get_otsample_nbars_from_wavfiles;
         use serde_octatrack::samples::slices::Slice;
-        use serde_octatrack::FromPath;
         use std::path::PathBuf;
 
         #[test]

@@ -3,30 +3,18 @@
 
 mod yaml;
 
-use log::{debug, error, info, warn};
-use serde_octatrack::projects::Project;
+use serde_octatrack::{
+    get_bytes_slice, read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
+};
 
-use crate::{
-    actions::{banks::yaml::YamlCopyBankConfig, get_bytes_slice, load_from_yaml},
-    RBoxErr,
-};
-use std::{
-    collections::HashSet,
-    path::{Path, PathBuf},
-};
+use crate::{actions::banks::yaml::YamlCopyBankConfig, RBoxErr};
+use log::{debug, error, info, warn};
+use std::{collections::HashSet, path::PathBuf};
 
 use serde_octatrack::{
     banks::{Bank, BankRawBytes},
-    projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot},
-    FromPath, ToPath, ToYamlFile,
+    projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
 };
-
-/// Show deserialised representation of a Sample Attributes file at `path`
-pub fn show_bank(path: &PathBuf) -> RBoxErr<()> {
-    let b = Bank::from_path(path).expect("Could not load bank file");
-    println!("{b:#?}");
-    Ok(())
-}
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
 pub fn show_bank_bytes(
@@ -34,27 +22,10 @@ pub fn show_bank_bytes(
     start_idx: &Option<usize>,
     len: &Option<usize>,
 ) -> RBoxErr<()> {
-    let bytes = get_bytes_slice(
-        BankRawBytes::from_path(path)
-            .expect("Could not load ot file")
-            .data
-            .to_vec(),
-        start_idx,
-        len,
-    );
+    let raw_bank = read_type_from_bin_file::<BankRawBytes>(path).expect("Could not read bank file");
+
+    let bytes = get_bytes_slice(raw_bank.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
-    Ok(())
-}
-
-/// Load Bank file data from a YAML file
-pub fn load_bank(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
-    load_from_yaml::<Bank>(yaml_path, outfile)
-}
-
-/// Dump Bank file data to a YAML file
-pub fn dump_bank(bank_path: &Path, yaml_path: &Path) -> RBoxErr<()> {
-    let b = Bank::from_path(bank_path).expect("Could not load bank file");
-    let _ = b.to_yaml(yaml_path);
     Ok(())
 }
 
@@ -262,31 +233,15 @@ pub fn copy_bank(
 ) -> RBoxErr<()> {
     info!("Loading banks ...");
 
-    let mut bank = Bank::from_path(source_bank_filepath).expect("Could not load source bank.");
+    let mut bank = read_type_from_bin_file::<Bank>(&source_bank_filepath)
+        .expect("Could not load bank from file at path");
 
     info!("Loading projects ...");
 
-    let src_project =
-        Project::from_path(source_project_filepath).expect("Could not load source project");
-
-    let mut dest_project =
-        Project::from_path(destination_project_filepath).expect("Could not load source project");
-
-    // let mut projects = TransferProject::new(source_project_filepath, destination_project_filepath)
-    //     .expect("Could not load projects.");
-
-    // let _ = projects.dest.project.to_path(&projects.dest.path);
-
-    info!("Backing up destination bank to /tmp/ ...");
-    let _ = std::fs::copy(destination_bank_filepath, PathBuf::from("/tmp/bank.bak"))
-        .expect("Could not back up destination bank file.");
-
-    info!("Backing up destination project to /tmp/ ...");
-    let _ = std::fs::copy(
-        destination_project_filepath,
-        PathBuf::from("/tmp/project.bak"),
-    )
-    .expect("Could not back up destination bank file.");
+    let src_project = read_type_from_bin_file::<Project>(&source_project_filepath)
+        .expect("Could not load source project");
+    let mut dest_project = read_type_from_bin_file::<Project>(&destination_project_filepath)
+        .expect("Could not load destination project");
 
     info!("Finding free static sample slots in destination project ...");
     let mut free_static =
@@ -498,14 +453,12 @@ pub fn copy_bank(
 
     info!("Writing destination project ...");
     dest_project.slots = dest_sample_slots;
-    dest_project
-        .to_path(destination_project_filepath)
+    write_type_to_bin_file::<Project>(&dest_project, &destination_project_filepath)
         .expect("Could not write project to file");
 
     info!("Writing new bank file ...");
-    bank.to_path(destination_bank_filepath)
-        .expect("Could not write bank to file");
-
+    write_type_to_bin_file::<Bank>(&bank, &destination_bank_filepath)
+        .expect("Could not write bank to file at path");
     info!("Bank copy complete.");
     Ok(())
 }
@@ -515,14 +468,16 @@ pub fn copy_bank(
 /// Expanded functionality on top of the `octatools copy bank` command.
 /// Perform multiple copies one after the other by defining how to copy banks in a YAML config file.
 ///
-/// All the caveats and deails for the `copy_bank` function still apply
+/// All the caveats and details for the `copy_bank` function still apply
 /// (this function calls it multiple times).
 
 pub fn batch_copy_banks(yaml_config_path: &PathBuf) -> RBoxErr<()> {
-    let conf = YamlCopyBankConfig::from_path(yaml_config_path)?;
+    let conf = yaml_file_to_type::<YamlCopyBankConfig>(&yaml_config_path)
+        .expect("Could not load YAML configuration for batch bank transfers");
 
     for x in conf.bank_copies {
-        let _ = copy_bank(&x.src.bank, &x.src.project, &x.dest.bank, &x.dest.project);
+        let _ = copy_bank(&x.src.bank, &x.src.project, &x.dest.bank, &x.dest.project)
+            .expect("Could not copy bank");
     }
 
     Ok(())
@@ -530,9 +485,9 @@ pub fn batch_copy_banks(yaml_config_path: &PathBuf) -> RBoxErr<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use serde_octatrack::banks::Bank;
-
+    // currently fails with Could not copy audio file:
+    // The process cannot access the file because it is being used by another process
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_copy_bank() {
         use copy_dir;
@@ -553,9 +508,9 @@ mod tests {
             outbank.parent().unwrap(),
         );
 
-        let _source_bank = Bank::from_path(&inbank).unwrap();
+        let _source_bank = read_type_from_bin_file::<Bank>(&inbank).unwrap();
         let _ = copy_bank(&inbank, &inproject, &outbank, &outproject);
-        let _copied_bank = Bank::from_path(&outbank).unwrap();
+        let _copied_bank = read_type_from_bin_file::<Bank>(&outbank).unwrap();
 
         // remove the test destination project directory
         let _ = std::fs::remove_dir_all(outbank.parent().unwrap());

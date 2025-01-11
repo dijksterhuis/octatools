@@ -261,7 +261,7 @@ mod test {
 
     #[test]
     fn set_fails_to_load_not_a_set() {
-        let fp = PathBuf::from("./src/");
+        let fp = PathBuf::from("../assets/");
         let r = OctatrackSetFiles::from_pathbuf(&fp);
         assert!(r.is_err());
     }

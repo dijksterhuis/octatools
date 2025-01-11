@@ -1,17 +1,9 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::{actions::get_bytes_slice, RBoxErr};
-use serde_octatrack::{
-    arrangements::{ArrangementFile, ArrangementFileRawBytes},
-    FromPath,
-};
+use serde_octatrack::{get_bytes_slice, read_type_from_bin_file};
 
-/// Show deserialised representation of an Arrangement for a given arrangement file at `path`
-pub fn show_arrangement(path: &PathBuf) -> RBoxErr<()> {
-    let b = ArrangementFile::from_path(path).expect("Could not load arrangement file");
-    println!("{b:#?}");
-    Ok(())
-}
+use crate::RBoxErr;
+use serde_octatrack::arrangements::ArrangementFileRawBytes;
 
 /// Show bytes output as u8 values for an Arrangement file located at `path`
 pub fn show_arrangement_bytes(
@@ -19,37 +11,16 @@ pub fn show_arrangement_bytes(
     start_idx: &Option<usize>,
     len: &Option<usize>,
 ) -> RBoxErr<()> {
-    let bytes = get_bytes_slice(
-        ArrangementFileRawBytes::from_path(path)
-            .expect("Could not load arrangement file")
-            .data
-            .to_vec(),
-        start_idx,
-        len,
-    );
+    let raw: ArrangementFileRawBytes = read_type_from_bin_file::<ArrangementFileRawBytes>(&path)
+        .expect("Could not read arrangement file");
+
+    let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
     Ok(())
 }
 
-/// Load Arrangement file data from a YAML file
-pub fn load_arrangement(_yaml_path: &Path, _outfile: &Path) -> RBoxErr<()> {
-    unimplemented!("Need to deal with intermediate struct conversions.")
-}
-
-/// Dump Arrangement file data to a YAML file
-pub fn dump_arrangement(_path: &Path, _yaml_path: &Path) -> RBoxErr<()> {
-    unimplemented!("Need to deal with intermediate struct conversions.")
-}
-
 mod test {
     use super::*;
-
-    #[test]
-    fn test_show_ok() {
-        let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
-        let r = show_arrangement(&fp);
-        assert!(r.is_ok())
-    }
 
     #[test]
     fn test_show_bytes_first_all_bytes_ok() {

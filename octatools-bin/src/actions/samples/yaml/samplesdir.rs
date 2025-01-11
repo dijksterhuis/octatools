@@ -3,15 +3,14 @@
 use std::path::PathBuf;
 use std::{fs::File, io::Read};
 
+use crate::audio::utils::scan_dir_path_for_audio_files;
+use crate::{OctatoolErrors, RBoxErr};
 use base64ct::{Base64, Encoding};
 use log::{debug, info};
 use md5::Digest;
 use serde::{Deserialize, Serialize};
+use serde_octatrack::{Decode, Encode};
 use std::fs::canonicalize;
-
-use crate::audio::utils::scan_dir_path_for_audio_files;
-use crate::{OctatoolErrors, RBoxErr};
-use serde_octatrack::{FromYamlFile, ToYamlFile};
 
 fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> RBoxErr<String> {
     debug!("Getting file stem from pathbuf: file={pathbuf:#?}");
@@ -88,8 +87,8 @@ pub struct SamplesDirIndexFull {
     pub samples: Vec<SamplesDirAudioFile>,
 }
 
-impl FromYamlFile for SamplesDirIndexFull {}
-impl ToYamlFile for SamplesDirIndexFull {}
+impl Decode for SamplesDirIndexFull {}
+impl Encode for SamplesDirIndexFull {}
 
 impl SamplesDirIndexFull {
     pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {
@@ -121,8 +120,8 @@ pub struct SamplesDirIndexSimple {
     pub samples: Vec<PathBuf>,
 }
 
-impl FromYamlFile for SamplesDirIndexSimple {}
-impl ToYamlFile for SamplesDirIndexSimple {}
+impl Decode for SamplesDirIndexSimple {}
+impl Encode for SamplesDirIndexSimple {}
 
 impl SamplesDirIndexSimple {
     pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {

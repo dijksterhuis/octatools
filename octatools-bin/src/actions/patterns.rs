@@ -1,18 +1,24 @@
 use std::path::PathBuf;
 
 use crate::{OctatoolErrors, RBoxErr};
-use serde_octatrack::{banks::Bank, FromPath};
+use serde_octatrack::{banks::Bank, read_type_from_bin_file};
 
-/// Show deserialised representation of Pattern state
+fn pattern_index_is_valid(indexes: &Vec<usize>) -> bool {
+    let max_elem = *indexes.iter().max().unwrap();
+    let min_elem = *indexes.iter().min().unwrap();
+    max_elem <= 16 && min_elem > 0
+}
+
+/// Show deserialized representation of Pattern state
 pub fn show_pattern(path: &PathBuf, indexes: Vec<usize>) -> RBoxErr<()> {
     if indexes.is_empty() {
         return Err(Box::new(OctatoolErrors::CliMissingPatternIndices));
     };
-    if *indexes.iter().max().unwrap() > 16 || *indexes.iter().min().unwrap() < 1 {
+    if !pattern_index_is_valid(&indexes) {
         return Err(Box::new(OctatoolErrors::CliInvalidPatternIndices));
     }
 
-    let b = &Bank::from_path(path).expect("Could not load bank file");
+    let b = read_type_from_bin_file::<Bank>(&path).expect("Could not load bank file");
 
     for index in indexes {
         let x = &b.patterns[index - 1];

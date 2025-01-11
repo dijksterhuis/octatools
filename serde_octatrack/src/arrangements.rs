@@ -27,14 +27,14 @@
 //!   - Unknown block 2
 //!
 
-use crate::{FromPath, RBoxErr, ToPath};
+use crate::{Decode, Encode, RBoxErr};
 use bincode;
 use serde::de::SeqAccess;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_big_array::BigArray;
 use std::array::from_fn;
-use std::{error::Error, fmt, fs::File, io::Read, io::Write, path::Path, str};
+use std::{fmt, str};
 
 /// A Row in the Arrangement.
 #[derive(Debug)]
@@ -508,30 +508,8 @@ pub struct ArrangementFileRawBytes {
     pub data: [u8; 11336],
 }
 
-impl FromPath for ArrangementFileRawBytes {
-    type T = ArrangementFileRawBytes;
-
-    /// Crete a new struct by reading a file located at `path`.
-    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
-        let mut infile = File::open(path)?;
-        let mut bytes: Vec<u8> = vec![];
-        let _: usize = infile.read_to_end(&mut bytes)?;
-
-        let new: Self = bincode::deserialize(&bytes[..])?;
-
-        Ok(new)
-    }
-}
-
-impl ToPath for ArrangementFileRawBytes {
-    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        let bytes: Vec<u8> = bincode::serialize(&self)?;
-        let mut file: File = File::create(path)?;
-        let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-
-        Ok(())
-    }
-}
+impl Encode for ArrangementFileRawBytes {}
+impl Decode for ArrangementFileRawBytes {}
 
 // max length: 11336 bytes
 #[derive(Debug, Serialize, Deserialize)]
@@ -588,15 +566,11 @@ pub struct ArrangementFile {
     pub unk2: [u8; 8],
 }
 
-impl FromPath for ArrangementFile {
-    type T = ArrangementFile;
+// TODO
+// impl Encode for ArrangementFile {}
 
-    /// Crete a new struct by reading a file located at `path`.
-    fn from_path(path: &Path) -> Result<Self::T, Box<dyn Error>> {
-        let mut infile = File::open(path)?;
-        let mut bytes: Vec<u8> = vec![];
-        let _: usize = infile.read_to_end(&mut bytes)?;
-
+impl Decode for ArrangementFile {
+    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
         let new: ArrangementFileIntermediate = bincode::deserialize(&bytes[..])?;
 
         let mut a: Vec<ArrangementBlock> = vec![];
@@ -700,19 +674,3 @@ impl FromPath for ArrangementFile {
         Ok(decoded)
     }
 }
-
-// impl ToFileAtPathBuf for ArrangementFile {
-//     fn to_pathbuf(&self, path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-//         let bytes: Vec<u8> = bincode::serialize(&self)?;
-//         let mut file: File = File::create(path)?;
-//         let _: RBoxErr<()> = file.write_all(&bytes).map_err(|e| e.into());
-
-//         Ok(())
-//     }
-// }
-
-// Todo; need to deal with intermediate structs
-// impl ToYamlFile for ArrangementFile {}
-// impl FromYamlFile for ArrangementFile {}
-// impl ToJsonFile for ArrangementFile {}
-// impl FromJsonFile for ArrangementFile {}

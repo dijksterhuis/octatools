@@ -4,23 +4,17 @@ mod yaml;
 
 use log::{debug, info, trace};
 use rand::Rng;
-use std::path::{Path, PathBuf};
-
-use serde_octatrack::{
-    samples::{
-        configs::{SampleLoopConfig, SampleTrimConfig},
-        options::{
-            SampleAttributeLoopMode, SampleAttributeTimestrechMode,
-            SampleAttributeTrigQuantizationMode,
-        },
-        slices::{Slice, Slices},
-        SampleAttributes, SampleAttributesRawBytes,
+use serde_octatrack::samples::{
+    configs::{SampleLoopConfig, SampleTrimConfig},
+    options::{
+        SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
     },
-    FromPath, FromYamlFile, ToPath, ToYamlFile,
+    slices::{Slice, Slices},
+    SampleAttributes, SampleAttributesRawBytes,
 };
+use std::path::PathBuf;
 
 use crate::{
-    actions::{get_bytes_slice, load_from_yaml},
     audio::wav::WavFile,
     utils::{
         create_slices_from_wavfiles, get_otsample_nbars_from_wavfile,
@@ -29,18 +23,15 @@ use crate::{
     RBoxErr,
 };
 
+use serde_octatrack::{
+    get_bytes_slice, read_type_from_bin_file, type_to_yaml_file, write_type_to_bin_file,
+    yaml_file_to_type,
+};
 use yaml::{
     create::YamlChainCreate,
     deconstruct::YamlChainDeconstruct,
     samplesdir::{SamplesDirIndexFull, SamplesDirIndexSimple},
 };
-
-/// Show deserialised representation of a Sample Attributes file at `path`
-pub fn show_ot_file(path: &PathBuf) -> RBoxErr<()> {
-    let b = SampleAttributes::from_path(path).expect("Could not load ot file");
-    println!("{b:#?}");
-    Ok(())
-}
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
 pub fn show_ot_file_bytes(
@@ -48,27 +39,11 @@ pub fn show_ot_file_bytes(
     start_idx: &Option<usize>,
     len: &Option<usize>,
 ) -> RBoxErr<()> {
-    let bytes = get_bytes_slice(
-        SampleAttributesRawBytes::from_path(path)
-            .expect("Could not load ot file")
-            .data
-            .to_vec(),
-        start_idx,
-        len,
-    );
+    let raw =
+        read_type_from_bin_file::<SampleAttributesRawBytes>(&path).expect("Could not load ot file");
+
+    let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
-    Ok(())
-}
-
-/// Load Sample Attributes file data from a YAML file
-pub fn load_ot_file(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
-    load_from_yaml::<SampleAttributes>(yaml_path, outfile)
-}
-
-/// Dump Sample Attributes file data to a YAML file
-pub fn dump_ot_file(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
-    let b = SampleAttributes::from_path(path).expect("Could not load ot file");
-    let _ = b.to_yaml(yaml_path);
     Ok(())
 }
 
@@ -121,7 +96,7 @@ pub fn chain_wavfiles_64_batch(
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
 
 pub fn create_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
-    let chain_conf = YamlChainCreate::from_yaml(yaml_conf_fpath)
+    let chain_conf = yaml_file_to_type::<YamlChainCreate>(&yaml_conf_fpath)
         .unwrap_or_else(|_| panic!("Could not load yaml file: path={yaml_conf_fpath:#?}"));
 
     info!("Creating sample chains from yaml config.");
@@ -228,7 +203,8 @@ pub fn create_samplechain_from_pathbufs_only(
 
         let mut ot_outpath = wav_sliced_outpath.clone();
         ot_outpath.set_extension("ot");
-        chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
+
+        write_type_to_bin_file::<SampleAttributes>(&chain_data, &ot_outpath).unwrap_or_else(|_| {
             panic!(
                 "Could not write sample chain attributes file: idx={idx:#?} path={ot_outpath:#?}"
             )
@@ -251,9 +227,11 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
     }
 
     let wavfile = WavFile::from_path(audio_fpath).expect("Could not read wavfile.");
-    let attrs = SampleAttributes::from_path(attributes_fpath).unwrap_or_else(|_| {
-        panic!("Could not read `.ot` attributes file: path={attributes_fpath:#?}")
-    });
+
+    let attrs =
+        read_type_from_bin_file::<SampleAttributes>(&attributes_fpath).unwrap_or_else(|_| {
+            panic!("Could not read `.ot` attributes file: path={attributes_fpath:#?}")
+        });
     // todo: this feels fragile
     let base_sample_fname = audio_fpath
         .file_stem()
@@ -271,7 +249,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
             spec: wavfile.spec,
             len: slice.trim_end - slice.trim_end,
             samples: w,
-            file_path: PathBuf::from("/tmp/dummy.wav"),
+            file_path: std::env::temp_dir().join("dummy.wav"),
         };
 
         let sample_fname = format!("{base_sample_fname}_{i:#?}");
@@ -288,7 +266,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
 }
 
 pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
-    let chain_conf = YamlChainDeconstruct::from_yaml(yaml_conf_fpath)
+    let chain_conf = yaml_file_to_type::<YamlChainDeconstruct>(&yaml_conf_fpath)
         .unwrap_or_else(|_| panic!("Could not load yaml file: path={yaml_conf_fpath:#?}"));
 
     info!("Deconstructing sample chains from yaml config.");
@@ -380,7 +358,7 @@ pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxE
     let mut ot_outpath = wav_fp.clone();
     ot_outpath.set_extension("ot");
 
-    chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
+    write_type_to_bin_file::<SampleAttributes>(&chain_data, &ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")
     });
     info!("Created chain attributes file: {ot_outpath:#?}");
@@ -454,7 +432,7 @@ pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxEr
     let mut ot_outpath = wav_fp.clone();
     ot_outpath.set_extension("ot");
 
-    chain_data.to_path(&ot_outpath).unwrap_or_else(|_| {
+    write_type_to_bin_file::<SampleAttributes>(&chain_data, &ot_outpath).unwrap_or_else(|_| {
         panic!("Could not write sample chain attributes file: path={ot_outpath:#?}")
     });
     info!("Created chain attributes file: {ot_outpath:#?}");
@@ -469,7 +447,8 @@ pub fn create_index_samples_dir_simple(
     let sample_index = SamplesDirIndexSimple::new(samples_dir_path)?;
 
     if !yaml_file_path.is_none() {
-        let _ = sample_index.to_yaml(yaml_file_path.as_ref().unwrap());
+        type_to_yaml_file(&sample_index, &yaml_file_path.as_ref().unwrap())
+            .expect("Could not write yaml file.");
     }
 
     Ok(())
@@ -482,7 +461,8 @@ pub fn create_index_samples_dir_full(
     let sample_index = SamplesDirIndexFull::new(samples_dir_path)?;
 
     if !yaml_file_path.is_none() {
-        let _ = sample_index.to_yaml(yaml_file_path.as_ref().unwrap());
+        type_to_yaml_file(&sample_index, &yaml_file_path.as_ref().unwrap())
+            .expect("Could not write yaml file.");
     }
     Ok(())
 }
@@ -504,7 +484,7 @@ mod tests {
         fn test_basic() {
             let audio_fpath = PathBuf::from("../data/tests/chains/deconstruct/test.wav");
             let attributes_fpath = PathBuf::from("../data/tests/chains/deconstruct/test.ot");
-            let outdir = PathBuf::from("/tmp/");
+            let outdir = std::env::temp_dir().join("");
 
             let res = deconstruct_samplechain_from_pathbufs_only(
                 &audio_fpath,
@@ -526,16 +506,15 @@ mod tests {
     }
 
     mod chain_create {
-
-        use super::*;
         use std::path::PathBuf;
         use walkdir::{DirEntry, WalkDir};
 
         use crate::RBoxErr;
 
         use crate::audio::wav::WavFile;
-        use serde_octatrack::FromPath;
 
+        use crate::utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles};
+        use serde_octatrack::read_type_from_bin_file;
         use serde_octatrack::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},
             options::{
@@ -545,8 +524,7 @@ mod tests {
             slices::{Slice, Slices},
             SampleAttributes,
         };
-
-        use crate::utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles};
+        use serde_octatrack::Encode;
 
         fn walkdir_filter_is_wav(entry: &DirEntry) -> bool {
             entry
@@ -603,7 +581,7 @@ mod tests {
         }
 
         fn read_valid_sample_chain(path: &PathBuf) -> RBoxErr<SampleAttributes> {
-            let read_chain = SampleAttributes::from_path(path).unwrap();
+            let read_chain = read_type_from_bin_file::<SampleAttributes>(path)?;
             Ok(read_chain)
         }
 
@@ -862,9 +840,7 @@ mod tests {
     mod indexing {
         use crate::actions::samples::{
             create_index_samples_dir_full, create_index_samples_dir_simple,
-            yaml::samplesdir::SamplesDirIndexFull, yaml::samplesdir::SamplesDirIndexSimple,
         };
-        use serde_octatrack::FromYamlFile;
         use std::path::PathBuf;
 
         #[test]
@@ -883,7 +859,7 @@ mod tests {
 
         #[test]
         fn simple_with_yaml_ok() {
-            let yamlpath = PathBuf::from("/tmp/test-samples-search-simple.yaml");
+            let yamlpath = std::env::temp_dir().join("test-samples-search-simple.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_simple(&dirpath, &Some(yamlpath.clone()));
 
@@ -893,7 +869,7 @@ mod tests {
 
         #[test]
         fn full_with_yaml_ok() {
-            let yamlpath = PathBuf::from("/tmp/test-samples-search-full.yaml");
+            let yamlpath = std::env::temp_dir().join("test-samples-search-full.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let r = create_index_samples_dir_full(&dirpath, &Some(yamlpath.clone()));
 
@@ -901,29 +877,33 @@ mod tests {
             assert!(r.is_ok())
         }
 
+        // fails as paths in the target yaml are linux only
+        #[cfg(not(target_os = "windows"))]
         #[test]
         fn simple_with_yaml_matches_validation() {
             let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
-            let outpath = PathBuf::from("/tmp/test-samples-search-simple-validate.yaml");
+            let outpath = std::env::temp_dir().join("test-samples-search-simple-validate.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let _ = create_index_samples_dir_simple(&dirpath, &Some(outpath.clone()));
 
-            let valid = SamplesDirIndexSimple::from_yaml(&testpath).unwrap();
-            let written = SamplesDirIndexSimple::from_yaml(&outpath).unwrap();
+            let valid = yaml_file_to_type::<SamplesDirIndexSimple>(&testpath).unwrap();
+            let written = yaml_file_to_type::<SamplesDirIndexSimple>(&outpath).unwrap();
 
             let _ = std::fs::remove_file(outpath);
             assert_eq!(written, valid)
         }
 
+        // fails as paths in the target yaml are linux only
+        #[cfg(not(target_os = "windows"))]
         #[test]
         fn full_with_yaml_matches_validation() {
             let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
-            let outpath = PathBuf::from("/tmp/test-samples-search-full-validate.yaml");
+            let outpath = std::env::temp_dir().join("test-samples-search-full-validate.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let _ = create_index_samples_dir_full(&dirpath, &Some(outpath.clone()));
 
-            let valid = SamplesDirIndexFull::from_yaml(&testpath).unwrap();
-            let written = SamplesDirIndexFull::from_yaml(&outpath).unwrap();
+            let valid = yaml_file_to_type::<SamplesDirIndexSimple>(&testpath).unwrap();
+            let written = yaml_file_to_type::<SamplesDirIndexSimple>(&outpath).unwrap();
 
             let _ = std::fs::remove_file(outpath);
             assert_eq!(written, valid)

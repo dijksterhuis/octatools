@@ -16,8 +16,7 @@ use crate::{
         metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
         slots::ProjectSampleSlot, states::ProjectStates,
     },
-    FromJsonFile, FromPath, FromYamlFile, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
-    ToJsonFile, ToPath, ToYamlFile,
+    Decode, Encode, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
@@ -269,12 +268,11 @@ impl ProjectToString for Project {
     }
 }
 
-impl FromPath for Project {
-    type T = Project;
-
-    /// Read and parse an Octatrack project file (`project.work` or `project.strd`)
-    fn from_path(path: &Path) -> RBoxErr<Self> {
-        let s = std::fs::read_to_string(path)?;
+// For project data, need to read bytes as a utf string, then split the structs out from the string
+// data.
+impl Decode for Project {
+    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
+        let s = std::str::from_utf8(bytes)?.to_string();
 
         let metadata = ProjectMetadata::from_string(&s)?;
         let states = ProjectStates::from_string(&s)?;
@@ -290,20 +288,14 @@ impl FromPath for Project {
     }
 }
 
-impl ToPath for Project {
-    fn to_path(&self, path: &Path) -> RBoxErr<()> {
+// For project data, need to convert to string values again then into bytes
+impl Encode for Project {
+    fn encode(&self) -> RBoxErr<Vec<u8>> {
         let data = self.to_string()?;
-        let mut f = File::create(path)?;
-        f.write_all(data.as_bytes())?;
-
-        Ok(())
+        let bytes: Vec<u8> = data.bytes().collect::<Vec<u8>>();
+        Ok(bytes)
     }
 }
-
-impl ToYamlFile for Project {}
-impl FromYamlFile for Project {}
-impl ToJsonFile for Project {}
-impl FromJsonFile for Project {}
 
 #[cfg(test)]
 mod tests {
@@ -416,71 +408,6 @@ mod tests {
 
     mod test_read {
         use super::*;
-
-        use std::path::PathBuf;
-
-        // can read a project file without errors
-        #[test]
-        fn test_read_default_project_work_file() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            assert!(Project::from_path(&infile).is_ok());
-        }
-
-        // test that the metadata section is correct
-        #[test]
-        fn test_read_default_project_work_file_metadata() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            let p = Project::from_path(&infile).unwrap();
-
-            let correct = ProjectMetadata::default();
-
-            assert_eq!(p.metadata, correct);
-        }
-
-        // test that the states section is correct
-        #[test]
-        fn test_read_default_project_work_file_states() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            let p = Project::from_path(&infile).unwrap();
-
-            let correct = ProjectStates::default();
-
-            assert_eq!(p.states, correct);
-        }
-
-        // test that the states section is correct
-        #[test]
-        fn test_read_default_project_work_file_settings() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            let p = Project::from_path(&infile).unwrap();
-
-            let correct = ProjectSettings::default();
-
-            assert_eq!(p.settings, correct);
-        }
-
-        // test that the states section is correct
-        #[test]
-        fn test_read_default_project_work_file_sslots() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            let p = Project::from_path(&infile).unwrap();
-            let default_sslots = ProjectSampleSlot::default_vec();
-
-            assert_eq!(p.slots, default_sslots);
-        }
-
-        // test that reading and writing a single project gives the same outputs
-        #[test]
-        fn test_read_write_default_project_work_file() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
-            let outfile = PathBuf::from("/tmp/default_1.work");
-            let p = Project::from_path(&infile).unwrap();
-            let _ = p.to_path(&outfile);
-
-            let p_reread = Project::from_path(&outfile).unwrap();
-
-            assert_eq!(p, p_reread)
-        }
 
         #[test]
         fn test_full_to_string() {

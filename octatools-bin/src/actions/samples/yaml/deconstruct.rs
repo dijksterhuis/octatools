@@ -1,9 +1,8 @@
 //! Read a YAML file config to batch deconstruct sliced sample chains into constituent slice samples.
 
 use serde::{Deserialize, Serialize};
+use serde_octatrack::Decode;
 use std::path::PathBuf;
-
-use serde_octatrack::{FromYamlFile, ToYamlFile};
 
 /// YAML section which globally affects all chains being created with the loaded config.
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -27,5 +26,4 @@ pub struct YamlChainDeconstruct {
     pub chains: Vec<YamlChainDeconstructFilePairs>,
 }
 
-impl FromYamlFile for YamlChainDeconstruct {}
-impl ToYamlFile for YamlChainDeconstruct {}
+impl Decode for YamlChainDeconstruct {}
