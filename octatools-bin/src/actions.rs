@@ -8,27 +8,26 @@ pub mod patterns;
 pub mod projects;
 pub mod samples;
 
-use crate::RBoxErr;
-use serde_octatrack::{FromYamlFile, ToPath};
-use std::path::Path;
-
-fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
-    let start: usize = match start_idx {
-        None => 0,
-        _ => start_idx.unwrap(),
-    };
-
-    let end: usize = match len {
-        None => data.len() - 1,
-        _ => len.unwrap() + start,
-    };
-
-    data[start..end].to_vec()
-}
-
-/// Load binary file data from a YAML file
-fn load_from_yaml<T: FromYamlFile + ToPath>(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
-    let b = T::from_yaml(yaml_path).expect("Could not load YAML file");
-    b.to_path(outfile).expect("Could not write data to file");
-    Ok(())
-}
+// TODO: T needs a Where and for a trait or something with a `data()` method to ensure the generic
+//       function definition knows we can get the `data` field from it
+// /// Show raw bytes representation of a binary data file of type `T` at `path`
+// fn show_type_bytes<T>(
+//     path: &PathBuf,
+//     start_idx: &Option<usize>,
+//     len: &Option<usize>,
+// ) -> RBoxErr<()> {
+//
+//     let bytes = read_bin_file(path)?;
+//
+//     let raw_data = deserialize_bin_to_type::<T>(&bytes)?;
+//
+//
+//     let bytes = get_bytes_slice(
+//         raw_data.data.to_vec(),
+//         start_idx,
+//         len,
+//     );
+//     println!("{:#?}", bytes);
+//     Ok(())
+// }
+//

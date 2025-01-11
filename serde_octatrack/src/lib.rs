@@ -17,11 +17,15 @@ pub mod projects;
 pub mod samples;
 pub mod utils;
 
-use std::{error::Error, fmt::Debug, path::Path};
-
+use bincode;
 use serde::{Deserialize, Serialize};
-use serde_json::Error as SerdeJsonError;
-use serde_yml::Error as SerdeYmlError;
+use std::{
+    error::Error,
+    fmt::Debug,
+    fs::File,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
 
 // todo: sized errors so not necessary to keep Boxing error enum varients
 /// Shorthand type alias for a Result with a Boxed Error
@@ -55,7 +59,7 @@ impl std::fmt::Display for SerdeOctatrackErrors {
         }
     }
 }
-impl std::error::Error for SerdeOctatrackErrors {}
+impl Error for SerdeOctatrackErrors {}
 
 /// Trait to convert between Enum option instances and their corresponding value.
 trait OptionEnumValueConvert {
@@ -72,75 +76,674 @@ trait OptionEnumValueConvert {
     fn value(&self) -> RBoxErr<Self::V>;
 }
 
-/// Trait to use when a new struct can be deserialised from some file or directory tree located at the specified path.
-pub trait FromPath {
-    /// Type for `Self`
-    type T;
-
-    /// Crete a new struct by reading a file located at `path`.
-    fn from_path(path: &Path) -> Result<Self::T, Box<dyn std::error::Error>>;
-}
-
-/// Trait to use when a new file(s) can be written at the specifed path by serializing a struct
-pub trait ToPath {
-    /// Crete a new file at the path file location struct by serializing struct data.
-    fn to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>>;
-}
-
-pub trait ToYamlFile
-where
-    Self: Serialize,
-{
-    fn to_yaml(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        serde_yml::to_writer(
-            std::fs::File::options()
-                .read(true)
-                .write(true)
-                .create_new(true)
-                .open(path)
-                .unwrap(),
-            self,
-        )?;
-        Ok(())
+pub trait Decode {
+    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self>
+    where
+        Self: Sized,
+        Self: for<'a> Deserialize<'a>,
+    {
+        let x: Self = bincode::deserialize(&bytes[..])?;
+        Ok(x)
     }
 }
 
-pub trait FromYamlFile
-where
-    Self: for<'a> Deserialize<'a>,
-{
-    fn from_yaml(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
-        let f = std::fs::File::open(path)?;
-        let data: Result<Self, SerdeYmlError> = serde_yml::from_reader(f);
-        Ok(data?)
+pub trait Encode {
+    fn encode(&self) -> RBoxErr<Vec<u8>>
+    where
+        Self: Serialize,
+    {
+        Ok(bincode::serialize(&self)?)
     }
 }
 
-pub trait ToJsonFile
+/* SER/DE GENERICS ============================================================================== */
+
+/// TODO Serialize a JSON string to a data structure of type `T`
+pub fn deserialize_bin_to_type<T>(bytes: &Vec<u8>) -> RBoxErr<T>
 where
-    Self: Serialize,
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
 {
-    fn to_json(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {
-        serde_json::to_writer(
-            std::fs::File::options()
-                .read(true)
-                .write(true)
-                .create_new(true)
-                .open(path)
-                .unwrap(),
-            self,
-        )?;
-        Ok(())
+    let x: T = T::decode(bytes)?;
+    Ok(x)
+}
+
+/// TODO Serialize a xxx from a data structure of type `T`
+pub fn serialize_bin_from_type<T>(data: &T) -> RBoxErr<Vec<u8>>
+where
+    T: Encode,
+    T: Serialize,
+{
+    Ok(data.encode()?)
+}
+
+/// Deserialize a JSON string to a data structure of type `T`
+pub fn deserialize_json_to_type<T>(data: &str) -> RBoxErr<T>
+where
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let x: T = serde_json::from_str(data)?;
+    Ok(x)
+}
+
+/// Serialize a JSON string from a data structure of type `T`
+pub fn serialize_json_from_type<T>(data: &T) -> RBoxErr<String>
+where
+    T: Encode,
+    T: Serialize,
+{
+    Ok(serde_json::to_string(&data)?)
+}
+
+/// Deserialize a YAML string to a data structure of type `T`
+pub fn deserialize_yaml_to_type<T>(data: &str) -> RBoxErr<T>
+where
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let x: T = serde_yml::from_str(data)?;
+    Ok(x)
+}
+/// Serialize a YAML string from a data structure of type `T`
+pub fn serialize_yaml_from_type<T>(data: &T) -> RBoxErr<String>
+where
+    T: Encode,
+    T: Serialize,
+{
+    Ok(serde_yml::to_string(&data)?)
+}
+
+/* UTILS ======================================================================================== */
+
+/* NO TESTS BLOCK START */
+
+pub fn yaml_file_to_type<T>(path: &Path) -> RBoxErr<T>
+where
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let string = read_str_file(path)?;
+    let data = deserialize_yaml_to_type::<T>(&string)?;
+    Ok(data)
+}
+
+pub fn type_to_yaml_file<T>(data: &T, path: &Path) -> RBoxErr<()>
+where
+    T: Encode,
+    T: Serialize,
+{
+    let yaml = serialize_yaml_from_type::<T>(data)?;
+    let _ = write_str_file(&yaml, path)?;
+    Ok(())
+}
+
+pub fn json_file_to_type<T>(path: &Path) -> RBoxErr<T>
+where
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let string = read_str_file(path)?;
+    let data = deserialize_json_to_type::<T>(&string)?;
+    Ok(data)
+}
+
+pub fn type_to_json_file<T>(data: &T, path: &Path) -> RBoxErr<()>
+where
+    T: Encode,
+    T: Serialize,
+{
+    let yaml = serialize_json_from_type::<T>(data)?;
+    let _ = write_str_file(&yaml, path)?;
+    Ok(())
+}
+
+/* NO TESTS BLOCK ENDS */
+/// Get a slice of a byte vector (`Vec<u8>`) -- mostly for reverse engineering utility purposes
+pub fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
+    let start: usize = match start_idx {
+        None => 0,
+        _ => start_idx.unwrap(),
+    };
+
+    let end: usize = match len {
+        None => data.len(),
+        _ => len.unwrap() + start,
+    };
+
+    data[start..end].to_vec()
+}
+
+/// Show deserialized representation of a binary data file of type `T` at `path`
+pub fn show_type<T>(path: &PathBuf, newlines: Option<bool>) -> RBoxErr<()>
+where
+    T: Debug,
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let data = read_type_from_bin_file::<T>(&path)?;
+    if newlines.unwrap_or(true) {
+        println!("{data:#?}")
+    } else {
+        println!("{data:?}")
+    };
+
+    Ok(())
+}
+
+/// Read a YAML file then write the data to a new `<T>` type file
+pub fn yaml_file_to_bin_file<T>(yaml_filepath: &Path, bin_filepath: &Path) -> RBoxErr<()>
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let yaml = read_str_file(yaml_filepath)?;
+    let data = deserialize_yaml_to_type::<T>(&yaml)?;
+    let _ = write_type_to_bin_file::<T>(&data, &bin_filepath)?;
+    Ok(())
+}
+
+/// Read data of type `<T>` from  a binary data file and write it to a YAML file
+pub fn bin_file_to_yaml_file<T>(bin_filepath: &Path, yaml_filepath: &Path) -> RBoxErr<()>
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let data = read_type_from_bin_file::<T>(&bin_filepath)?;
+    let yaml = serialize_yaml_from_type::<T>(&data)?;
+    let _ = write_str_file(&yaml, yaml_filepath)?;
+    Ok(())
+}
+
+/// Read a JSON file then write the data to a new `<T>` type file
+pub fn json_file_to_bin_file<T>(json_filepath: &Path, bin_filepath: &Path) -> RBoxErr<()>
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let json = read_str_file(json_filepath)?;
+    let data = deserialize_json_to_type::<T>(&json)?;
+    let _ = write_type_to_bin_file::<T>(&data, &bin_filepath)?;
+    Ok(())
+}
+
+/// Read data of type `<T>` from  a binary data file and write it to a JSON file
+pub fn bin_file_to_json_file<T>(bin_filepath: &Path, json_filepath: &Path) -> RBoxErr<()>
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let data = read_type_from_bin_file::<T>(&bin_filepath)?;
+    let yaml = serialize_json_from_type::<T>(&data)?;
+    let _ = write_str_file(&yaml, json_filepath)?;
+    Ok(())
+}
+
+/// Shorthand/helper for reading a type from a binary data file and deserializing it in one go.
+pub fn read_type_from_bin_file<T>(path: &Path) -> RBoxErr<T>
+where
+    T: Decode,
+    T: for<'a> Deserialize<'a>,
+{
+    let bytes = read_bin_file(path)?;
+    let data = deserialize_bin_to_type::<T>(&bytes)?;
+    Ok(data)
+}
+
+/// Shorthand/helper for writing a type to a binary data file while serializing it in one go.
+pub fn write_type_to_bin_file<T>(data: &T, path: &Path) -> RBoxErr<()>
+where
+    T: Encode,
+    T: Serialize,
+{
+    let bytes = crate::serialize_bin_from_type::<T>(data)?;
+    let _ = write_bin_file(&bytes, path)?;
+    Ok(())
+}
+
+/// Read `bytes` from a file at `path`. Used for reading octatrack data files.
+pub fn read_bin_file(path: &Path) -> RBoxErr<Vec<u8>> {
+    let mut infile = File::open(path)?;
+    let mut bytes: Vec<u8> = vec![];
+    let _: usize = infile.read_to_end(&mut bytes)?;
+    Ok(bytes)
+}
+
+/// Write `bytes` to a file at `path`. Used for creating new octatrack data files.
+pub fn write_bin_file(bytes: &Vec<u8>, path: &Path) -> RBoxErr<()> {
+    let mut file: File = File::create(path)?;
+    let _ = file.write_all(&bytes)?;
+    Ok(())
+}
+
+/// Read a file at `path` as a single string. Useful for reading from json and yaml files.
+pub fn read_str_file(path: &Path) -> RBoxErr<String> {
+    let mut file = File::open(path)?;
+    let mut string = String::new();
+    let _ = file.read_to_string(&mut string)?;
+    Ok(string)
+}
+
+/// Write a single `string` to a file at `path`. Useful for writing to json and yaml files.
+pub fn write_str_file(string: &str, path: &Path) -> RBoxErr<()> {
+    let mut file: File = File::create(path)?;
+    let _ = write!(file, "{}", string)?;
+    Ok(())
+}
+
+mod test {
+    use super::*;
+    use crate::banks::Bank;
+    use crate::projects::Project;
+    use crate::samples::SampleAttributes;
+
+    mod show_ok {
+        use super::*;
+
+        // #[test]
+        // fn test_arrangement() {
+        //     let fp = PathBuf::from("../data/tests/blank-project/arr01.work");
+        //     let r = show_type::<ArrangementFile>(&fp);
+        //     assert!(r.is_ok())
+        // }
+
+        #[test]
+        fn test_bank() {
+            let fp = PathBuf::from("../data/tests/blank-project/bank01.work");
+            let r = show_type::<Bank>(&fp, None);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_project() {
+            let fp = PathBuf::from("../data/tests/blank-project/project.work");
+            let r = show_type::<Project>(&fp, None);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_sample() {
+            let fp = PathBuf::from("../data/tests/misc/pair.ot");
+            let r = show_type::<SampleAttributes>(&fp, None);
+            assert!(r.is_ok())
+        }
+    }
+
+    // TODO: Add more cases
+    mod yaml_file_to_bin_file_ok {
+        use super::*;
+        use std::path::PathBuf;
+
+        // #[test]
+        // fn test_arrangement() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-arrangement-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     // TODO!
+        //     let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        // #[test]
+        // fn test_bank() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-bank-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     let r = yaml_file_to_bin_file::<Bank>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        #[test]
+        fn test_project() {
+            let outfile = std::env::temp_dir().join("octatools-actions-project-load-test-ok.work");
+            let yaml = PathBuf::from("../data/tests/projects/project.yaml");
+            let r = yaml_file_to_bin_file::<Project>(&yaml, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_project_matches_blank() {
+            let testfile = PathBuf::from("../data/tests/projects/blank.work");
+            let outfile =
+                std::env::temp_dir().join("octatools-actions-project-load-test-full.work");
+            let yaml = PathBuf::from("../data/tests/projects/project.yaml");
+
+            let _ = yaml_file_to_bin_file::<Project>(&yaml, &outfile);
+
+            let written = read_type_from_bin_file::<Project>(&outfile).unwrap();
+            let valid = read_type_from_bin_file::<Project>(&testfile).unwrap();
+
+            let _ = std::fs::remove_file(&outfile);
+            assert_eq!(written, valid)
+        }
+
+        // #[test]
+        // fn test_sample() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-sample-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     let r = yaml_file_to_bin_file::<SampleAttributes>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+    }
+
+    mod bin_file_to_yaml_file_ok {
+        use super::*;
+
+        // #[test]
+        // fn test_arrangement() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-arrangement-ok.yaml");
+        //     let binfile = PathBuf::from("../data/tests/blank-project/arr01.work");
+        //     let r = bin_file_to_yaml_file::<ArrangementFile>(&binfile, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        #[test]
+        fn test_bank() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-bank-ok.yaml");
+            let binfile = PathBuf::from("../data/tests/blank-project/bank01.work");
+            let r = bin_file_to_yaml_file::<Bank>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_project() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-project-ok.yaml");
+            let binfile = PathBuf::from("../data/tests/blank-project/project.work");
+            let r = bin_file_to_yaml_file::<Project>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_sample() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-sample-ok.yaml");
+            let binfile = PathBuf::from("../data/tests/misc/pair.ot");
+            let r = bin_file_to_yaml_file::<SampleAttributes>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+    }
+
+    mod bin_file_to_json_file_ok {
+        use super::*;
+
+        // #[test]
+        // fn test_arrangement() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-arrangement-ok.json");
+        //     let binfile = PathBuf::from("../data/tests/blank-project/arr01.work");
+        //     let r = bin_file_to_json_file::<ArrangementFile>(&binfile, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        #[test]
+        fn test_bank() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-bank-ok.json");
+            let binfile = PathBuf::from("../data/tests/blank-project/bank01.work");
+            let r = bin_file_to_json_file::<Bank>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_project() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-project-ok.json");
+            let binfile = PathBuf::from("../data/tests/blank-project/project.work");
+            let r = bin_file_to_json_file::<Project>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_sample() {
+            let outfile = std::env::temp_dir().join("octatools-actions-bin2yaml-sample-ok.json");
+            let binfile = PathBuf::from("../data/tests/misc/pair.ot");
+            let r = bin_file_to_json_file::<SampleAttributes>(&binfile, &outfile);
+            let _ = std::fs::remove_file(&outfile);
+            assert!(r.is_ok())
+        }
+    }
+
+    // TODO: Add more cases!
+    mod json_file_to_bin_file_ok {
+        // #[test]
+        // fn test_arrangement() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-arrangement-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     // TODO!
+        //     let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        // #[test]
+        // fn test_bank() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-bank-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     let r = yaml_file_to_bin_file::<Bank>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        // #[test]
+        // fn test_project() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-project-load-test-ok.work");
+        //     let yaml = PathBuf::from("../data/tests/projects/project.yaml");
+        //     let r = yaml_file_to_bin_file::<Project>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+
+        // #[test]
+        // fn test_sample() {
+        //     let outfile = std::env::temp_dir().join("octatools-actions-sample-load-test-ok.work");
+        //     let yaml = PathBuf::from("TODO");
+        //     let r = yaml_file_to_bin_file::<SampleAttributes>(&yaml, &outfile);
+        //     let _ = std::fs::remove_file(&outfile);
+        //     assert!(r.is_ok())
+        // }
+    }
+
+    mod read_type_from_bin_file_ok {
+        use super::*;
+
+        // #[test]
+        // fn test_read_type_from_bin_file_arrangement() {
+        //     let binfile = PathBuf::from("../data/tests/blank-project/arr01.work");
+        //     let r = read_type_from_bin_file::<ArrangementFile>(&binfile);
+        //     assert!(r.is_ok())
+        // }
+
+        #[test]
+        fn test_read_type_from_bin_file_bank() {
+            let binfile = PathBuf::from("../data/tests/blank-project/bank01.work");
+            let r = read_type_from_bin_file::<Bank>(&binfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_type_from_bin_file_project() {
+            let binfile = PathBuf::from("../data/tests/blank-project/project.work");
+            let r = read_type_from_bin_file::<Project>(&binfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_type_from_bin_file_sample() {
+            let binfile = PathBuf::from("../data/tests/misc/pair.ot");
+            let r = read_type_from_bin_file::<SampleAttributes>(&binfile);
+            assert!(r.is_ok())
+        }
+    }
+
+    mod write_type_from_bin_file_ok {
+        // TODO
+    }
+
+    mod read_bin_file_ok {
+        use super::*;
+
+        #[test]
+        fn test_read_bin_file_arrangement() {
+            let binfile = PathBuf::from("../data/tests/blank-project/arr01.work");
+            let r = read_bin_file(&binfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_bin_file_bank() {
+            let binfile = PathBuf::from("../data/tests/blank-project/bank01.work");
+            let r = read_bin_file(&binfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_bin_file_project() {
+            let binfile = PathBuf::from("../data/tests/blank-project/project.work");
+            let r = read_bin_file(&binfile);
+            assert!(r.is_ok())
+        }
+
+        #[test]
+        fn test_read_bin_file_sample() {
+            let binfile = PathBuf::from("../data/tests/misc/pair.ot");
+            let r = read_bin_file(&binfile);
+            assert!(r.is_ok())
+        }
+    }
+
+    mod write_bin_file_ok {
+        // TODO
+    }
+
+    mod read_str_file_ok {
+        // TODO
+    }
+
+    mod write_str_file_ok {
+        // TODO
+    }
+
+    // TODO: This probably shouldn't be here...
+    mod project_read {
+        use super::*;
+        use crate::projects::metadata::ProjectMetadata;
+        use crate::projects::settings::ProjectSettings;
+        use crate::projects::slots::ProjectSampleSlot;
+        use crate::projects::states::ProjectStates;
+        use crate::projects::Project;
+        use std::path::PathBuf;
+
+        // can read a project file without errors
+        #[test]
+        fn test_read_default_project_work_file() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            assert!(read_type_from_bin_file::<Project>(&infile).is_ok());
+        }
+
+        // test that the metadata section is correct
+        #[test]
+        fn test_read_default_project_work_file_metadata() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let p = read_type_from_bin_file::<Project>(&infile).unwrap();
+
+            let correct = ProjectMetadata::default();
+
+            assert_eq!(p.metadata, correct);
+        }
+
+        // test that the states section is correct
+        #[test]
+        fn test_read_default_project_work_file_states() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let p = read_type_from_bin_file::<Project>(&infile).unwrap();
+
+            let correct = ProjectStates::default();
+
+            assert_eq!(p.states, correct);
+        }
+
+        // test that the states section is correct
+        #[test]
+        fn test_read_default_project_work_file_settings() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let p = read_type_from_bin_file::<Project>(&infile).unwrap();
+
+            let correct = ProjectSettings::default();
+
+            assert_eq!(p.settings, correct);
+        }
+
+        // test that the states section is correct
+        #[test]
+        fn test_read_default_project_work_file_sslots() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let p = read_type_from_bin_file::<Project>(&infile).unwrap();
+            let default_sslots = ProjectSampleSlot::default_vec();
+
+            assert_eq!(p.slots, default_sslots);
+        }
+
+        // test that reading and writing a single project gives the same outputs
+        #[test]
+        fn test_read_write_default_project_work_file() {
+            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let outfile = std::env::temp_dir().join("default_1.work");
+            let p = read_type_from_bin_file::<Project>(&infile).unwrap();
+            let _ = write_type_to_bin_file::<Project>(&p, &outfile);
+
+            let p_reread = read_type_from_bin_file::<Project>(&infile).unwrap();
+
+            assert_eq!(p, p_reread)
+        }
     }
 }
 
-pub trait FromJsonFile
-where
-    Self: for<'a> Deserialize<'a>,
-{
-    fn from_json(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
-        let f = std::fs::File::open(path)?;
-        let data: Result<Self, SerdeJsonError> = serde_json::from_reader(f);
-        Ok(data?)
+mod tests {
+    use super::*;
+    mod test_get_byte_slice {
+        use super::*;
+        #[test]
+        fn test_no_options() {
+            let data: Vec<u8> = vec![1, 2, 3];
+            let r = get_bytes_slice(data, &None, &None);
+            assert_eq!(r, vec![1, 2, 3]);
+        }
+        #[test]
+        fn test_no_options_one_byte_data() {
+            let data: Vec<u8> = vec![1];
+            let r = get_bytes_slice(data, &None, &None);
+            assert_eq!(r, vec![1]);
+        }
+        #[test]
+        fn test_non_zero_start() {
+            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
+            let r = get_bytes_slice(data, &Some(1), &None);
+            assert_eq!(r, vec![2, 3, 4, 5]);
+        }
+        #[test]
+        fn test_non_zero_end() {
+            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
+            let r = get_bytes_slice(data, &None, &Some(3));
+            assert_eq!(r, vec![1, 2, 3]);
+        }
+        #[test]
+        fn test_non_zero_start_and_end() {
+            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
+            let r = get_bytes_slice(data, &Some(1), &Some(3));
+            assert_eq!(r, vec![2, 3, 4]);
+        }
     }
 }

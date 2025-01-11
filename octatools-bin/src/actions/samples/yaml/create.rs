@@ -8,7 +8,7 @@ use serde_octatrack::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 
-use serde_octatrack::{FromYamlFile, ToYamlFile};
+use serde_octatrack::Decode;
 
 /// YAML section which globally affects all chains being created with the loaded config.
 
@@ -49,5 +49,4 @@ pub struct YamlChainCreate {
     pub chains: Vec<YamlChainCreateSamplechains>,
 }
 
-impl FromYamlFile for YamlChainCreate {}
-impl ToYamlFile for YamlChainCreate {}
+impl Decode for YamlChainCreate {}

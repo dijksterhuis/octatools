@@ -1,26 +1,20 @@
+use crate::audio::utils::scan_dir_path_for_audio_files;
+use crate::RBoxErr;
+
 use serde_octatrack::{
     projects::{slots::ProjectSampleSlot, Project},
-    FromPath, ToPath, ToYamlFile,
+    read_type_from_bin_file, write_type_to_bin_file,
 };
 
-use crate::audio::utils::scan_dir_path_for_audio_files;
-use crate::{actions::load_from_yaml, RBoxErr};
 use itertools::Itertools;
 use std::{
     fs,
     path::{Path, PathBuf},
 };
 
-/// Show deserialised representation of a Project for a given project file at `path`
-pub fn show_project(path: &PathBuf) -> RBoxErr<()> {
-    let b = Project::from_path(path).expect("Could not load project file");
-    println!("{b:#?}");
-    Ok(())
-}
-
 /// List all the sample slots within an Octatrack Project, given a path to a Project data file
 pub fn list_project_sample_slots(path: &PathBuf) -> RBoxErr<()> {
-    let project = Project::from_path(path).expect("Could not load project file");
+    let project = read_type_from_bin_file::<Project>(&path).expect("Could not load project file");
 
     let slots = project
         .slots
@@ -49,7 +43,8 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
         .unwrap_or_else(|| panic!("Cannot find set directory from project file path."))
         .join("AUDIO");
 
-    let mut project = Project::from_path(&abs_project_fp).expect("Could not load project file");
+    let mut project = read_type_from_bin_file::<Project>(&project_file_path)
+        .expect("Could not load project file");
 
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -76,7 +71,7 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
 
             let new_audio_path = audio_pool_path.join(&audio_fname);
 
-            let _ = std::fs::copy(&audio_fpath, &new_audio_path)?;
+            let _ = fs::copy(&audio_fpath, &new_audio_path)?;
 
             let mut ot_filepath = audio_fpath.clone();
             ot_filepath.set_extension("ot");
@@ -85,7 +80,7 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
                 let mut new_otfile_path = audio_pool_path.join(&audio_fname);
                 new_otfile_path.set_extension("ot");
 
-                let _ = std::fs::copy(&ot_filepath, &new_otfile_path)?;
+                let _ = fs::copy(&ot_filepath, &new_otfile_path)?;
             }
 
             slot.path = new_audio_path;
@@ -93,7 +88,8 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
     }
 
     project.slots = slots;
-    project.to_path(&abs_project_fp)?;
+    write_type_to_bin_file::<Project>(&project, &abs_project_fp)
+        .expect("Could not save project file");
 
     Ok(())
 }
@@ -111,7 +107,8 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
 
     println!("{:#?}", project_dir_path);
 
-    let mut project = Project::from_path(&abs_project_fp).expect("Could not load project file");
+    let mut project = read_type_from_bin_file::<Project>(&project_file_path)
+        .expect("Could not load project file");
 
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -136,7 +133,7 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
             let new_audio_path = project_dir_path.join(&audio_fname);
             println!("{:#?}", audio_fpath);
 
-            let _ = std::fs::copy(&audio_fpath, &new_audio_path)?;
+            let _ = fs::copy(&audio_fpath, &new_audio_path)?;
 
             let mut ot_filepath = audio_fpath.clone();
             ot_filepath.set_extension("ot");
@@ -145,7 +142,7 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
                 let mut new_otfile_path = project_dir_path.join(&audio_fname);
                 new_otfile_path.set_extension("ot");
 
-                let _ = std::fs::copy(&ot_filepath, &new_otfile_path)?;
+                let _ = fs::copy(&ot_filepath, &new_otfile_path)?;
             }
 
             slot.path = new_audio_path;
@@ -153,7 +150,8 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
     }
 
     project.slots = slots;
-    project.to_path(&abs_project_fp)?;
+    write_type_to_bin_file::<Project>(&project, &abs_project_fp)
+        .expect("Could not save project file");
 
     Ok(())
 }
@@ -169,7 +167,8 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
         .parent()
         .unwrap_or_else(|| panic!("Cannot find project directory from project file path."));
 
-    let project = Project::from_path(&abs_project_fp).expect("Could not load project file");
+    let project =
+        read_type_from_bin_file::<Project>(&abs_project_fp).expect("Could not load project file");
 
     let slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -205,28 +204,8 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
     Ok(())
 }
 
-/// Load Project file data from a YAML file
-pub fn load_project(yaml_path: &Path, outfile: &Path) -> RBoxErr<()> {
-    load_from_yaml::<Project>(yaml_path, outfile)
-}
-
-/// Dump Project file data to a YAML file
-pub fn dump_project(path: &Path, yaml_path: &Path) -> RBoxErr<()> {
-    let b = Project::from_path(path).expect("Could not load project file");
-    let _ = b.to_yaml(yaml_path);
-    Ok(())
-}
-
 mod test {
-
     use super::*;
-
-    #[test]
-    fn test_show_ok() {
-        let fp = PathBuf::from("../data/tests/blank-project/project.work");
-        let r = show_project(&fp);
-        assert!(r.is_ok())
-    }
 
     #[test]
     fn test_list_sample_slots_ok() {
@@ -235,169 +214,150 @@ mod test {
         assert!(r.is_ok())
     }
 
-    #[test]
-    fn test_load_project_ok() {
-        let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-ok.work");
-        let yaml = PathBuf::from("../data/tests/projects/project.yaml");
-        let r = load_project(&yaml, &outfile);
-
-        let _ = std::fs::remove_file(&outfile);
-        assert!(r.is_ok())
-    }
-
-    #[test]
-    fn test_load_project_matches_blank() {
-        let testfile = PathBuf::from("../data/tests/projects/blank.work");
-        let outfile = PathBuf::from("/tmp/octatools-actions-project-load-test-full.work");
-        let yaml = PathBuf::from("../data/tests/projects/project.yaml");
-
-        let _ = load_project(&yaml, &outfile);
-
-        let written = Project::from_path(&outfile).unwrap();
-        let valid = Project::from_path(&testfile).unwrap();
-
-        let _ = std::fs::remove_file(&outfile);
-        assert_eq!(written, valid)
-    }
-
-    #[test]
-    fn test_dump_project_ok() {
-        let infile = PathBuf::from("../data/tests/projects/blank.work");
-        let outyaml = PathBuf::from("/tmp/project-test-dump-ok.yaml");
-        let r = dump_project(&infile, &outyaml);
-
-        let _ = std::fs::remove_file(&outyaml);
-        assert!(r.is_ok())
-    }
-
     fn make_sslot_mock_set_dir(base_path: &PathBuf) {
-        let _ = fs::create_dir(base_path.join("test"));
-        let _ = fs::create_dir(base_path.join("test/AUDIO"));
-        let _ = fs::create_dir(base_path.join("test/PROJECT"));
+        let _ = fs::create_dir(fs::canonicalize(base_path).unwrap());
+        let _ = fs::create_dir(fs::canonicalize(base_path.join("AUDIO")).unwrap());
+        let _ = fs::create_dir(fs::canonicalize(base_path.join("PROJECT")).unwrap());
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/test.wav"),
-            base_path.join("test/AUDIO/first-0.wav"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
+            fs::canonicalize(base_path.join("AUDIO/first-0.wav")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/test.wav"),
-            base_path.join("test/AUDIO/second-0.wav"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
+            fs::canonicalize(base_path.join("AUDIO/second-0.wav")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/pair.wav"),
-            base_path.join("test/AUDIO/third-0.wav"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.wav")).unwrap(),
+            fs::canonicalize(base_path.join("AUDIO/third-0.wav")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/pair.ot"),
-            base_path.join("test/AUDIO/third-0.ot"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.ot")).unwrap(),
+            fs::canonicalize(base_path.join("AUDIO/third-0.ot")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/test.wav"),
-            base_path.join("test/PROJECT/fourth-0.wav"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
+            fs::canonicalize(base_path.join("PROJECT/fourth-0.wav")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/pair.wav"),
-            base_path.join("test/PROJECT/fifth-0.wav"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.wav")).unwrap(),
+            fs::canonicalize(base_path.join("PROJECT/fifth-0.wav")).unwrap(),
         );
         let _ = fs::copy(
-            PathBuf::from("./../data/tests/misc/pair.ot"),
-            base_path.join("test/PROJECT/fifth-0.ot"),
+            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.ot")).unwrap(),
+            fs::canonicalize(base_path.join("PROJECT/fifth-0.ot")).unwrap(),
         );
     }
 
+    // fails due to paths on windows
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_consolidate_sslots_audio_pool_ok() {
         let base_path =
-            PathBuf::from("./../data/tests/projects/sample-slots/consolidation/to_audio_pool/");
+            PathBuf::from("../data/tests/projects/sample-slots/consolidation/to_audio_pool/");
 
-        if base_path.join("test/").exists() {
-            let _ = std::fs::remove_dir_all(&base_path.join("test/"));
+        let test_dir_path = std::env::temp_dir().join("ot_consolidate_audio_pool");
+
+        if test_dir_path.exists() {
+            let _ = fs::remove_dir_all(&test_dir_path);
         };
 
-        make_sslot_mock_set_dir(&base_path);
+        make_sslot_mock_set_dir(&test_dir_path);
 
-        let _ = load_project(
+        let _ = yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
-            &base_path.join("test/PROJECT/project.work"),
+            &test_dir_path.join("PROJECT/project.work"),
         )
         .unwrap();
 
-        let r =
-            consolidate_sample_slots_to_audio_pool(&base_path.join("test/PROJECT/project.work"));
+        let r = consolidate_sample_slots_to_audio_pool(&test_dir_path.join("PROJECT/project.work"));
 
         assert!(r.is_ok());
 
-        assert!(base_path.join("test/PROJECT/project.work").exists());
-        assert!(base_path.join("test/AUDIO/first-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/second-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/third-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/fourth-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/fifth-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/fifth-0.ot").exists());
-        assert!(base_path.join("test/PROJECT/fourth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.ot").exists());
+        assert!(test_dir_path.join("PROJECT/project.work").exists());
+        assert!(test_dir_path.join("AUDIO/first-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/second-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/third-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/fourth-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/fifth-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/fifth-0.ot").exists());
+        assert!(test_dir_path.join("PROJECT/fourth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.ot").exists());
     }
 
+    // fails due to paths on windows
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_consolidate_sslots_project_pool_ok() {
         let base_path =
             PathBuf::from("./../data/tests/projects/sample-slots/consolidation/to_project_pool/");
 
-        if base_path.join("test/").exists() {
-            let _ = std::fs::remove_dir_all(&base_path.join("test/"));
+        let test_dir_path = std::env::temp_dir().join("ot_consolidate_project_pool");
+
+        if test_dir_path.exists() {
+            let _ = fs::remove_dir_all(&test_dir_path);
         };
 
-        make_sslot_mock_set_dir(&base_path);
+        make_sslot_mock_set_dir(&test_dir_path);
 
-        let _ = load_project(
+        println!(
+            "{:#?}",
+            &test_dir_path.join("PROJECT/project.work").exists()
+        );
+        println!("{:#?}", &test_dir_path.join("PROJECT/project.work"));
+
+        let _ = yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
-            &base_path.join("test/PROJECT/project.work"),
+            &test_dir_path.join("PROJECT/project.work"),
         )
         .unwrap();
 
         let r =
-            consolidate_sample_slots_to_project_pool(&base_path.join("test/PROJECT/project.work"));
+            consolidate_sample_slots_to_project_pool(&test_dir_path.join("PROJECT/project.work"));
 
         assert!(r.is_ok());
 
-        assert!(base_path.join("test/PROJECT/project.work").exists());
-        assert!(base_path.join("test/AUDIO/first-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/second-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/third-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/first-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/second-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/third-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fourth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.ot").exists());
+        assert!(test_dir_path.join("PROJECT/project.work").exists());
+        assert!(test_dir_path.join("AUDIO/first-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/second-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/third-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/first-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/second-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/third-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fourth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.ot").exists());
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_purge_project_pool_ok() {
         let base_path = PathBuf::from("./../data/tests/projects/sample-slots/purge/project_pool/");
 
-        if base_path.join("test/").exists() {
-            let _ = std::fs::remove_dir_all(&base_path.join("test/"));
+        let test_dir_path = std::env::temp_dir().join("ot_purge_project_pool");
+
+        if test_dir_path.exists() {
+            let _ = fs::remove_dir_all(&test_dir_path);
         };
 
-        make_sslot_mock_set_dir(&base_path);
+        make_sslot_mock_set_dir(&test_dir_path);
 
         let _ = fs::copy(
             PathBuf::from("./../data/tests/misc/pair.wav"),
-            base_path.join("test/PROJECT/deleteme1.wav"),
+            test_dir_path.join("PROJECT/deleteme1.wav"),
         );
         let _ = fs::copy(
             PathBuf::from("./../data/tests/misc/pair.ot"),
-            base_path.join("test/PROJECT/deleteme1.ot"),
+            test_dir_path.join("PROJECT/deleteme1.ot"),
         );
         let _ = fs::copy(
             PathBuf::from("./../data/tests/misc/test.wav"),
-            base_path.join("test/PROJECT/deleteme2.wav"),
+            test_dir_path.join("PROJECT/deleteme2.wav"),
         );
 
-        let _ = load_project(
+        let _ = yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
-            &base_path.join("test/PROJECT/project.work"),
+            &test_dir_path.join("PROJECT/project.work"),
         )
         .unwrap();
 
@@ -405,15 +365,15 @@ mod test {
 
         assert!(r.is_ok());
 
-        assert!(base_path.join("test/PROJECT/project.work").exists());
-        assert!(base_path.join("test/AUDIO/first-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/second-0.wav").exists());
-        assert!(base_path.join("test/AUDIO/third-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fourth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.wav").exists());
-        assert!(base_path.join("test/PROJECT/fifth-0.ot").exists());
-        assert!(!base_path.join("test/PROJECT/deleteme1.wav").exists());
-        assert!(!base_path.join("test/PROJECT/deleteme1.ot").exists());
-        assert!(!base_path.join("test/PROJECT/deleteme2.wav").exists());
+        assert!(test_dir_path.join("PROJECT/project.work").exists());
+        assert!(test_dir_path.join("AUDIO/first-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/second-0.wav").exists());
+        assert!(test_dir_path.join("AUDIO/third-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fourth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.wav").exists());
+        assert!(test_dir_path.join("PROJECT/fifth-0.ot").exists());
+        assert!(!test_dir_path.join("PROJECT/deleteme1.wav").exists());
+        assert!(!test_dir_path.join("PROJECT/deleteme1.ot").exists());
+        assert!(!test_dir_path.join("PROJECT/deleteme2.wav").exists());
     }
 }
