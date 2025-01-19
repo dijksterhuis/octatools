@@ -8,7 +8,7 @@ use serde_octatrack::{
     projects::slots::ProjectSampleSlot,
     samples::slices::{Slice, Slices},
 };
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Create a `Slice` object for an unchained wavfile.
 /// The starting `offset` position should be the sample index within the eventual chained wavfile.
@@ -21,7 +21,7 @@ pub fn create_slice_from_wavfile(wavfile: &WavFile, trim_start: u32) -> RBoxErr<
 }
 
 /// Get a new `Slices` struct, given a `Vec` of `WavFile`s.
-pub fn create_slices_from_wavfiles(wavfiles: &Vec<WavFile>, offset: u32) -> RBoxErr<Slices> {
+pub fn create_slices_from_wavfiles(wavfiles: &[WavFile], offset: u32) -> RBoxErr<Slices> {
     let mut new_slices: Vec<Slice> = Vec::new();
     let mut off = offset;
 
@@ -58,7 +58,7 @@ pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxEr
 
 /// Calculate the effective number of bars for a vec of wav files.
 /// Assumes four beats per bar.
-pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) -> RBoxErr<u32> {
+pub fn get_otsample_nbars_from_wavfiles(wavs: &[WavFile], tempo_bpm: &f32) -> RBoxErr<u32> {
     let total_samples: u32 = wavs.iter().map(|x| x.len).sum();
     let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
     let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
@@ -72,12 +72,10 @@ pub fn get_otsample_nbars_from_wavfiles(wavs: &Vec<WavFile>, tempo_bpm: &f32) ->
 ///
 /// Note: The `samples` module is reserved for ser/de of `SampleAttributes` files (`.ot` files),
 /// and this struct is only relevant for Projects anyway.
-
 // NOTE: samples can be stored either in the set's audio pool or in the project directory
-
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SampleFilePair {
-    /// Name of this Sample (file basenames)
+    /// Name of this Sample (file basename)
     pub name: String,
 
     /// Explicit path to the **audio** file.
@@ -90,20 +88,19 @@ pub struct SampleFilePair {
 impl SampleFilePair {
     /// Create a new `OctatrackSampleFile` from the audio file path
     /// and an optional attributes file path.
-
-    pub fn from_pathbufs(audio_fp: &PathBuf, ot_fp: &Option<PathBuf>) -> RBoxErr<Self> {
+    #[allow(dead_code)]  // I want to keep this in case it becomes useful in future.
+    pub fn from_pathbufs(audio_fp: &Path, ot_fp: &Option<PathBuf>) -> RBoxErr<Self> {
         Ok(Self {
             name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
-            audio_filepath: audio_fp.clone(),
+            audio_filepath: audio_fp.to_owned(),
             attributes_filepath: ot_fp.clone(),
         })
     }
 
     /// Create a new `OctatrackSampleFile` only from  the audio file path
-
-    pub fn from_audio_pathbuf(audio_fp: &PathBuf) -> RBoxErr<Self> {
+    pub fn from_audio_pathbuf(audio_fp: &Path) -> RBoxErr<Self> {
         // TODO: optimise this? so many clones
-        let mut ot_file_path = audio_fp.clone();
+        let mut ot_file_path = audio_fp.to_path_buf();
         ot_file_path.set_extension("ot");
 
         let mut ot_file_pathbuf = Some(ot_file_path.clone());
@@ -113,7 +110,7 @@ impl SampleFilePair {
 
         Ok(Self {
             name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),
-            audio_filepath: audio_fp.clone(),
+            audio_filepath: audio_fp.to_owned(),
             attributes_filepath: ot_file_pathbuf,
         })
     }
@@ -130,6 +127,8 @@ pub struct ProjectSamples {
     inactive: Vec<SampleFilePair>,
 }
 
+#[cfg(test)]
+#[allow(unused_imports)]
 mod test {
 
     mod slice_from_wav {
@@ -144,7 +143,7 @@ mod test {
             let fp = PathBuf::from("../data/tests/misc/test.wav");
             let wav = WavFile::from_path(&fp).unwrap();
 
-            let valid = Slice {
+            let _valid = Slice {
                 trim_start: 0,
                 trim_end: wav.len,
                 loop_start: 0xFFFFFFFF,

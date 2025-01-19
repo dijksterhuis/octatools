@@ -4,7 +4,7 @@ pub mod configs;
 pub mod options;
 pub mod slices;
 
-use std::{error::Error, fs::File, io::prelude::*, io::Write, path::Path};
+use std::error::Error;
 
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
@@ -32,7 +32,6 @@ pub const UNKNOWN_BYTES: [u8; 7] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00];
 // ......
 // ```
 /// Raw header bytes and post-header spacer bytes in an Octatrack `.ot` metadata settings file
-
 pub const FULL_HEADER: [u8; 23] = [
     0x46, 0x4F, 0x52, 0x4D, 0x00, 0x00, 0x00, 0x00, 0x44, 0x50, 0x53, 0x31, 0x53, 0x4D, 0x50, 0x41,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
@@ -136,7 +135,6 @@ pub struct SampleAttributes {
 impl SwapBytes for SampleAttributes {
     /// Swaps the bytes on all struct fields.
     /// **MUST BE CALLED BEFORE SERIALISATION WHEN SYSTEM IS LITTLE ENDIAN!**
-
     type T = SampleAttributes;
 
     /// Swap the bytes of all struct fields.
@@ -179,9 +177,8 @@ impl SampleAttributes {
         loop_config: &SampleLoopConfig,
         slices: &Slices,
     ) -> RBoxErr<Self> {
-        let validated_gain: RBoxErr<u16> = if gain > &24.0 {
-            Err(SampleAttributeErrors::InvalidGain.into())
-        } else if gain < &-24.0 {
+        // https://rust-lang.github.io/rust-clippy/master/index.html#manual_range_contains
+        let validated_gain: RBoxErr<u16> = if !(&-24.0..=&24.0).contains(&gain) {
             Err(SampleAttributeErrors::InvalidGain.into())
         } else {
             // translate to 0_u16 <= x < 96_u16 from -24.0_d32 <= x <= + 24.0_f32
@@ -190,9 +187,8 @@ impl SampleAttributes {
             Ok(new_gain_f32 as u16)
         };
 
-        let validated_tempo: RBoxErr<f32> = if tempo < &30.0 {
-            Err(SampleAttributeErrors::InvalidTempo.into())
-        } else if tempo > &300.0 {
+        // https://rust-lang.github.io/rust-clippy/master/index.html#manual_range_contains
+        let validated_tempo: RBoxErr<f32> = if !(&30.0..=&300.0).contains(&tempo) {
             Err(SampleAttributeErrors::InvalidTempo.into())
         } else {
             Ok(*tempo)
@@ -221,9 +217,9 @@ impl SampleAttributes {
 impl Decode for SampleAttributes {
     /// Decode raw bytes of a `.ot` data file into a new struct,
     /// swap byte values if system is little-endian then do some minor
-    /// post-processing to get user friendly settings values.
-    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
-        let decoded: Self = bincode::deserialize(&bytes[..]).unwrap();
+    /// post-processing to get user-friendly settings values.
+    fn decode(bytes: &[u8]) -> RBoxErr<Self> {
+        let decoded: Self = bincode::deserialize(bytes).unwrap();
         let mut bswapd = decoded.clone();
 
         // swapping bytes is one required when running on little-endian systems

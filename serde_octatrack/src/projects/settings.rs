@@ -217,7 +217,7 @@ impl ProjectFromString for ProjectSettings {
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
-    fn from_string(s: &String) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_string(s: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let hmap = string_to_hashmap(s, &ProjectRawFileSection::Settings)?;
 
         Ok(Self {
@@ -235,7 +235,6 @@ impl ProjectFromString for ProjectSettings {
 
 impl ProjectToString for ProjectSettings {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-
     fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
         let mut s = "".to_string();
         s.push_str("[SETTINGS]");

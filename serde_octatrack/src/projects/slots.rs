@@ -71,6 +71,7 @@ pub struct ProjectSampleSlot {
     pub bpm: u16,
 }
 
+#[allow(clippy::too_many_arguments)] // not my fault there's a bunch of inputs for this...
 impl ProjectSampleSlot {
     pub fn new(
         sample_type: ProjectSampleSlotType,
@@ -288,7 +289,7 @@ impl ProjectFromString for ProjectSampleSlot {
     type T = Vec<Self>;
 
     /// Load project 'samples' data from the raw project ASCII file.
-    fn from_string(data: &String) -> RBoxErr<Vec<Self>> {
+    fn from_string(data: &str) -> RBoxErr<Vec<Self>> {
         let footer_stripped = data
             .strip_suffix("\r\n\r\n############################\r\n\r\n")
             .unwrap();
@@ -338,7 +339,6 @@ impl ProjectFromString for ProjectSampleSlot {
 
 impl ProjectToString for ProjectSampleSlot {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-
     fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
         // Recording buffers are actually stored as FLEX slots with
         // a slot ID > 128.
@@ -377,6 +377,8 @@ impl ProjectToString for ProjectSampleSlot {
     }
 }
 
+#[cfg(test)]
+#[allow(unused_imports)]
 mod test {
 
     #[test]

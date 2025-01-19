@@ -194,6 +194,7 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
 
 /// "Specification" tests ... ie. guarantee that enum values match correct values.
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test_spec {
 
     mod ot_trig_quantize_mode {

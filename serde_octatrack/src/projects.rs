@@ -7,9 +7,7 @@ pub mod slots;
 pub mod states;
 
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::HashMap, error::Error, fmt::Debug, fs::File, io::Write, path::Path, str::FromStr,
-};
+use std::{collections::HashMap, error::Error, fmt::Debug, str::FromStr};
 
 use crate::{
     projects::{
@@ -40,7 +38,7 @@ trait ProjectFromString {
     type T;
 
     /// Crete a new struct by parsing a `String`.
-    fn from_string(data: &String) -> Result<Self::T, Box<dyn std::error::Error>>;
+    fn from_string(data: &str) -> Result<Self::T, Box<dyn std::error::Error>>;
 }
 
 /// Trait to use when a new struct can be created by reading a string.
@@ -71,12 +69,11 @@ fn parse_hashmap_string_value_bool(
     key: &str,
     default_str: Option<&str>,
 ) -> Result<bool, Box<dyn std::error::Error>> {
-    Ok(
-        match parse_hashmap_string_value::<u8>(hmap, key, default_str)? {
-            1 => true,
-            _ => false,
-        },
-    )
+    // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#match_like_matches_macro
+    Ok(matches!(
+        parse_hashmap_string_value::<u8>(hmap, key, default_str)?,
+        1
+    ))
 }
 
 /// ASCII data section headings within an Octatrack `project.*` file
@@ -123,9 +120,8 @@ impl ProjectRawFileSection {
 }
 
 /// Extract ASCII string project data for a specified section as a HashMap of k-v pairs.
-
 fn string_to_hashmap(
-    data: &String,
+    data: &str,
     section: &ProjectRawFileSection,
 ) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
     let start_idx: usize = data.find(&section.start_string()?).unwrap();
@@ -145,7 +141,7 @@ fn string_to_hashmap(
             let mut key_pair_split: Vec<&str> = key_pair_string.split('=').collect();
 
             // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
-            // but the keys do not have track number indicators. i assume they're
+            // but the keys do not have audio track number indicators. i assume they're
             // stored in order of the midi track number, and each subsequent one we
             // read is the next track.
             let key_renamed: String = format!("trig_mode_midi_track_{}", &trig_mode_midi_field_idx);
@@ -164,7 +160,7 @@ fn string_to_hashmap(
     Ok(hmap)
 }
 
-fn sslots_vec_to_string(v: &Vec<ProjectSampleSlot>) -> String {
+fn sslots_vec_to_string(v: &[ProjectSampleSlot]) -> String {
     let sslots_mapped: Vec<String> = v.iter().map(|x| x.to_string().unwrap()).collect();
 
     sslots_mapped.join("\r\n\r\n")
@@ -233,7 +229,6 @@ impl Default for Project {
 
 impl ProjectToString for Project {
     /// Turn a Project struct into a String configuration, ready for writing to binary data files
-
     fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
         let states_header =
             "############################\r\n# Project States\r\n############################"
@@ -251,16 +246,16 @@ impl ProjectToString for Project {
 
         let sslots_string = sslots_vec_to_string(&self.slots);
 
-        let mut v: Vec<String> = Vec::new();
-
-        v.push(settings_header);
-        v.push(metadata_string);
-        v.push(settings_string);
-        v.push(states_header);
-        v.push(states_string);
-        v.push(slots_header);
-        v.push(sslots_string);
-        v.push(footer);
+        let v: Vec<String> = vec![
+            settings_header,
+            metadata_string,
+            settings_string,
+            states_header,
+            states_string,
+            slots_header,
+            sslots_string,
+            footer,
+        ];
 
         let mut project_string = v.join("\r\n\r\n");
         project_string.push_str("\r\n\r\n");
@@ -268,10 +263,10 @@ impl ProjectToString for Project {
     }
 }
 
-// For project data, need to read bytes as a utf string, then split the structs out from the string
+// For project data, need to read bytes as an utf string, then split the structs out from the string
 // data.
 impl Decode for Project {
-    fn decode(bytes: &Vec<u8>) -> RBoxErr<Self> {
+    fn decode(bytes: &[u8]) -> RBoxErr<Self> {
         let s = std::str::from_utf8(bytes)?.to_string();
 
         let metadata = ProjectMetadata::from_string(&s)?;
@@ -298,6 +293,7 @@ impl Encode for Project {
 }
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
     use super::*;
 

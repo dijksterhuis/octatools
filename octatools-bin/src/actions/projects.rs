@@ -13,8 +13,8 @@ use std::{
 };
 
 /// List all the sample slots within an Octatrack Project, given a path to a Project data file
-pub fn list_project_sample_slots(path: &PathBuf) -> RBoxErr<()> {
-    let project = read_type_from_bin_file::<Project>(&path).expect("Could not load project file");
+pub fn list_project_sample_slots(path: &Path) -> RBoxErr<()> {
+    let project = read_type_from_bin_file::<Project>(path).expect("Could not load project file");
 
     let slots = project
         .slots
@@ -43,8 +43,8 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
         .unwrap_or_else(|| panic!("Cannot find set directory from project file path."))
         .join("AUDIO");
 
-    let mut project = read_type_from_bin_file::<Project>(&project_file_path)
-        .expect("Could not load project file");
+    let mut project =
+        read_type_from_bin_file::<Project>(project_file_path).expect("Could not load project file");
 
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -107,8 +107,8 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
 
     println!("{:#?}", project_dir_path);
 
-    let mut project = read_type_from_bin_file::<Project>(&project_file_path)
-        .expect("Could not load project file");
+    let mut project =
+        read_type_from_bin_file::<Project>(project_file_path).expect("Could not load project file");
 
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -204,6 +204,8 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
     Ok(())
 }
 
+#[cfg(test)]
+#[allow(unused_imports)]
 mod test {
     use super::*;
 
@@ -214,6 +216,7 @@ mod test {
         assert!(r.is_ok())
     }
 
+    #[allow(dead_code)]  // only dead code on windows!
     fn make_sslot_mock_set_dir(base_path: &PathBuf) {
         let _ = fs::create_dir(fs::canonicalize(base_path).unwrap());
         let _ = fs::create_dir(fs::canonicalize(base_path.join("AUDIO")).unwrap());

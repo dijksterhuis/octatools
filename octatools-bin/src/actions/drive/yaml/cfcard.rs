@@ -37,6 +37,7 @@ impl Decode for CompactFlashDrive {}
 impl Encode for CompactFlashDrive {}
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test {
     use super::*;
     use serde_octatrack::yaml_file_to_type;

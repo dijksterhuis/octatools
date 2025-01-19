@@ -30,8 +30,7 @@ use actions::{
         create_equally_sliced_sample, create_index_samples_dir_full,
         create_index_samples_dir_simple, create_randomly_sliced_sample,
         create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
-        deconstruct_samplechain_from_pathbufs_only, deconstruct_samplechains_from_yaml,
-        show_ot_file_bytes,
+        deconstruct_samplechain_from_paths, deconstruct_samplechains_from_yaml, show_ot_file_bytes,
     },
 };
 use serde_octatrack::arrangements::ArrangementFile;
@@ -245,7 +244,7 @@ fn main() {
                 bank_file_path,
                 index,
             } => {
-                let _ = show_pattern(&bank_file_path, index);
+                let _ = show_pattern(&bank_file_path, &index[..]);
             }
         },
         Commands::Parts(x) => match x {
@@ -287,7 +286,7 @@ fn main() {
                     audio_file_path,
                     out_dir_path,
                 } => {
-                    let _ = deconstruct_samplechain_from_pathbufs_only(
+                    let _ = deconstruct_samplechain_from_paths(
                         &audio_file_path,
                         &ot_file_path,
                         &out_dir_path,

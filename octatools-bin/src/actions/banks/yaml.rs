@@ -2,7 +2,7 @@
 //! Reading a config and creating a sample chain is currently implemented.
 
 use serde::{Deserialize, Serialize};
-use serde_octatrack::{Decode, Encode};
+use serde_octatrack::Decode;
 use std::path::PathBuf;
 
 /// YAML section determining the input/output files for an individual sample chain.

@@ -12,7 +12,7 @@ use serde_octatrack::samples::{
     slices::{Slice, Slices},
     SampleAttributes, SampleAttributesRawBytes,
 };
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::{
     audio::wav::WavFile,
@@ -35,12 +35,12 @@ use yaml::{
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
 pub fn show_ot_file_bytes(
-    path: &PathBuf,
+    path: &Path,
     start_idx: &Option<usize>,
     len: &Option<usize>,
 ) -> RBoxErr<()> {
     let raw =
-        read_type_from_bin_file::<SampleAttributesRawBytes>(&path).expect("Could not load ot file");
+        read_type_from_bin_file::<SampleAttributesRawBytes>(path).expect("Could not load ot file");
 
     let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
@@ -51,9 +51,7 @@ pub fn show_ot_file_bytes(
 ///
 /// Each individual output can have a maximum of 64 samples,
 /// so results are batched up with a max size of 64.
-pub fn chain_wavfiles_64_batch(
-    wavfiles: &Vec<WavFile>,
-) -> Result<Vec<(WavFile, Vec<WavFile>)>, ()> {
+pub fn chain_wavfiles_64_batch(wavfiles: &[WavFile]) -> Result<Vec<(WavFile, Vec<WavFile>)>, ()> {
     debug!("Batching {:#?} audio files.", wavfiles.len());
 
     let vec_mod_length = wavfiles.len().div_euclid(64);
@@ -94,9 +92,8 @@ pub fn chain_wavfiles_64_batch(
 }
 
 /// Create Octatrack samplechain file-pairs from a loaded yaml config.
-
-pub fn create_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
-    let chain_conf = yaml_file_to_type::<YamlChainCreate>(&yaml_conf_fpath)
+pub fn create_samplechains_from_yaml(yaml_conf_fpath: &Path) -> RBoxErr<()> {
+    let chain_conf = yaml_file_to_type::<YamlChainCreate>(yaml_conf_fpath)
         .unwrap_or_else(|_| panic!("Could not load yaml file: path={yaml_conf_fpath:#?}"));
 
     info!("Creating sample chains from yaml config.");
@@ -126,10 +123,9 @@ pub fn create_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
 }
 
 /// Create 64 length sample chains and write out the files.
-
 pub fn create_samplechain_from_pathbufs_only(
-    wav_fps: &Vec<PathBuf>,
-    outdir_path: &PathBuf,
+    wav_fps: &[PathBuf],
+    outdir_path: &Path,
     outchain_name: &String,
 ) -> RBoxErr<()> {
     let wavfiles: Vec<WavFile> = wav_fps
@@ -190,7 +186,7 @@ pub fn create_samplechain_from_pathbufs_only(
             idx + 1,
             wavfiles_batched.len()
         );
-        let base_outchain_path = outdir_path.join(outchain_name);
+        let base_outchain_path = outdir_path.to_path_buf().join(outchain_name);
 
         let mut wav_sliced_outpath = base_outchain_path;
         wav_sliced_outpath.set_extension("wav");
@@ -217,10 +213,10 @@ pub fn create_samplechain_from_pathbufs_only(
 
 // todo: needs tests
 /// Extract a slices from a sliced sample chain into individual samples.
-pub fn deconstruct_samplechain_from_pathbufs_only(
-    audio_fpath: &PathBuf,
-    attributes_fpath: &PathBuf,
-    out_dirpath: &PathBuf,
+pub fn deconstruct_samplechain_from_paths(
+    audio_fpath: &Path,
+    attributes_fpath: &Path,
+    out_dirpath: &Path,
 ) -> RBoxErr<Vec<PathBuf>> {
     if !out_dirpath.is_dir() {
         panic!("Output dirpath argument is not a directory. Must be a directory.");
@@ -229,7 +225,7 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
     let wavfile = WavFile::from_path(audio_fpath).expect("Could not read wavfile.");
 
     let attrs =
-        read_type_from_bin_file::<SampleAttributes>(&attributes_fpath).unwrap_or_else(|_| {
+        read_type_from_bin_file::<SampleAttributes>(attributes_fpath).unwrap_or_else(|_| {
             panic!("Could not read `.ot` attributes file: path={attributes_fpath:#?}")
         });
     // todo: this feels fragile
@@ -244,16 +240,17 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
     for i in 0..attrs.slices_len {
         let slice = attrs.slices[i as usize];
         let w = wavfile.samples[(slice.trim_start as usize)..(slice.trim_end as usize)].to_vec();
+        let wav_len = slice.trim_end - slice.trim_start;
 
         let wavslice = WavFile {
             spec: wavfile.spec,
-            len: slice.trim_end - slice.trim_end,
+            len: wav_len,
             samples: w,
             file_path: std::env::temp_dir().join("dummy.wav"),
         };
 
         let sample_fname = format!("{base_sample_fname}_{i:#?}");
-        let mut out_fpath = out_dirpath.clone().join(sample_fname);
+        let mut out_fpath = out_dirpath.to_path_buf().join(sample_fname);
         out_fpath.set_extension("wav");
 
         wavslice
@@ -266,14 +263,14 @@ pub fn deconstruct_samplechain_from_pathbufs_only(
 }
 
 pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<()> {
-    let chain_conf = yaml_file_to_type::<YamlChainDeconstruct>(&yaml_conf_fpath)
+    let chain_conf = yaml_file_to_type::<YamlChainDeconstruct>(yaml_conf_fpath)
         .unwrap_or_else(|_| panic!("Could not load yaml file: path={yaml_conf_fpath:#?}"));
 
     info!("Deconstructing sample chains from yaml config.");
     trace!("Yaml contents: {chain_conf:#?}");
 
     for chain_config in &chain_conf.chains {
-        deconstruct_samplechain_from_pathbufs_only(
+        deconstruct_samplechain_from_paths(
             &chain_config.sample,
             &chain_config.otfile,
             &chain_conf.global_settings.out_dir_path,
@@ -290,7 +287,7 @@ pub fn deconstruct_samplechains_from_yaml(yaml_conf_fpath: &PathBuf) -> RBoxErr<
 }
 
 /// Given a wavfile, create Nx random slices stored in a sample attributes file.
-pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxErr<()> {
+pub fn create_randomly_sliced_sample(wav_fp: &Path, n_slices: usize) -> RBoxErr<()> {
     if n_slices > 64 {
         panic!("Maximum number of slices in a sample file is 64.");
     };
@@ -311,6 +308,7 @@ pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxE
 
     let mut slices_arr: [Slice; 64] = [default_slice; 64];
 
+    #[allow(clippy::needless_range_loop)]
     for i in 0..n_slices {
         let trim_start: u32 = rng.gen_range(0..=(wavfile.len - 64));
         let trim_end: u32 = rng.gen_range(trim_start..=wavfile.len);
@@ -355,7 +353,7 @@ pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxE
     )
     .expect("Could not create sample attributes data for sample chain.");
 
-    let mut ot_outpath = wav_fp.clone();
+    let mut ot_outpath = wav_fp.to_path_buf();
     ot_outpath.set_extension("ot");
 
     write_type_to_bin_file::<SampleAttributes>(&chain_data, &ot_outpath).unwrap_or_else(|_| {
@@ -366,7 +364,7 @@ pub fn create_randomly_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxE
 }
 
 /// Given a wavfile, create Nx equal length slices stored in a sample attributes file.
-pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxErr<()> {
+pub fn create_equally_sliced_sample(wav_fp: &Path, n_slices: usize) -> RBoxErr<()> {
     if n_slices > 64 {
         panic!("Maximum number of slices in a sample file is 64.");
     };
@@ -385,6 +383,7 @@ pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxEr
     let mut slices_arr: [Slice; 64] = [default_slice; 64];
     let len = wavfile.len / (n_slices as u32);
 
+    #[allow(clippy::needless_range_loop)]
     for i in 0..n_slices {
         let trim_start: u32 = (i as u32) * len;
         let trim_end: u32 = trim_start + len;
@@ -429,7 +428,7 @@ pub fn create_equally_sliced_sample(wav_fp: &PathBuf, n_slices: usize) -> RBoxEr
     )
     .expect("Could not create sample attributes data for sample chain.");
 
-    let mut ot_outpath = wav_fp.clone();
+    let mut ot_outpath = wav_fp.to_path_buf();
     ot_outpath.set_extension("ot");
 
     write_type_to_bin_file::<SampleAttributes>(&chain_data, &ot_outpath).unwrap_or_else(|_| {
@@ -447,7 +446,7 @@ pub fn create_index_samples_dir_simple(
     let sample_index = SamplesDirIndexSimple::new(samples_dir_path)?;
 
     if !yaml_file_path.is_none() {
-        type_to_yaml_file(&sample_index, &yaml_file_path.as_ref().unwrap())
+        type_to_yaml_file(&sample_index, yaml_file_path.as_ref().unwrap())
             .expect("Could not write yaml file.");
     }
 
@@ -461,7 +460,7 @@ pub fn create_index_samples_dir_full(
     let sample_index = SamplesDirIndexFull::new(samples_dir_path)?;
 
     if !yaml_file_path.is_none() {
-        type_to_yaml_file(&sample_index, &yaml_file_path.as_ref().unwrap())
+        type_to_yaml_file(&sample_index, yaml_file_path.as_ref().unwrap())
             .expect("Could not write yaml file.");
     }
     Ok(())
@@ -471,14 +470,14 @@ pub fn create_index_samples_dir_full(
 /// and compare it to what should exist.
 /// Read relevant WAV files, create an OT file of some description, write
 /// the OT file then compare it to the known good output from OctaChainer.
-
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
 
     mod chain_deconstruct {
 
-        use crate::actions::samples::deconstruct_samplechain_from_pathbufs_only;
-        use std::{fs, path::PathBuf};
+        use crate::actions::samples::deconstruct_samplechain_from_paths;
+        use std::{fs, path::Path, path::PathBuf};
 
         #[test]
         fn test_basic() {
@@ -486,11 +485,7 @@ mod tests {
             let attributes_fpath = PathBuf::from("../data/tests/chains/deconstruct/test.ot");
             let outdir = std::env::temp_dir().join("");
 
-            let res = deconstruct_samplechain_from_pathbufs_only(
-                &audio_fpath,
-                &attributes_fpath,
-                &outdir,
-            );
+            let res = deconstruct_samplechain_from_paths(&audio_fpath, &attributes_fpath, &outdir);
 
             let outfiles = res.unwrap();
 
@@ -506,7 +501,7 @@ mod tests {
     }
 
     mod chain_create {
-        use std::path::PathBuf;
+        use std::path::{Path, PathBuf};
         use walkdir::{DirEntry, WalkDir};
 
         use crate::RBoxErr;
@@ -535,12 +530,12 @@ mod tests {
         }
 
         fn get_test_wav_paths(path: &str) -> RBoxErr<Vec<PathBuf>> {
-            let paths_iter: _ = WalkDir::new(path)
+            let paths_iter = WalkDir::new(path)
                 .sort_by_file_name()
                 .max_depth(1)
                 .min_depth(1)
                 .into_iter()
-                .filter_entry(|e| walkdir_filter_is_wav(e));
+                .filter_entry(walkdir_filter_is_wav);
 
             let mut fpaths: Vec<PathBuf> = Vec::new();
             for entry in paths_iter {
@@ -567,7 +562,7 @@ mod tests {
 
             let trim_config = SampleTrimConfig {
                 start: 0,
-                end: wavs.iter().map(|x| x.len as u32).sum(),
+                end: wavs.iter().map(|x| x.len).sum(),
                 length: bars,
             };
 
@@ -580,7 +575,7 @@ mod tests {
             Ok((loop_config, trim_config, slices_config))
         }
 
-        fn read_valid_sample_chain(path: &PathBuf) -> RBoxErr<SampleAttributes> {
+        fn read_valid_sample_chain(path: &Path) -> RBoxErr<SampleAttributes> {
             let read_chain = read_type_from_bin_file::<SampleAttributes>(path)?;
             Ok(read_chain)
         }
@@ -716,10 +711,7 @@ mod tests {
 
             let slices: [Slice; 64] = [default_slice; 64];
 
-            let slice_conf = Slices {
-                slices: slices,
-                count: 0,
-            };
+            let slice_conf = Slices { slices, count: 0 };
 
             (trim_config, loop_config, slice_conf)
         }

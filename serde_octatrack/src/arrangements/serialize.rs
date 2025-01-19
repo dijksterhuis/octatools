@@ -243,6 +243,7 @@ impl Serialize for ArrangeRow {
     }
 }
 
+#[cfg(test)]
 #[allow(unused_imports)]
 mod tests {
     use super::*;
@@ -252,20 +253,22 @@ mod tests {
         #[test]
         // WARN: Currently depends on deserialization being functional.
         fn test_serialize_to_json() {
-            let path = std::path::Path::new("../data/tests/blank-project/arr01.work");
-            let r = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(&path)
+            let path = std::path::Path::new("../data/tests/arrange/blank.work");
+            let r = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(path)
                 .unwrap();
             let json = crate::serialize_json_from_type::<crate::arrangements::ArrangementFile>(&r);
             assert!(json.is_ok());
         }
 
         #[test]
-        // WARN: Currently depends on deserialization being functional.
+        // Windows will add on carriage returns...
+        #[cfg(not(target_os = "windows"))]
+        // WARN: Depends on deserialization being functional.
         fn test_serialize_to_yaml() {
             let valid_yaml_path = std::path::Path::new("../data/tests/arrange/blank.yaml");
             let valid_yaml = crate::read_str_file(&valid_yaml_path);
 
-            let bin_file_path = std::path::Path::new("../data/tests/blank-project/arr01.work");
+            let bin_file_path = std::path::Path::new("../data/tests/arrange/blank.work");
             let arr = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(
                 &bin_file_path,
             );
@@ -277,73 +280,6 @@ mod tests {
 
             let yaml_str = yaml.unwrap();
             assert_eq!(valid_yaml.unwrap(), yaml_str)
-        }
-
-        // re-enable this test to dump a yaml file to the serde_octatrack package directory.
-        // useful for inspecting the current schema.
-        #[test]
-        #[ignore]
-        fn test_serialize_custom_arrange_to_yaml() {
-            let expected_rows: [super::ArrangeRow; 256] = std::array::from_fn(|i| {
-                if i < 3 {
-                    super::ArrangeRow::PatternRow {
-                        pattern_id: 0,
-                        repetitions: 0,
-                        mute_mask: 0,
-                        tempo_1: 0,
-                        tempo_2: 0,
-                        scene_a: 0,
-                        scene_b: 0,
-                        offset: 0,
-                        length: 0,
-                        midi_transpose: [0, 0, 0, 0, 0, 0, 0, 0],
-                    }
-                } else if i < 6 {
-                    super::ArrangeRow::LoopOrJumpOrHaltRow {
-                        loop_count: 2,
-                        row_target: 0,
-                    }
-                } else if i < 10 {
-                    super::ArrangeRow::ReminderRow("CCCCCCCCCCCCC".to_string())
-                } else {
-                    super::ArrangeRow::EmptyRow()
-                }
-            });
-
-            let empty_rows: [super::ArrangeRow; 256] =
-                std::array::from_fn(|_| super::ArrangeRow::EmptyRow());
-
-            let rows_1 = Box::new(serde_big_array::Array(expected_rows));
-            let rows_2 = Box::new(serde_big_array::Array(empty_rows));
-
-            let arrangement_state_current = super::ArrangementBlock {
-                name: [45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45, 45],
-                unknown_1: [99, 99],
-                n_rows: 10,
-                rows: rows_1,
-            };
-            let arrangement_state_previous = super::ArrangementBlock {
-                name: [70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70, 70],
-                unknown_1: [99, 99],
-                n_rows: 0,
-                rows: rows_2,
-            };
-
-            let arr_f = crate::arrangements::ArrangementFile {
-                header: crate::arrangements::ARRANGEMENT_FILE_HEADER,
-                unk1: [0, 0],
-                arrangement_state_current,
-                unk2: [0, 0],
-                arrangement_state_previous,
-                arrangements_active_flag: [1, 0, 0, 0, 0, 0, 0, 0],
-                check_sum: [0, 0],
-            };
-
-            let outyaml = std::path::Path::new("./test_thing.yaml");
-            let _ =
-                crate::type_to_yaml_file::<crate::arrangements::ArrangementFile>(&arr_f, outyaml)
-                    .unwrap();
-            assert!(false);
         }
     }
 

@@ -61,8 +61,7 @@ impl ProjectFromString for ProjectMetadata {
     type T = Self;
 
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-
-    fn from_string(data: &String) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_string(data: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let hmap: HashMap<String, String> = string_to_hashmap(data, &ProjectRawFileSection::Meta)?;
 
         Ok(Self {
@@ -75,7 +74,6 @@ impl ProjectFromString for ProjectMetadata {
 
 impl ProjectToString for ProjectMetadata {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-
     fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
         let mut s = "".to_string();
         s.push_str("[META]\r\n");
