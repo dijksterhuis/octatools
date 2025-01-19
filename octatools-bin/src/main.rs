@@ -160,10 +160,7 @@ fn main() {
         },
         Commands::Arrangements(x) => match x {
             cli::Arrangements::Inspect { path } => {
-                unimplemented!(
-                    "Need to deal with intermediate struct conversions and deserialization."
-                )
-                // let _ = actions::show_type::<ArrangementFile>(&path);
+                let _ = serde_octatrack::show_type::<ArrangementFile>(&path, None);
             }
             cli::Arrangements::InspectBytes {
                 path,
@@ -173,22 +170,28 @@ fn main() {
                 let _ = show_arrangement_bytes(&path, &byte_start_idx, &n_bytes);
             }
             cli::Arrangements::Dump {
-                arrangement_file_path: _,
-                yaml_file_path: _,
+                arrangement_file_path,
+                yaml_file_path,
             } => {
-                unimplemented!(
-                    "Need to deal with intermediate struct conversions and deserialization."
-                )
-                // let _ = actions::bin_file_to_yaml_file::<ArrangementFile>(&arrangement_file_path, &yaml_file_path);
+                let r = serde_octatrack::bin_file_to_yaml_file::<ArrangementFile>(
+                    &arrangement_file_path,
+                    &yaml_file_path,
+                );
+                if r.is_err() {
+                    println!("ERROR: {r:?}")
+                };
             }
             cli::Arrangements::Load {
                 yaml_file_path,
                 arrangement_file_path,
             } => {
-                unimplemented!(
-                    "Need to deal with intermediate struct conversions and deserialization."
-                )
-                // let _ = actions::yaml_file_to_bin_file::<Bank>(&yaml_file_path, &arrangement_file_path);
+                let r = serde_octatrack::yaml_file_to_bin_file::<ArrangementFile>(
+                    &yaml_file_path,
+                    &arrangement_file_path,
+                );
+                if r.is_err() {
+                    println!("ERROR: {r:?}")
+                };
             }
         },
         Commands::Banks(x) => match x {
