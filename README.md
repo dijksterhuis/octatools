@@ -1,6 +1,6 @@
 # OctaTools
 
-![Utilities for the Elektron Octatrack DPS-1](assets/logo.png "OctaTools")
+![Utilities for the Elektron Octatrack DPS-1](assets/logo-wide.png "OctaTools")
 
 Utilities for the [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer).
 Currently only tested against the latest version of the Octatrack OS 1.40B.
