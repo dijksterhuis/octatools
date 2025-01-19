@@ -1,0 +1,7967 @@
+header:
+- 70
+- 79
+- 82
+- 77
+- 0
+- 0
+- 0
+- 0
+- 68
+- 80
+- 83
+- 49
+- 65
+- 82
+- 82
+- 65
+- 0
+- 0
+- 0
+- 0
+- 0
+- 6
+unk1:
+- 0
+- 0
+arrangement_state_current:
+  name:
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  unknown_1:
+  - 0
+  - 0
+  n_rows: 255
+  rows:
+  - pattern_id: 1
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 1
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - loop_count: 0
+    row_target: 30
+  - loop_count: 0
+    row_target: 31
+  - loop_count: 0
+    row_target: 32
+  - loop_count: 0
+    row_target: 33
+  - loop_count: 0
+    row_target: 34
+  - loop_count: 0
+    row_target: 35
+  - loop_count: 0
+    row_target: 36
+  - loop_count: 0
+    row_target: 37
+  - loop_count: 0
+    row_target: 38
+  - loop_count: 0
+    row_target: 39
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - empty: ''
+unk2:
+- 0
+- 0
+arrangement_state_previous:
+  name:
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  - 90
+  unknown_1:
+  - 0
+  - 0
+  n_rows: 255
+  rows:
+  - pattern_id: 1
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 1
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 0
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - pattern_id: 255
+    repetitions: 63
+    mute_mask: 255
+    tempo_1: 28
+    tempo_2: 32
+    scene_a: 15
+    scene_b: 15
+    offset: 0
+    length: 0
+    midi_transpose:
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+    - 48
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - reminder: AAAAAAAAAAAAAAA
+  - loop_count: 0
+    row_target: 30
+  - loop_count: 0
+    row_target: 31
+  - loop_count: 0
+    row_target: 32
+  - loop_count: 0
+    row_target: 33
+  - loop_count: 0
+    row_target: 34
+  - loop_count: 0
+    row_target: 35
+  - loop_count: 0
+    row_target: 36
+  - loop_count: 0
+    row_target: 37
+  - loop_count: 0
+    row_target: 38
+  - loop_count: 0
+    row_target: 39
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 59
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - loop_count: 0
+    row_target: 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - pattern_id: 255
+    repetitions: 0
+    mute_mask: 0
+    tempo_1: 0
+    tempo_2: 0
+    scene_a: 255
+    scene_b: 255
+    offset: 0
+    length: 16
+    midi_transpose:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+  - empty: ''
+arrangements_active_flag:
+- 1
+- 1
+- 0
+- 0
+- 0
+- 1
+- 1
+- 1
+check_sum:
+- 82
+- 227
