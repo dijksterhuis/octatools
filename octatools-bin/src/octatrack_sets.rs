@@ -227,6 +227,7 @@ impl OctatrackSetFiles {
 }
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test {
 
     use super::*;

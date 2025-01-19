@@ -2,12 +2,11 @@
 //! Serialization / Deserialization.
 
 use crate::RBoxErr;
-use std::{ffi::OsStr, fmt::Error, path::PathBuf};
+use std::{ffi::OsStr, fmt::Error, path::Path};
 
 #[allow(dead_code)]
-fn pathbuf_to_fname(path: &PathBuf) -> RBoxErr<String> {
+fn pathbuf_to_fname(path: &Path) -> RBoxErr<String> {
     let name = path
-        .clone()
         .file_name()
         .unwrap_or(OsStr::new("err"))
         .to_str()

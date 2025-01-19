@@ -16,13 +16,14 @@ pub fn create_file_index_yaml(
     let cf = CompactFlashDrive::from_path(cfcard_dir_path)?;
 
     if !yaml_file_path.is_none() {
-        let _ = type_to_yaml_file(&cf, &yaml_file_path.as_ref().unwrap())?;
+        type_to_yaml_file(&cf, yaml_file_path.as_ref().unwrap())?;
     };
 
     Ok(())
 }
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test {
     use super::*;
     use serde_octatrack::yaml_file_to_type;

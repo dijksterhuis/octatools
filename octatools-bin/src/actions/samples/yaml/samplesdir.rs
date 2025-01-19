@@ -140,6 +140,8 @@ impl SamplesDirIndexSimple {
     }
 }
 
+#[cfg(test)]
+#[allow(unused_imports)]
 mod test {
     use super::*;
 

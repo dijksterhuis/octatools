@@ -1,0 +1,229 @@
+header:
+- 70
+- 79
+- 82
+- 77
+- 0
+- 0
+- 0
+- 0
+- 68
+- 80
+- 83
+- 49
+- 83
+- 77
+- 80
+- 65
+- 0
+- 0
+- 0
+- 0
+- 0
+- 2
+- 0
+tempo: 125
+trim_len: 75
+loop_len: 75
+stretch: 0
+loop_mode: 0
+gain: 0
+quantization: 255
+trim_start: 0
+trim_end: 55897
+loop_start: 0
+slices:
+- trim_start: 0
+  trim_end: 21960
+  loop_start: 4294967295
+- trim_start: 21960
+  trim_end: 26673
+  loop_start: 4294967295
+- trim_start: 26673
+  trim_end: 32910
+  loop_start: 4294967295
+- trim_start: 32910
+  trim_end: 36113
+  loop_start: 4294967295
+- trim_start: 36113
+  trim_end: 37905
+  loop_start: 4294967295
+- trim_start: 37905
+  trim_end: 46346
+  loop_start: 4294967295
+- trim_start: 46346
+  trim_end: 49025
+  loop_start: 4294967295
+- trim_start: 49025
+  trim_end: 52058
+  loop_start: 4294967295
+- trim_start: 52058
+  trim_end: 53685
+  loop_start: 4294967295
+- trim_start: 53685
+  trim_end: 55897
+  loop_start: 4294967295
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+- trim_start: 0
+  trim_end: 0
+  loop_start: 0
+slices_len: 10
+checksum: 15924

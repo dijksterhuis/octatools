@@ -9,7 +9,7 @@ use serde_octatrack::{
 
 use crate::{actions::banks::yaml::YamlCopyBankConfig, RBoxErr};
 use log::{debug, error, info, warn};
-use std::{collections::HashSet, path::PathBuf};
+use std::{collections::HashSet, path::Path};
 
 use serde_octatrack::{
     banks::{Bank, BankRawBytes},
@@ -17,11 +17,7 @@ use serde_octatrack::{
 };
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
-pub fn show_bank_bytes(
-    path: &PathBuf,
-    start_idx: &Option<usize>,
-    len: &Option<usize>,
-) -> RBoxErr<()> {
+pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usize>) -> RBoxErr<()> {
     let raw_bank = read_type_from_bin_file::<BankRawBytes>(path).expect("Could not read bank file");
 
     let bytes = get_bytes_slice(raw_bank.data.to_vec(), start_idx, len);
@@ -31,7 +27,7 @@ pub fn show_bank_bytes(
 
 /// Find free sample slot locations in a `Project`
 fn find_free_sample_slot_ids(
-    sample_slots_inuse: &Vec<ProjectSampleSlot>,
+    sample_slots_inuse: &[ProjectSampleSlot],
     slot_type: ProjectSampleSlotType,
 ) -> RBoxErr<Vec<u8>> {
     let mut free_slots: Vec<u8> = vec![];
@@ -41,7 +37,7 @@ fn find_free_sample_slot_ids(
 
     for slot in sample_slots_inuse.iter() {
         if slot_type == slot.sample_type {
-            free_slots.retain(|x| *x != slot.slot_id as u8);
+            free_slots.retain(|x| *x != slot.slot_id);
         }
     }
 
@@ -53,7 +49,7 @@ fn find_free_sample_slot_ids(
 
 /// Find sample slots belonging to a `Project` which are used within a `Bank`
 fn find_active_sample_slots(
-    project_slots: &Vec<ProjectSampleSlot>,
+    project_slots: &[ProjectSampleSlot],
     bank: &Bank,
     slot_type: &ProjectSampleSlotType,
 ) -> RBoxErr<Vec<ProjectSampleSlot>> {
@@ -208,39 +204,38 @@ fn find_active_sample_slots(
 /// 1. searches for 'active' project sample slots used in the source bank
 /// 2. copies source slots over to available free sample slots in the destination project
 /// 3. mutates all references to the source sample slots in the source bank
-/// 4. copys the source sample files to the project's audio pool
+/// 4. copiess the source sample files to the project's audio pool
 /// 5. writes over the destination project and bank with new data.
 ///
 /// A couple of important quirks to highlight:
 /// - All 'active' sample files from the source project are consolidated into the
-/// destination Set audio pool (the Set which the destination Project belongs to).
+///     destination Set audio pool (the Set which the destination Project belongs to).
 /// - Sample slots are not de-duplicated or tested for uniqueness against existing
-/// destination sample slots. If you have a lot of duplicate sample slots across
-/// banks then you may need to do some clean up.
+///     destination sample slots. If you have a lot of duplicate sample slots across
+///     banks then you may need to do some clean up.
 /// - 'Inactive' sample files will not be moved or copied. Only sample slots that
-/// match the following criteria will be copied:
+///     match the following criteria will be copied:
 ///     - have been assigned to a sample slot within the source Project
 ///     - sample slot has a p-locked sample locks somewhere in the Patterns of the source Bank.
 ///     - sample slot has been used by an Audio Track Machine (Static/Flex) in one of the Parts
-///     of the source Bank.
+///         of the source Bank.
 ///     - sample slot is not a recorder buffer
-
 pub fn copy_bank(
-    source_bank_filepath: &PathBuf,
-    source_project_filepath: &PathBuf,
-    destination_bank_filepath: &PathBuf,
-    destination_project_filepath: &PathBuf,
+    source_bank_filepath: &Path,
+    source_project_filepath: &Path,
+    destination_bank_filepath: &Path,
+    destination_project_filepath: &Path,
 ) -> RBoxErr<()> {
     info!("Loading banks ...");
 
-    let mut bank = read_type_from_bin_file::<Bank>(&source_bank_filepath)
+    let mut bank = read_type_from_bin_file::<Bank>(source_bank_filepath)
         .expect("Could not load bank from file at path");
 
     info!("Loading projects ...");
 
-    let src_project = read_type_from_bin_file::<Project>(&source_project_filepath)
+    let src_project = read_type_from_bin_file::<Project>(source_project_filepath)
         .expect("Could not load source project");
-    let mut dest_project = read_type_from_bin_file::<Project>(&destination_project_filepath)
+    let mut dest_project = read_type_from_bin_file::<Project>(destination_project_filepath)
         .expect("Could not load destination project");
 
     info!("Finding free static sample slots in destination project ...");
@@ -390,11 +385,11 @@ pub fn copy_bank(
                     .unwrap()
                     .to_path_buf()
                     .join("AUDIO")
-                    .join(&active_slot.path.file_name().unwrap());
+                    .join(active_slot.path.file_name().unwrap());
 
                 let new_sslot = ProjectSampleSlot::new(
                     active_slot.sample_type.clone(),
-                    dest_slot_id.clone(),
+                    dest_slot_id,
                     dest_path_audio.clone(),
                     None,
                     None,
@@ -412,10 +407,8 @@ pub fn copy_bank(
                     active_slot.sample_type,
                 );
 
-                let _ = std::fs::copy(&src_path_audio, &dest_path_audio)
-                .expect(
-                    format!("Could not copy audio file: src={:#?} dest={:#?}", src_path_audio, dest_path_audio).as_str(),
-                );
+                let _ = std::fs::copy(src_path_audio, dest_path_audio)
+                .unwrap_or_else(|_| panic!("Could not copy audio file: src={:#?} dest={:#?}", src_path_audio, dest_path_audio));
 
                 let mut src_path_sample_attr = src_path_audio.clone();
                 src_path_sample_attr.set_extension("ot");
@@ -431,9 +424,7 @@ pub fn copy_bank(
                         active_slot.sample_type,
                     );
                     let _ = std::fs::copy(&src_path_sample_attr, &dest_path_sample_attr)
-                    .expect(
-                        format!("Could not copy sample attributes file: src={:#?} dest={:#?}", src_path_sample_attr, dest_path_sample_attr).as_str(),
-                    );
+                    .unwrap_or_else(|_| panic!("Could not copy sample attributes file: src={:#?} dest={:#?}", src_path_sample_attr, dest_path_sample_attr));
                 }
 
                 debug!(
@@ -453,11 +444,11 @@ pub fn copy_bank(
 
     info!("Writing destination project ...");
     dest_project.slots = dest_sample_slots;
-    write_type_to_bin_file::<Project>(&dest_project, &destination_project_filepath)
+    write_type_to_bin_file::<Project>(&dest_project, destination_project_filepath)
         .expect("Could not write project to file");
 
     info!("Writing new bank file ...");
-    write_type_to_bin_file::<Bank>(&bank, &destination_bank_filepath)
+    write_type_to_bin_file::<Bank>(&bank, destination_bank_filepath)
         .expect("Could not write bank to file at path");
     info!("Bank copy complete.");
     Ok(())
@@ -470,13 +461,12 @@ pub fn copy_bank(
 ///
 /// All the caveats and details for the `copy_bank` function still apply
 /// (this function calls it multiple times).
-
-pub fn batch_copy_banks(yaml_config_path: &PathBuf) -> RBoxErr<()> {
-    let conf = yaml_file_to_type::<YamlCopyBankConfig>(&yaml_config_path)
+pub fn batch_copy_banks(yaml_config_path: &Path) -> RBoxErr<()> {
+    let conf = yaml_file_to_type::<YamlCopyBankConfig>(yaml_config_path)
         .expect("Could not load YAML configuration for batch bank transfers");
 
     for x in conf.bank_copies {
-        let _ = copy_bank(&x.src.bank, &x.src.project, &x.dest.bank, &x.dest.project)
+        copy_bank(&x.src.bank, &x.src.project, &x.dest.bank, &x.dest.project)
             .expect("Could not copy bank");
     }
 
@@ -484,6 +474,7 @@ pub fn batch_copy_banks(yaml_config_path: &PathBuf) -> RBoxErr<()> {
 }
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
     // currently fails with Could not copy audio file:
     // The process cannot access the file because it is being used by another process

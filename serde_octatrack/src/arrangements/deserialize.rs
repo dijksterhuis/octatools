@@ -54,7 +54,7 @@ impl<'de> Deserialize<'de> for ArrangementFile {
             {
                 struct FieldVisitor;
 
-                impl<'de> Visitor<'de> for FieldVisitor {
+                impl Visitor<'_> for FieldVisitor {
                     type Value = Field;
 
                     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -573,6 +573,7 @@ impl<'de> Deserialize<'de> for ArrangeRow {
     }
 }
 
+#[cfg(test)]
 #[allow(unused_imports)]
 mod tests {
     use super::*;
@@ -582,7 +583,7 @@ mod tests {
         #[test]
         fn read_binfile_blank() {
             let path = std::path::Path::new("../data/tests/arrange/blank.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
@@ -590,7 +591,7 @@ mod tests {
         #[test]
         fn read_binfile_full_options() {
             let path = std::path::Path::new("../data/tests/arrange/full_options.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
@@ -598,7 +599,7 @@ mod tests {
         #[test]
         fn read_binfile_one_reminder_row() {
             let path = std::path::Path::new("../data/tests/arrange/one_reminder_row.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
@@ -711,7 +712,7 @@ mod tests {
             fn valid_yaml() {
                 let expected = super::ArrangeRow::EmptyRow();
                 let s = "empty: ''\n";
-                let r = serde_yml::from_str::<super::ArrangeRow>(&s);
+                let r = serde_yml::from_str::<super::ArrangeRow>(s);
                 println!("{r:?}");
                 assert!(r.is_ok());
                 assert_eq!(expected, r.unwrap());
@@ -721,7 +722,7 @@ mod tests {
             fn valid_json() {
                 let expected = super::ArrangeRow::EmptyRow();
                 let s = "{\"empty\":\"\"}";
-                let r = serde_json::from_str::<super::ArrangeRow>(&s);
+                let r = serde_json::from_str::<super::ArrangeRow>(s);
                 println!("{r:?}");
                 assert!(r.is_ok());
                 assert_eq!(expected, r.unwrap());
@@ -744,7 +745,7 @@ mod tests {
                 let expected = super::ArrangeRow::ReminderRow("CCCCCCCCCCCCCCC".to_string());
 
                 let s = "reminder: CCCCCCCCCCCCCCC\n";
-                let r = serde_yml::from_str::<super::ArrangeRow>(&s);
+                let r = serde_yml::from_str::<super::ArrangeRow>(s);
                 assert_eq!(expected, r.unwrap());
             }
 
@@ -782,7 +783,7 @@ mod tests {
                 };
 
                 let s = "loop_count: 1\nrow_target: 1\n";
-                let r = serde_yml::from_str::<super::ArrangeRow>(&s);
+                let r = serde_yml::from_str::<super::ArrangeRow>(s);
                 assert_eq!(expected, r.unwrap());
             }
 

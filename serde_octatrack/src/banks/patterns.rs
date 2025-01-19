@@ -16,7 +16,7 @@ use crate::RBoxErr;
 
 const HALF_PAGE_TRIG_BITMASK_VALUES: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
 
-/// Given a half-page trig bit mask, get a arrary of 8x boolean values
+/// Given a half-page trig bit mask, get an array of 8x boolean values
 /// indicating whether each trig in the half-page is active or not
 pub fn get_halfpage_trigs_from_bitmask_value(bitmask: &u8) -> RBoxErr<[bool; 8]> {
     let arr: [bool; 8] = HALF_PAGE_TRIG_BITMASK_VALUES
@@ -28,7 +28,7 @@ pub fn get_halfpage_trigs_from_bitmask_value(bitmask: &u8) -> RBoxErr<[bool; 8]>
     Ok(arr)
 }
 
-/// Given a half-page trig bit mask, get a arrary of 8x boolean values
+/// Given a half-page trig bit mask, get an array of 8x boolean values
 /// indicating where each trig in the half-page is active or not
 pub fn get_track_trigs_from_bitmasks(bitmasks: &[u8; 8]) -> RBoxErr<[bool; 64]> {
     let trigs: [bool; 64] = bitmasks
@@ -425,7 +425,7 @@ pub struct PatternScaleSettings {
     /// This field must be set to `255` when Master Length in
     /// Per Track Pattern mode is set to `INF`.
     ///
-    /// Minimum value is 2 when when the multiplier equals 0.
+    /// Minimum value is 2 when the multiplier equals 0.
     pub master_len_per_track: u8,
 
     /// The Audio Track's Scale when Pattern is in Per Track mode.
@@ -518,7 +518,7 @@ pub struct Pattern {
     /// Pattern setting for Tempo.
     ///
     /// The Tempo value is split across both `tempo_1` and `tempo_2`.
-    /// As of yet to figure out how they relate to each other.
+    /// Yet to figure out how they relate to each other.
     ///
     /// Value of 120 BPM is 11 for this field.
     /// Value of 30 BPM is 2 for this field.
@@ -527,7 +527,7 @@ pub struct Pattern {
     /// Pattern setting for Tempo.
     ///
     /// The Tempo value is split across both `tempo_1` and `tempo_2`.
-    /// As of yet to figure out how they relate to each other.
+    /// Tet to figure out how they relate to each other.
     ///
     /// Value of 120 BPM is `64` for this field.
     /// Value of 30 BPM is `208` for this field.
@@ -541,8 +541,8 @@ impl Pattern {
         old: &u8,
         new: &u8,
     ) -> RBoxErr<()> {
-        for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
-            for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
+        for audio_track_trigs in self.audio_track_trigs.iter_mut() {
+            for plock in audio_track_trigs.plocks.iter_mut() {
                 match sample_type {
                     ProjectSampleSlotType::Static => {
                         if plock.static_slot_id == *old {
@@ -561,8 +561,8 @@ impl Pattern {
         Ok(())
     }
     pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
-        for (_, audio_track_trigs) in self.audio_track_trigs.iter_mut().enumerate() {
-            for (_, plock) in audio_track_trigs.plocks.iter_mut().enumerate() {
+        for audio_track_trigs in self.audio_track_trigs.iter_mut() {
+            for plock in audio_track_trigs.plocks.iter_mut() {
                 if plock.flex_slot_id == *old {
                     plock.flex_slot_id = *new;
                 }
@@ -572,6 +572,8 @@ impl Pattern {
     }
 }
 
+#[cfg(test)]
+#[allow(unused_imports)]
 mod test {
     mod trig_bitmasks {
 

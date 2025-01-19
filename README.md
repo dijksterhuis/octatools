@@ -44,7 +44,7 @@ Command line binary executable to interact with Octatrack data files.
 - Find compatible WAV files in a local directory and write their file paths to a YAML file
 - Scan a Compact Flash card and dumpy Octatrack file information to YAML
 
-## `octatools-gui` -- Octatools (CLI Binary Executable)
+## `octatools-gui` -- Octatools (Executable)
 
 Eventually I'd like to create a simple cross-platform GUI application for people to perform all the octatools tasks alongside a cli binary.
 This package is a placeholder to act as a guilt trip every time I look at the repository.
@@ -56,6 +56,6 @@ Most of this is just the [`serde` crate](https://serde.rs).
 
 ### Current Features (mostly working-ish)
 - Deserialise all Octatrack data structures from binarized data
-- Serialise most Octatrack data structures to binarized data (cannot serialise arrangements yet?)
-- Serialize/deserialise to/from YAML and JSON
+- Serialize most Octatrack data structures to binarized data (cannot serialize arrangements yet?)
+- Serialize/deserialize to/from YAML and JSON
 

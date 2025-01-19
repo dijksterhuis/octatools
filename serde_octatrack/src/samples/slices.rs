@@ -22,7 +22,6 @@ pub struct Slice {
 impl SwapBytes for Slice {
     /// Swaps the bytes on all struct fields.
     /// **MUST BE CALLED BEFORE SERIALISATION WHEN SYSTEM IS LITTLE ENDIAN!**
-
     type T = Slice;
 
     /// Swap the bytes of all struct fields.

@@ -330,14 +330,17 @@ pub struct MidiControlMidiPage {
     /// Whether samples can be loaded in 24-bit depth (16 bit depth samples are always oaded as 16 bit).
     /// `AUDIO CC IN` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
     /// Whether audio tracks respond to MIDI CC IN messages.
+    ///
     /// See manual section 8.7.1 CONTROL.
     pub midi_audio_track_cc_in: bool,
 
     /// `AUDIO CC OUT` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
-    /// Whether audio tracks send MIDI CC OUT messages. Three options:
+    /// Whether audio tracks send MIDI CC OUT messages.
+    /// Three options:
     /// - `INT`: No messages sent, knobs only affect Octatrack settings.
     /// - `EXT`: Sends CC OUT messages but they don't alter any Octatrack settings.
     /// - `INT+EXT`: Simulataneously affects Octratack settings and sends CC OUT messages.
+    ///
     /// See manual section 8.7.1 CONTROL.
     pub midi_audio_track_cc_out: u8,
 
@@ -348,7 +351,7 @@ pub struct MidiControlMidiPage {
     /// - **STANDARD**: standard note mapping (default).
     /// - **FOLLOW TM**: Track's current trig mode affects audio tracks (track/chromatic/slots).
     /// - **MAP/TRACK**: Uses MIDI MAP configuration on a per track basis (track/chromatic/slots
-    /// disconnected from user trig mode of track).
+    ///     disconnected from user trig mode of track).
     pub midi_audio_track_note_in: u8,
 
     /// `AUDIO NOTE OUT` setting in `PROJECT` -> `CONTROL` -> `MIDI` -> `CONTROL` UI menu.
@@ -356,6 +359,7 @@ pub struct MidiControlMidiPage {
     /// - `INT`: No messages sent, knobs only affect Octatrack settings.
     /// - `EXT`: Sends NOTE OUT messages but they don't alter any Octatrack settings.
     /// - `INT+EXT`: Simulataneously affects Octratack settings and sends NOTE OUT messages.
+    ///
     /// See manual section 8.7.1 CONTROL.
     pub midi_audio_track_note_out: u8,
 

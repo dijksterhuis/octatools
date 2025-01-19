@@ -147,6 +147,7 @@ impl OptionEnumValueConvert for ProjectMidiChannels {
 
 /// "Specification" tests ... ie. guarantee that enum values match correct values.
 #[cfg(test)]
+#[allow(unused_imports)]
 mod test_spec {
 
     mod ot_sample_slot_type {

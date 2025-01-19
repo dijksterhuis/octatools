@@ -62,6 +62,7 @@ impl SampleLoopConfig {
 }
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
 
     mod test_sample_loop_config {
