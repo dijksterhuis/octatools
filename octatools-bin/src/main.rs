@@ -1,6 +1,6 @@
 //! # `octatools`
 //!
-//! CLI tools to interact with data files used by the [Elektron Octatrack DPS](https://www.elektron.se/en/octratrack-mkii-explorer)
+//! CLI tools to interact with data files used by the [Elektron OctaTrack DPS](https://www.elektron.se/en/octratrack-mkii-explorer)
 
 mod actions;
 mod audio;
@@ -12,9 +12,6 @@ mod utils;
 use clap::Parser;
 use env_logger::{Builder, Target};
 use log::LevelFilter;
-
-use cli::{Cli, Commands};
-use std::error::Error;
 
 use actions::{
     arrangements::show_arrangement_bytes,
@@ -33,10 +30,15 @@ use actions::{
         deconstruct_samplechain_from_paths, deconstruct_samplechains_from_yaml, show_ot_file_bytes,
     },
 };
+use cli::{Cli, Commands};
+use serde::{Deserialize, Serialize};
 use serde_octatrack::arrangements::ArrangementFile;
 use serde_octatrack::banks::Bank;
 use serde_octatrack::projects::Project;
 use serde_octatrack::samples::SampleAttributes;
+use serde_octatrack::{Decode, Encode};
+use std::error::Error;
+use std::path::PathBuf;
 
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
 pub type RVoidError<T> = Result<T, ()>;
@@ -86,6 +88,322 @@ impl std::fmt::Display for OctatoolErrors {
 impl std::error::Error for OctatoolErrors {}
 
 #[doc(hidden)]
+fn human_to_bin<T>(
+    source_type: cli::HumanReadableFileFormat,
+    source_path: PathBuf,
+    bin_path: PathBuf,
+) -> ()
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let r = match source_type {
+        cli::HumanReadableFileFormat::Json => {
+            serde_octatrack::json_file_to_bin_file::<T>(&source_path, &bin_path)
+        }
+        cli::HumanReadableFileFormat::Yaml => {
+            serde_octatrack::yaml_file_to_bin_file::<T>(&source_path, &bin_path)
+        }
+    };
+
+    if r.is_err() {
+        println!("ERROR: {r:?}")
+    };
+}
+
+#[doc(hidden)]
+fn bin_to_human<T>(
+    bin_path: PathBuf,
+    dest_type: cli::HumanReadableFileFormat,
+    dest_path: PathBuf,
+) -> ()
+where
+    T: Decode,
+    T: Encode,
+    T: Serialize,
+    T: for<'a> Deserialize<'a>,
+{
+    let r = match dest_type {
+        cli::HumanReadableFileFormat::Json => {
+            serde_octatrack::bin_file_to_json_file::<T>(&bin_path, &dest_path)
+        }
+        cli::HumanReadableFileFormat::Yaml => {
+            serde_octatrack::bin_file_to_yaml_file::<T>(&bin_path, &dest_path)
+        }
+    };
+
+    if r.is_err() {
+        println!("ERROR: {r:?}")
+    };
+}
+
+#[doc(hidden)]
+fn cmd_select_arrangements(x: cli::Arrangements) -> () {
+    match x {
+        cli::Arrangements::Inspect(cli::Inspect { bin_path }) => {
+            let _ = serde_octatrack::show_type::<ArrangementFile>(&bin_path, None);
+        }
+        cli::Arrangements::InspectBytes(cli::InspectBytes {
+            bin_path,
+            start,
+            len,
+        }) => {
+            let _ = show_arrangement_bytes(&bin_path, &start, &len);
+        }
+        cli::Arrangements::BinToHuman(cli::BinToHuman {
+            bin_path,
+            dest_type,
+            dest_path,
+        }) => {
+            bin_to_human::<ArrangementFile>(bin_path, dest_type, dest_path);
+        }
+        cli::Arrangements::HumanToBin(cli::HumanToBin {
+            source_type,
+            source_path,
+            bin_path,
+        }) => {
+            human_to_bin::<ArrangementFile>(source_type, source_path, bin_path);
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_banks(x: cli::Banks) -> () {
+    match x {
+        cli::Banks::Inspect(cli::Inspect { bin_path }) => {
+            let _ = serde_octatrack::show_type::<Bank>(&bin_path, None);
+        }
+        cli::Banks::InspectBytes(cli::InspectBytes {
+            bin_path,
+            start,
+            len,
+        }) => {
+            let _ = show_bank_bytes(&bin_path, &start, &len);
+        }
+        cli::Banks::BinToHuman(cli::BinToHuman {
+            bin_path,
+            dest_type,
+            dest_path,
+        }) => {
+            bin_to_human::<Bank>(bin_path, dest_type, dest_path);
+        }
+        cli::Banks::HumanToBin(cli::HumanToBin {
+            source_type,
+            source_path,
+            bin_path,
+        }) => {
+            human_to_bin::<Bank>(source_type, source_path, bin_path);
+        }
+        cli::Banks::Copy {
+            src_bank_path,
+            src_project_path,
+            dest_bank_path,
+            dest_project_path,
+        } => {
+            let _ = copy_bank(
+                &src_bank_path,
+                &src_project_path,
+                &dest_bank_path,
+                &dest_project_path,
+            );
+        }
+        cli::Banks::CopyN { yaml_file_path } => {
+            let _ = batch_copy_banks(&yaml_file_path);
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_drive(x: cli::Drive) -> () {
+    match x {
+        cli::Drive::Scan {
+            cfcard_dir_path,
+            yaml_file_path,
+        } => {
+            let _ = create_file_index_yaml(&cfcard_dir_path, &yaml_file_path);
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_parts(x: cli::Parts) -> () {
+    match x {
+        cli::Parts::Saved(y) => match y {
+            cli::PartsCmd::Inspect { bin_path, index } => {
+                let _ = show_saved_parts(&bin_path, index);
+            }
+        },
+        cli::Parts::Unsaved(y) => match y {
+            cli::PartsCmd::Inspect { bin_path, index } => {
+                let _ = show_unsaved_parts(&bin_path, index);
+            }
+        },
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_patterns(x: cli::Patterns) -> () {
+    match x {
+        cli::Patterns::Inspect { bin_path, index } => {
+            let _ = show_pattern(&bin_path, &index[..]);
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_project(x: cli::Projects) -> () {
+    match x {
+        cli::Projects::Inspect(cli::Inspect { bin_path }) => {
+            let _ = serde_octatrack::show_type::<Project>(&bin_path, None);
+        }
+        cli::Projects::Settings(y) => match y {
+            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
+                unimplemented!();
+            }
+        },
+        cli::Projects::Metadata(y) => match y {
+            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
+                unimplemented!();
+            }
+        },
+        cli::Projects::State(y) => match y {
+            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
+                unimplemented!();
+            }
+        },
+        cli::Projects::SampleSlots(y) => match y {
+            cli::SampleSlots::Inspect(cli::Inspect { bin_path: _ }) => {
+                unimplemented!();
+            }
+            cli::SampleSlots::List { path } => {
+                let _ = list_project_sample_slots(&path);
+            }
+            cli::SampleSlots::Purge { path } => {
+                let _ = purge_project_pool(&path);
+            }
+            cli::SampleSlots::Consolidate { path } => {
+                let _ = consolidate_sample_slots_to_project_pool(&path);
+            }
+            cli::SampleSlots::Centralise { path } => {
+                let _ = consolidate_sample_slots_to_audio_pool(&path);
+            }
+        },
+        cli::Projects::BinToHuman(cli::BinToHuman {
+            bin_path,
+            dest_type,
+            dest_path,
+        }) => {
+            bin_to_human::<Project>(bin_path, dest_type, dest_path);
+        }
+        cli::Projects::HumanToBin(cli::HumanToBin {
+            source_type,
+            source_path,
+            bin_path,
+        }) => {
+            human_to_bin::<Project>(source_type, source_path, bin_path);
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_samples(x: cli::Samples) -> () {
+    match x {
+        cli::Samples::Chain(y) => match y {
+            cli::SampleChains::Create {
+                chain_name,
+                out_dir_path,
+                wav_file_paths,
+            } => {
+                let _ = create_samplechain_from_pathbufs_only(
+                    &wav_file_paths,
+                    &out_dir_path,
+                    &chain_name,
+                );
+            }
+            cli::SampleChains::CreateN { yaml_file_path } => {
+                let _ = create_samplechains_from_yaml(&yaml_file_path);
+            }
+            cli::SampleChains::Deconstruct {
+                ot_file_path,
+                audio_file_path,
+                out_dir_path,
+            } => {
+                let _ = deconstruct_samplechain_from_paths(
+                    &audio_file_path,
+                    &ot_file_path,
+                    &out_dir_path,
+                );
+            }
+            cli::SampleChains::DeconstructN { yaml_file_path } => {
+                let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
+            }
+        },
+        cli::Samples::Grid(y) => match y {
+            cli::SampleSliceGrid::Random {
+                wav_file_path,
+                n_slices,
+            } => {
+                let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
+            }
+            cli::SampleSliceGrid::Linear {
+                wav_file_path,
+                n_slices,
+            } => {
+                let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
+            }
+        },
+        cli::Samples::Otfile(y) => match y {
+            cli::Otfile::Inspect(cli::Inspect { bin_path }) => {
+                let _ = serde_octatrack::show_type::<SampleAttributes>(&bin_path, None);
+            }
+            cli::Otfile::InspectBytes(cli::InspectBytes {
+                bin_path,
+                start,
+                len,
+            }) => {
+                let _ = show_ot_file_bytes(&bin_path, &start, &len);
+            }
+            cli::Otfile::BinToHuman(cli::BinToHuman {
+                bin_path,
+                dest_type,
+                dest_path,
+            }) => {
+                bin_to_human::<SampleAttributes>(bin_path, dest_type, dest_path);
+            }
+            cli::Otfile::HumanToBin(cli::HumanToBin {
+                source_type,
+                source_path,
+                bin_path,
+            }) => {
+                human_to_bin::<SampleAttributes>(source_type, source_path, bin_path);
+            }
+
+            cli::Otfile::CreateDefault {
+                wav_file_path: _wav_file_path,
+            } => {
+                unimplemented!();
+            }
+        },
+        cli::Samples::Search(y) => match y {
+            cli::SampleSearch::Simple {
+                samples_dir_path,
+                yaml_file_path,
+            } => {
+                let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
+            }
+            cli::SampleSearch::Full {
+                samples_dir_path,
+                yaml_file_path,
+            } => {
+                let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
+            }
+        },
+    }
+}
+
+#[doc(hidden)]
 fn main() {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);
@@ -94,271 +412,12 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Drive(x) => match x {
-            cli::Drive::Dump {
-                cfcard_dir_path,
-                yaml_file_path,
-            } => {
-                let _ = create_file_index_yaml(&cfcard_dir_path, &yaml_file_path);
-            }
-        },
-        Commands::Projects(x) => match x {
-            cli::Projects::Inspect { path } => {
-                let _ = serde_octatrack::show_type::<Project>(&path, None);
-            }
-            cli::Projects::Settings(y) => match y {
-                cli::ProjectData::Inspect { path: _path } => {
-                    unimplemented!();
-                }
-            },
-            cli::Projects::Metadata(y) => match y {
-                cli::ProjectData::Inspect { path: _path } => {
-                    unimplemented!();
-                }
-            },
-            cli::Projects::State(y) => match y {
-                cli::ProjectData::Inspect { path: _path } => {
-                    unimplemented!();
-                }
-            },
-            cli::Projects::Sampleslots(y) => match y {
-                cli::SampleSlots::Inspect { path: _path } => {
-                    unimplemented!();
-                }
-                cli::SampleSlots::List { path } => {
-                    let _ = list_project_sample_slots(&path);
-                }
-                cli::SampleSlots::Purge { path } => {
-                    let _ = purge_project_pool(&path);
-                }
-                cli::SampleSlots::Consolidate { path } => {
-                    let _ = consolidate_sample_slots_to_project_pool(&path);
-                }
-                cli::SampleSlots::Centralise { path } => {
-                    let _ = consolidate_sample_slots_to_audio_pool(&path);
-                }
-            },
-            cli::Projects::Dump {
-                project_file_path,
-                yaml_file_path,
-            } => {
-                let _ = serde_octatrack::bin_file_to_yaml_file::<Project>(
-                    &project_file_path,
-                    &yaml_file_path,
-                );
-            }
-            cli::Projects::Load {
-                yaml_file_path,
-                project_file_path,
-            } => {
-                let _ = serde_octatrack::yaml_file_to_bin_file::<Project>(
-                    &yaml_file_path,
-                    &project_file_path,
-                );
-            }
-        },
-        Commands::Arrangements(x) => match x {
-            cli::Arrangements::Inspect { path } => {
-                let _ = serde_octatrack::show_type::<ArrangementFile>(&path, None);
-            }
-            cli::Arrangements::InspectBytes {
-                path,
-                byte_start_idx,
-                n_bytes,
-            } => {
-                let _ = show_arrangement_bytes(&path, &byte_start_idx, &n_bytes);
-            }
-            cli::Arrangements::Dump {
-                arrangement_file_path,
-                yaml_file_path,
-            } => {
-                let r = serde_octatrack::bin_file_to_yaml_file::<ArrangementFile>(
-                    &arrangement_file_path,
-                    &yaml_file_path,
-                );
-                if r.is_err() {
-                    println!("ERROR: {r:?}")
-                };
-            }
-            cli::Arrangements::Load {
-                yaml_file_path,
-                arrangement_file_path,
-            } => {
-                let r = serde_octatrack::yaml_file_to_bin_file::<ArrangementFile>(
-                    &yaml_file_path,
-                    &arrangement_file_path,
-                );
-                if r.is_err() {
-                    println!("ERROR: {r:?}")
-                };
-            }
-        },
-        Commands::Banks(x) => match x {
-            cli::Banks::Inspect { path } => {
-                let _ = serde_octatrack::show_type::<Bank>(&path, None);
-            }
-            cli::Banks::InspectBytes {
-                path,
-                byte_start_idx,
-                n_bytes,
-            } => {
-                let _ = show_bank_bytes(&path, &byte_start_idx, &n_bytes);
-            }
-            cli::Banks::Copy {
-                source_bank_filepath,
-                source_project_filepath,
-                destination_bank_filepath,
-                destination_project_filepath,
-            } => {
-                let _ = copy_bank(
-                    &source_bank_filepath,
-                    &source_project_filepath,
-                    &destination_bank_filepath,
-                    &destination_project_filepath,
-                );
-            }
-            cli::Banks::CopyN { yaml_file_path } => {
-                let _ = batch_copy_banks(&yaml_file_path);
-            }
-            cli::Banks::Dump {
-                bank_file_path,
-                yaml_file_path,
-            } => {
-                let _ = serde_octatrack::bin_file_to_yaml_file::<Bank>(
-                    &bank_file_path,
-                    &yaml_file_path,
-                );
-            }
-            cli::Banks::Load {
-                yaml_file_path,
-                bank_file_path,
-            } => {
-                let _ = serde_octatrack::yaml_file_to_bin_file::<Bank>(
-                    &yaml_file_path,
-                    &bank_file_path,
-                );
-            }
-        },
-        Commands::Patterns(x) => match x {
-            crate::cli::Patterns::Inspect {
-                bank_file_path,
-                index,
-            } => {
-                let _ = show_pattern(&bank_file_path, &index[..]);
-            }
-        },
-        Commands::Parts(x) => match x {
-            crate::cli::Parts::Saved(y) => match y {
-                crate::cli::PartsCmd::Inspect {
-                    bank_file_path,
-                    index,
-                } => {
-                    let _ = show_saved_parts(&bank_file_path, index);
-                }
-            },
-            crate::cli::Parts::Unsaved(y) => match y {
-                crate::cli::PartsCmd::Inspect {
-                    bank_file_path,
-                    index,
-                } => {
-                    let _ = show_unsaved_parts(&bank_file_path, index);
-                }
-            },
-        },
-        Commands::Samples(x) => match x {
-            crate::cli::Samples::Chain(y) => match y {
-                crate::cli::SampleChains::Create {
-                    chain_name,
-                    out_dir_path,
-                    wav_file_paths,
-                } => {
-                    let _ = create_samplechain_from_pathbufs_only(
-                        &wav_file_paths,
-                        &out_dir_path,
-                        &chain_name,
-                    );
-                }
-                crate::cli::SampleChains::CreateN { yaml_file_path } => {
-                    let _ = create_samplechains_from_yaml(&yaml_file_path);
-                }
-                crate::cli::SampleChains::Deconstruct {
-                    ot_file_path,
-                    audio_file_path,
-                    out_dir_path,
-                } => {
-                    let _ = deconstruct_samplechain_from_paths(
-                        &audio_file_path,
-                        &ot_file_path,
-                        &out_dir_path,
-                    );
-                }
-                crate::cli::SampleChains::DeconstructN { yaml_file_path } => {
-                    let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
-                }
-            },
-            crate::cli::Samples::Grid(y) => match y {
-                crate::cli::SampleSliceGrid::Random {
-                    wav_file_path,
-                    n_slices,
-                } => {
-                    let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
-                }
-                crate::cli::SampleSliceGrid::Linear {
-                    wav_file_path,
-                    n_slices,
-                } => {
-                    let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
-                }
-            },
-            crate::cli::Samples::Otfile(y) => match y {
-                cli::Otfile::Inspect { path } => {
-                    let _ = serde_octatrack::show_type::<SampleAttributes>(&path, None);
-                }
-                cli::Otfile::InspectBytes {
-                    path,
-                    byte_start_idx,
-                    n_bytes,
-                } => {
-                    let _ = show_ot_file_bytes(&path, &byte_start_idx, &n_bytes);
-                }
-                cli::Otfile::CreateDefault {
-                    wav_file_path: _wav_file_path,
-                } => {
-                    unimplemented!();
-                }
-                cli::Otfile::Dump {
-                    ot_file_path,
-                    yaml_file_path,
-                } => {
-                    let _ = serde_octatrack::bin_file_to_yaml_file::<SampleAttributes>(
-                        &ot_file_path,
-                        &yaml_file_path,
-                    );
-                }
-                cli::Otfile::Load {
-                    yaml_file_path,
-                    ot_file_path,
-                } => {
-                    let _ = serde_octatrack::yaml_file_to_bin_file::<SampleAttributes>(
-                        &yaml_file_path,
-                        &ot_file_path,
-                    );
-                }
-            },
-            crate::cli::Samples::Search(y) => match y {
-                crate::cli::SampleSearch::Simple {
-                    samples_dir_path,
-                    yaml_file_path,
-                } => {
-                    let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
-                }
-                crate::cli::SampleSearch::Full {
-                    samples_dir_path,
-                    yaml_file_path,
-                } => {
-                    let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
-                }
-            },
-        },
+        Commands::Arrangements(x) => cmd_select_arrangements(x),
+        Commands::Banks(x) => cmd_select_banks(x),
+        Commands::Drive(x) => cmd_select_drive(x),
+        Commands::Patterns(x) => cmd_select_patterns(x),
+        Commands::Parts(x) => cmd_select_parts(x),
+        Commands::Projects(x) => cmd_select_project(x),
+        Commands::Samples(x) => cmd_select_samples(x),
     };
 }
