@@ -1,9 +1,9 @@
 //! Module for CLAP based CLI arguments.
 
+use clap::{command, Args, Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
 
-use clap::{command, Parser, Subcommand};
-
+#[doc(hidden)]
 #[derive(Parser, Debug)]
 #[command(version, long_about = None, about = "CLI tool for handling Elektron Octatrack DPS-1 data files.")]
 #[command(propagate_version = true)]
@@ -12,63 +12,82 @@ pub struct Cli {
     pub command: Commands,
 }
 
-/// Commands related to data in Octatrack Arrangment files (examples: arr01.work, arr01.strd)
+/// Available file formats for converting to/from human-readable data formats
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+pub enum HumanReadableFileFormat {
+    Json,
+    Yaml,
+}
+
+/// Read a binary data file and print the deserialized output to stdout
+#[derive(Args, Debug)]
+pub struct Inspect {
+    /// Path of the OctaTrack binary data file
+    pub bin_path: PathBuf,
+}
+
+/// Read a binary data file and print raw u8 byte values to stdout
+#[derive(Args, Debug)]
+pub struct InspectBytes {
+    /// Path of the OctaTrack binary data file
+    pub bin_path: PathBuf,
+    /// Index of starting byte range to inspect
+    pub start: Option<usize>,
+    /// Number of bytes to display after starting byte index
+    pub len: Option<usize>,
+}
+
+/// Use a human-readable data file to create a new binary data file
+#[derive(Args, Debug)]
+pub struct HumanToBin {
+    /// Read from this type of human-readable format
+    #[arg(value_enum)]
+    pub source_type: HumanReadableFileFormat,
+    /// Path to the human-readable source file
+    pub source_path: PathBuf,
+    /// Path to the output OctaTrack data file
+    pub bin_path: PathBuf,
+}
+
+/// Create a human-readable data file from an OctaTrack's binary data file
+#[derive(Args, Debug)]
+pub struct BinToHuman {
+    /// Path to the source OctaTrack data file
+    pub bin_path: PathBuf,
+    /// Convert to this type of human-readable format
+    #[arg(value_enum)]
+    pub dest_type: HumanReadableFileFormat,
+    /// Path to the human-readable output file
+    pub dest_path: PathBuf,
+}
+
+/// Commands related to data in OctaTrack Arrangement files (examples: arr01.work, arr01.strd)
 #[derive(Subcommand, Debug)]
-// #[command(flatten_help = true)]
+#[command(flatten_help = true)]
+#[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Arrangements {
-    /// Print the deserialised form of Arrangement data
-    Inspect { path: PathBuf },
-    /// Print the deserialised raw u8 byte values of Arrangement data
-    InspectBytes {
-        path: PathBuf,
-        byte_start_idx: Option<usize>,
-        n_bytes: Option<usize>,
-    },
-
-    /// Dump the Arrangement data to a YAML file
-    Dump {
-        /// File path of the arrangement file
-        arrangement_file_path: PathBuf,
-        /// Destination yaml file
-        yaml_file_path: PathBuf,
-    },
-
-    /// Load Arrangement data from a YAML file
-    Load {
-        /// Source yaml file
-        yaml_file_path: PathBuf,
-        /// File path of the arrangement file
-        arrangement_file_path: PathBuf,
-    },
+    Inspect(Inspect),
+    InspectBytes(InspectBytes),
+    BinToHuman(BinToHuman),
+    HumanToBin(HumanToBin),
 }
 
 #[derive(Subcommand, Debug)]
-// #[command(flatten_help = true)]
 pub enum ProjectData {
-    /// Print the deserialised form of Project data
-    Inspect {
-        /// File path of the project.work or project.strd file to inspect
-        path: PathBuf,
-    },
+    Inspect(Inspect),
 }
 
 #[derive(Subcommand, Debug)]
 pub enum SampleSlots {
-    /// Print the deserialised form of a Project's Sample Slot data.
-    Inspect {
-        /// File path of the project.work or project.strd file
-        // #[arg(required=true)]
-        path: PathBuf,
-    },
+    Inspect(Inspect),
 
     /// List Sample Slots used in a Project.
     List {
         /// File path of the project.work or project.strd file
-        // #[arg(required=true)]
         path: PathBuf,
     },
 
-    /// Remove Project Sample Slots when the slot is not beging used in any related Bank files.
+    /// Remove Project Sample Slots when the slot is not being used in any related Bank files.
     Purge {
         /// Project directory path, NOT the project.work/project.strd file (command needs to inspect related bank files)
         path: PathBuf,
@@ -87,16 +106,12 @@ pub enum SampleSlots {
     },
 }
 
-/// Commands related to data contained in Octatrack Project files (examples: project.work, project.strd)
+/// Commands related to data contained in OctaTrack Project files (examples: project.work, project.strd)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Projects {
-    /// Print the deserialised form of all Project data.
-    Inspect {
-        /// File path of the project.work or project.strd file
-        path: PathBuf,
-    },
+    Inspect(Inspect),
 
     /// Specific commands for Project Metadata
     #[command(subcommand)]
@@ -115,89 +130,52 @@ pub enum Projects {
     /// Specific commands for Project Sample Slots
     #[command(subcommand)]
     #[command(flatten_help = true)]
-    Sampleslots(SampleSlots),
+    SampleSlots(SampleSlots),
 
-    /// Dump the current Project metadata, state, settings and slots to a YAML file
-    Dump {
-        /// File path of the project.work or project.strd file
-        project_file_path: PathBuf,
-        /// Destination yaml file
-        yaml_file_path: PathBuf,
-    },
-
-    /// Load an existing Project file with metadata, state, settings and slots from a YAML file
-    Load {
-        /// Source yaml file
-        yaml_file_path: PathBuf,
-        /// Path to the destination project.work or project.strd file that will be created
-        project_file_path: PathBuf,
-    },
+    BinToHuman(BinToHuman),
+    HumanToBin(HumanToBin),
 }
 
-/// Commands related to data contained in Octatrack Bank files (examples: bank01.work, bank01.strd)
+/// Commands related to data contained in OctaTrack Bank files (examples: bank01.work, bank01.strd)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Banks {
-    /// Print the deserialised form of a Bank file.
-    Inspect {
-        /// File path of the bank??.work or bank??.strd file
-        path: PathBuf,
-    },
+    Inspect(Inspect),
+    InspectBytes(InspectBytes),
 
-    /// Print the raw deserialised u8 byte values of a Bank file.
-    InspectBytes {
-        /// File path of the bank??.work or bank??.strd file
-        path: PathBuf,
-        byte_start_idx: Option<usize>,
-        n_bytes: Option<usize>,
-    },
-
-    /// Move a Bank from one location to another,
-    /// updating active sample slot assignments in destination Projects while moving.
+    /// Move a Bank from one Project to another Project while updating active sample slot
+    /// assignments in the destination Project.
     Copy {
         /// File path of the source `bank??.work` or `bank??.strd` file
-        source_bank_filepath: PathBuf,
+        src_bank_path: PathBuf,
         /// File path of the source project.work or project.strd file
-        source_project_filepath: PathBuf,
+        src_project_path: PathBuf,
         /// File path of the destination `bank??.work` or `bank??.strd` file
-        destination_bank_filepath: PathBuf,
+        dest_bank_path: PathBuf,
         /// File path of the destination `project.work` or `project.strd` file
-        destination_project_filepath: PathBuf,
+        dest_project_path: PathBuf,
     },
 
-    /// Move Nx Banks from one location to another,
-    /// updating active sample slot assignments in destination Projects while moving.
+    /// Move Nx Banks from their source Project to another destination Project while updating active
+    /// sample slot assignments in each destination Projects.
     CopyN {
-        /// File path of the YAML config for the changes
+        /// File path of the YAML config detailing the changes to make
         yaml_file_path: PathBuf,
     },
 
-    /// Dump data from a Bank file to a YAML file
-    Dump {
-        /// File path of the source bank??.work or bank??.strd file
-        bank_file_path: PathBuf,
-        /// File path of the destination YAML data dump
-        yaml_file_path: PathBuf,
-    },
-
-    /// Write Bank data with content of a YAML file
-    Load {
-        /// File path of the source YAML data dump
-        yaml_file_path: PathBuf,
-        /// File path of the destiantion bank??.work or bank??.strd file
-        bank_file_path: PathBuf,
-    },
+    BinToHuman(BinToHuman),
+    HumanToBin(HumanToBin),
 }
 
-/// Commands related to Pattern data in Octatrack Bank files (examples: bank01.work, bank01.strd)
+/// Commands related to Pattern data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Patterns {
-    /// Show the deserialised representation of one or more Patterns
+    /// Show the deserialized representation of one or more Patterns
     Inspect {
-        bank_file_path: PathBuf,
+        bin_path: PathBuf,
         index: Vec<usize>,
     },
 }
@@ -206,23 +184,23 @@ pub enum Patterns {
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum PartsCmd {
-    /// Show the deserialised representation of one or more Parts
+    /// Show the deserialized representation of one or more Parts
     Inspect {
-        bank_file_path: PathBuf,
+        bin_path: PathBuf,
         index: Vec<usize>,
     },
 }
 
-/// Commands related to Part data in Octatrack Bank files (examples: bank01.work, bank01.strd)
+/// Commands related to Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Parts {
-    /// Commands related to SAVED Part data in Octatrack Bank files (examples: bank01.work, bank01.strd)
+    /// Commands related to SAVED Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
     #[command(subcommand)]
     Saved(PartsCmd),
 
-    /// Commands related to UNSAVED Part data in Octatrack Bank files (examples: bank01.work, bank01.strd)
+    /// Commands related to UNSAVED Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
     #[command(subcommand)]
     Unsaved(PartsCmd),
 }
@@ -288,7 +266,7 @@ pub enum SampleChains {
     },
 }
 
-/// Commands related to finding compatible audio files to use with an Octatrack
+/// Commands related to finding compatible audio files to use with an OctaTrack
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
@@ -312,44 +290,25 @@ pub enum SampleSearch {
     },
 }
 
-/// Commands related to Sample Attributes data in Octatrack 'OT' files (examples: sampleName.ot, anotherSampleName.ot)
+/// Commands related to Sample Attributes data in OctaTrack 'OT' files (examples: sampleName.ot, anotherSampleName.ot)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Otfile {
-    /// Print the deserialised form of a sample attributes (ot) file.
-    Inspect {
-        /// File path of the *.ot file
-        path: PathBuf,
-    },
+    Inspect(Inspect),
+    InspectBytes(InspectBytes),
 
-    /// Print the raw deserialised u8 byte values of a sample attributes (ot) file.
-    InspectBytes {
-        /// File path of the *.ot file
-        path: PathBuf,
-        byte_start_idx: Option<usize>,
-        n_bytes: Option<usize>,
-    },
-
+    /// Create a default OctaTrack binary data file
     CreateDefault {
-        /// create a default sample attributes ('.ot') file for wav files
+        /// Wav File paths to generate default sample attribute files for
         wav_file_path: Vec<PathBuf>,
     },
 
-    /// Dump Part data from a Bank file to a YAML file
-    Dump {
-        ot_file_path: PathBuf,
-        yaml_file_path: PathBuf,
-    },
-
-    /// Write Part data in a Bank file with content of a YAML file
-    Load {
-        yaml_file_path: PathBuf,
-        ot_file_path: PathBuf,
-    },
+    BinToHuman(BinToHuman),
+    HumanToBin(HumanToBin),
 }
 
-/// Commands related to Sample Attributes data in Octatrack 'OT' files (examples: sampleName.ot, anotherSampleName.ot)
+/// Commands related to Sample Attributes data in OctaTrack 'OT' files (examples: sampleName.ot, anotherSampleName.ot)
 #[derive(Subcommand, Debug)]
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
@@ -373,9 +332,9 @@ pub enum Samples {
 #[command(flatten_help = true)]
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Drive {
-    /// Generate an in-depth YAML representation of Octatrack data for a Set.
+    /// Generate an in-depth YAML representation of OctaTrack data for a Set.
     /// WARNING: A 1x Project Set will generate a circa 200MB YAML file!
-    Dump {
+    Scan {
         /// Directory path of the Compact Flash Card directory
         cfcard_dir_path: PathBuf,
 
