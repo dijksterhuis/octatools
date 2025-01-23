@@ -88,7 +88,7 @@ pub struct SampleFilePair {
 impl SampleFilePair {
     /// Create a new `OctatrackSampleFile` from the audio file path
     /// and an optional attributes file path.
-    #[allow(dead_code)]  // I want to keep this in case it becomes useful in future.
+    #[allow(dead_code)] // I want to keep this in case it becomes useful in future.
     pub fn from_pathbufs(audio_fp: &Path, ot_fp: &Option<PathBuf>) -> RBoxErr<Self> {
         Ok(Self {
             name: audio_fp.file_stem().unwrap().to_str().unwrap().to_string(),

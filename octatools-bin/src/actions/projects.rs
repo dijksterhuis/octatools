@@ -216,7 +216,7 @@ mod test {
         assert!(r.is_ok())
     }
 
-    #[allow(dead_code)]  // only dead code on windows!
+    #[allow(dead_code)] // only dead code on windows!
     fn make_sslot_mock_set_dir(base_path: &PathBuf) {
         let _ = fs::create_dir(fs::canonicalize(base_path).unwrap());
         let _ = fs::create_dir(fs::canonicalize(base_path.join("AUDIO")).unwrap());
