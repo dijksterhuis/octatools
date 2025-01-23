@@ -38,6 +38,7 @@ use serde_octatrack::projects::Project;
 use serde_octatrack::samples::SampleAttributes;
 use serde_octatrack::{Decode, Encode};
 use std::error::Error;
+use std::fmt::Display;
 use std::path::PathBuf;
 
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
@@ -88,29 +89,37 @@ impl std::fmt::Display for OctatoolErrors {
 impl std::error::Error for OctatoolErrors {}
 
 #[doc(hidden)]
+pub fn print_err<E, F>(cb: F) -> ()
+where
+    F: FnOnce() -> Result<(), E>,
+    E: Display,
+{
+    let r = cb();
+    if r.is_err() {
+        println!("ERROR: {}", r.unwrap_err());
+    }
+}
+
+#[doc(hidden)]
 fn human_to_bin<T>(
     source_type: cli::HumanReadableFileFormat,
     source_path: PathBuf,
     bin_path: PathBuf,
-) -> ()
+) -> RBoxErr<()>
 where
     T: Decode,
     T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
 {
-    let r = match source_type {
+    match source_type {
         cli::HumanReadableFileFormat::Json => {
             serde_octatrack::json_file_to_bin_file::<T>(&source_path, &bin_path)
         }
         cli::HumanReadableFileFormat::Yaml => {
             serde_octatrack::yaml_file_to_bin_file::<T>(&source_path, &bin_path)
         }
-    };
-
-    if r.is_err() {
-        println!("ERROR: {r:?}")
-    };
+    }
 }
 
 #[doc(hidden)]
@@ -118,53 +127,49 @@ fn bin_to_human<T>(
     bin_path: PathBuf,
     dest_type: cli::HumanReadableFileFormat,
     dest_path: PathBuf,
-) -> ()
+) -> RBoxErr<()>
 where
     T: Decode,
     T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
 {
-    let r = match dest_type {
+    match dest_type {
         cli::HumanReadableFileFormat::Json => {
             serde_octatrack::bin_file_to_json_file::<T>(&bin_path, &dest_path)
         }
         cli::HumanReadableFileFormat::Yaml => {
             serde_octatrack::bin_file_to_yaml_file::<T>(&bin_path, &dest_path)
         }
-    };
-
-    if r.is_err() {
-        println!("ERROR: {r:?}")
-    };
+    }
 }
 
 #[doc(hidden)]
 fn cmd_select_arrangements(x: cli::Arrangements) -> () {
     match x {
         cli::Arrangements::Inspect(cli::Inspect { bin_path }) => {
-            let _ = serde_octatrack::show_type::<ArrangementFile>(&bin_path, None);
+            print_err(|| serde_octatrack::show_type::<ArrangementFile>(&bin_path, None));
         }
         cli::Arrangements::InspectBytes(cli::InspectBytes {
             bin_path,
             start,
             len,
         }) => {
-            let _ = show_arrangement_bytes(&bin_path, &start, &len);
+            print_err(|| show_arrangement_bytes(&bin_path, &start, &len));
         }
         cli::Arrangements::BinToHuman(cli::BinToHuman {
             bin_path,
             dest_type,
             dest_path,
         }) => {
-            bin_to_human::<ArrangementFile>(bin_path, dest_type, dest_path);
+            print_err(|| bin_to_human::<ArrangementFile>(bin_path, dest_type, dest_path));
         }
         cli::Arrangements::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            human_to_bin::<ArrangementFile>(source_type, source_path, bin_path);
+            print_err(|| human_to_bin::<ArrangementFile>(source_type, source_path, bin_path));
         }
     }
 }
@@ -173,28 +178,28 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
 fn cmd_select_banks(x: cli::Banks) -> () {
     match x {
         cli::Banks::Inspect(cli::Inspect { bin_path }) => {
-            let _ = serde_octatrack::show_type::<Bank>(&bin_path, None);
+            print_err(|| serde_octatrack::show_type::<Bank>(&bin_path, None));
         }
         cli::Banks::InspectBytes(cli::InspectBytes {
             bin_path,
             start,
             len,
         }) => {
-            let _ = show_bank_bytes(&bin_path, &start, &len);
+            print_err(|| show_bank_bytes(&bin_path, &start, &len));
         }
         cli::Banks::BinToHuman(cli::BinToHuman {
             bin_path,
             dest_type,
             dest_path,
         }) => {
-            bin_to_human::<Bank>(bin_path, dest_type, dest_path);
+            print_err(|| bin_to_human::<Bank>(bin_path, dest_type, dest_path));
         }
         cli::Banks::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            human_to_bin::<Bank>(source_type, source_path, bin_path);
+            print_err(|| human_to_bin::<Bank>(source_type, source_path, bin_path));
         }
         cli::Banks::Copy {
             src_bank_path,
@@ -202,15 +207,17 @@ fn cmd_select_banks(x: cli::Banks) -> () {
             dest_bank_path,
             dest_project_path,
         } => {
-            let _ = copy_bank(
-                &src_bank_path,
-                &src_project_path,
-                &dest_bank_path,
-                &dest_project_path,
-            );
+            print_err(|| {
+                copy_bank(
+                    &src_bank_path,
+                    &src_project_path,
+                    &dest_bank_path,
+                    &dest_project_path,
+                )
+            });
         }
         cli::Banks::CopyN { yaml_file_path } => {
-            let _ = batch_copy_banks(&yaml_file_path);
+            print_err(|| batch_copy_banks(&yaml_file_path));
         }
     }
 }
@@ -222,7 +229,7 @@ fn cmd_select_drive(x: cli::Drive) -> () {
             cfcard_dir_path,
             yaml_file_path,
         } => {
-            let _ = create_file_index_yaml(&cfcard_dir_path, &yaml_file_path);
+            print_err(|| create_file_index_yaml(&cfcard_dir_path, &yaml_file_path));
         }
     }
 }
@@ -232,12 +239,12 @@ fn cmd_select_parts(x: cli::Parts) -> () {
     match x {
         cli::Parts::Saved(y) => match y {
             cli::PartsCmd::Inspect { bin_path, index } => {
-                let _ = show_saved_parts(&bin_path, index);
+                print_err(|| show_saved_parts(&bin_path, index));
             }
         },
         cli::Parts::Unsaved(y) => match y {
             cli::PartsCmd::Inspect { bin_path, index } => {
-                let _ = show_unsaved_parts(&bin_path, index);
+                print_err(|| show_unsaved_parts(&bin_path, index));
             }
         },
     }
@@ -247,7 +254,7 @@ fn cmd_select_parts(x: cli::Parts) -> () {
 fn cmd_select_patterns(x: cli::Patterns) -> () {
     match x {
         cli::Patterns::Inspect { bin_path, index } => {
-            let _ = show_pattern(&bin_path, &index[..]);
+            print_err(|| show_pattern(&bin_path, &index[..]));
         }
     }
 }
@@ -256,7 +263,7 @@ fn cmd_select_patterns(x: cli::Patterns) -> () {
 fn cmd_select_project(x: cli::Projects) -> () {
     match x {
         cli::Projects::Inspect(cli::Inspect { bin_path }) => {
-            let _ = serde_octatrack::show_type::<Project>(&bin_path, None);
+            print_err(|| serde_octatrack::show_type::<Project>(&bin_path, None));
         }
         cli::Projects::Settings(y) => match y {
             cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
@@ -278,16 +285,16 @@ fn cmd_select_project(x: cli::Projects) -> () {
                 unimplemented!();
             }
             cli::SampleSlots::List { path } => {
-                let _ = list_project_sample_slots(&path);
+                print_err(|| list_project_sample_slots(&path));
             }
             cli::SampleSlots::Purge { path } => {
-                let _ = purge_project_pool(&path);
+                print_err(|| purge_project_pool(&path));
             }
             cli::SampleSlots::Consolidate { path } => {
-                let _ = consolidate_sample_slots_to_project_pool(&path);
+                print_err(|| consolidate_sample_slots_to_project_pool(&path));
             }
             cli::SampleSlots::Centralise { path } => {
-                let _ = consolidate_sample_slots_to_audio_pool(&path);
+                print_err(|| consolidate_sample_slots_to_audio_pool(&path));
             }
         },
         cli::Projects::BinToHuman(cli::BinToHuman {
@@ -295,14 +302,14 @@ fn cmd_select_project(x: cli::Projects) -> () {
             dest_type,
             dest_path,
         }) => {
-            bin_to_human::<Project>(bin_path, dest_type, dest_path);
+            print_err(|| bin_to_human::<Project>(bin_path, dest_type, dest_path));
         }
         cli::Projects::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            human_to_bin::<Project>(source_type, source_path, bin_path);
+            print_err(|| human_to_bin::<Project>(source_type, source_path, bin_path));
         }
     }
 }
@@ -316,14 +323,16 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                 out_dir_path,
                 wav_file_paths,
             } => {
-                let _ = create_samplechain_from_pathbufs_only(
-                    &wav_file_paths,
-                    &out_dir_path,
-                    &chain_name,
-                );
+                print_err(|| {
+                    create_samplechain_from_pathbufs_only(
+                        &wav_file_paths,
+                        &out_dir_path,
+                        &chain_name,
+                    )
+                });
             }
             cli::SampleChains::CreateN { yaml_file_path } => {
-                let _ = create_samplechains_from_yaml(&yaml_file_path);
+                print_err(|| create_samplechains_from_yaml(&yaml_file_path));
             }
             cli::SampleChains::Deconstruct {
                 ot_file_path,
@@ -337,7 +346,7 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                 );
             }
             cli::SampleChains::DeconstructN { yaml_file_path } => {
-                let _ = deconstruct_samplechains_from_yaml(&yaml_file_path);
+                print_err(|| deconstruct_samplechains_from_yaml(&yaml_file_path));
             }
         },
         cli::Samples::Grid(y) => match y {
@@ -345,39 +354,39 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                 wav_file_path,
                 n_slices,
             } => {
-                let _ = create_randomly_sliced_sample(&wav_file_path, n_slices);
+                print_err(|| create_randomly_sliced_sample(&wav_file_path, n_slices));
             }
             cli::SampleSliceGrid::Linear {
                 wav_file_path,
                 n_slices,
             } => {
-                let _ = create_equally_sliced_sample(&wav_file_path, n_slices);
+                print_err(|| create_equally_sliced_sample(&wav_file_path, n_slices));
             }
         },
         cli::Samples::Otfile(y) => match y {
             cli::Otfile::Inspect(cli::Inspect { bin_path }) => {
-                let _ = serde_octatrack::show_type::<SampleAttributes>(&bin_path, None);
+                print_err(|| serde_octatrack::show_type::<SampleAttributes>(&bin_path, None));
             }
             cli::Otfile::InspectBytes(cli::InspectBytes {
                 bin_path,
                 start,
                 len,
             }) => {
-                let _ = show_ot_file_bytes(&bin_path, &start, &len);
+                print_err(|| show_ot_file_bytes(&bin_path, &start, &len));
             }
             cli::Otfile::BinToHuman(cli::BinToHuman {
                 bin_path,
                 dest_type,
                 dest_path,
             }) => {
-                bin_to_human::<SampleAttributes>(bin_path, dest_type, dest_path);
+                print_err(|| bin_to_human::<SampleAttributes>(bin_path, dest_type, dest_path));
             }
             cli::Otfile::HumanToBin(cli::HumanToBin {
                 source_type,
                 source_path,
                 bin_path,
             }) => {
-                human_to_bin::<SampleAttributes>(source_type, source_path, bin_path);
+                print_err(|| human_to_bin::<SampleAttributes>(source_type, source_path, bin_path));
             }
 
             cli::Otfile::CreateDefault {
@@ -391,13 +400,13 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                 samples_dir_path,
                 yaml_file_path,
             } => {
-                let _ = create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path);
+                print_err(|| create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path));
             }
             cli::SampleSearch::Full {
                 samples_dir_path,
                 yaml_file_path,
             } => {
-                let _ = create_index_samples_dir_full(&samples_dir_path, &yaml_file_path);
+                print_err(|| create_index_samples_dir_full(&samples_dir_path, &yaml_file_path));
             }
         },
     }
