@@ -100,33 +100,18 @@ where
     }
 }
 
-#[doc(hidden)]
-fn human_to_bin<T>(
-    source_type: cli::HumanReadableFileFormat,
-    source_path: PathBuf,
-    bin_path: PathBuf,
-) -> RBoxErr<()>
-where
-    T: Decode,
-    T: Encode,
-    T: Serialize,
-    T: for<'a> Deserialize<'a>,
-{
-    match source_type {
-        cli::HumanReadableFileFormat::Json => {
-            serde_octatrack::json_file_to_bin_file::<T>(&source_path, &bin_path)
-        }
-        cli::HumanReadableFileFormat::Yaml => {
-            serde_octatrack::yaml_file_to_bin_file::<T>(&source_path, &bin_path)
-        }
-    }
+enum ConvertFromTo {
+    BinToHuman,
+    HumanToBin,
 }
 
 #[doc(hidden)]
-fn bin_to_human<T>(
+/// Succinctly handle converting from binary to human-readable and vice versa
+fn convert_from_to<T>(
+    conversion_type: ConvertFromTo,
+    human_type: cli::HumanReadableFileFormat,
+    human_path: PathBuf,
     bin_path: PathBuf,
-    dest_type: cli::HumanReadableFileFormat,
-    dest_path: PathBuf,
 ) -> RBoxErr<()>
 where
     T: Decode,
@@ -134,13 +119,23 @@ where
     T: Serialize,
     T: for<'a> Deserialize<'a>,
 {
-    match dest_type {
-        cli::HumanReadableFileFormat::Json => {
-            serde_octatrack::bin_file_to_json_file::<T>(&bin_path, &dest_path)
-        }
-        cli::HumanReadableFileFormat::Yaml => {
-            serde_octatrack::bin_file_to_yaml_file::<T>(&bin_path, &dest_path)
-        }
+    match conversion_type {
+        ConvertFromTo::BinToHuman => match human_type {
+            cli::HumanReadableFileFormat::Json => {
+                serde_octatrack::bin_file_to_json_file::<T>(&bin_path, &human_path)
+            }
+            cli::HumanReadableFileFormat::Yaml => {
+                serde_octatrack::bin_file_to_yaml_file::<T>(&bin_path, &human_path)
+            }
+        },
+        ConvertFromTo::HumanToBin => match human_type {
+            cli::HumanReadableFileFormat::Json => {
+                serde_octatrack::json_file_to_bin_file::<T>(&human_path, &bin_path)
+            }
+            cli::HumanReadableFileFormat::Yaml => {
+                serde_octatrack::yaml_file_to_bin_file::<T>(&human_path, &bin_path)
+            }
+        },
     }
 }
 
@@ -162,14 +157,28 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
             dest_type,
             dest_path,
         }) => {
-            print_err(|| bin_to_human::<ArrangementFile>(bin_path, dest_type, dest_path));
+            print_err(|| {
+                convert_from_to::<ArrangementFile>(
+                    ConvertFromTo::BinToHuman,
+                    dest_type,
+                    dest_path,
+                    bin_path,
+                )
+            });
         }
         cli::Arrangements::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            print_err(|| human_to_bin::<ArrangementFile>(source_type, source_path, bin_path));
+            print_err(|| {
+                convert_from_to::<ArrangementFile>(
+                    ConvertFromTo::HumanToBin,
+                    source_type,
+                    source_path,
+                    bin_path,
+                )
+            });
         }
     }
 }
@@ -192,14 +201,23 @@ fn cmd_select_banks(x: cli::Banks) -> () {
             dest_type,
             dest_path,
         }) => {
-            print_err(|| bin_to_human::<Bank>(bin_path, dest_type, dest_path));
+            print_err(|| {
+                convert_from_to::<Bank>(ConvertFromTo::BinToHuman, dest_type, dest_path, bin_path)
+            });
         }
         cli::Banks::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            print_err(|| human_to_bin::<Bank>(source_type, source_path, bin_path));
+            print_err(|| {
+                convert_from_to::<Bank>(
+                    ConvertFromTo::HumanToBin,
+                    source_type,
+                    source_path,
+                    bin_path,
+                )
+            });
         }
         cli::Banks::Copy {
             src_bank_path,
@@ -302,14 +320,28 @@ fn cmd_select_project(x: cli::Projects) -> () {
             dest_type,
             dest_path,
         }) => {
-            print_err(|| bin_to_human::<Project>(bin_path, dest_type, dest_path));
+            print_err(|| {
+                convert_from_to::<Project>(
+                    ConvertFromTo::BinToHuman,
+                    dest_type,
+                    dest_path,
+                    bin_path,
+                )
+            });
         }
         cli::Projects::HumanToBin(cli::HumanToBin {
             source_type,
             source_path,
             bin_path,
         }) => {
-            print_err(|| human_to_bin::<Project>(source_type, source_path, bin_path));
+            print_err(|| {
+                convert_from_to::<Project>(
+                    ConvertFromTo::HumanToBin,
+                    source_type,
+                    source_path,
+                    bin_path,
+                )
+            });
         }
     }
 }
@@ -379,14 +411,28 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                 dest_type,
                 dest_path,
             }) => {
-                print_err(|| bin_to_human::<SampleAttributes>(bin_path, dest_type, dest_path));
+                print_err(|| {
+                    convert_from_to::<SampleAttributes>(
+                        ConvertFromTo::BinToHuman,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
             }
             cli::Otfile::HumanToBin(cli::HumanToBin {
                 source_type,
                 source_path,
                 bin_path,
             }) => {
-                print_err(|| human_to_bin::<SampleAttributes>(source_type, source_path, bin_path));
+                print_err(|| {
+                    convert_from_to::<SampleAttributes>(
+                        ConvertFromTo::HumanToBin,
+                        source_type,
+                        source_path,
+                        bin_path,
+                    )
+                });
             }
 
             cli::Otfile::CreateDefault {
