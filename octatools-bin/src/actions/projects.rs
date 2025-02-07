@@ -170,20 +170,21 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
     let project =
         read_type_from_bin_file::<Project>(&abs_project_fp).expect("Could not load project file");
 
-    let slots: Vec<ProjectSampleSlot> = project
+    let sample_file_slots: Vec<ProjectSampleSlot> = project
         .slots
         .into_iter()
         .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
+        .filter(|x| x.path != PathBuf::from(""))
         .collect();
 
-    let slot_paths: Vec<PathBuf> = slots
+    let slot_paths: Vec<PathBuf> = sample_file_slots
         .into_iter()
         .map(|x| {
             project_dir_path
                 .join(x.path)
                 .to_path_buf()
                 .canonicalize()
-                .expect("Could not get abslute path for sample slot.")
+                .expect("Could not get absolute path for sample slot.")
         })
         .collect();
     let samples: Vec<PathBuf> = scan_dir_path_for_audio_files(&project_dir_path.to_path_buf())?;
@@ -208,6 +209,7 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
 #[allow(unused_imports)]
 mod test {
     use super::*;
+    use serde_octatrack::yaml_file_to_bin_file;
 
     #[test]
     fn test_list_sample_slots_ok() {
@@ -217,37 +219,38 @@ mod test {
     }
 
     #[allow(dead_code)] // only dead code on windows!
-    fn make_sslot_mock_set_dir(base_path: &PathBuf) {
-        let _ = fs::create_dir(fs::canonicalize(base_path).unwrap());
-        let _ = fs::create_dir(fs::canonicalize(base_path.join("AUDIO")).unwrap());
-        let _ = fs::create_dir(fs::canonicalize(base_path.join("PROJECT")).unwrap());
+    fn make_sslot_mock_set_dir(test_dir_path: &PathBuf) {
+
+        let _ = fs::create_dir(test_dir_path);
+        let _ = fs::create_dir(test_dir_path.join("AUDIO"));
+        let _ = fs::create_dir(test_dir_path.join("PROJECT"));
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
-            fs::canonicalize(base_path.join("AUDIO/first-0.wav")).unwrap(),
+            PathBuf::from("./../data/tests/misc/test.wav"),
+            test_dir_path.join("AUDIO/first-0.wav"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
-            fs::canonicalize(base_path.join("AUDIO/second-0.wav")).unwrap(),
+            PathBuf::from("./../data/tests/misc/test.wav"),
+            test_dir_path.join("AUDIO/second-0.wav"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.wav")).unwrap(),
-            fs::canonicalize(base_path.join("AUDIO/third-0.wav")).unwrap(),
+            PathBuf::from("./../data/tests/misc/pair.wav"),
+            test_dir_path.join("AUDIO/third-0.wav"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.ot")).unwrap(),
-            fs::canonicalize(base_path.join("AUDIO/third-0.ot")).unwrap(),
+            PathBuf::from("./../data/tests/misc/pair.ot"),
+            test_dir_path.join("AUDIO/third-0.ot"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/test.wav")).unwrap(),
-            fs::canonicalize(base_path.join("PROJECT/fourth-0.wav")).unwrap(),
+            PathBuf::from("./../data/tests/misc/test.wav"),
+            test_dir_path.join("PROJECT/fourth-0.wav"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.wav")).unwrap(),
-            fs::canonicalize(base_path.join("PROJECT/fifth-0.wav")).unwrap(),
+            PathBuf::from("./../data/tests/misc/pair.wav"),
+            test_dir_path.join("PROJECT/fifth-0.wav"),
         );
         let _ = fs::copy(
-            fs::canonicalize(PathBuf::from("./../data/tests/misc/pair.ot")).unwrap(),
-            fs::canonicalize(base_path.join("PROJECT/fifth-0.ot")).unwrap(),
+            PathBuf::from("./../data/tests/misc/pair.ot"),
+            test_dir_path.join("PROJECT/fifth-0.ot"),
         );
     }
 
@@ -364,7 +367,7 @@ mod test {
         )
         .unwrap();
 
-        let r = purge_project_pool(&base_path.join("test/PROJECT/project.work"));
+        let r = purge_project_pool(&test_dir_path.join("PROJECT/project.work"));
 
         assert!(r.is_ok());
 

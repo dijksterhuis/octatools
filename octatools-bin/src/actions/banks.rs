@@ -482,6 +482,8 @@ mod tests {
     #[test]
     fn test_copy_bank() {
         use copy_dir;
+        use std::path::PathBuf;
+        use super::*;
 
         let audio_pool = PathBuf::from("../data/tests/copy/bank/AUDIO-TEST");
 

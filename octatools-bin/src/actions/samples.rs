@@ -873,6 +873,10 @@ mod tests {
         #[cfg(not(target_os = "windows"))]
         #[test]
         fn simple_with_yaml_matches_validation() {
+
+            use serde_octatrack::yaml_file_to_type;
+            use crate::actions::samples::SamplesDirIndexSimple;
+
             let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-simple-validate.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
@@ -888,14 +892,19 @@ mod tests {
         // fails as paths in the target yaml are linux only
         #[cfg(not(target_os = "windows"))]
         #[test]
+        // #[ignore]
         fn full_with_yaml_matches_validation() {
+
+            use serde_octatrack::yaml_file_to_type;
+            use crate::actions::samples::SamplesDirIndexFull;
+
             let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-full-validate.yaml");
             let dirpath = PathBuf::from("../data/tests/samples/indexing/");
             let _ = create_index_samples_dir_full(&dirpath, &Some(outpath.clone()));
 
-            let valid = yaml_file_to_type::<SamplesDirIndexSimple>(&testpath).unwrap();
-            let written = yaml_file_to_type::<SamplesDirIndexSimple>(&outpath).unwrap();
+            let valid = yaml_file_to_type::<SamplesDirIndexFull>(&testpath).unwrap();
+            let written = yaml_file_to_type::<SamplesDirIndexFull>(&outpath).unwrap();
 
             let _ = std::fs::remove_file(outpath);
             assert_eq!(written, valid)
