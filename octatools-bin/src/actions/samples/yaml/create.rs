@@ -1,6 +1,7 @@
 //! Read/Write a YAML file config related to Octatrack compatible sample chains.
 //! Reading a config and creating a sample chain is currently implemented.
 
+use octatools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -8,7 +9,6 @@ use serde_octatrack::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 
-use serde_octatrack::Decode;
 
 /// YAML section which globally affects all chains being created with the loaded config.
 
@@ -43,10 +43,8 @@ pub struct YamlChainCreateSamplechains {
 
 /// A parsed YAML config for a single YAML file.
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Decodeable)]
 pub struct YamlChainCreate {
     pub global_settings: YamlChainCreateGlobalSettings,
     pub chains: Vec<YamlChainCreateSamplechains>,
 }
-
-impl Decode for YamlChainCreate {}

@@ -5,7 +5,7 @@ pub mod patterns;
 
 use crate::{banks::{parts::Part, patterns::Pattern}, Decode, DefaultsArrayBoxed, Encode};
 
-use octatools_derive::DefaultsAsBoxedBigArray;
+use octatools_derive::{DefaultsAsBoxedBigArray, Decodeable, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
@@ -28,7 +28,9 @@ const DEFAULT_PART_NAMES: [[u8; 7]; 4] = [
 ];
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray)]
+#[derive(
+    Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray, Decodeable, Encodeable
+)]
 pub struct Bank {
     /// Misc header data for Banks.
     /// Always follows the same format.
@@ -77,15 +79,9 @@ impl Default for Bank {
     }
 }
 
-impl Encode for Bank {}
-impl Decode for Bank {}
-
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Decodeable)]
 pub struct BankRawBytes {
     pub data: Box<Array<u8, 636113>>,
 }
-
-impl Encode for BankRawBytes {}
-impl Decode for BankRawBytes {}

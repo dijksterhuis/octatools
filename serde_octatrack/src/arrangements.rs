@@ -22,8 +22,8 @@
 mod deserialize;
 mod serialize;
 
-use crate::{Decode, DefaultsArrayBoxed, Encode};
-use octatools_derive::DefaultsAsBoxedBigArray;
+use crate::DefaultsArrayBoxed;
+use octatools_derive::{DefaultsAsBoxedBigArray, Decodeable, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
@@ -37,7 +37,7 @@ const ARRANGEMENT_DEFAULT_NAME: [u8; 15] =
 
 // max length: 11336 bytes
 /// Public representation of an `arr??.*` Arrangement file.
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Encodeable, Decodeable)]
 pub struct ArrangementFile {
     /// Header data:
     /// ```text
@@ -99,8 +99,6 @@ impl Default for ArrangementFile {
     }
 }
 
-impl Encode for ArrangementFile {}
-impl Decode for ArrangementFile {}
 /// An Arrangement 'block'. 5650 bytes.
 /// There are multiple arrangement states in `arr??.*` files for Arrangements,
 /// seemingly due to the peculiarities of how the Octatrack stores data
@@ -199,11 +197,8 @@ impl Default for ArrangeRow {
 // max length: 11336 bytes
 /// Used with the `octatools inspect bytes arrangement` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Decodeable)]
 pub struct ArrangementFileRawBytes {
     #[serde(with = "BigArray")]
     pub data: [u8; 11336],
 }
-
-impl Encode for ArrangementFileRawBytes {}
-impl Decode for ArrangementFileRawBytes {}

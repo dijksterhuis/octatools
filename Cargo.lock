@@ -312,6 +312,7 @@ dependencies = [
  "itertools",
  "log",
  "md5",
+ "octatools_derive",
  "rand",
  "serde",
  "serde_octatrack",
