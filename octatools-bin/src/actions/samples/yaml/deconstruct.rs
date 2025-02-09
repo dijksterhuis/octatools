@@ -1,7 +1,7 @@
 //! Read a YAML file config to batch deconstruct sliced sample chains into constituent slice samples.
 
+use octatools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
-use serde_octatrack::Decode;
 use std::path::PathBuf;
 
 /// YAML section which globally affects all chains being created with the loaded config.
@@ -20,10 +20,8 @@ pub struct YamlChainDeconstructFilePairs {
     pub otfile: PathBuf,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Decodeable)]
 pub struct YamlChainDeconstruct {
     pub global_settings: YamlChainDeconstructConfigGlobalSettings,
     pub chains: Vec<YamlChainDeconstructFilePairs>,
 }
-
-impl Decode for YamlChainDeconstruct {}

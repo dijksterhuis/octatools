@@ -8,8 +8,8 @@ use crate::{OctatoolErrors, RBoxErr};
 use base64ct::{Base64, Encoding};
 use log::{debug, info};
 use md5::Digest;
+use octatools_derive::{Decodeable, Encodeable};
 use serde::{Deserialize, Serialize};
-use serde_octatrack::{Decode, Encode};
 use std::fs::canonicalize;
 
 fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> RBoxErr<String> {
@@ -81,14 +81,11 @@ impl SamplesDirAudioFile {
 
 /// An index of a "sample's directory" -- i.e. where someone stores their samples.
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Decodeable, Encodeable)]
 pub struct SamplesDirIndexFull {
     pub dirpath: PathBuf,
     pub samples: Vec<SamplesDirAudioFile>,
 }
-
-impl Decode for SamplesDirIndexFull {}
-impl Encode for SamplesDirIndexFull {}
 
 impl SamplesDirIndexFull {
     pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {
@@ -114,14 +111,11 @@ impl SamplesDirIndexFull {
     }
 }
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Decodeable, Encodeable)]
 pub struct SamplesDirIndexSimple {
     pub dirpath: PathBuf,
     pub samples: Vec<PathBuf>,
 }
-
-impl Decode for SamplesDirIndexSimple {}
-impl Encode for SamplesDirIndexSimple {}
 
 impl SamplesDirIndexSimple {
     pub fn new(dirpath: &PathBuf) -> RBoxErr<Self> {

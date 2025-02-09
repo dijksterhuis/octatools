@@ -6,9 +6,6 @@ pub mod slices;
 
 use std::error::Error;
 
-use serde::{Deserialize, Serialize};
-use serde_big_array::BigArray;
-
 use crate::{
     samples::options::{SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode},
     samples::{
@@ -17,6 +14,9 @@ use crate::{
     },
     Decode, Encode, OptionEnumValueConvert, RBoxErr,
 };
+use octatools_derive::Decodeable;
+use serde::{Deserialize, Serialize};
+use serde_big_array::BigArray;
 
 /// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
 pub const HEADER_BYTES: [u8; 16] = [
@@ -304,11 +304,8 @@ impl Encode for SampleAttributes {
 
 /// Used with the `octatools inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Decodeable)]
 pub struct SampleAttributesRawBytes {
     #[serde(with = "BigArray")]
     pub data: [u8; 816],
 }
-
-impl Decode for SampleAttributesRawBytes {}
-impl Encode for SampleAttributesRawBytes {}
