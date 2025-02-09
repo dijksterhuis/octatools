@@ -37,6 +37,14 @@ pub struct InspectBytes {
     pub len: Option<usize>,
 }
 
+/// Create a OctaTrack binary data file with default data (default values not set up yet!)
+#[derive(Args, Debug)]
+pub struct CreateDefault {
+    /// Write path
+    pub path: PathBuf,
+}
+
+
 /// Use a human-readable data file to create a new binary data file
 #[derive(Args, Debug)]
 pub struct HumanToBin {
@@ -68,6 +76,7 @@ pub struct BinToHuman {
 pub enum Arrangements {
     Inspect(Inspect),
     InspectBytes(InspectBytes),
+    CreateDefault(CreateDefault),
     BinToHuman(BinToHuman),
     HumanToBin(HumanToBin),
 }
@@ -112,6 +121,7 @@ pub enum SampleSlots {
 #[command(help_template = "{name}: {about}\n{usage-heading}\n{tab}{tab}{tab} {usage}")]
 pub enum Projects {
     Inspect(Inspect),
+    CreateDefault(CreateDefault),
 
     /// Specific commands for Project Metadata
     #[command(subcommand)]
@@ -143,6 +153,7 @@ pub enum Projects {
 pub enum Banks {
     Inspect(Inspect),
     InspectBytes(InspectBytes),
+    CreateDefault(CreateDefault),
 
     /// Move a Bank from one Project to another Project while updating active sample slot
     /// assignments in the destination Project.
@@ -297,11 +308,12 @@ pub enum SampleSearch {
 pub enum Otfile {
     Inspect(Inspect),
     InspectBytes(InspectBytes),
+    CreateDefault(CreateDefault),
 
-    /// Create a default OctaTrack binary data file
-    CreateDefault {
+    /// Create Nx OctaTrack binary data files with default data
+    CreateDefaultN {
         /// Wav File paths to generate default sample attribute files for
-        wav_file_path: Vec<PathBuf>,
+        paths: Vec<PathBuf>,
     },
 
     BinToHuman(BinToHuman),

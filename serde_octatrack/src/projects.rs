@@ -216,7 +216,7 @@ impl Default for Project {
         let states = ProjectStates::default();
         let settings = ProjectSettings::default();
 
-        let slots: Vec<ProjectSampleSlot> = ProjectSampleSlot::default_vec();
+        let slots: Vec<ProjectSampleSlot> = ProjectSampleSlot::defaults();
 
         Project {
             metadata,
@@ -432,10 +432,7 @@ mod tests {
         #[test]
         fn test_sslots_to_string() {
             let valid = "[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=129\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=130\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=131\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=132\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=133\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=134\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=135\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]\r\n\r\n[SAMPLE]\r\nTYPE=FLEX\r\nSLOT=136\r\nPATH=\r\nTRIM_BARSx100=0\r\nTSMODE=2\r\nLOOPMODE=0\r\nGAIN=72\r\nTRIGQUANTIZATION=255\r\n[/SAMPLE]";
-            assert_eq!(
-                sslots_vec_to_string(&ProjectSampleSlot::default_vec()),
-                valid
-            );
+            assert_eq!(sslots_vec_to_string(&ProjectSampleSlot::defaults()), valid);
         }
     }
 }

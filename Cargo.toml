@@ -1,5 +1,5 @@
 [workspace]
-members = ["serde_octatrack", "octatools-bin", "octatools-gui"]
+members = ["serde_octatrack", "octatools-bin", "octatools-gui", "octatools_derive"]
 resolver = "2"
 
 [workspace.package]

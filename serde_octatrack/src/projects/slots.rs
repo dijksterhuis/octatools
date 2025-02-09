@@ -98,8 +98,8 @@ impl ProjectSampleSlot {
         })
     }
 
-    /// Create a default vector of Projet Sample Slots; 8x Recorder Buffers.
-    pub fn default_vec() -> Vec<Self> {
+    /// Create a default vector of Project Sample Slots; 8x Recorder Buffers.
+    pub fn defaults() -> Vec<Self> {
         [
             ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,

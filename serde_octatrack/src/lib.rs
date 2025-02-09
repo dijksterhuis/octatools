@@ -18,6 +18,8 @@ pub mod samples;
 pub mod utils;
 
 use serde::{Deserialize, Serialize};
+use serde_big_array::Array;
+use std::array::from_fn;
 use std::{
     error::Error,
     fmt::Debug,
@@ -60,6 +62,7 @@ impl std::fmt::Display for SerdeOctatrackErrors {
 }
 impl Error for SerdeOctatrackErrors {}
 
+// DO-NOT-DERIVE: Implementation details for each enum are always required.
 /// Trait to convert between Enum option instances and their corresponding value.
 trait OptionEnumValueConvert {
     /// One of the enum types within the `octatrack::options` module.
@@ -92,6 +95,62 @@ pub trait Encode {
         Self: Serialize,
     {
         Ok(bincode::serialize(&self)?)
+    }
+}
+
+/*
+Personal note: const generic parameters is one of those things that is making me
+fall in love with Rust's type system.
+
+A const generic parameter defined like this is automatically picked up by the
+type system when creating a new instance of a struct.
+
+So a struct like:
+```rust
+#[derive(DefaultsAsArray)]
+struct MyStruct { pub arr: [u8; 42] }
+impl Default for u8 { fn default() -> u8 { 0 } }
+let x = MyStruct { arr: u8::defaults() };
+```
+
+The type system automatically works out that the method's const generic `N`
+parameter is `22` for the `arr` field! No need to manually provide the length as
+an argument if the array is already defined as having a specified length!
+
+In non-struct code definitions, the same thing happens if a type hint is given
+when declaring the variable:
+```
+let y: [u8; 42] = u8::defaults();
+```
+
+When there's no type hint -- that's where we have to define it:
+```
+let z = u8::defaults::<42>();
+```
+*/
+
+/// Used when we need a collection of types as the default, e.g. when we want to
+/// get a default sample slot list, we need to return a `Vec<SampleSlot>`
+/// The `Default` trait doesn't work in this case, because `Default` is reserved
+/// for a creating a default of a single `SampleSlot`.
+pub trait DefaultsArray {
+    /// Create an Array containing `N` default instances of `Self`.
+    fn defaults<const N: usize>() -> [Self; N]
+    where
+        Self: Default,
+    {
+        from_fn(|_| Self::default())
+    }
+}
+
+pub trait DefaultsArrayBoxed {
+    /// Create a Boxed 'serde BigArray' Array containing `N` default instances
+    /// of `Self`.
+    fn defaults<const N: usize>() -> Box<Array<Self, N>>
+    where
+        Self: Default,
+    {
+        Box::new(Array(from_fn(|_| Self::default())))
     }
 }
 
@@ -194,6 +253,25 @@ where
 {
     let yaml = serialize_json_from_type::<T>(data)?;
     write_str_file(&yaml, path)?;
+    Ok(())
+}
+
+/// Create a new type with default settings, and serialize the data to a file.
+///
+/// **NOTE**: The `Defaults` trait should never be used with this function.
+///
+/// `Defaults` are always used during the construction of underlying types
+/// within a top level type, i.e. the default `Vec<SampleSlot>` only exists
+/// inside a `Project` type. There's no reason for us to write `Vec<SampleSlot>`
+/// to a binary data file.
+pub fn default_type_to_bin_file<T>(outpath: &Path) -> RBoxErr<()>
+where
+    T: Debug,
+    T: Encode,
+    T: Default,
+    T: Serialize,
+{
+    write_type_to_bin_file(&T::default(), outpath)?;
     Ok(())
 }
 
@@ -860,7 +938,7 @@ mod test {
         fn test_read_default_project_work_file_sslots() {
             let infile = PathBuf::from("../data/tests/blank-project/project.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
-            let default_sslots = ProjectSampleSlot::default_vec();
+            let default_sslots = ProjectSampleSlot::defaults();
 
             assert_eq!(p.slots, default_sslots);
         }

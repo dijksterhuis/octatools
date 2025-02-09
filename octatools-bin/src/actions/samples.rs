@@ -12,6 +12,7 @@ use serde_octatrack::samples::{
     slices::{Slice, Slices},
     SampleAttributes, SampleAttributesRawBytes,
 };
+use std::array::from_fn;
 use std::path::{Path, PathBuf};
 
 use crate::{
@@ -45,6 +46,52 @@ pub fn show_ot_file_bytes(
     let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
     Ok(())
+}
+
+// todo: tests
+/// Create a default OctaTrack sample attributes file for some wav file
+pub fn create_default_ot_file_for_wav_file(path: &Path) -> RBoxErr<()> {
+    let mut ot_path = path.to_path_buf();
+    ot_path.set_extension("ot");
+
+    let wavfile = WavFile::from_path(path)?;
+
+    let ot_data = SampleAttributes::new(
+        &120.0,
+        &SampleAttributeTimestrechMode::default(),
+        &SampleAttributeTrigQuantizationMode::default(),
+        &0.0,
+        &SampleTrimConfig {
+            start: 0,
+            end: wavfile.len,
+            length: wavfile.len,
+        },
+        &SampleLoopConfig {
+            start: 0,
+            length: wavfile.len,
+            mode: SampleAttributeLoopMode::default(),
+        },
+        &Slices {
+            slices: from_fn(|_| Slice {
+                trim_end: 0,
+                trim_start: 0,
+                loop_start: 0,
+            }),
+            count: 0,
+        },
+    );
+
+    Ok(type_to_yaml_file::<SampleAttributes>(&ot_data?, &ot_path)?)
+}
+
+// todo: test
+// todo: better error handling
+/// Create Nx default OctaTrack sample attributes file for Nx wav files
+pub fn create_default_ot_files_for_wav_files(paths: &Vec<PathBuf>) -> RBoxErr<()> {
+    Ok(paths
+        .iter()
+        .map(|x| create_default_ot_file_for_wav_file(x).expect("Failed to create an ot file"))
+        .collect())
 }
 
 /// Chain together a wav sample vector into individual wav file(s).

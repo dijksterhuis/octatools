@@ -3,25 +3,35 @@
 pub mod parts;
 pub mod patterns;
 
-use crate::{
-    banks::{parts::Part, patterns::Pattern},
-    Decode, Encode,
-};
+use crate::{banks::{parts::Part, patterns::Pattern}, Decode, DefaultsArrayBoxed, Encode};
+
+use octatools_derive::DefaultsAsBoxedBigArray;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
+/// Bank header data.
+/// ```text
+/// FORM....DPS1BANK......
+/// 46 4f 52 4d 00 00 00 00 44 50 53 31 42 41 4e 4b 00 00 00 00 00 17
+/// [70 79 82 77 0 0 0 0 68 80 83 49 66 65 78 75 0 0 0 0 0 23]
+/// ```
+const BANK_HEADER: [u8; 22] = [
+    70, 79, 82, 77, 0, 0, 0, 0, 68, 80, 83, 49, 66, 65, 78, 75, 0, 0, 0, 0, 0, 23,
+];
+
+/// Default Part names (PART 1, PART 2 etc.) converted to u8 for ease of use.
+const DEFAULT_PART_NAMES: [[u8; 7]; 4] = [
+    [80, 65, 82, 84, 32, 49, 0], // "PART 1"
+    [80, 65, 82, 84, 32, 50, 0], // "PART 2"
+    [80, 65, 82, 84, 32, 51, 0], // "PART 3"
+    [80, 65, 82, 84, 32, 52, 0], // "PART 4"
+];
+
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray)]
 pub struct Bank {
     /// Misc header data for Banks.
     /// Always follows the same format.
-    ///
-    /// Example data:
-    /// ```text
-    /// FORM....DPS1BANK......
-    /// 46 4f 52 4d 00 00 00 00 44 50 53 31 42 41 4e 4b
-    /// 00 00 00 00 00 17
-    /// ```
     #[serde(with = "BigArray")]
     pub header_data: [u8; 22],
 
@@ -51,6 +61,20 @@ pub struct Bank {
     /// Seems to be related to whether the Bank has been modified or saved?
     #[serde(with = "BigArray")]
     pub remainder: [u8; 2],
+}
+
+impl Default for Bank {
+    fn default() -> Self {
+        Self {
+            header_data: BANK_HEADER,
+            patterns: Pattern::defaults(),
+            parts_unsaved: Part::defaults(),
+            parts_saved: Part::defaults(),
+            unknown: [0, 0, 0, 0, 0],
+            part_names: DEFAULT_PART_NAMES,
+            remainder: [0, 0],
+        }
+    }
 }
 
 impl Encode for Bank {}
