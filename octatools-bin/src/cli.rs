@@ -381,6 +381,9 @@ pub enum ShellCompletions {
 
 #[derive(Subcommand, Debug, PartialEq)]
 pub enum Commands {
+    /// Prints a list of all available commands and a description of what they do
+    HelpFull,
+
     #[command(subcommand)]
     ShellCompletion(ShellCompletions),
 
@@ -404,4 +407,5 @@ pub enum Commands {
 
     #[command(subcommand)]
     Samples(Samples),
+
 }
