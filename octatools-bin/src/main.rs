@@ -43,6 +43,7 @@ use serde_octatrack::{Decode, Encode};
 use std::error::Error;
 use std::fmt::Display;
 use std::io;
+use std::io::Write;
 use std::path::PathBuf;
 
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
@@ -486,6 +487,93 @@ fn cmd_shell_completions(x: cli::ShellCompletions) -> () {
 }
 
 #[doc(hidden)]
+fn cmd_help_full() -> () {
+    let mut cli_data = Cli::command();
+
+    let mut buf = String::new();
+    let mut prefix = String::new();
+
+    /*
+
+    SAMPLES: Some text describing `samples` commands
+    ====================================
+    samples chain create: some text about chaining
+    samples chain create-n: some text about chaining
+    sample grid linear: some text about slice grids
+    sample grid random: some text about slice grids
+    */
+    let _ = recursive_walk_subcommands(&mut buf, &mut prefix, &mut cli_data);
+
+    io::stdout().write_all(buf.as_bytes()).unwrap();
+    io::stdout().flush().unwrap();
+}
+
+#[doc(hidden)]
+fn write_command_usage(
+    buffer: &mut String,
+    prefix: &mut String,
+    cmd: &mut Command,
+) -> () {
+    /*
+    {prefix} command -- Some text describing a specific command
+    {prefix} command -- Some text describing a specific command
+    {prefix} command -- Some text describing a specific command
+    {prefix} command -- Some text describing a specific command
+    */
+
+
+    buffer.push_str(format!("{prefix} {}", cmd.get_name()).as_str());
+    if let Some(about) = cmd.get_about() {
+        buffer.push_str(format!(" -- {}", about).as_str());
+    }
+    buffer.push_str("\n");
+}
+
+
+#[doc(hidden)]
+fn write_top_level_header(
+    buffer: &mut String,
+    cmd: &mut Command,
+) -> () {
+    /*
+
+    SAMPLES: Some text describing `samples` commands
+    ====================================
+    */
+    buffer.push_str(format!("\n{}", cmd.get_name().to_ascii_uppercase()).as_str());
+    if let Some(about) = cmd.get_about() {
+        buffer.push_str(format!(": {}\n", about).as_str());
+    }
+    buffer.push_str("====================================\n");
+
+}
+
+
+#[doc(hidden)]
+fn recursive_walk_subcommands(buffer: &mut String, prefix: &mut String, cmd: &mut Command) -> String {
+    for sub in cmd.get_subcommands_mut() {
+        // some sort of command/subcommand
+        if sub.has_subcommands() {
+            let mut sub_prefix = prefix.clone();
+            if sub_prefix.len() == 0 {
+                // no existing prefix -- top level command, create a header block
+                write_top_level_header(buffer, sub)
+            } else {
+                // an existing prefix -- is a subcommand so include in list with usage
+                sub_prefix.push_str(" ");
+            }
+            sub_prefix.push_str(sub.get_name());
+            recursive_walk_subcommands(buffer, &mut sub_prefix, sub);
+        } else {
+            // no subcommands, write usage details
+            write_command_usage(buffer, prefix, sub);
+        }
+    }
+
+    buffer.clone()
+
+}
+#[doc(hidden)]
 fn main() {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);
@@ -500,5 +588,6 @@ fn main() {
         Commands::Projects(x) => cmd_select_project(x),
         Commands::Samples(x) => cmd_select_samples(x),
         Commands::ShellCompletion(x) => cmd_shell_completions(x),
+        Commands::HelpFull => cmd_help_full(),
     };
 }
