@@ -13,7 +13,7 @@ use clap::Parser;
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 
-use actions::{
+use crate::actions::{
     arrangements::show_arrangement_bytes,
     banks::{batch_copy_banks, copy_bank, show_bank_bytes},
     drive::create_file_index_yaml,
@@ -24,6 +24,7 @@ use actions::{
         list_project_sample_slots, purge_project_pool,
     },
     samples::{
+        create_default_ot_file_for_wav_file, create_default_ot_files_for_wav_files,
         create_equally_sliced_sample, create_index_samples_dir_full,
         create_index_samples_dir_simple, create_randomly_sliced_sample,
         create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
@@ -152,6 +153,9 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
         }) => {
             print_err(|| show_arrangement_bytes(&bin_path, &start, &len));
         }
+        cli::Arrangements::CreateDefault(cli::CreateDefault { path }) => {
+            print_err(|| serde_octatrack::default_type_to_bin_file::<ArrangementFile>(&path));
+        }
         cli::Arrangements::BinToHuman(cli::BinToHuman {
             bin_path,
             dest_type,
@@ -195,6 +199,9 @@ fn cmd_select_banks(x: cli::Banks) -> () {
             len,
         }) => {
             print_err(|| show_bank_bytes(&bin_path, &start, &len));
+        }
+        cli::Banks::CreateDefault(cli::CreateDefault { path }) => {
+            print_err(|| serde_octatrack::default_type_to_bin_file::<Bank>(&path));
         }
         cli::Banks::BinToHuman(cli::BinToHuman {
             bin_path,
@@ -282,6 +289,9 @@ fn cmd_select_project(x: cli::Projects) -> () {
     match x {
         cli::Projects::Inspect(cli::Inspect { bin_path }) => {
             print_err(|| serde_octatrack::show_type::<Project>(&bin_path, None));
+        }
+        cli::Projects::CreateDefault(cli::CreateDefault { path }) => {
+            print_err(|| serde_octatrack::default_type_to_bin_file::<Project>(&path));
         }
         cli::Projects::Settings(y) => match y {
             cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
@@ -434,11 +444,11 @@ fn cmd_select_samples(x: cli::Samples) -> () {
                     )
                 });
             }
-
-            cli::Otfile::CreateDefault {
-                wav_file_path: _wav_file_path,
-            } => {
-                unimplemented!();
+            cli::Otfile::CreateDefault(cli::CreateDefault { path }) => {
+                print_err(|| create_default_ot_file_for_wav_file(&path));
+            }
+            cli::Otfile::CreateDefaultN { paths } => {
+                print_err(|| create_default_ot_files_for_wav_files(&paths));
             }
         },
         cli::Samples::Search(y) => match y {

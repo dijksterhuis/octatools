@@ -7,14 +7,24 @@ use crate::{
         MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
     },
     projects::options::ProjectSampleSlotType,
+    DefaultsArray, DefaultsArrayBoxed,
 };
 
+use octatools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
+
+use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
-use crate::RBoxErr;
-
 const HALF_PAGE_TRIG_BITMASK_VALUES: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
+const PATTERN_HEADER: [u8; 8] = [0x50, 0x54, 0x52, 0x4e, 0x00, 0x00, 0x00, 0x00];
+
+/// Header array for a MIDI track section in binary data files: `MTRA`
+const MIDI_TRACK_HEADER: [u8; 4] = [0x4d, 0x54, 0x52, 0x41];
+
+/// Header array for a MIDI track section in binary data files: `TRAC`
+const AUDIO_TRACK_HEADER: [u8; 4] = [54, 0x52, 0x41, 0x43];
+
 
 /// Given a half-page trig bit mask, get an array of 8x boolean values
 /// indicating whether each trig in the half-page is active or not
@@ -42,7 +52,7 @@ pub fn get_track_trigs_from_bitmasks(bitmasks: &[u8; 8]) -> RBoxErr<[bool; 64]> 
 }
 
 /// A Trig's parameter locks on the Playback/Machine page for an Audio Track.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy)]
 pub struct AudioTrackParameterLockPlayback {
     pub param1: u8,
     pub param2: u8,
@@ -52,8 +62,67 @@ pub struct AudioTrackParameterLockPlayback {
     pub param6: u8,
 }
 
+impl Default for AudioTrackParameterLocks {
+    fn default() -> Self {
+        // 255 -> disabled
+
+        // NOTE: the `part.rs` `default` methods for each of these type has
+        // fields all set to the correct defaults for the TRACK view, not p-lock
+        // trigS. So don't try and use the type's `default` method here as you
+        // will end up with a bunch of p-locks on trigs for all the default
+        // values. (Although maybe that's a desired feature for some workflows).
+
+        // Yes, this comment is duplicated below. It is to make sur you've seen
+        // it.
+        Self {
+            machine: AudioTrackParameterLockPlayback {
+                param1: 255,
+                param2: 255,
+                param3: 255,
+                param4: 255,
+                param5: 255,
+                param6: 255,
+            },
+            lfo: LfoParamsValues {
+                spd1: 255,
+                spd2: 255,
+                spd3: 255,
+                dep1: 255,
+                dep2: 255,
+                dep3: 255,
+            },
+            amp: AudioTrackAmpParamsValues {
+                atk: 255,
+                hold: 255,
+                rel: 255,
+                vol: 255,
+                bal: 255,
+                unused: 255,
+            },
+            fx1: AudioTrackFxParamsValues {
+                param_1: 255,
+                param_2: 255,
+                param_3: 255,
+                param_4: 255,
+                param_5: 255,
+                param_6: 255,
+            },
+            fx2: AudioTrackFxParamsValues {
+                param_1: 255,
+                param_2: 255,
+                param_3: 255,
+                param_4: 255,
+                param_5: 255,
+                param_6: 255,
+            },
+            static_slot_id: 255,
+            flex_slot_id: 255,
+        }
+    }
+}
+
 /// A single trig's parameter locks on an Audio Track.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy, DefaultsAsBoxedBigArray)]
 pub struct AudioTrackParameterLocks {
     pub machine: AudioTrackParameterLockPlayback,
     pub lfo: LfoParamsValues,
@@ -67,7 +136,7 @@ pub struct AudioTrackParameterLocks {
 }
 
 /// MIDI Track parameter locks.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy, DefaultsAsBoxedBigArray)]
 pub struct MidiTrackParameterLocks {
     pub midi: MidiTrackMidiParamsValues,
     pub lfo: MidiTrackLfoParamsValues,
@@ -79,8 +148,67 @@ pub struct MidiTrackParameterLocks {
     unknown: [u8; 2],
 }
 
+impl Default for MidiTrackParameterLocks {
+    fn default() -> Self {
+        // 255 -> disabled
+
+        // NOTE: the `part.rs` `default` methods for each of these type has
+        // fields all set to the correct defaults for the TRACK view, not p-lock
+        // trigS. So don't try and use the type's `default` method here as you
+        // will end up with a bunch of p-locks on trigs for all the default
+        // values. (Although maybe that's a desired feature for some workflows).
+
+        // Yes, this comment is duplicated above. It is to make sur you've seen
+        // it.
+
+        Self {
+            midi: MidiTrackMidiParamsValues {
+                note: 255,
+                vel: 255,
+                len: 255,
+                not2: 255,
+                not3: 255,
+                not4: 255,
+            },
+            lfo: MidiTrackLfoParamsValues {
+                spd1: 255,
+                spd2: 255,
+                spd3: 255,
+                dep1: 255,
+                dep2: 255,
+                dep3: 255,
+            },
+            arp: MidiTrackArpParamsValues {
+                tran: 255,
+                leg: 255,
+                mode: 255,
+                spd: 255,
+                rnge: 255,
+                nlen: 255,
+            },
+            ctrl1: MidiTrackCc1ParamsValues {
+                pb: 255,
+                at: 255,
+                cc1: 255,
+                cc2: 255,
+                cc3: 255,
+                cc4: 255,
+            },
+            ctrl2: MidiTrackCc2ParamsValues {
+                cc5: 255,
+                cc6: 255,
+                cc7: 255,
+                cc8: 255,
+                cc9: 255,
+                cc10: 255,
+            },
+            unknown: [255, 255],
+        }
+    }
+}
+
 /// Audio & MIDI Track Pattern playback settings.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy)]
 pub struct TrackPatternSettings {
     /// Silence any existing audio playback on the Audio Track when switching Patterns.
     pub start_silent: u8,
@@ -125,6 +253,18 @@ pub struct TrackPatternSettings {
 
     /// Whether to play the track as a `ONESHOT` track.
     pub oneshot_trk: u8,
+}
+
+impl Default for TrackPatternSettings {
+    fn default() -> Self {
+        Self {
+            start_silent: 255,
+            plays_free: 0,
+            trig_mode: 0,
+            trig_quant: 0,
+            oneshot_trk: 0,
+        }
+    }
 }
 
 /// Trig bitmasks array for Audio Tracks.
@@ -241,8 +381,25 @@ pub struct AudioTrackTrigMasks {
     pub slide: [u8; 8],
 }
 
+impl Default for AudioTrackTrigMasks {
+    fn default() -> Self {
+        Self {
+            trigger: [0, 0, 0, 0, 0, 0, 0, 0],
+            trigless: [0, 0, 0, 0, 0, 0, 0, 0],
+            plock: [0, 0, 0, 0, 0, 0, 0, 0],
+            oneshot: [0, 0, 0, 0, 0, 0, 0, 0],
+            recorder: [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0,
+            ],
+            swing: [170, 170, 170, 170, 170, 170, 170, 170],
+            slide: [0, 0, 0, 0, 0, 0, 0, 0],
+        }
+    }
+}
+
 /// Audio Track custom scaling when the Pattern is in PER TRACK scale mode.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy)]
 pub struct TrackPerTrackModeScale {
     /// The Audio Track's Length when Pattern is in Per Track mode.
     /// Default: 16
@@ -263,8 +420,17 @@ pub struct TrackPerTrackModeScale {
     pub per_track_scale: u8,
 }
 
+impl Default for TrackPerTrackModeScale {
+    fn default() -> Self {
+        Self {
+            per_track_len: 16,
+            per_track_scale: 2,
+        }
+    }
+}
+
 /// Track trigs assigned on an Audio Track within a Pattern
-#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone, DefaultsAsArray)]
 pub struct AudioTrackTrigs {
     /// Header data section
     ///
@@ -307,6 +473,30 @@ pub struct AudioTrackTrigs {
     pub unknown_3: [u8; 192],
 }
 
+impl Default for AudioTrackTrigs {
+    fn default() -> Self {
+        Self {
+            header: AUDIO_TRACK_HEADER,
+            unknown_1: [0, 0, 0, 0, 0],
+            trig_masks: AudioTrackTrigMasks::default(),
+            scale_per_track_mode: TrackPerTrackModeScale::default(),
+            swing_amount: 0,
+            pattern_settings: TrackPatternSettings::default(),
+            unknown_2: 0,
+            plocks: AudioTrackParameterLocks::defaults(),
+            unknown_3: [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ],
+        }
+    }
+}
+
 /// MIDI Track Trig masks.
 /// Can be converted into an array of booleans using the `get_track_trigs_from_bitmasks` function.
 /// See `AudioTrackTrigMasks` for more information.
@@ -320,7 +510,7 @@ pub struct AudioTrackTrigs {
 /// 6. 2nd half of the 2nd page
 /// 7. 2nd half of the 1st page
 /// 8. 1st half of the 1st page
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Copy)]
 pub struct MidiTrackTrigMasks {
     /// Note Trig masks.
     #[serde(with = "BigArray")]
@@ -345,8 +535,20 @@ pub struct MidiTrackTrigMasks {
     pub unknown: [u8; 8],
 }
 
+impl Default for MidiTrackTrigMasks {
+    fn default() -> Self {
+        Self {
+            trigger: [0, 0, 0, 0, 0, 0, 0, 0],
+            trigless: [0, 0, 0, 0, 0, 0, 0, 0],
+            plock: [0, 0, 0, 0, 0, 0, 0, 0],
+            swing: [170, 170, 170, 170, 170, 170, 170, 170],
+            unknown: [0, 0, 0, 0, 0, 0, 0, 0],
+        }
+    }
+}
+
 /// Track trigs assigned on an Audio Track within a Pattern
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsArray)]
 pub struct MidiTrackTrigs {
     /// Header data section
     ///
@@ -397,6 +599,22 @@ pub struct MidiTrackTrigs {
     /// mostly a bunch of zero values
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub unknown_3: Box<Array<u8, 128>>,
+}
+
+impl Default for MidiTrackTrigs {
+    fn default() -> Self {
+        Self {
+            header: MIDI_TRACK_HEADER,
+            unknown_1: [0, 0, 0, 0],
+            unknown_2: 0,
+            trig_masks: MidiTrackTrigMasks::default(),
+            scale_per_track_mode: TrackPerTrackModeScale::default(),
+            swing_amount: 0,
+            pattern_settings: TrackPatternSettings::default(),
+            plocks: MidiTrackParameterLocks::defaults(),
+            unknown_3: Box::new(Array([0; 128])),
+        }
+    }
 }
 
 /// Pattern level scaling settings.
@@ -470,6 +688,19 @@ pub struct PatternScaleSettings {
     pub scale_mode: u8,
 }
 
+impl Default for PatternScaleSettings {
+    fn default() -> Self {
+        Self {
+            master_len_per_track_multiplier: 0,
+            master_len_per_track: 16,
+            master_scale_per_track: 2,
+            master_len: 16,
+            master_scale: 2,
+            scale_mode: 0,
+        }
+    }
+}
+
 /// Chaining behaviour for the pattern.
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PatternChainBehavior {
@@ -484,8 +715,17 @@ pub struct PatternChainBehavior {
     pub use_project_setting: u8,
 }
 
+impl Default for PatternChainBehavior {
+    fn default() -> Self {
+        Self {
+            use_pattern_setting: 0,
+            use_project_setting: 0,
+        }
+    }
+}
+
 /// A pattern of trigs stored in the bank.
-#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone, DefaultsAsBoxedBigArray)]
 pub struct Pattern {
     /// Header indicating start of pattern section
     ///
@@ -532,6 +772,23 @@ pub struct Pattern {
     /// Value of 120 BPM is `64` for this field.
     /// Value of 30 BPM is `208` for this field.
     pub tempo_2: u8,
+}
+
+impl Default for Pattern {
+    fn default() -> Self {
+        Self {
+            header: PATTERN_HEADER,
+            audio_track_trigs: AudioTrackTrigs::defaults(),
+            midi_track_trigs: MidiTrackTrigs::defaults(),
+            scale: PatternScaleSettings::default(),
+            chain_behaviour: PatternChainBehavior::default(),
+            unknown: [0, 0],
+            // **I believe** these two mask values make the tempo 120.0 BPM
+            // don't quote me on that though
+            tempo_1: 11,
+            tempo_2: 64,
+        }
+    }
 }
 
 impl Pattern {

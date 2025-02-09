@@ -22,13 +22,18 @@
 mod deserialize;
 mod serialize;
 
-use crate::{Decode, Encode};
+use crate::{Decode, DefaultsArrayBoxed, Encode};
+use octatools_derive::DefaultsAsBoxedBigArray;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
 const ARRANGEMENT_FILE_HEADER: [u8; 22] = [
     70, 79, 82, 77, 0, 0, 0, 0, 68, 80, 83, 49, 65, 82, 82, 65, 0, 0, 0, 0, 0, 6,
 ];
+
+// "OCTATOOLS-ARR"
+const ARRANGEMENT_DEFAULT_NAME: [u8; 15] =
+    [79, 67, 84, 65, 84, 79, 79, 76, 83, 45, 65, 82, 82, 32, 32];
 
 // max length: 11336 bytes
 /// Public representation of an `arr??.*` Arrangement file.
@@ -80,6 +85,20 @@ pub struct ArrangementFile {
     pub check_sum: [u8; 2],
 }
 
+impl Default for ArrangementFile {
+    fn default() -> Self {
+        Self {
+            header: ARRANGEMENT_FILE_HEADER,
+            unk1: [0, 0],
+            arrangement_state_current: ArrangementBlock::default(),
+            unk2: [0, 0],
+            arrangement_state_previous: ArrangementBlock::default(),
+            arrangements_active_flag: [0, 0, 0, 0, 0, 0, 0, 0],
+            check_sum: [0, 0],
+        }
+    }
+}
+
 impl Encode for ArrangementFile {}
 impl Decode for ArrangementFile {}
 /// An Arrangement 'block'. 5650 bytes.
@@ -105,8 +124,19 @@ pub struct ArrangementBlock {
     pub rows: Box<Array<ArrangeRow, 256>>,
 }
 
+impl Default for ArrangementBlock {
+    fn default() -> Self {
+        Self {
+            name: ARRANGEMENT_DEFAULT_NAME,
+            unknown_1: [0, 0],
+            n_rows: 0,
+            rows: ArrangeRow::defaults(),
+        }
+    }
+}
+
 /// A Row in the Arrangement.
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, DefaultsAsBoxedBigArray)]
 pub enum ArrangeRow {
     /// pattern choice and playback
     PatternRow {
@@ -158,6 +188,12 @@ pub enum ArrangeRow {
     ReminderRow(String),
     /// Row is not in use. Only used in an `ArrangementBlock` as a placeholder for null basically.
     EmptyRow(),
+}
+
+impl Default for ArrangeRow {
+    fn default() -> Self {
+        Self::EmptyRow()
+    }
 }
 
 // max length: 11336 bytes

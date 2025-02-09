@@ -9,7 +9,6 @@ license-file.workspace = true
 homepage.workspace = true
 repository.workspace = true
 
-
 [dependencies]
 bincode.workspace = true
 itertools.workspace = true
@@ -18,3 +17,5 @@ serde-big-array = "0.5.1"
 serde_json.workspace = true
 serde_yml.workspace = true
 walkdir.workspace = true
+octatools_derive = { path = "../octatools_derive" }
+
