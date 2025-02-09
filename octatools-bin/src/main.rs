@@ -9,7 +9,9 @@ mod common;
 mod octatrack_sets;
 mod utils;
 
-use clap::Parser;
+use clap::{Command, CommandFactory, Parser};
+use clap_complete::{generate, Generator, Shell};
+
 use env_logger::{Builder, Target};
 use log::LevelFilter;
 
@@ -40,6 +42,7 @@ use serde_octatrack::samples::SampleAttributes;
 use serde_octatrack::{Decode, Encode};
 use std::error::Error;
 use std::fmt::Display;
+use std::io;
 use std::path::PathBuf;
 
 pub type RBoxErr<T> = Result<T, Box<dyn Error>>;
@@ -469,14 +472,26 @@ fn cmd_select_samples(x: cli::Samples) -> () {
 }
 
 #[doc(hidden)]
+fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
+    generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
+}
+
+#[doc(hidden)]
+fn cmd_shell_completions(x: cli::ShellCompletions) -> () {
+    let mut cli_data = Cli::command();
+    match x {
+        cli::ShellCompletions::Bash => print_completions(Shell::Bash, &mut cli_data),
+        cli::ShellCompletions::Powershell => print_completions(Shell::PowerShell, &mut cli_data),
+    }
+}
+
+#[doc(hidden)]
 fn main() {
     let mut logger = Builder::new();
     logger.filter_level(LevelFilter::Debug);
     logger.target(Target::Stdout).init();
 
-    let args = Cli::parse();
-
-    match args.command {
+    match Cli::parse().command {
         Commands::Arrangements(x) => cmd_select_arrangements(x),
         Commands::Banks(x) => cmd_select_banks(x),
         Commands::Drive(x) => cmd_select_drive(x),
@@ -484,5 +499,6 @@ fn main() {
         Commands::Parts(x) => cmd_select_parts(x),
         Commands::Projects(x) => cmd_select_project(x),
         Commands::Samples(x) => cmd_select_samples(x),
+        Commands::ShellCompletion(x) => cmd_shell_completions(x),
     };
 }
