@@ -1,5 +1,5 @@
 use crate::{OctatoolErrors, RBoxErr};
-use serde_octatrack::{banks::Bank, read_type_from_bin_file};
+use octatools_lib::{banks::Bank, read_type_from_bin_file};
 use std::path::Path;
 
 fn part_index_is_valid(indexes: &[usize]) -> bool {

@@ -5,7 +5,7 @@ use octatools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-use serde_octatrack::samples::options::{
+use octatools_lib::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 

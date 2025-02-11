@@ -1,7 +1,7 @@
 //! Functions for generating YAML 'index' files from the CLI.
 
 mod yaml;
-use serde_octatrack::type_to_yaml_file;
+use octatools_lib::type_to_yaml_file;
 
 use crate::RBoxErr;
 use log::debug;
@@ -26,7 +26,7 @@ pub fn create_file_index_yaml(
 #[allow(unused_imports)]
 mod test {
     use super::*;
-    use serde_octatrack::yaml_file_to_type;
+    use octatools_lib::yaml_file_to_type;
 
     #[test]
     fn test_drive_file_index_yaml_ok() {

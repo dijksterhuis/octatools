@@ -25,7 +25,7 @@ hound = "3.5.1"
 log = "0.4.22"
 md5 = "0.7.0"
 rand = "0.8.5"
-serde_octatrack = { path = "../serde_octatrack" }
+octatools-lib = { path = "../octatools-lib" }
 
 bincode.workspace = true
 itertools.workspace = true

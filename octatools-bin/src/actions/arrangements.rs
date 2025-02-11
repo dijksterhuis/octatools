@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use serde_octatrack::{get_bytes_slice, read_type_from_bin_file};
+use octatools_lib::{get_bytes_slice, read_type_from_bin_file};
 
 use crate::RBoxErr;
-use serde_octatrack::arrangements::ArrangementFileRawBytes;
+use octatools_lib::arrangements::ArrangementFileRawBytes;
 
 /// Show bytes output as u8 values for an Arrangement file located at `path`
 pub fn show_arrangement_bytes(

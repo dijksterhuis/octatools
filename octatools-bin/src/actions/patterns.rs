@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::{OctatoolErrors, RBoxErr};
-use serde_octatrack::{banks::Bank, read_type_from_bin_file};
+use octatools_lib::{banks::Bank, read_type_from_bin_file};
 
 fn pattern_index_is_valid(indexes: &[usize]) -> bool {
     let max_elem = *indexes.iter().max().unwrap();

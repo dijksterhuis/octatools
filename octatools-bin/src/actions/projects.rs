@@ -1,7 +1,7 @@
 use crate::audio::utils::scan_dir_path_for_audio_files;
 use crate::RBoxErr;
 
-use serde_octatrack::{
+use octatools_lib::{
     projects::{slots::ProjectSampleSlot, Project},
     read_type_from_bin_file, write_type_to_bin_file,
 };
@@ -209,7 +209,7 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
 #[allow(unused_imports)]
 mod test {
     use super::*;
-    use serde_octatrack::yaml_file_to_bin_file;
+    use octatools_lib::yaml_file_to_bin_file;
 
     #[test]
     fn test_list_sample_slots_ok() {

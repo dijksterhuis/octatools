@@ -10,7 +10,7 @@ homepage.workspace = true
 repository.workspace = true
 
 [dependencies]
-serde_octatrack = { path = "../serde_octatrack" }
+octatools-lib = { path = "../octatools-lib" }
 bincode.workspace = true
 itertools.workspace = true
 serde.workspace = true
