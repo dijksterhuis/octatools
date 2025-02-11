@@ -195,8 +195,6 @@ impl ProjectSampleSlot {
 }
 
 fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u8> {
-    println!("{hmap:#?}");
-
     let x = parse_hashmap_string_value::<u8>(hmap, "slot", None);
 
     // ParseIntError doesn't allow ? usage
