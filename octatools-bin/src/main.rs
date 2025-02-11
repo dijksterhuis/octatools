@@ -35,11 +35,11 @@ use crate::actions::{
 };
 use cli::{Cli, Commands};
 use serde::{Deserialize, Serialize};
-use serde_octatrack::arrangements::ArrangementFile;
-use serde_octatrack::banks::Bank;
-use serde_octatrack::projects::Project;
-use serde_octatrack::samples::SampleAttributes;
-use serde_octatrack::{Decode, Encode};
+use octatools_lib::arrangements::ArrangementFile;
+use octatools_lib::banks::Bank;
+use octatools_lib::projects::Project;
+use octatools_lib::samples::SampleAttributes;
+use octatools_lib::{Decode, Encode};
 use std::error::Error;
 use std::fmt::Display;
 use std::io;
@@ -127,18 +127,18 @@ where
     match conversion_type {
         ConvertFromTo::BinToHuman => match human_type {
             cli::HumanReadableFileFormat::Json => {
-                serde_octatrack::bin_file_to_json_file::<T>(&bin_path, &human_path)
+                octatools_lib::bin_file_to_json_file::<T>(&bin_path, &human_path)
             }
             cli::HumanReadableFileFormat::Yaml => {
-                serde_octatrack::bin_file_to_yaml_file::<T>(&bin_path, &human_path)
+                octatools_lib::bin_file_to_yaml_file::<T>(&bin_path, &human_path)
             }
         },
         ConvertFromTo::HumanToBin => match human_type {
             cli::HumanReadableFileFormat::Json => {
-                serde_octatrack::json_file_to_bin_file::<T>(&human_path, &bin_path)
+                octatools_lib::json_file_to_bin_file::<T>(&human_path, &bin_path)
             }
             cli::HumanReadableFileFormat::Yaml => {
-                serde_octatrack::yaml_file_to_bin_file::<T>(&human_path, &bin_path)
+                octatools_lib::yaml_file_to_bin_file::<T>(&human_path, &bin_path)
             }
         },
     }
@@ -148,7 +148,7 @@ where
 fn cmd_select_arrangements(x: cli::Arrangements) -> () {
     match x {
         cli::Arrangements::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| serde_octatrack::show_type::<ArrangementFile>(&bin_path, None));
+            print_err(|| octatools_lib::show_type::<ArrangementFile>(&bin_path, None));
         }
         cli::Arrangements::InspectBytes(cli::InspectBytes {
             bin_path,
@@ -158,7 +158,7 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
             print_err(|| show_arrangement_bytes(&bin_path, &start, &len));
         }
         cli::Arrangements::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| serde_octatrack::default_type_to_bin_file::<ArrangementFile>(&path));
+            print_err(|| octatools_lib::default_type_to_bin_file::<ArrangementFile>(&path));
         }
         cli::Arrangements::BinToHuman(cli::BinToHuman {
             bin_path,
@@ -195,7 +195,7 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
 fn cmd_select_banks(x: cli::Banks) -> () {
     match x {
         cli::Banks::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| serde_octatrack::show_type::<Bank>(&bin_path, None));
+            print_err(|| octatools_lib::show_type::<Bank>(&bin_path, None));
         }
         cli::Banks::InspectBytes(cli::InspectBytes {
             bin_path,
@@ -205,7 +205,7 @@ fn cmd_select_banks(x: cli::Banks) -> () {
             print_err(|| show_bank_bytes(&bin_path, &start, &len));
         }
         cli::Banks::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| serde_octatrack::default_type_to_bin_file::<Bank>(&path));
+            print_err(|| octatools_lib::default_type_to_bin_file::<Bank>(&path));
         }
         cli::Banks::BinToHuman(cli::BinToHuman {
             bin_path,
@@ -292,10 +292,10 @@ fn cmd_select_patterns(x: cli::Patterns) -> () {
 fn cmd_select_project(x: cli::Projects) -> () {
     match x {
         cli::Projects::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| serde_octatrack::show_type::<Project>(&bin_path, None));
+            print_err(|| octatools_lib::show_type::<Project>(&bin_path, None));
         }
         cli::Projects::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| serde_octatrack::default_type_to_bin_file::<Project>(&path));
+            print_err(|| octatools_lib::default_type_to_bin_file::<Project>(&path));
         }
         cli::Projects::Settings(y) => match y {
             cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
@@ -411,7 +411,7 @@ fn cmd_select_samples(x: cli::Samples) -> () {
         },
         cli::Samples::Otfile(y) => match y {
             cli::Otfile::Inspect(cli::Inspect { bin_path }) => {
-                print_err(|| serde_octatrack::show_type::<SampleAttributes>(&bin_path, None));
+                print_err(|| octatools_lib::show_type::<SampleAttributes>(&bin_path, None));
             }
             cli::Otfile::InspectBytes(cli::InspectBytes {
                 bin_path,

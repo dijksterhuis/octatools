@@ -3,7 +3,7 @@
 use crate::audio::wav::WavFile;
 use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
-use serde_octatrack::{
+use octatools_lib::{
     constants::DEFAULT_SAMPLE_RATE,
     projects::slots::ProjectSampleSlot,
     samples::slices::{Slice, Slices},
@@ -135,7 +135,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::create_slice_from_wavfile;
-        use serde_octatrack::samples::slices::Slice;
+        use octatools_lib::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]
@@ -185,7 +185,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::create_slices_from_wavfiles;
-        use serde_octatrack::samples::slices::Slice;
+        use octatools_lib::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]
@@ -241,7 +241,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::get_otsample_nbars_from_wavfile;
-        use serde_octatrack::samples::slices::Slice;
+        use octatools_lib::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]
@@ -302,7 +302,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::get_otsample_nbars_from_wavfiles;
-        use serde_octatrack::samples::slices::Slice;
+        use octatools_lib::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]

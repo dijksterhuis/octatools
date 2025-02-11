@@ -37,7 +37,7 @@ impl CompactFlashDrive {
 #[allow(unused_imports)]
 mod test {
     use super::*;
-    use serde_octatrack::yaml_file_to_type;
+    use octatools_lib::yaml_file_to_type;
 
     #[test]
     fn from_yaml_ok() {

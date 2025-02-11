@@ -3,7 +3,7 @@
 
 mod yaml;
 
-use serde_octatrack::{
+use octatools_lib::{
     get_bytes_slice, read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
 };
 
@@ -11,7 +11,7 @@ use crate::{actions::banks::yaml::YamlCopyBankConfig, RBoxErr};
 use log::{debug, error, info, warn};
 use std::{collections::HashSet, path::Path};
 
-use serde_octatrack::{
+use octatools_lib::{
     banks::{Bank, BankRawBytes},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
 };

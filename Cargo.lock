@@ -343,10 +343,10 @@ dependencies = [
  "itertools",
  "log",
  "md5",
+ "octatools-lib",
  "octatools_derive",
  "rand",
  "serde",
- "serde_octatrack",
  "serde_yml",
  "walkdir",
 ]
@@ -357,8 +357,23 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "itertools",
+ "octatools-lib",
  "serde",
- "serde_octatrack",
+ "serde_yml",
+ "walkdir",
+]
+
+[[package]]
+name = "octatools-lib"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "itertools",
+ "octatools_derive",
+ "pyo3",
+ "serde",
+ "serde-big-array",
+ "serde_json",
  "serde_yml",
  "walkdir",
 ]
@@ -367,8 +382,8 @@ dependencies = [
 name = "octatools-py"
 version = "0.1.0"
 dependencies = [
+ "octatools-lib",
  "pyo3",
- "serde_octatrack",
 ]
 
 [[package]]
@@ -594,21 +609,6 @@ dependencies = [
  "memchr",
  "ryu",
  "serde",
-]
-
-[[package]]
-name = "serde_octatrack"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "itertools",
- "octatools_derive",
- "pyo3",
- "serde",
- "serde-big-array",
- "serde_json",
- "serde_yml",
- "walkdir",
 ]
 
 [[package]]

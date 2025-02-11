@@ -19,4 +19,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.23.4", features = ["extension-module"] }
-serde_octatrack = { path = "../serde_octatrack" }
+octatools-lib = { path = "../octatools-lib" }

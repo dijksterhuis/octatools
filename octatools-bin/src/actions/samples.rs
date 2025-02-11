@@ -4,7 +4,7 @@ mod yaml;
 
 use log::{debug, info, trace};
 use rand::Rng;
-use serde_octatrack::samples::{
+use octatools_lib::samples::{
     configs::{SampleLoopConfig, SampleTrimConfig},
     options::{
         SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
@@ -24,7 +24,7 @@ use crate::{
     RBoxErr,
 };
 
-use serde_octatrack::{
+use octatools_lib::{
     get_bytes_slice, read_type_from_bin_file, type_to_yaml_file, write_type_to_bin_file,
     yaml_file_to_type,
 };
@@ -556,8 +556,8 @@ mod tests {
         use crate::audio::wav::WavFile;
 
         use crate::utils::{create_slices_from_wavfiles, get_otsample_nbars_from_wavfiles};
-        use serde_octatrack::read_type_from_bin_file;
-        use serde_octatrack::samples::{
+        use octatools_lib::read_type_from_bin_file;
+        use octatools_lib::samples::{
             configs::{SampleLoopConfig, SampleTrimConfig},
             options::{
                 SampleAttributeLoopMode, SampleAttributeTimestrechMode,
@@ -566,7 +566,7 @@ mod tests {
             slices::{Slice, Slices},
             SampleAttributes,
         };
-        use serde_octatrack::Encode;
+        use octatools_lib::Encode;
 
         fn walkdir_filter_is_wav(entry: &DirEntry) -> bool {
             entry
@@ -921,7 +921,7 @@ mod tests {
         #[test]
         fn simple_with_yaml_matches_validation() {
             use crate::actions::samples::SamplesDirIndexSimple;
-            use serde_octatrack::yaml_file_to_type;
+            use octatools_lib::yaml_file_to_type;
 
             let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-simple-validate.yaml");
@@ -941,7 +941,7 @@ mod tests {
         // #[ignore]
         fn full_with_yaml_matches_validation() {
             use crate::actions::samples::SamplesDirIndexFull;
-            use serde_octatrack::yaml_file_to_type;
+            use octatools_lib::yaml_file_to_type;
 
             let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-full-validate.yaml");
