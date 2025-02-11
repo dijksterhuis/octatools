@@ -220,7 +220,6 @@ mod test {
 
     #[allow(dead_code)] // only dead code on windows!
     fn make_sslot_mock_set_dir(test_dir_path: &PathBuf) {
-
         let _ = fs::create_dir(test_dir_path);
         let _ = fs::create_dir(test_dir_path.join("AUDIO"));
         let _ = fs::create_dir(test_dir_path.join("PROJECT"));

@@ -49,7 +49,6 @@ pub struct CreateDefault {
     pub path: PathBuf,
 }
 
-
 /// Use a human-readable data file to create a new binary data file
 #[derive(Args, Debug, PartialEq)]
 pub struct HumanToBin {
@@ -407,5 +406,4 @@ pub enum Commands {
 
     #[command(subcommand)]
     Samples(Samples),
-
 }
