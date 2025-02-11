@@ -1,3 +1,6 @@
+PYTHON_EXT_PACKAGE_NAME="octatools-py"
+PYTHON_EXT_MODULE_NAME=octatools_py
+
 all:
 	docs test build checks
 
@@ -42,6 +45,20 @@ cov:
 
 build:
 	cargo build --workspace
+
+setup-py:
+	virtualenv -p python3 ./${PYTHON_EXT_PACKAGE_NAME}/venv/
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -m pip install maturin
+
+build-py: setup-py
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/maturin build --manifest-path ./${PYTHON_EXT_PACKAGE_NAME}/Cargo.toml
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -m pip install --force-reinstall $(wildcard ./target/wheels/*.whl)
+
+smoke-py: build-py
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.bank_file_to_json(\"./data/tests/blank-project/bank01.work\")).keys(); print('arrangment:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.arrangement_file_to_json(\"./data/tests/blank-project/arr01.work\")).keys(); print('bank:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.project_file_to_json(\"./data/tests/blank-project/project.work\")).keys(); print('project:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.sample_attributes_file_to_json(\"./data/tests/misc/pair.ot\")).keys(); print('sample attibutes:', keys)"
 
 run:
 	cargo run
