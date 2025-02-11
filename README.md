@@ -1,11 +1,24 @@
-# OctaTools
-
 ![Utilities for the Elektron OctaTrack DPS-1](assets/logo-wide.png "OctaTools")
 
 Utilities for the [Elektron OctaTrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer).
 Only tested against the latest version of the OctaTrack OS (1.40B).
 
-### Warning
+# Table of Contents
+
+- [Warning](./README.md#warning)
+- [Repo Structure](./README.md#repo-structure)
+- [What this is not](./README.md#what-this-is-not)
+- [Packages](./README.md#packages)
+  - [`octatools-bin`](./README.md#octatools-bin)
+  - [`octatools-derive`](./README.md#octatools-derive)
+  - [`octatools-gui`](./README.md#octatools-gui)
+  - [`octatools-lib`](./README.md#octatools-lib)
+  - [`octatools-py`](./README.md#octatools-py)
+- [How to build packages](./README.md#how-to-build-packages)
+- [How to run tests](./README.md#how-to-run-tests)
+- [Help wanted](./README.md#help-wanted)
+
+# Warning
 
 This has mostly been a **learning** project for me to get to grips with Rust. 
 **Please do not expect high quality rust code**.
@@ -22,7 +35,7 @@ I will not take any responsibility for irretrievable data loss that occurs
 (although I may feel bad about it and will likely try to fix whatever bug caused it, if it
 was a bug).
 
-### Repo structure
+# Repo structure
 
 - `./assets/` -- project logo stuff
 - `./data/tests/` -- data used when running the tests, may also be useful when trying out
@@ -35,12 +48,9 @@ was a bug).
   confirmed working on Windows/OSX first)
 - `./octatools-lib` -- Main library containing functions and all the 
   serialization/deserialization code for OctaTrack data files 
-- `./octatools-lib` -- Python extension built with PyO3 to build a python module 
-- `./octatools_py` -- which can turn octatrack data files into json, and back again. Can write 
-  the file to disk or can translate to/from bytes (might be useful for an application 
-  based on python HTTP APIs if someone is so inclined ;])
+- `./octatools-py` -- Python extension built with PyO3 to build a python module 
 
-### What this is not
+# What this is not
 - A clone of DigiChain
 - A clone of OctaEdit
 - A clone of Octachainer
@@ -48,9 +58,11 @@ was a bug).
 - Thoroughly tested
 - Expertly written
 
-## `octatools-bin` -- CLI Executable
+# Packages
 
-Command line binary executable to interact with OctaTrack data files.
+## `octatools-bin`
+
+Command line interface binary executable to interact with OctaTrack data files.
 
 ### Current Features (mostly working-ish)
 - Copy banks from one project to another, moving relevant project sample slots with the 
@@ -68,7 +80,7 @@ Command line binary executable to interact with OctaTrack data files.
 - Find compatible WAV files in a local directory and write their file paths to a YAML file
 - Scan a Compact Flash card and dump OctaTrack file information to YAML
 
-## `octatools-derive` -- Macro definitions for derive traits
+## `octatools-derive`
 
 **If you don't write rust code you can ignore this**.
 
@@ -80,7 +92,7 @@ Used to create `#[derive(XXXX)]` macros for the following:
 
 See the trait descriptions for more information.
 
-## `octatools-gui` -- GUI Application
+## `octatools-gui`
 
 Eventually I'd like to create a simple cross-platform GUI application containing the 
 various `octatools-bin` commands for people who don't know how to use the terminal.
@@ -92,9 +104,9 @@ This package is a placeholder to act as a guilt trip every time I look at the re
 Probably need to have everything tested and working on windows before I'm gonna be 
 comfortable getting this sorted.
 
-## `octatools-lib` -- Functions & Ser/De library
+## `octatools-lib`
 
-Library used for reading/writing octatrack binary data.
+Library with functions for reading/writing octatrack binary data.
 Most of this is just the [`serde` crate](https://serde.rs) with a bunch of function 
 definitions for doing different things.
 
@@ -120,7 +132,7 @@ Like, the arrangements data could do with some work to deal with all the `{"empt
 arranger rows. Header fields *probably* don't need to be there and can be injected in 
 during deserialization.
 
-## `octatools-py` -- Python extension
+## `octatools-py`
 
 Python extension module to allow the reading/writing of octatrack binary data to/from 
 JSON.
@@ -137,3 +149,44 @@ your website into bytes, pass to `octatools_py`, get the json for it etc. etc..
 - Serialize all OctaTrack data files to rust types
 - Serialize/deserialize to/from YAML and JSON
 
+# How to build packages
+For a dev version of `octatools-bin`, `octatools-gui` and `octatools-lib`:
+```bash
+make build
+```
+
+For a release version of `octatools-bin`, `octatools-gui` and `octatools-lib`:
+```bash
+make release
+```
+
+For a dev version of `octatools-py`
+```bash
+make build-py
+```
+
+TODO: For a release version of `octatools-py`
+```bash
+make release-py
+```
+
+# How to run tests
+```bash
+make test
+```
+
+To generate a test coverage report:
+```bash
+cargo install tarpaulin
+make cov
+```
+
+The project is currently hanging around 50-60% test coverage. 
+
+# Help Wanted
+
+- Testing, lots and lots of testing
+- Final bits of reverse engineering the binary data files (see [./octatools-lib/TODO.md](./octatools-lib/TODO.md))
+- More testing
+- Windows cross compilation (most testing to find issues)
+- macOS cross compilation
