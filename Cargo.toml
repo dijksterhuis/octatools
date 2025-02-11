@@ -1,5 +1,5 @@
 [workspace]
-members = ["octatools-lib", "octatools-bin", "octatools-gui", "octatools_derive", "octatools-py"]
+members = ["octatools-lib", "octatools-bin", "octatools-gui", "octatools-derive", "octatools-py"]
 resolver = "2"
 
 [workspace.package]

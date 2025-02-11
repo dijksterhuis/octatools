@@ -21,5 +21,4 @@ serde-big-array = "0.5.1"
 serde_json.workspace = true
 serde_yml.workspace = true
 walkdir.workspace = true
-octatools_derive = { path = "../octatools_derive" }
-
+octatools-derive = { path = "../octatools-derive" }

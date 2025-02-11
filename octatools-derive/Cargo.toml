@@ -1,5 +1,5 @@
 [package]
-name = "octatools_derive"
+name = "octatools-derive"
 version.workspace = true
 edition.workspace = true
 readme.workspace = true
@@ -12,4 +12,5 @@ quote = "1.0.38"
 syn = "2.0.98"
 
 [lib]
+name = "octatools_derive"
 proc-macro = true
