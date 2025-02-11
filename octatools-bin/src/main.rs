@@ -509,18 +509,13 @@ fn cmd_help_full() -> () {
 }
 
 #[doc(hidden)]
-fn write_command_usage(
-    buffer: &mut String,
-    prefix: &mut String,
-    cmd: &mut Command,
-) -> () {
+fn write_command_usage(buffer: &mut String, prefix: &mut String, cmd: &mut Command) -> () {
     /*
     {prefix} command -- Some text describing a specific command
     {prefix} command -- Some text describing a specific command
     {prefix} command -- Some text describing a specific command
     {prefix} command -- Some text describing a specific command
     */
-
 
     buffer.push_str(format!("{prefix} {}", cmd.get_name()).as_str());
     if let Some(about) = cmd.get_about() {
@@ -529,12 +524,8 @@ fn write_command_usage(
     buffer.push_str("\n");
 }
 
-
 #[doc(hidden)]
-fn write_top_level_header(
-    buffer: &mut String,
-    cmd: &mut Command,
-) -> () {
+fn write_top_level_header(buffer: &mut String, cmd: &mut Command) -> () {
     /*
 
     SAMPLES: Some text describing `samples` commands
@@ -545,12 +536,14 @@ fn write_top_level_header(
         buffer.push_str(format!(": {}\n", about).as_str());
     }
     buffer.push_str("====================================\n");
-
 }
 
-
 #[doc(hidden)]
-fn recursive_walk_subcommands(buffer: &mut String, prefix: &mut String, cmd: &mut Command) -> String {
+fn recursive_walk_subcommands(
+    buffer: &mut String,
+    prefix: &mut String,
+    cmd: &mut Command,
+) -> String {
     for sub in cmd.get_subcommands_mut() {
         // some sort of command/subcommand
         if sub.has_subcommands() {
@@ -571,7 +564,6 @@ fn recursive_walk_subcommands(buffer: &mut String, prefix: &mut String, cmd: &mu
     }
 
     buffer.clone()
-
 }
 #[doc(hidden)]
 fn main() {

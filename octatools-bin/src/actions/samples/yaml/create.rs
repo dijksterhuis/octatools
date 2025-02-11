@@ -9,7 +9,6 @@ use serde_octatrack::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
 
-
 /// YAML section which globally affects all chains being created with the loaded config.
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -920,9 +920,8 @@ mod tests {
         #[cfg(not(target_os = "windows"))]
         #[test]
         fn simple_with_yaml_matches_validation() {
-
-            use serde_octatrack::yaml_file_to_type;
             use crate::actions::samples::SamplesDirIndexSimple;
+            use serde_octatrack::yaml_file_to_type;
 
             let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-simple-validate.yaml");
@@ -941,9 +940,8 @@ mod tests {
         #[test]
         // #[ignore]
         fn full_with_yaml_matches_validation() {
-
-            use serde_octatrack::yaml_file_to_type;
             use crate::actions::samples::SamplesDirIndexFull;
+            use serde_octatrack::yaml_file_to_type;
 
             let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
             let outpath = std::env::temp_dir().join("test-samples-search-full-validate.yaml");
