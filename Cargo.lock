@@ -343,12 +343,20 @@ dependencies = [
  "itertools",
  "log",
  "md5",
+ "octatools-derive",
  "octatools-lib",
- "octatools_derive",
  "rand",
  "serde",
  "serde_yml",
  "walkdir",
+]
+
+[[package]]
+name = "octatools-derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -369,7 +377,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "itertools",
- "octatools_derive",
+ "octatools-derive",
  "pyo3",
  "serde",
  "serde-big-array",
@@ -384,14 +392,6 @@ version = "0.1.0"
 dependencies = [
  "octatools-lib",
  "pyo3",
-]
-
-[[package]]
-name = "octatools_derive"
-version = "0.1.0"
-dependencies = [
- "quote",
- "syn",
 ]
 
 [[package]]
