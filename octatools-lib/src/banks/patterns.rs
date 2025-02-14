@@ -751,8 +751,12 @@ pub struct Pattern {
     pub chain_behaviour: PatternChainBehavior,
 
     /// Unknown data.
-    #[serde(with = "BigArray")]
-    pub unknown: [u8; 2],
+    pub unknown: u8,
+
+    /// The Part of a Bank assigned to a Pattern.
+    /// Part 1 = 0; Part 2 = 1; Part 3 = 2; Part 4 = 3.
+    /// Credit to [@sezare56 on elektronauts for catching this one](https://www.elektronauts.com/t/octalib-a-simple-octatrack-librarian/225192/27)
+    pub part_assignment: u8,
 
     /// Pattern setting for Tempo.
     ///
@@ -781,7 +785,8 @@ impl Default for Pattern {
             midi_track_trigs: MidiTrackTrigs::defaults(),
             scale: PatternScaleSettings::default(),
             chain_behaviour: PatternChainBehavior::default(),
-            unknown: [0, 0],
+            unknown: 0,
+            part_assignment: 0,
             // **I believe** these two mask values make the tempo 120.0 BPM
             // don't quote me on that though
             tempo_1: 11,
