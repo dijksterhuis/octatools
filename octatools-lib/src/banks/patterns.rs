@@ -465,9 +465,13 @@ pub struct AudioTrackTrigs {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub plocks: Box<Array<AudioTrackParameterLocks, 64>>,
 
-    /// Unknown data.
-    /// comes at the end, dunno what this block is yet
-    /// mostly a bunch of zero values
+    /// This will be micro-timings, trig repeats and conditional trig state. 64 length array for
+    /// each.
+    ///
+    /// Trig Repeats and Conditionals will likely step up in increments,
+    /// Micro-timings likely will be 255/0 for "none"; x < 127 is negative; x > 127 is positive.
+    ///
+    /// TODO: Not inspected data values yet.
     #[serde(with = "BigArray")]
     pub unknown_3: [u8; 192],
 }
