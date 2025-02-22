@@ -34,3 +34,4 @@ serde_yml.workspace = true
 walkdir.workspace = true
 octatools-derive = { path = "../octatools-derive" }
 clap_complete = "4.5.44"
+chrono = "0.4.39"

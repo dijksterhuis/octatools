@@ -10,7 +10,7 @@ use std::path::PathBuf;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YamlCopyDetails {
     pub project: PathBuf,
-    pub bank: PathBuf,
+    pub bank_id: usize,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

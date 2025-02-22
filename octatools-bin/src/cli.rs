@@ -151,6 +151,15 @@ pub enum Projects {
     HumanToBin(HumanToBin),
 }
 
+#[derive(Debug, clap::Args, PartialEq, Clone)]
+#[group(required = false, multiple = false)]
+pub(crate) struct ListSlotUsageOpts {
+    /// Don't list usages for sample slots without an audio file loaded,
+    /// conflicts with `--exclude-loaded`.
+    #[clap(long, action)]
+    pub(crate) exclude_empty: bool,
+}
+
 /// Commands related to data contained in OctaTrack Bank files (examples: bank01.work, bank01.strd)
 #[derive(Subcommand, Debug, PartialEq)]
 pub enum Banks {
@@ -161,18 +170,30 @@ pub enum Banks {
     /// Move a Bank from one Project to another Project while updating active sample slot
     /// assignments in the destination Project.
     Copy {
-        /// File path of the source `bank??.work` or `bank??.strd` file
-        #[arg(value_hint = ValueHint::FilePath)]
-        src_bank_path: PathBuf,
-        /// File path of the source project.work or project.strd file
+        /// Directory path of the source project
         #[arg(value_hint = ValueHint::DirPath)]
         src_project_path: PathBuf,
-        /// File path of the destination `bank??.work` or `bank??.strd` file
-        #[arg(value_hint = ValueHint::FilePath)]
-        dest_bank_path: PathBuf,
-        /// File path of the destination `project.work` or `project.strd` file
+        /// Directory path of the destination project
         #[arg(value_hint = ValueHint::DirPath)]
         dest_project_path: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank to copy
+        #[arg(value_hint = ValueHint::Other)]
+        src_bank_id: usize,
+        /// Number 1-16 (inclusive) of the bank location in the destination project
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_bank_id: usize,
+    },
+
+    /// List sample slot usages within the given bank
+    ListSlotUsage {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_path: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank to search for sample slot usages
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
     },
 
     /// Move Nx Banks from their source Project to another destination Project while updating active
@@ -196,6 +217,21 @@ pub enum Patterns {
         #[arg(value_hint = ValueHint::Other)]
         index: Vec<usize>,
     },
+
+    /// List sample slot usages within the given pattern
+    ListSlotUsage {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_path: PathBuf,
+        /// Number 1-16 (inclusive) of the bank
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        /// Number 1-16 (inclusive) of the pattern
+        #[arg(value_hint = ValueHint::Other)]
+        pattern_id: usize,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
+    },
 }
 
 #[derive(Subcommand, Debug, PartialEq)]
@@ -206,6 +242,21 @@ pub enum PartsCmd {
         bin_path: PathBuf,
         #[arg(value_hint = ValueHint::Other)]
         index: Vec<usize>,
+    },
+
+    /// List sample slot usages within the given part
+    ListSlotUsage {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_path: PathBuf,
+        /// Number 1-16 (inclusive) of the bank
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        /// Number 1-16 (inclusive) of the pattern
+        #[arg(value_hint = ValueHint::Other)]
+        part_id: usize,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
     },
 }
 

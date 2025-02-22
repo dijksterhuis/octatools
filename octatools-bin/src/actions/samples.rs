@@ -3,7 +3,6 @@
 mod yaml;
 
 use log::{debug, info, trace};
-use rand::Rng;
 use octatools_lib::samples::{
     configs::{SampleLoopConfig, SampleTrimConfig},
     options::{
@@ -12,6 +11,7 @@ use octatools_lib::samples::{
     slices::{Slice, Slices},
     SampleAttributes, SampleAttributesRawBytes,
 };
+use rand::Rng;
 use std::array::from_fn;
 use std::path::{Path, PathBuf};
 
