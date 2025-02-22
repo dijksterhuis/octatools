@@ -2,18 +2,33 @@
 //! such as `Bank`s, `Pattern`s, `Part`s or `Project`s.
 
 mod yaml;
+#[cfg(test)]
+mod tests;
+pub(crate) mod utils;
 
-use octatools_lib::{
-    get_bytes_slice, read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
-};
-
-use crate::{actions::banks::yaml::YamlCopyBankConfig, RBoxErr};
-use log::{debug, error, info, warn};
-use std::{collections::HashSet, path::Path};
-
+use crate::{actions::banks::yaml::YamlCopyBankConfig, OctatoolErrors, RBoxErr};
+use itertools::Itertools;
 use octatools_lib::{
     banks::{Bank, BankRawBytes},
-    projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
+    get_bytes_slice,
+    projects::Project,
+    read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
+};
+use std::{
+    path::Path, path::PathBuf,
+};
+use octatools_lib::projects::options::ProjectSampleSlotType;
+use utils::{
+    BankCopyPathsMeta,
+    BankMeta,
+    ProjectMeta,
+    create_backup_of_work_file,
+    calculate_copy_bank_changes,
+    transfer_sample_files,
+    get_bank_fname_from_id,
+    find_sample_slot_refs_in_bank,
+    get_zero_indexed_slots_from_one_indexed,
+    BankSlotReferenceType,
 };
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
@@ -25,490 +40,217 @@ pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usiz
     Ok(())
 }
 
-/// Find free sample slot locations in a `Project`
-fn find_free_sample_slot_ids(
-    sample_slots_inuse: &[ProjectSampleSlot],
-    slot_type: ProjectSampleSlotType,
-) -> RBoxErr<Vec<u8>> {
-    let mut free_slots: Vec<u8> = vec![];
-    for i in 1..=128 {
-        free_slots.push(i)
-    }
 
-    for slot in sample_slots_inuse.iter() {
-        if slot_type == slot.sample_type {
-            free_slots.retain(|x| *x != slot.slot_id);
-        }
-    }
 
-    // reverse so we can just use pop instead of needing to import VecDeque::pop_rev()
-    free_slots.reverse();
-
-    Ok(free_slots)
-}
-
-/// Find sample slots belonging to a `Project` which are used within a `Bank`
-fn find_active_sample_slots(
-    project_slots: &[ProjectSampleSlot],
-    bank: &Bank,
-    slot_type: &ProjectSampleSlotType,
-) -> RBoxErr<Vec<ProjectSampleSlot>> {
-    // avoid dealing with duplicated sample slots -> sets
-    let mut active_slots: HashSet<ProjectSampleSlot> = HashSet::new();
-
-    debug!(
-        "Checking for sample slot usage in bank: type={:#?}",
-        slot_type
-    );
-    debug!("Checking bank's pattern p-locks: type={:#?}", slot_type);
-    // pattern P-locks
-    for (pattern_idx, pattern) in bank.patterns.iter().enumerate() {
-        for (track_idx, audio_track_trigs) in pattern.audio_track_trigs.iter().enumerate() {
-            for (plock_idx, plock) in audio_track_trigs.plocks.iter().enumerate() {
-                let active_slot = match slot_type {
-                    ProjectSampleSlotType::Static => {
-                        // static slot is assigned (255 is no assignment)
-                        if plock.static_slot_id < 128 {
-                            project_slots.iter().find(|x| {
-                                x.slot_id == plock.static_slot_id && x.sample_type == *slot_type
-                            })
-                        } else {
-                            None
-                        }
-                    }
-                    ProjectSampleSlotType::Flex => {
-                        // static slot is assigned (255 is no assignment)
-                        if plock.flex_slot_id < 128 {
-                            project_slots.iter().find(|x| {
-                                x.slot_id == plock.flex_slot_id && x.sample_type == *slot_type
-                            })
-                        } else {
-                            None
-                        }
-                    }
-                    _ => None,
-                };
-
-                if active_slot.is_some() {
-                    info!(
-                        "Found active sample p-lock: type={:#?} pattern={:#?} track={:#?} trig={:#?} slot={:#?}",
-                        slot_type,
-                        pattern_idx,
-                        track_idx,
-                        plock_idx,
-                        plock.static_slot_id,
-                    );
-                    active_slots.insert(active_slot.unwrap().clone());
-                } else {
-                    warn!(
-                        "Found an 'inactive' sample p-lock: type={:#?} pattern={:#?} track={:#?} trig={:#?} slot={:#?}",
-                        slot_type,
-                        pattern_idx,
-                        track_idx,
-                        plock_idx,
-                        plock.static_slot_id,
-                    );
-                    warn!("Pattern p-lock may eventually point at an existing sample in the destination project.")
-                }
-            }
-        }
-    }
-
-    debug!("Checking bank's unsaved part state: type={:#?}", slot_type);
-    // parts_unsaved
-    for (part_idx, part) in bank.parts_unsaved.iter().enumerate() {
-        for (track_idx, audio_track_slots) in part.audio_track_machine_slots.iter().enumerate() {
-            // the default sample slot for Static/Flex machines is the track ID.
-            // so we check if there is an actual sample assigned to a machine's slot
-            // to work out if the machine actually has an 'active' sample slot assignment or not.
-
-            let active_slot = match slot_type {
-                ProjectSampleSlotType::Static => project_slots.iter().find(|x| {
-                    x.slot_id == audio_track_slots.static_slot_id && x.sample_type == *slot_type
-                }),
-                ProjectSampleSlotType::Flex => project_slots.iter().find(|x| {
-                    x.slot_id == audio_track_slots.flex_slot_id && x.sample_type == *slot_type
-                }),
-                _ => None,
-            };
-
-            if active_slot.is_some() {
-                info!(
-                    "Found active sample slot machine usage: type={:#?} unsavedPart={:#?} track={:#?} slot={:#?}",
-                    slot_type,
-                    part_idx,
-                    track_idx,
-                    audio_track_slots.static_slot_id,
-                );
-                active_slots.insert(active_slot.unwrap().clone());
-            } else {
-                warn!("Found an 'inactive' sample slot machine usage: type={:#?} unsavedPart={:#?} track={:#?} slot={:#?}", 
-                    slot_type,
-                    part_idx,
-                    track_idx,
-                    audio_track_slots.static_slot_id,
-                );
-                warn!("Machine sample slot assignment may point at an existing sample in the destination project.")
-            }
-        }
-    }
-
-    debug!("Checking bank's saved part state: type={:#?}", slot_type);
-    // parts_saved
-    for (part_idx, part) in bank.parts_saved.iter().enumerate() {
-        for (track_idx, audio_track_slots) in part.audio_track_machine_slots.iter().enumerate() {
-            // the default sample slot for Static/Flex machines is the track ID.
-            // so we check if there is an actual sample assigned to a machine's slot
-            // to work out if the machine actually has an 'active' sample slot assignment or not.
-
-            let active_slot = match slot_type {
-                ProjectSampleSlotType::Static => project_slots.iter().find(|x| {
-                    x.slot_id == audio_track_slots.static_slot_id && x.sample_type == *slot_type
-                }),
-                ProjectSampleSlotType::Flex => project_slots.iter().find(|x| {
-                    x.slot_id == audio_track_slots.flex_slot_id && x.sample_type == *slot_type
-                }),
-                _ => None,
-            };
-
-            if active_slot.is_some() {
-                info!(
-                    "Found active sample slot machine usage: type={:#?} savedPart={:#?} track={:#?} slot={:#?}",
-                    slot_type,
-                    part_idx,
-                    track_idx,
-                    audio_track_slots.static_slot_id,
-                );
-                active_slots.insert(active_slot.unwrap().clone());
-            } else {
-                warn!("Found an 'inactive' sample slot machine usage: type={:#?} savedPart={:#?} track={:#?} slot={:#?}", 
-                    slot_type,
-                    part_idx,
-                    track_idx,
-                    audio_track_slots.static_slot_id,
-                );
-                warn!("Machine sample slot assignment may point at an existing sample in the destination project.")
-            }
-        }
-    }
-
-    Ok(active_slots.into_iter().collect())
-}
-
-/// ### Copy a bank from one project to another project.
+/// ### Copy Banks
 ///
-/// Main function for the `octatools copy bank` command, making it possible to
-/// (somewhat safely) move any Octatrack Bank to a new location.
+/// Copy a bank from one project location to another, also transferring sample files and updating
+/// project sample slots. Can be used to copy banks within the same project (swap the banks).
 ///
-/// During a transfers, this
-/// 1. searches for 'active' project sample slots used in the source bank
-/// 2. copies source slots over to available free sample slots in the destination project
-/// 3. mutates all references to the source sample slots in the source bank
-/// 4. copiess the source sample files to the project's audio pool
-/// 5. writes over the destination project and bank with new data.
+/// A couple of important notes to highlight:
 ///
-/// A couple of important quirks to highlight:
-/// - All 'active' sample files from the source project are consolidated into the
-///     destination Set audio pool (the Set which the destination Project belongs to).
-/// - Sample slots are not de-duplicated or tested for uniqueness against existing
-///     destination sample slots. If you have a lot of duplicate sample slots across
-///     banks then you may need to do some clean up.
-/// - 'Inactive' sample files will not be moved or copied. Only sample slots that
-///     match the following criteria will be copied:
-///     - have been assigned to a sample slot within the source Project
-///     - sample slot has a p-locked sample locks somewhere in the Patterns of the source Bank.
-///     - sample slot has been used by an Audio Track Machine (Static/Flex) in one of the Parts
-///         of the source Bank.
-///     - sample slot is not a recorder buffer
-pub fn copy_bank(
-    source_bank_filepath: &Path,
-    source_project_filepath: &Path,
-    destination_bank_filepath: &Path,
-    destination_project_filepath: &Path,
+/// - Only 'Active' sample slots are copied from the source project to the destination project. If a
+///     sample slot is not used within the target bank then it is not copied to the destination
+///     project.
+///
+/// - Copied sample files from the source project will be copied to the destination project
+///     directory, not the `AUDIO` pool.
+///
+/// - Destination sample slots are reused if the slot settings and sample file paths match. If you
+///     have different samples in two projects that use the same filename, you will get breakage.
+///
+/// - Bank data is modified, remapping sample slots that are 'active' or 'inactive'.
+///     - Active: An Audio Track's machine / P-Lock trig references a sample slot that has a sample
+///     loaded
+///     - Inactive: An Audio Track's machine / P-Lock trig references a sample slot that **does
+///     not** have a sample loaded
+pub fn copy_bank_by_paths(
+    source_project_dirpath: &Path,
+    destination_project_dirpath: &Path,
+    source_bank_number: usize,
+    destination_bank_number: usize,
 ) -> RBoxErr<()> {
-    info!("Loading banks ...");
-
-    let mut bank = read_type_from_bin_file::<Bank>(source_bank_filepath)
-        .expect("Could not load bank from file at path");
-
-    info!("Loading projects ...");
-
-    let src_project = read_type_from_bin_file::<Project>(source_project_filepath)
-        .expect("Could not load source project");
-    let mut dest_project = read_type_from_bin_file::<Project>(destination_project_filepath)
-        .expect("Could not load destination project");
-
-    info!("Finding free static sample slots in destination project ...");
-    let mut free_static =
-        find_free_sample_slot_ids(&dest_project.slots, ProjectSampleSlotType::Static)
-            .expect("Error while searching for free static sample slots in destination project.");
-
-    info!("Finding free flex sample slots in destination project ...");
-    let mut free_flex = find_free_sample_slot_ids(&dest_project.slots, ProjectSampleSlotType::Flex)
-        .expect("Error while searching for free flex sample slots in destination project.");
-
-    info!(
-        "Destination project has free sample slots: {:#?} static; {:#?} flex.",
-        free_static.len(),
-        free_flex.len()
-    );
-
-    info!("Finding 'active' sample slots (sample slots actually used within source bank) ...");
-    let mut active_static_slots =
-        find_active_sample_slots(&src_project.slots, &bank, &ProjectSampleSlotType::Static)
-            .expect("Error while finding active static sample slots in source bank.");
-
-    let mut active_flex_slots =
-        find_active_sample_slots(&src_project.slots, &bank, &ProjectSampleSlotType::Flex)
-            .expect("Error while finding active flex sample slots in source bank.");
-
-    let mut active_slots: Vec<ProjectSampleSlot> = vec![];
-    active_slots.append(&mut active_static_slots);
-    active_slots.append(&mut active_flex_slots);
-
-    if active_flex_slots.len() > free_flex.len() || active_static_slots.len() > free_static.len() {
-        error!("Not enough free samples slots in destination project!");
-        error!(
-            "Static sample slots: sourceActive={:#?} destAvailable={:#?}",
-            active_static_slots.len(),
-            free_static
-        );
-        error!(
-            "Flex sample slots: sourceActive={:#?} destAvailable={:#?}",
-            active_flex_slots.len(),
-            free_flex
-        );
-        panic!("Not enough samples slots in destination project!");
+    if source_bank_number < 1
+        || source_bank_number > 16
+        || destination_bank_number < 1
+        || destination_bank_number > 16
+    {
+        return Err(Box::new(OctatoolErrors::CliInvalidBankIndex));
     }
 
-    info!("Active sample slots in source bank: {:#?}", active_slots);
+    let source_meta = BankCopyPathsMeta {
+        project: ProjectMeta::frompath(source_project_dirpath),
+        bank: BankMeta::frompath(&source_project_dirpath, source_bank_number),
+    };
 
-    // edit the bank data in place, updating:
-    // - project's sample slot;
-    // - sample plocks reference to project sample slot;
-    // - audio track machine assignment reference to project sample slot.
-    info!(
-        "Updating {:#?} active sample slots in source bank ...",
-        active_slots.len()
-    );
-    let mut updated_sample_slots: Vec<ProjectSampleSlot> = active_slots
+    println!("===================================================================================");
+    println!("Loading data files ...");
+
+    let src_project = read_type_from_bin_file::<Project>(&source_meta.project.filepath)
+        .expect("Failed to read source project file.");
+
+    let destination_meta = BankCopyPathsMeta {
+        project: ProjectMeta::frompath(destination_project_dirpath),
+        bank: BankMeta::frompath(&destination_project_dirpath, destination_bank_number),
+    };
+
+    // up-front check to make sure thee are no missing audio files, could be breakage if there are
+    // missing files.
+    let mising_source_file_slot_ids = src_project
+        .slots
         .iter()
-        .enumerate()
-        .map(
-            |(slot_idx, active_slot)|
-            {
-                // pop a free sample slot ID from the array we created earlier.
-                debug!(
-                    "Beginning transfer of sample slot: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
-                let dest_slot_id = match active_slot.sample_type {
-                    ProjectSampleSlotType::Static => free_static.pop().expect("No more destination slots."),
-                    ProjectSampleSlotType::Flex => free_flex.pop().expect("No more destination slots."),
-                    _ => 255,
-                };
+        .filter(|x| {
+            let src_path_audio_abs = &source_meta.project.dirpath.join(&x.path);
+            !src_path_audio_abs.exists()
+        })
+        .cloned()
+        .map(|x| (x.sample_type, x.slot_id))
+        .into_group_map();
 
-                debug!(
-                    "Selected sample slot ID in destination project: {:#?}",
-                    dest_slot_id,
-                );
+    if mising_source_file_slot_ids.len() > 0 {
+        eprintln!("Missing sample files detected in source project! Not continuing.");
+        eprintln!(
+            "Slot IDs with no audio file: {:?}",
+            mising_source_file_slot_ids
+        );
+        return Err(Box::new(OctatoolErrors::PathDoesNotExist));
+    }
 
-                debug!(
-                    "Updating sample slot reference in pattern p-locks: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
+    create_backup_of_work_file(&destination_meta.project.filepath)
+        .expect("Failed to create destination project file backup.");
+    create_backup_of_work_file(&destination_meta.bank.filepath)
+        .expect("Failed to create destination bank file backup.");
 
-                for pattern in bank.patterns.iter_mut() {
-                    pattern
-                        .update_plock_sample_slots(
-                            &active_slot.sample_type,
-                            &active_slot.slot_id,
-                            &dest_slot_id,
-                        )
-                        .expect("Could not update sample slot reference in pattern p-locks.");
-                }
+    let dest_project = read_type_from_bin_file::<Project>(&destination_meta.project.filepath)
+        .expect("Failed to read destination project file.");
 
-                debug!(
-                    "Updating sample slot reference in unsaved part audio track machines: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
-                for part in bank.parts_unsaved.iter_mut() {
-                    part.update_machine_sample_slot(
-                        &active_slot.sample_type,
-                        &active_slot.slot_id,
-                        &dest_slot_id,
-                    )
-                    .expect("Could not update sample slot reference in unsaved part audio track machine.");
-                }
+    let bank = read_type_from_bin_file::<Bank>(&source_meta.bank.filepath)?;
 
-                debug!(
-                    "Updating sample slot reference in saved part audio track machines: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
-                for part in bank.parts_saved.iter_mut() {
-                    part.update_machine_sample_slot(
-                        &active_slot.sample_type,
-                        &active_slot.slot_id,
-                        &dest_slot_id,
-                    )
-                    .expect("Could not update sample slot reference in saved part audio track machine.");
-                }
+    println!("===================================================================================");
+    println!("Calculating changes ...");
 
-                debug!(
-                    "Creating new project sample slot data: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
+    let (new_project, new_bank, sample_transfers) = calculate_copy_bank_changes(
+        &source_project_dirpath,
+        &src_project,
+        &bank,
+        &dest_project,
+    )?;
 
-                // `blah/blah/my_audio_file.wav`
-                // or `blah/AUDIO/my_audio_file.wav`
-                let src_path_audio = &source_project_filepath
-                    .parent()
-                    .unwrap()
-                    .to_path_buf()
-                    .join(&active_slot.path);
+    println!("===================================================================================");
 
-                // `blah/blah/project.work/../../AUDIO/`
-                let dest_path_audio = &destination_project_filepath
-                    .parent()
-                    .unwrap()
-                    .parent()
-                    .unwrap()
-                    .to_path_buf()
-                    .join("AUDIO")
-                    .join(active_slot.path.file_name().unwrap());
+    /*
+    ================================================================================================
 
-                let new_sslot = ProjectSampleSlot::new(
-                    active_slot.sample_type.clone(),
-                    dest_slot_id,
-                    dest_path_audio.clone(),
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
-                )
-                .expect("Could not create new sample slot.");
+    This is where we begin making changes on the file system. If you want to
+    include some warnings to the user about potentially destructive actions
+    occurring -- __now is the time to do it__!!!
 
-                debug!(
-                    "Copying audio file: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
+    ================================================================================================
+    */
 
-                let _ = std::fs::copy(src_path_audio, dest_path_audio)
-                .unwrap_or_else(|_| panic!("Could not copy audio file: src={:#?} dest={:#?}", src_path_audio, dest_path_audio));
 
-                let mut src_path_sample_attr = src_path_audio.clone();
-                src_path_sample_attr.set_extension("ot");
+    if sample_transfers.len() > 0 { println!("Copying necessary sample files ...") }
+    else { println!("No sample files need copying.") }
 
-                let mut dest_path_sample_attr = dest_path_audio.clone();
-                dest_path_sample_attr.set_extension("ot");
+    transfer_sample_files(
+        &sample_transfers,
+        &source_project_dirpath,
+        &destination_project_dirpath,
+    )?;
 
-                if src_path_sample_attr.exists() {
-                    debug!(
-                        "Copying sample attributes file: n={:#?} total={:#?} type={:#?}",
-                        slot_idx,
-                        active_slots.len(),
-                        active_slot.sample_type,
-                    );
-                    let _ = std::fs::copy(&src_path_sample_attr, &dest_path_sample_attr)
-                    .unwrap_or_else(|_| panic!("Could not copy sample attributes file: src={:#?} dest={:#?}", src_path_sample_attr, dest_path_sample_attr));
-                }
+    println!("Writing sample slot modifications to destination ...");
+    write_type_to_bin_file::<Project>(&new_project, &destination_meta.project.filepath)
+        .expect("Could not write modified project data to destination location.");
 
-                debug!(
-                    "Sample slot references updated: n={:#?} total={:#?} type={:#?}",
-                    slot_idx,
-                    active_slots.len(),
-                    active_slot.sample_type,
-                );
-                new_sslot
-            }
-        )
-        .collect();
+    println!("Writing bank modifications to destination ...");
+    write_type_to_bin_file::<Bank>(&new_bank, &destination_meta.bank.filepath)
+        .expect("Could not write modified bank to destination location.");
 
-    info!("Inserting new sample slots into destination project ...");
-    let mut dest_sample_slots: Vec<ProjectSampleSlot> = dest_project.slots;
-    dest_sample_slots.append(&mut updated_sample_slots);
-
-    info!("Writing destination project ...");
-    dest_project.slots = dest_sample_slots;
-    write_type_to_bin_file::<Project>(&dest_project, destination_project_filepath)
-        .expect("Could not write project to file");
-
-    info!("Writing new bank file ...");
-    write_type_to_bin_file::<Bank>(&bank, destination_bank_filepath)
-        .expect("Could not write bank to file at path");
-    info!("Bank copy complete.");
+    println!("===================================================================================");
+    println!("Bank copy complete.");
     Ok(())
+
 }
 
 /// ### Batched bank copying using a YAML config
 ///
-/// Expanded functionality on top of the `octatools copy bank` command.
-/// Perform multiple copies one after the other by defining how to copy banks in a YAML config file.
+/// Wrapper over the `copy_bank_by_paths` function / `octatools copy bank` command.
+/// Allows users to perform multiple copies in one command run by defining how to copy banks in a
+/// YAML config file.
 ///
-/// All the caveats and details for the `copy_bank` function still apply
-/// (this function calls it multiple times).
+/// All the caveats and details for the `copy_bank_by_paths` function still apply.
 pub fn batch_copy_banks(yaml_config_path: &Path) -> RBoxErr<()> {
     let conf = yaml_file_to_type::<YamlCopyBankConfig>(yaml_config_path)
         .expect("Could not load YAML configuration for batch bank transfers");
 
     for x in conf.bank_copies {
-        copy_bank(&x.src.bank, &x.src.project, &x.dest.bank, &x.dest.project)
-            .expect("Could not copy bank");
+        copy_bank_by_paths(
+            &x.src.project,
+            &x.dest.project,
+            x.src.bank_id,
+            x.dest.bank_id,
+        )
+        .expect("Could not copy bank");
     }
 
     Ok(())
 }
 
-#[cfg(test)]
-#[allow(unused_imports)]
-mod tests {
-    // currently fails with Could not copy audio file:
-    // The process cannot access the file because it is being used by another process
-    #[cfg(not(target_os = "windows"))]
-    #[test]
-    fn test_copy_bank() {
-        use super::*;
-        use copy_dir;
-        use std::path::PathBuf;
+#[derive(Debug)]
+#[allow(dead_code)] // clippy doesn't detect the usage below for some reason
+struct SlotUseListItem {
+    sample_loaded: bool,
+    sample_type: ProjectSampleSlotType,
+    slot_id: u8,
+    path: Option<PathBuf>,
+}
 
-        let audio_pool = PathBuf::from("../data/tests/copy/bank/AUDIO-TEST");
+/// List samples slots that are used in a bank
+pub fn list_bank_sample_slot_references(
+    project_dirpath: &Path,
+    bank_id: usize,
+    ignore_empty_slots: bool,
+) -> RBoxErr<()> {
+    let project_fpath = project_dirpath.to_path_buf().join("project.work");
 
-        let inbank = PathBuf::from("../data/tests/copy/bank/BANK-COPY-SRC/bank01.work");
-        let outbank = PathBuf::from("../data/tests/copy/bank/BANK-COPY-DUMMY/bank01.work");
+    let bank_fpath = project_dirpath
+        .to_path_buf()
+        .join(get_bank_fname_from_id(bank_id));
 
-        let inproject = PathBuf::from("../data/tests/copy/bank/BANK-COPY-SRC/project.work");
-        let outproject = PathBuf::from("../data/tests/copy/bank/BANK-COPY-DUMMY/project.work");
+    let src_project =
+        read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
 
-        let _ = std::fs::create_dir(&audio_pool);
+    let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
 
-        // copy test destination project to a new directory, so we have a fresh test each time
-        let _ = copy_dir::copy_dir(
-            PathBuf::from("../data/tests/copy/bank/BANK-COPY-DEST/"),
-            outbank.parent().unwrap(),
-        );
+    find_sample_slot_refs_in_bank(
+        &get_zero_indexed_slots_from_one_indexed(&src_project.slots)?,
+        &bank,
+    )?
+    .iter()
+    .filter(|x| !ignore_empty_slots == (x.reference_type == BankSlotReferenceType::Active))
+    .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
+    .map(|x| {
+        let path = if x.reference_type == BankSlotReferenceType::Active {
+            Some(
+                &src_project
+                    .slots
+                    .iter()
+                    .find(|s| s.slot_id == x.slot_id)
+                    .unwrap()
+                    .path,
+            )
+        } else {
+            None
+        };
 
-        let _source_bank = read_type_from_bin_file::<Bank>(&inbank).unwrap();
-        let _ = copy_bank(&inbank, &inproject, &outbank, &outproject);
-        let _copied_bank = read_type_from_bin_file::<Bank>(&outbank).unwrap();
+        SlotUseListItem {
+            sample_loaded: (x.reference_type == BankSlotReferenceType::Active),
+            sample_type: x.sample_type.clone(),
+            slot_id: x.slot_id + 1,
+            path: path.cloned(),
+        }
+    })
+    .for_each(|x| println!("{:?}", x));
 
-        // remove the test destination project directory
-        let _ = std::fs::remove_dir_all(outbank.parent().unwrap());
-        let _ = std::fs::remove_dir_all(audio_pool);
-
-        assert!(true);
-    }
+    Ok(())
 }

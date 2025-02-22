@@ -2,12 +2,12 @@
 
 use crate::audio::wav::WavFile;
 use crate::RBoxErr;
-use serde::{Deserialize, Serialize};
 use octatools_lib::{
     constants::DEFAULT_SAMPLE_RATE,
     projects::slots::ProjectSampleSlot,
     samples::slices::{Slice, Slices},
 };
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 /// Create a `Slice` object for an unchained wavfile.
@@ -116,8 +116,8 @@ impl SampleFilePair {
     }
 }
 
+// TODO: Delete me
 /// All samples related to the project
-
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct ProjectSamples {
     /// Samples loaded into project sample slots

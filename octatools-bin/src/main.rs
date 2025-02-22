@@ -17,10 +17,13 @@ use log::LevelFilter;
 
 use crate::actions::{
     arrangements::show_arrangement_bytes,
-    banks::{batch_copy_banks, copy_bank, show_bank_bytes},
+    banks::{batch_copy_banks, copy_bank_by_paths, list_bank_sample_slot_references, show_bank_bytes},
     drive::create_file_index_yaml,
-    parts::{show_saved_parts, show_unsaved_parts},
-    patterns::show_pattern,
+    parts::{
+        list_saved_part_sample_slot_references, list_unsaved_part_sample_slot_references,
+        show_saved_parts, show_unsaved_parts,
+    },
+    patterns::{list_pattern_sample_slot_references, show_pattern},
     projects::{
         consolidate_sample_slots_to_audio_pool, consolidate_sample_slots_to_project_pool,
         list_project_sample_slots, purge_project_pool,
@@ -34,12 +37,12 @@ use crate::actions::{
     },
 };
 use cli::{Cli, Commands};
-use serde::{Deserialize, Serialize};
 use octatools_lib::arrangements::ArrangementFile;
 use octatools_lib::banks::Bank;
 use octatools_lib::projects::Project;
 use octatools_lib::samples::SampleAttributes;
 use octatools_lib::{Decode, Encode};
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt::Display;
 use std::io;
@@ -55,10 +58,16 @@ pub enum OctatoolErrors {
     PathIsNotADirectory,
     PathIsNotAFile,
     PathIsNotASet,
-    CliInvalidPartIndices,
-    CliMissingPartIndices,
-    CliInvalidPatternIndices,
-    CliMissingPatternIndices,
+    CliInvalidPartIndex,
+    CliMissingPartIndex,
+    CliInvalidPatternIndex,
+    CliMissingPatternIndex,
+    InvalidFilenameOrExtension,
+    CliInvalidBankIndex,
+    CliCopyNoSourceSlotAudioFileFound,
+    CliNoFreeSampleSlots,
+    // not in use yet
+    CliInvalidTrackIndex,
     Unknown,
 }
 impl std::fmt::Display for OctatoolErrors {
@@ -71,21 +80,39 @@ impl std::fmt::Display for OctatoolErrors {
                 f,
                 "path is not an Octatrack set directory (no 'AUDIO' subdirectory found)"
             ),
-            Self::CliMissingPartIndices => write!(
+            Self::CliMissingPartIndex => write!(
                 f,
-                "Missing part number(s) - part number(s) between 1-4 must be be provided"
+                "Missing part number(s) - part number(s) between 1-4 (inclusive) must be be provided"
             ),
-            Self::CliInvalidPartIndices => write!(
+            Self::CliInvalidPartIndex => write!(
                 f,
-                "Invalid part number(s) - only part numbers between 1-4 can be provided"
+                "Invalid part number(s) - only part numbers between 1-4 (inclusive) can be provided"
             ),
-            Self::CliMissingPatternIndices => write!(
+            Self::CliMissingPatternIndex => write!(
                 f,
-                "Missing pattern number(s) - pattern number(s) between 1-16 must be be provided"
+                "Missing pattern number(s) - pattern number(s) between 1-16 (inclusive) must be provided"
             ),
-            Self::CliInvalidPatternIndices => write!(
+            Self::CliInvalidPatternIndex => write!(
                 f,
-                "Invalid pattern number(s) - only numbers between 1-16 can be provided"
+                "Invalid pattern number(s) - only numbers between 1-16 (inclusive) can be provided"
+            ),
+            Self::InvalidFilenameOrExtension => write!(f, "path does not have a file extension"),
+            Self::CliInvalidBankIndex => write!(
+                f,
+                "Invalid bank number(s) - only numbers between 1-16 (inclusive) can be provided"
+            ),
+            Self::CliCopyNoSourceSlotAudioFileFound => write!(
+                f,
+                "Could not find an associated audio file for source project sample slot",
+            ),
+            Self::CliNoFreeSampleSlots => write!(
+                f,
+                "Not enough sample slots in the project!.",
+            ),
+            // not in use yet
+            Self::CliInvalidTrackIndex => write!(
+                f,
+                "Invalid track number(s) - only numbers between 1-8 can be provided"
             ),
             Self::Unknown => write!(f, "unknown error (please investigate/report)"),
         }
@@ -231,18 +258,28 @@ fn cmd_select_banks(x: cli::Banks) -> () {
             });
         }
         cli::Banks::Copy {
-            src_bank_path,
             src_project_path,
-            dest_bank_path,
             dest_project_path,
+            src_bank_id,
+            dest_bank_id,
         } => {
             print_err(|| {
-                copy_bank(
-                    &src_bank_path,
+                copy_bank_by_paths(
                     &src_project_path,
-                    &dest_bank_path,
                     &dest_project_path,
+                    src_bank_id,
+                    dest_bank_id,
                 )
+            });
+        }
+        cli::Banks::ListSlotUsage {
+            project_path,
+            bank_id,
+            list_opts,
+        } => {
+            print_err(|| {
+                let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                list_bank_sample_slot_references(&project_path, bank_id, exclude_empty)
             });
         }
         cli::Banks::CopyN { yaml_file_path } => {
@@ -270,10 +307,42 @@ fn cmd_select_parts(x: cli::Parts) -> () {
             cli::PartsCmd::Inspect { bin_path, index } => {
                 print_err(|| show_saved_parts(&bin_path, index));
             }
+            cli::PartsCmd::ListSlotUsage {
+                project_path,
+                bank_id,
+                part_id,
+                list_opts,
+            } => {
+                print_err(|| {
+                    let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                    list_saved_part_sample_slot_references(
+                        &project_path,
+                        bank_id,
+                        part_id,
+                        exclude_empty,
+                    )
+                });
+            }
         },
         cli::Parts::Unsaved(y) => match y {
             cli::PartsCmd::Inspect { bin_path, index } => {
                 print_err(|| show_unsaved_parts(&bin_path, index));
+            }
+            cli::PartsCmd::ListSlotUsage {
+                project_path,
+                bank_id,
+                part_id,
+                list_opts,
+            } => {
+                print_err(|| {
+                    let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                    list_unsaved_part_sample_slot_references(
+                        &project_path,
+                        bank_id,
+                        part_id,
+                        exclude_empty,
+                    )
+                });
             }
         },
     }
@@ -284,6 +353,22 @@ fn cmd_select_patterns(x: cli::Patterns) -> () {
     match x {
         cli::Patterns::Inspect { bin_path, index } => {
             print_err(|| show_pattern(&bin_path, &index[..]));
+        }
+        cli::Patterns::ListSlotUsage {
+            project_path,
+            bank_id,
+            pattern_id,
+            list_opts,
+        } => {
+            print_err(|| {
+                let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                list_pattern_sample_slot_references(
+                    &project_path,
+                    bank_id,
+                    pattern_id,
+                    exclude_empty,
+                )
+            });
         }
     }
 }
