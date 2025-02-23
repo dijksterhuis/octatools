@@ -1,6 +1,7 @@
 ![Utilities for the Elektron Octatrack DPS-1](assets/logo-wide.png "octatools")
 
-Utilities for [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer) binary data files.
+Various Rust binaries/libraries for use with [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
+binary data files.
 
 Releases will be available on [GitHub](https://github.com/dijksterhuis/octatools).
 Development happens on [GitLab](https://gitlab.com/dijksterhuis/octatools).
@@ -25,15 +26,24 @@ Development happens on [GitLab](https://gitlab.com/dijksterhuis/octatools).
 - AIFF files are not currently supported for `octatools-bin samples` commands.
   Only WAV files are currently supported.
 
-- Only Linux is fully supported at the moment.
-  Most commands from `octatools-bin` can *probably* be run on windows.
+- Most commands from `octatools-bin` can *probably* be run on Windows, but I 
+  mainly develop on Linux, so I might have missed some issues. macOs will be a
+  whole other kettle of fish.
 
-- If you are worried about destroying your Octatrack projects / data files -- take a backup
-copy of the compact flash card / set / project folder and work on that copy first.
+- If you are worried about destroying your Octatrack projects / data files -- 
+  take a backup copy of the compact flash card / set / project folder and work 
+  on that copy first.
 
 - This has mostly been a **learning** project for me to get to grips with Rust. 
-**Please do not expect high quality rust code**.
+  **Please do not expect high quality or reliable rust code**.
 
+- Every API and/or command is currently in an 'unstable' state and will possibly 
+  change in the future.
+
+- **Name your sample files uniquely**. I cannot stress this enough. Especially
+  with respect to the copying banks between projects command. 
+
+- There will be bugs.
 
 # octatools is not ...
 
@@ -55,31 +65,42 @@ Multiple rust packages for doing 'stuff' with Octatrack binary data files ...
 
 ## `octatools-bin` -- the CLI binary
 
-TL;DR version -- Perform various useful actions on data files 
-like copying banks between projects or chain sample files with slices
+Perform various useful actions to create and/or modify Octatrack projects/files, 
+like copying banks between projects or chaining sample files together with 
+slices.
 
-- Copy banks from one project to another, moving relevant project sample slots with the
-  bank
+The following features are mostly working, but still need thorough testing, i.e.
+they need examples created and loaded onto the Octatrack for IRL on-machine 
+confirmation that they work; plus probably a bunch more automated test cases ...
+see [Help Wanted](./README.md#help-wanted).
+
+- Copy banks from one project to another: copies relevant project sample slots 
+  to the new project; copies sample files to the new project; remaps sample 
+  slots within bank data.
 - Create slice sample chains from multiple WAV files
 - Create a linear/random slice grid for an existing wav file
 - Deconstruct a slice sample chain into component WAV files
-- Write a new binary data file from a YAML/JSON source file (project/bank/sample)
-- Dump binary data to a YAML/JSON file (project/bank/sample/part/pattern)
+- Write a new binary data file from a YAML/JSON source file (arrangement/project/bank/sample)
+- Dump binary data to a YAML/JSON file (arrangement/project/bank/sample)
 - Inspect various data files (project/arrangement/bank/part/pattern/sample)
 - List samples slots being used in a project
-- Find compatible WAV files in a local directory and write their file paths to a YAML file
+- Find compatible WAV files in a local directory and write their file paths to a
+  YAML file
 
 Example usage:
-- [Copying banks between projects in the same set](./README.md#example-copying-banks-between-projects-in-the-same-set)
-- [Copying banks within the same project](./README.md#example-copying-banks-between-projects-in-the-same-set)
-- [Copying banks with a YAML config](./README.md#example-copying-banks-with-a-yaml-config)
+- [Copying a bank to a project in the same set](./README.md#example-copying-a-bank-to-a-project-in-the-same-set)
+- [Copying a bank within the same project](./README.md#example-copying-a-bank-within-the-same-project)
+- [Copying multiple banks with a YAML config](./README.md#example-copying-multiple-banks-with-a-yaml-config)
 - [Slice based sample chaining with the CLI](./README.md#example-slice-based-sample-chaining-with-the-cli)
 - [Slice based sample chaining with a YAML config](./README.md#example-slice-based-sample-chaining-with-a-yaml-config)
 - [Creating a "god-chain" with a YAML config](./README.md#example-creating-a-god-chain-with-a-yaml-config)
 - [Creating random/linear slice grids](./README.md#example-creating-randomlinear-slice-grids)
 - [Deconstructing samples based on slices](./README.md#example-deconstructing-samples-based-on-slices)
+- [Converting data files to YAML/JSON](./README.md#example-converting-data-files-to-yamljson)
+- [Writing YAML/JSON files as new data files](./README.md#example-writing-yamljson-files-as-new-binary-data-files)
+- [Creating default project data files](./README.md#example-creating-default-project-data-files)
 
-### Example: Copying banks between projects in the same set
+### Example: Copying a bank to a project in the same set
 
 Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the 
 `PROJECT_DEST` project.  The bank will be copied to `Bank 16` in the 
@@ -100,7 +121,7 @@ If you are happy with the changes, save the project and the bank with
 If anything looks wrong, you should be able to use `PROJECT MENU > PROJECT > 
 RELOAD` to undo all changes. Failing that, there are backup files created you 
 can use to manually restore the project/bank. However, please be aware **sample 
-files cannot be un-copied/un-transferred**, see the warning above as it is 
+files cannot be un-copied/un-transferred**, see the warning below as it is 
 possible to have sample files be overwritten if you are not careful with file 
 names.
 
@@ -120,7 +141,7 @@ copying. Sample slots are unique based on their current slot settings, including
 the file path of the sample loaded into the sample slot, so a difference in slot
 settings (e.g. gain/tempo) means that slot is treated as unique.
 
-### Example: Copying banks within the same project
+### Example: Copying a bank within the same project
 
 You can also use this command to copy existing banks within the same project
 ```bash
@@ -131,20 +152,22 @@ octatools-bin banks copy \
   16   # destination bank number
 ```
 
-### Example: Copying banks with a YAML config
+### Example: Copying multiple banks with a YAML config
 
 If you have a lot of banks to copy, you can speed things up by creating a YAML 
 configuration file and using the `banks copy-n` command to copy each bank in 
 series i.e. one after the other.
 
-Example configuration file for copying the same bank multiple times to different projects
+Example configuration file for copying the same bank multiple times to different 
+projects
 ```yaml
 # file saved at ./bank_copies.yaml
 bank_copies:
   # copy the bank to a different project
   - src: 
       # I'm using Linux based relative file paths here
-      # for windows you will need to change these to: ".\\path\\to\\SET\\PROJECT_SOURCE" 
+      # for windows you will need to change these to: 
+      #   project: ".\\path\\to\\SET\\PROJECT_SOURCE" 
       project: "./path/to/SET/PROJECT_SOURCE"
       bank_id: 1
     dest:
@@ -164,7 +187,8 @@ bank_copies:
     dest:
       project: "./path/to/SET/PROJECT_SOURCE"
       bank_id: 16
-  # copy another bank from another source project to a project in a different set
+  # copy another bank from another source project 
+  # to a project in a different set
   - src:
       project: "./path/to/SET/DIFFERENT_SOURCE"
       bank_id: 12
@@ -183,14 +207,15 @@ weird stuff like copying `PROJECT_SRC` bank 5 to `PROJECT_A` bank 1, then
 copying `PROJECT_A` bank 1 to `PROJECT_B` bank 2, then copying `PROJECT_B` bank 
 2 to `PROJECT_C` bank 15. 
 
-I'm not really sure why you would want to do that, but you could :person-shrugging:
+I'm not really sure why you would want to do that, but you could :shrug:
 
 
 
 ### Example: Slice based sample chaining with the CLI
 
-Create new sample files `chained-1.wav` and `chained-1.ot` which chains together multiple wav files, 
-all accessible in a single Octatrack sample slot using the slices
+Create new sample files `chained-1.wav` and `chained-1.ot` which chains together 
+multiple wav files, all accessible in a single Octatrack sample slot using the 
+slices
 ```bash
 octatools-bin samples chain create \
   chained \         # base file name of the resulting sample files
@@ -205,7 +230,8 @@ The output chains are always suffixed with a number to cover the case where more
 than 64 sample files are included in the chain. 100 input samples will create 2x
 output chain file pairs: `chained_1.wav`/`chained_1.ot` and `chained_2.wav`/`chained_2.ot`.
 
-So, you can include as many wav file paths as you want (sort of... memory limits apply).
+So, you can include as many wav file paths as you want (sort of... memory limits 
+apply).
 
 ### Example: Slice based sample chaining with a YAML config
 
@@ -371,6 +397,97 @@ The file names will be: `my_sample_0.wav`, `my_sample_1.wav`, etc.
 You can then add these files to an existing YAML config for your "god-chain" 
 and recreate the sample chain with your newly discovered slices.
 
+### Example: Converting data files to YAML/JSON
+Let's say you wanted to inspect all the settings and sample slots for a project
+without having to navigate through all the menus on the Octatrack
+
+```bash
+octatools-bin projects bin-to-human \
+  ./path/to/SET/PROJECT/project.work \
+  yaml \
+  ./project.yaml
+```
+
+This writes the `project.work` data file for a project to `./project.yaml`, 
+where you can now inspect all the settings for the project.
+
+### Example: Writing YAML/JSON files as new binary data files
+Maybe I want to I can edit some of the settings for the project in the above 
+example?
+
+```yaml
+# example truncated for brevity
+settings:
+  # ...
+  control:
+    audio:
+      master_track: false  # change this to `true`
+      cue_studio_mode: false  # change this to `true`
+  # ...
+```
+
+I can convert this to a new binary data file
+```bash
+octatools-bin projects human-to-bin \
+  yaml \
+  ./project.yaml \
+  ./new_project.work
+```
+
+I can create a backup copy of `./path/to/SET/PROJECT/project.work` and then make 
+the project settings change to match the edited YAML config by replacing the 
+existing `project.work` file with the newly generated binary file
+```bash
+# make a backup in case i set inappropriate values
+cp ./path/to/SET/PROJECT/project.work ./path/to/SET/PROJECT/project.work.backup
+# replace the project file
+cp ./new_project.work ./path/to/SET/PROJECT/project.work
+```
+
+**WARNING**: octatools will not perform validation when converting 
+human-readable values back to the binary data formats, except for basic type 
+overflows (e.g. a setting that cannot be negative, but you provided a negative 
+value). Check the comments and documentation in `octatools-lib` documentation to 
+get an idea of appropriate values. This is also why I explicitly mentioned 
+creating a backup in this example!
+
+### Example: Creating default project data files
+Maybe I want to create a new Octatrack project, but I don't have access to my 
+machine, or my compact flash card?
+
+Well, I can run these commands and will end up with a complete project, ready to 
+convert to YAML and start editing settings
+```bash
+mkdir ./NEW_PROJECT/
+# new project file
+octatools-bin projects create-default ./NEW_PROJECT/project.work
+
+# bank files 1 to 16, inclusive
+for i in `seq 1 16` 
+do 
+  ./octatools-bin banks create-default ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
+done
+# arrangements files 1 to 8, inclusive
+for i in `seq 1 8` 
+do 
+  octatools-bin arrangements create-default ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
+done
+```
+
+Running `ls ./NEW_PROJECT` gives
+```bash
+$ ls NEW_PROJECT/
+arr01.work  arr03.work  arr05.work  arr07.work  bank01.work  bank03.work  bank05.work  bank07.work  bank09.work  bank11.work  bank13.work  bank15.work  project.work
+arr02.work  arr04.work  arr06.work  arr08.work  bank02.work  bank04.work  bank06.work  bank08.work  bank10.work  bank12.work  bank14.work  bank16.work
+```
+
+The only thing missing is a `markers.work` file ... which *seems* to only be 
+used to keep track of state within the sample editing UI on the Octatrack
+
+**WARNING**: Creating a completely new project without a `markers.work`file is 
+currently untested behaviour. I'm just using it as an example to show what you can do with
+the `create-default` commands.
+
 ### Work in Progress features (need more work / need to start work on)
 - Collect a project's sample files to the project directory
 - Collect a project's sample files to the set Audio Pool
@@ -404,31 +521,41 @@ There are a small number of fields in data files which I haven't worked out what
 are used for yet. If anyone can help here then I would be very grateful 
 (see the list in [./octatools-lib/TODO.md](./octatools-lib/TODO.md)).
 
-Also, the JSON / YAML structures are a bit ... weird.
-I have done my best to not convert the underlying data into a structures so that the 
-library returns structures that are *as-close-to-the-raw-data-as-possible*.
+The JSON / YAML data structures are a bit ... weird. I have done my best to not 
+parse the underlying data into new structures, keeping it so that the library 
+returns data that is *as-close-to-the-raw-data-as-possible*.
 
-Like, the arrangements data could do with some work to deal with all the `{"empty": ""}` 
-arranger rows. Header fields *probably* don't need to be there and can be injected in 
-during deserialization.
+Like, the arrangements data could do with some work to deal with all the 
+`{"empty": ""}` arranger rows. Header fields *probably* don't need to be there
+and can be injected in during deserialization.
 
 ## `octatools-py` -- the python module 
 
-Python extension module to allow the reading/writing of Octatrack binary data to/from 
-JSON.
+Python extension module for reading/writing of Octatrack binary data to/from 
+YAML or JSON string data.
+
+```python
+import json
+from pathlib import Path
+from octatrack_py import bank_file_to_json
+
+bank_file_path: Path = Path("./PROJECT/bank01.work")
+json_str: str = bank_file_to_json(bank_file_path)
+json_converted: dict = json.loads(json_str)
+
+print(json_converted.keys())
+# prints: dict_keys(['header_data', 'patterns', 'parts_unsaved', 'parts_saved', 'unknown', 'part_names', 'remainder'])
+```
 
 ### Notes
 
-The module can be used to turn Octatrack data files into json, and back again. 
-It can write the JSON file to the filesystem, or convert to/from bytes. 
+The purpose of this package is to provide non-rust devs with a mechanism to make
+their own software. Rust has (fairly) stable bindings for Python provided by 
+[PyO3](https://pyo3.rs/v0.15.1/).
 
-The purpose of this package is to provide non-rust devs with a mechanism to make their own 
-software. Rust has (fairly) stable bindings for Python provided by [PyO3](https://pyo3.rs/v0.15.1/).
-
-
-which might be useful for an 
-application based on python HTTP APIs if someone is so inclined ;] -- read the file from 
-your website into bytes, pass to `octatools_py`, get the json for it etc. etc..
+Might be useful for an application based on python HTTP APIs if someone is so 
+inclined -- read the file from your website into bytes, pass to `octatools_py`, 
+get the json for it etc. etc.
 
 ### Current Features (mostly working-ish)
 - Deserialize all Octatrack data structures from binarized data
@@ -446,7 +573,6 @@ Used to create `#[derive(XXXX)]` macros for the following:
 - `#[derive(DefaultsAsArrayBoxed)]` for the `octatools-lib::DefaultsArrayBoxed` trait
 
 See the trait descriptions for more information.
-
 
 # How to build packages
 For a dev versions of `octatools-bin` and `octatools-lib`:
@@ -486,7 +612,7 @@ make cov
 
 The project is currently hanging around 50-60% test coverage. 
 
-# Credit
+# Credits
 
 The following projects were used a starting references for the initial
 serialization/deserialization efforts of data files (mostly the `.ot` files). 
