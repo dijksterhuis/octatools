@@ -100,7 +100,7 @@ impl ProjectSampleSlot {
 
     /// Create a default vector of Project Sample Slots; 8x Recorder Buffers.
     pub fn defaults() -> Vec<Self> {
-        [
+        let mut slots = [
             ProjectSampleSlot {
                 sample_type: ProjectSampleSlotType::RecorderBuffer,
                 slot_id: 129,
@@ -190,7 +190,9 @@ impl ProjectSampleSlot {
                 bpm: 120,
             },
         ]
-        .to_vec()
+        .to_vec();
+        slots.sort_by_key(|x| x.slot_id);
+        slots
     }
 }
 
