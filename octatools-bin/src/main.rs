@@ -122,7 +122,7 @@ impl std::fmt::Display for OctatoolErrors {
 impl std::error::Error for OctatoolErrors {}
 
 #[doc(hidden)]
-pub fn print_err<E, F>(cb: F) -> ()
+pub fn print_err<E, F>(cb: F)
 where
     F: FnOnce() -> Result<(), E>,
     E: Display,
@@ -173,7 +173,7 @@ where
 }
 
 #[doc(hidden)]
-fn cmd_select_arrangements(x: cli::Arrangements) -> () {
+fn cmd_select_arrangements(x: cli::Arrangements) {
     match x {
         cli::Arrangements::Inspect(cli::Inspect { bin_path }) => {
             print_err(|| octatools_lib::show_type::<ArrangementFile>(&bin_path, None));
@@ -220,7 +220,7 @@ fn cmd_select_arrangements(x: cli::Arrangements) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_banks(x: cli::Banks) -> () {
+fn cmd_select_banks(x: cli::Banks) {
     match x {
         cli::Banks::Inspect(cli::Inspect { bin_path }) => {
             print_err(|| octatools_lib::show_type::<Bank>(&bin_path, None));
@@ -290,7 +290,7 @@ fn cmd_select_banks(x: cli::Banks) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_drive(x: cli::Drive) -> () {
+fn cmd_select_drive(x: cli::Drive) {
     match x {
         cli::Drive::Scan {
             cfcard_dir_path,
@@ -302,7 +302,7 @@ fn cmd_select_drive(x: cli::Drive) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_parts(x: cli::Parts) -> () {
+fn cmd_select_parts(x: cli::Parts) {
     match x {
         cli::Parts::Saved(y) => match y {
             cli::PartsCmd::Inspect { bin_path, index } => {
@@ -350,7 +350,7 @@ fn cmd_select_parts(x: cli::Parts) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_patterns(x: cli::Patterns) -> () {
+fn cmd_select_patterns(x: cli::Patterns) {
     match x {
         cli::Patterns::Inspect { bin_path, index } => {
             print_err(|| show_pattern(&bin_path, &index[..]));
@@ -375,7 +375,7 @@ fn cmd_select_patterns(x: cli::Patterns) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_project(x: cli::Projects) -> () {
+fn cmd_select_project(x: cli::Projects) {
     match x {
         cli::Projects::Inspect(cli::Inspect { bin_path }) => {
             print_err(|| octatools_lib::show_type::<Project>(&bin_path, None));
@@ -450,7 +450,7 @@ fn cmd_select_project(x: cli::Projects) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_select_samples(x: cli::Samples) -> () {
+fn cmd_select_samples(x: cli::Samples) {
     match x {
         cli::Samples::Chain(y) => match y {
             cli::SampleChains::Create {
@@ -567,7 +567,7 @@ fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
 }
 
 #[doc(hidden)]
-fn cmd_shell_completions(x: cli::ShellCompletions) -> () {
+fn cmd_shell_completions(x: cli::ShellCompletions) {
     let mut cli_data = Cli::command();
     match x {
         cli::ShellCompletions::Bash => print_completions(Shell::Bash, &mut cli_data),
@@ -576,7 +576,7 @@ fn cmd_shell_completions(x: cli::ShellCompletions) -> () {
 }
 
 #[doc(hidden)]
-fn cmd_help_full() -> () {
+fn cmd_help_full() {
     let mut cli_data = Cli::command();
 
     let mut buf = String::new();
@@ -598,7 +598,7 @@ fn cmd_help_full() -> () {
 }
 
 #[doc(hidden)]
-fn write_command_usage(buffer: &mut String, prefix: &mut String, cmd: &mut Command) -> () {
+fn write_command_usage(buffer: &mut String, prefix: &mut String, cmd: &mut Command) {
     /*
     {prefix} command -- Some text describing a specific command
     {prefix} command -- Some text describing a specific command
@@ -610,11 +610,11 @@ fn write_command_usage(buffer: &mut String, prefix: &mut String, cmd: &mut Comma
     if let Some(about) = cmd.get_about() {
         buffer.push_str(format!(" -- {}", about).as_str());
     }
-    buffer.push_str("\n");
+    buffer.push('\n');
 }
 
 #[doc(hidden)]
-fn write_top_level_header(buffer: &mut String, cmd: &mut Command) -> () {
+fn write_top_level_header(buffer: &mut String, cmd: &mut Command) {
     /*
 
     SAMPLES: Some text describing `samples` commands
@@ -637,12 +637,12 @@ fn recursive_walk_subcommands(
         // some sort of command/subcommand
         if sub.has_subcommands() {
             let mut sub_prefix = prefix.clone();
-            if sub_prefix.len() == 0 {
+            if sub_prefix.is_empty() {
                 // no existing prefix -- top level command, create a header block
                 write_top_level_header(buffer, sub)
             } else {
                 // an existing prefix -- is a subcommand so include in list with usage
-                sub_prefix.push_str(" ");
+                sub_prefix.push(' ');
             }
             sub_prefix.push_str(sub.get_name());
             recursive_walk_subcommands(buffer, &mut sub_prefix, sub);

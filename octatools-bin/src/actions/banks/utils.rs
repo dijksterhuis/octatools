@@ -34,7 +34,7 @@ impl ProjectMeta {
 
     /// Load `ProjectMeta` data given a project directory path `PathBuf`
     pub(crate) fn frompath(dirpath: &Path) -> Self {
-        let project_filepath = resolve_project_work_file_from_project_dirpath(&dirpath)
+        let project_filepath = resolve_project_work_file_from_project_dirpath(dirpath)
             .expect("Project file not found.");
 
         Self {
@@ -52,7 +52,7 @@ pub(crate) struct BankMeta {
 impl BankMeta {
     /// Create a bank file from the project directory path and the bank's ID number (1-16 inclusive)
     pub(crate) fn frompath(dirpath: &Path, bank_id: usize) -> Self {
-        let filepath = resolve_bank_work_file_from_project_dirpath(&dirpath, bank_id)
+        let filepath = resolve_bank_work_file_from_project_dirpath(dirpath, bank_id)
             .expect("Bank file not found.");
 
         Self { filepath }
@@ -249,7 +249,7 @@ pub(crate) fn find_sample_slot_refs_in_patterns(
                     // plock slot reference is enabled
                     if slot_id != 255 {
                         slot_usage.insert(
-                            get_active_or_inactive_bank_slot_reference(&slots, sample_type, slot_id)?
+                            get_active_or_inactive_bank_slot_reference(slots, sample_type, slot_id)?
                         );
                     }
                 }
@@ -276,7 +276,7 @@ pub(crate) fn find_sample_slot_refs_in_parts(
                 (audio_track_slots.flex_slot_id, SlotType::Flex),
             ] {
                 slot_usage.insert(
-                    get_active_or_inactive_bank_slot_reference(&slots, sample_type, slot_id)?
+                    get_active_or_inactive_bank_slot_reference(slots, sample_type, slot_id)?
                 );
             }
         }
@@ -295,12 +295,12 @@ pub(crate) fn find_sample_slot_refs_in_bank(
 ) -> RBoxErr<HashSet<BankSlotReference>> {
     let pattern_slot_usage = find_sample_slot_refs_in_patterns(
         slots,
-        &bank.patterns.as_slice(), // boxed serde_big_array needs to be sliced
+        bank.patterns.as_slice(), // boxed serde_big_array needs to be sliced
     )?;
 
     let unsaved_part_slot_usage = find_sample_slot_refs_in_parts(
         slots,
-        &bank.parts_unsaved.as_slice(), // boxed serde_big_array needs to be sliced
+        bank.parts_unsaved.as_slice(), // boxed serde_big_array needs to be sliced
     )?;
 
     Ok(pattern_slot_usage
@@ -320,7 +320,7 @@ fn resolve_otfile_fpath_from_audio_fpath(path: &Path) -> PathBuf {
 /// Extract the filename and file extension from a `PathBuf` as a single String,
 /// i.e. `PathBuf("some/path/to/file.ext")` -> `"file.ext"`.
 pub(crate) fn resolve_fname_and_fext_from_path(path: &Path) -> RBoxErr<String> {
-    if !path.extension().is_some() {
+    if path.extension().is_none() {
         return Err(Box::new(OctatoolErrors::InvalidFilenameOrExtension));
     }
 
@@ -368,8 +368,8 @@ pub(crate) fn find_sample_slot_settings_match(candidate: &Slot, slots: &[Slot]) 
         })
         // first one in ascending order
         .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
-        .cloned()
         .next()
+        .cloned()
 }
 
 /// Create a new sample slot based on another sample slot.
@@ -457,8 +457,8 @@ fn get_deduplicated_sample_slots_and_updated_banks(
     let mut reassignments: Vec<SlotReferenceReassignment> = vec![];
 
     for slot in slots {
-        if !deduped.contains(&slot) {
-            if let Some(found) = find_sample_slot_settings_match(&slot, &deduped) {
+        if !deduped.contains(slot) {
+            if let Some(found) = find_sample_slot_settings_match(slot, &deduped) {
                 reassignments.push(SlotReferenceReassignment {
                     initial_slot_id: slot.slot_id,
                     new_slot_id: found.slot_id,
@@ -602,19 +602,14 @@ pub fn calculate_copy_bank_changes(
     // - the slot is referenced in the bank we are going to copy
     let src_slots_reuses = deduped_src_zero_indexed_slots
         .iter()
-        .filter(|src| find_sample_slot_settings_match(&src, &dest_zero_indexed_slots).is_some())
+        .filter(|src| find_sample_slot_settings_match(src, &dest_zero_indexed_slots).is_some())
         .cloned()
         .map(|src| SlotsSlotReference {
             sample_type: src.sample_type,
             slot_id: src.slot_id,
             op_type: SampleSlotOperationType::ReuseSlot,
         })
-        .filter(|slot| {
-            bank_slot_refs
-                .iter()
-                .find(|x| x.slot_id == slot.slot_id)
-                .is_some()
-        })
+        .filter(|slot| bank_slot_refs.iter().any(|x| x.slot_id == slot.slot_id))
         .collect::<HashSet<_>>();
 
     // the set of source slots where
@@ -622,19 +617,14 @@ pub fn calculate_copy_bank_changes(
     // - the slot is referenced in the bank we are going to copy
     let src_slots_inserts = deduped_src_zero_indexed_slots
         .iter()
-        .filter(|src| find_sample_slot_settings_match(&src, &dest_zero_indexed_slots).is_none())
+        .filter(|src| find_sample_slot_settings_match(src, &dest_zero_indexed_slots).is_none())
         .cloned()
         .map(|src| SlotsSlotReference {
             sample_type: src.sample_type,
             slot_id: src.slot_id,
             op_type: SampleSlotOperationType::NewSlot,
         })
-        .filter(|slot| {
-            bank_slot_refs
-                .iter()
-                .find(|x| x.slot_id == slot.slot_id)
-                .is_some()
-        })
+        .filter(|slot| bank_slot_refs.iter().any(|x| x.slot_id == slot.slot_id))
         .collect::<HashSet<_>>();
 
     let static_slot_inserts_count = src_slots_inserts
@@ -692,13 +682,11 @@ pub fn calculate_copy_bank_changes(
             let dest_slot =
                 create_sample_slot_from_existing(&src_slot, None, &new_slot_id).unwrap();
 
-            let op = SampleSlotOperation {
+            SampleSlotOperation {
                 src_slot,
                 dest_slot,
                 op_type: SampleSlotOperationType::ReuseSlot,
-            };
-
-            op
+            }
         })
         .collect::<HashSet<_>>();
 
@@ -733,7 +721,7 @@ pub fn calculate_copy_bank_changes(
 
             let src_path_audio_abs = &src_project_dirpath.join(&src_slot.path);
             let audio_fpath_rel_dest =
-                PathBuf::from(&resolve_fname_and_fext_from_path(&src_path_audio_abs).unwrap());
+                PathBuf::from(&resolve_fname_and_fext_from_path(src_path_audio_abs).unwrap());
             let dest_slot_id = match src_slot.sample_type {
                 SlotType::Static => free_static
                     .pop()
@@ -774,7 +762,7 @@ pub fn calculate_copy_bank_changes(
     apply_slot_changes_to_bank_inplace(&active_reuse_ops, &mut deduped_bank);
     apply_slot_changes_to_bank_inplace(&active_insert_ops, &mut deduped_bank);
 
-    let dest_new_zero_indexed_slots = if active_insert_ops.len() > 0 {
+    let dest_new_zero_indexed_slots = if !active_insert_ops.is_empty() {
         println!("Adding new sample slots to destination project data ...");
         let static_sample_slot_insertions = &active_insert_ops
             .iter()
@@ -836,7 +824,7 @@ pub(crate) fn transfer_sample_files(
 ) -> RBoxErr<()> {
     for transfer in transfers {
         let src_path_audio_abs = &src_dirpath.to_path_buf().join(&transfer.from.path);
-        let src_ot_filepath_abs = resolve_otfile_fpath_from_audio_fpath(&src_path_audio_abs);
+        let src_ot_filepath_abs = resolve_otfile_fpath_from_audio_fpath(src_path_audio_abs);
 
         let dest_filename_and_ext = resolve_fname_and_fext_from_path(&transfer.to.path).expect(
             "Failed to resolve file name and/or extension of audio file destination location.",

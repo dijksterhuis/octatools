@@ -81,17 +81,19 @@ pub fn create_default_ot_file_for_wav_file(path: &Path) -> RBoxErr<()> {
         },
     );
 
-    Ok(type_to_yaml_file::<SampleAttributes>(&ot_data?, &ot_path)?)
+    type_to_yaml_file::<SampleAttributes>(&ot_data?, &ot_path)?;
+
+    Ok(())
 }
 
 // todo: test
 // todo: better error handling
 /// Create Nx default OctaTrack sample attributes file for Nx wav files
-pub fn create_default_ot_files_for_wav_files(paths: &Vec<PathBuf>) -> RBoxErr<()> {
-    Ok(paths
-        .iter()
-        .map(|x| create_default_ot_file_for_wav_file(x).expect("Failed to create an ot file"))
-        .collect())
+pub fn create_default_ot_files_for_wav_files(paths: &[PathBuf]) -> RBoxErr<()> {
+    for path in paths {
+        create_default_ot_file_for_wav_file(path).expect("Failed to create an ot file");
+    };
+    Ok(())
 }
 
 /// Chain together a wav sample vector into individual wav file(s).
