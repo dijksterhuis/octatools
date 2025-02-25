@@ -386,7 +386,6 @@ where
     Ok(())
 }
 
-
 /// Read `bytes` from a file at `path`. Used for reading octatrack data files.
 pub fn read_bin_file(path: &Path) -> RBoxErr<Vec<u8>> {
     let mut infile = File::open(path)?;
