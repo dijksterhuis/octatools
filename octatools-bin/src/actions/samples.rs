@@ -233,7 +233,20 @@ pub fn create_samplechain_from_pathbufs_only(
             idx + 1,
             wavfiles_batched.len()
         );
-        let base_outchain_path = outdir_path.to_path_buf().join(outchain_name);
+
+        // always suffix the batch number onto the same chain
+        // if someone generates a sample chain with 64 files the first time,
+        // then attempts to create a second version later on with 65 files then
+        // they'll end up with different file names and have to manually load the
+        // samples to every slot where they've been used.
+        //
+        // example use-case: users creating "godchains" containing all their
+        // favourite samples. If they start with <64 samples, subsequently
+        // adding more and regenerating their "godchain" will mean they have to
+        // edit the existing sample slot in all their projects.
+        //
+        // so just always suffix `-{idx}` to the filenames.
+        let base_outchain_path = outdir_path.to_path_buf().join(format!["{}-{}", outchain_name, idx + 1]);
 
         let mut wav_sliced_outpath = base_outchain_path;
         wav_sliced_outpath.set_extension("wav");
