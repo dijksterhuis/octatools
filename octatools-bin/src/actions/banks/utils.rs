@@ -96,10 +96,10 @@ pub(crate) struct SlotsSlotReference {
     pub(crate) op_type: SampleSlotOperationType,
 }
 
-struct SlotReferenceReassignment {
-    initial_slot_id: u8,
-    new_slot_id: u8,
-    slot_type: SlotType,
+pub(crate) struct SlotReferenceReassignment {
+    pub(crate) initial_slot_id: u8,
+    pub(crate) new_slot_id: u8,
+    pub(crate) slot_type: SlotType,
 }
 
 /// Type of operation we'll be performing with repsect to sample slots
@@ -352,7 +352,7 @@ fn find_last_empty_slot(slots: &[Slot], sample_type: &SlotType) -> RBoxErr<u8> {
 
 /// Find a match for a given sample slot based only on the SETTINGS of the sample slot, i.e. do not
 /// match on `slot_id`
-fn find_sample_slot_settings_match(candidate: &Slot, slots: &[Slot]) -> Option<Slot> {
+pub(crate) fn find_sample_slot_settings_match(candidate: &Slot, slots: &[Slot]) -> Option<Slot> {
     slots
         .iter()
         .filter(|x| {
@@ -411,7 +411,7 @@ pub(crate) fn get_zero_indexed_slots_from_one_indexed(slots: &[Slot]) -> RBoxErr
 }
 
 /// Get a new vector of project slots, one-indexed
-fn get_one_indexed_slots_from_zero_indexed(slots: &[Slot]) -> RBoxErr<Vec<Slot>> {
+pub(crate) fn get_one_indexed_slots_from_zero_indexed(slots: &[Slot]) -> RBoxErr<Vec<Slot>> {
     Ok(slots
         .iter()
         .map(|s| {

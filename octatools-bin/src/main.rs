@@ -28,6 +28,7 @@ use crate::actions::{
         consolidate_sample_slots_to_audio_pool, consolidate_sample_slots_to_project_pool,
         list_project_sample_slots, purge_project_pool,
     },
+    projects::slots::cmd_slots_deduplicate,
     samples::{
         create_default_ot_file_for_wav_file, create_default_ot_files_for_wav_files,
         create_equally_sliced_sample, create_index_samples_dir_full,
@@ -412,6 +413,9 @@ fn cmd_select_project(x: cli::Projects) -> () {
             }
             cli::SampleSlots::Centralise { path } => {
                 print_err(|| consolidate_sample_slots_to_audio_pool(&path));
+            }
+            cli::SampleSlots::Deduplicate { project_dirpath } => {
+                print_err(|| cmd_slots_deduplicate(&project_dirpath));
             }
         },
         cli::Projects::BinToHuman(cli::BinToHuman {
