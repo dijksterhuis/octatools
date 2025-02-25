@@ -345,11 +345,6 @@ the start of the list will put your new samples at the start of your sample
 chain, potentially meaning existing projects will no longer be using the correct 
 slices!
 
-**NOTE**: The `projects dedupe` command idea mentioned in the bank copying 
-example may cause issues here as it will likely rename all files based on the 
-combined content hash of sample file pairs. Generating a new "godchain" will 
-mean having different content hashes ... Need to think about this.
-
 ### Example: Creating random/linear slice grids
 
 If you're like me, you like finding weird sounds within a much larger sample file 
