@@ -47,7 +47,7 @@ pub fn arrangement_json_to_bytes(json: String) -> PyResult<Vec<u8>> {
 pub fn arrangement_json_to_file(json: String, path: PathBuf) -> PyResult<()> {
     let x = deserialize_json_to_type::<ArrangementFile>(&json)
         .expect("Could not deserialize JSON to arrangement.");
-    let _ = write_type_to_bin_file::<ArrangementFile>(&x, &path)
+    write_type_to_bin_file::<ArrangementFile>(&x, &path)
         .expect("Could not write arrangement to file.");
     Ok(())
 }
@@ -80,7 +80,7 @@ pub fn bank_json_to_bytes(json: String) -> PyResult<Vec<u8>> {
 #[pyfunction]
 pub fn bank_json_to_file(json: String, path: PathBuf) -> PyResult<()> {
     let x = deserialize_json_to_type::<Bank>(&json).expect("Could not deserialize JSON to bank.");
-    let _ = write_type_to_bin_file::<Bank>(&x, &path).expect("Could not write bank to file.");
+    write_type_to_bin_file::<Bank>(&x, &path).expect("Could not write bank to file.");
     Ok(())
 }
 
@@ -115,7 +115,7 @@ pub fn project_json_to_bytes(json: String) -> PyResult<Vec<u8>> {
 pub fn project_json_to_file(json: String, path: PathBuf) -> PyResult<()> {
     let x =
         deserialize_json_to_type::<Project>(&json).expect("Could not deserialize JSON to project.");
-    let _ = write_type_to_bin_file::<Project>(&x, &path).expect("Could not write project to file.");
+    write_type_to_bin_file::<Project>(&x, &path).expect("Could not write project to file.");
     Ok(())
 }
 
@@ -155,7 +155,7 @@ pub fn sample_attributes_json_to_bytes(json: String) -> PyResult<Vec<u8>> {
 pub fn sample_attributes_json_to_file(json: String, path: PathBuf) -> PyResult<()> {
     let x = deserialize_json_to_type::<SampleAttributes>(&json)
         .expect("Could not deserialize JSON to sample attributes.");
-    let _ = write_type_to_bin_file::<SampleAttributes>(&x, &path)
+    write_type_to_bin_file::<SampleAttributes>(&x, &path)
         .expect("Could not write sample attributes to file.");
     Ok(())
 }
