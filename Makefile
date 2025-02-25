@@ -52,7 +52,7 @@ setup-py:
 
 build-py: setup-py
 	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/maturin build --manifest-path ./${PYTHON_EXT_PACKAGE_NAME}/Cargo.toml
-	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -m pip install --force-reinstall $(wildcard ./target/wheels/*.whl)
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -m pip install --force-reinstall $(wildcard ./target/wheels/octatools_py-*.whl)
 
 smoke-py: build-py
 	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.bank_file_to_json(\"./data/tests/blank-project/bank01.work\")).keys(); print('arrangment:', keys)"
