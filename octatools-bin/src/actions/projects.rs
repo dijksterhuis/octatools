@@ -1,3 +1,5 @@
+pub mod slots;
+
 use crate::audio::utils::scan_dir_path_for_audio_files;
 use crate::RBoxErr;
 

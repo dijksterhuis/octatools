@@ -123,6 +123,22 @@ pub enum SampleSlots {
         #[arg(value_hint = ValueHint::DirPath)]
         path: PathBuf,
     },
+
+    /// Deduplicate sample slots within a project.
+    #[command(long_about = "\
+Deduplicate sample slots within a project, removing duplicates based on slot settings.
+Slot uniqueness is determined by the file path of the registered sample file, gain, tempo, trim length etc.
+The command will also update slot references in all bankXX.work files within the project \
+(slot assignments are changed to point at the remaining unique slot).
+
+** WARNING ** Does not check whether sample files are unique based on content -- be careful naming your sample files!
+"
+    )]
+    Deduplicate {
+        /// Project directory path to perform de-duplication on
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_dirpath: PathBuf,
+    },
 }
 
 /// Commands related to data contained in OctaTrack Project files (examples: project.work, project.strd)
