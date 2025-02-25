@@ -23,7 +23,7 @@ mod deserialize;
 mod serialize;
 
 use crate::DefaultsArrayBoxed;
-use octatools_derive::{DefaultsAsBoxedBigArray, Decodeable, Encodeable};
+use octatools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 

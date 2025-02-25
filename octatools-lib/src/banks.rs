@@ -3,9 +3,12 @@
 pub mod parts;
 pub mod patterns;
 
-use crate::{banks::{parts::Part, patterns::Pattern}, Decode, DefaultsArrayBoxed, Encode};
+use crate::{
+    banks::{parts::Part, patterns::Pattern},
+    Decode, DefaultsArrayBoxed, Encode,
+};
 
-use octatools_derive::{DefaultsAsBoxedBigArray, Decodeable, Encodeable};
+use octatools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
@@ -29,7 +32,7 @@ const DEFAULT_PART_NAMES: [[u8; 7]; 4] = [
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
 #[derive(
-    Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray, Decodeable, Encodeable
+    Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray, Decodeable, Encodeable,
 )]
 pub struct Bank {
     /// Misc header data for Banks.
