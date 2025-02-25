@@ -15,7 +15,6 @@ name = "octatools_lib"
 [dependencies]
 bincode.workspace = true
 itertools.workspace = true
-pyo3 = "0.23.4"
 serde.workspace = true
 serde-big-array = "0.5.1"
 serde_json.workspace = true
