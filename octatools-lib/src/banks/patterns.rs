@@ -718,6 +718,10 @@ pub struct PatternChainBehavior {
     pub use_project_setting: u8,
 }
 
+// allow the verbose implementation to keep things
+// - (a) standardised across all types
+// - (b) easier for non-rustaceans to follow when reading through data structures
+#[allow(clippy::derivable_impls)]
 impl Default for PatternChainBehavior {
     fn default() -> Self {
         Self {

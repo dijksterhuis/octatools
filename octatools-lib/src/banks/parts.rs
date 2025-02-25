@@ -330,6 +330,10 @@ pub struct AudioTrackAmpParamsValues {
     pub unused: u8,
 }
 
+// allow the verbose implementation to keep things
+// - (a) standardised across all types
+// - (b) easier for non-rustaceans to follow when reading through data structures
+#[allow(clippy::derivable_impls)]
 impl Default for AudioTrackAmpParamsValues {
     fn default() -> Self {
         Self {
