@@ -21,28 +21,22 @@ Development happens on [GitLab](https://gitlab.com/dijksterhuis/octatools).
 
 # Warnings
 
+- There will be bugs.
 - octatools only works with OS version 1.40B (the one I have installed)
-
 - AIFF files are not currently supported for `octatools-bin samples` commands.
   Only WAV files are currently supported.
-
 - Most commands from `octatools-bin` can *probably* be run on Windows, but I 
   mainly develop on Linux, so I might have missed some issues. macOs will be a
   whole other kettle of fish.
-
 - If you are worried about destroying your Octatrack projects / data files -- 
   take a backup copy of the compact flash card / set / project folder and work 
   on that copy first.
-
 - This has mostly been a **learning** project for me to get to grips with Rust. 
   **Please do not expect high quality or reliable rust code**.
-
+- **Name your sample files uniquely**. I cannot stress this enough. Especially
+  with respect to the copying banks between projects command.
 - Every API and/or command is currently in an 'unstable' state and will possibly 
   change in the future.
-
-- **Name your sample files uniquely**. I cannot stress this enough. Especially
-  with respect to the copying banks between projects command. 
-
 - There will be bugs.
 
 # octatools is not ...
@@ -495,6 +489,12 @@ the `create-default` commands.
 - Find compatible audio files on the local file system for using in the Octatrack
 - Deduplicate project sample files with unique file names (content hash based)
 - Deduplicate all set sample files with unique file names (content hash based)
+- Clearing all patterns within a project (leaving parts alone)
+- Clearing all parts within a project (leaving patterns alone) ... is this even 
+  useful? o_O
+- Clearing all patterns within a bank (leaving parts alone)
+- Clearing all parts within a bank (leaving patterns alone) ... is this even
+  useful? o_O
 
 ### Help Wanted
 - User guide / documentation
