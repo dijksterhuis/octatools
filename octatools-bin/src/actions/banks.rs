@@ -1,34 +1,25 @@
 //! Functions for CLI actions related to copying Octatrack data,
 //! such as `Bank`s, `Pattern`s, `Part`s or `Project`s.
 
-mod yaml;
 #[cfg(test)]
 mod tests;
 pub(crate) mod utils;
+mod yaml;
 
 use crate::{actions::banks::yaml::YamlCopyBankConfig, OctatoolErrors, RBoxErr};
 use itertools::Itertools;
+use octatools_lib::projects::options::ProjectSampleSlotType;
 use octatools_lib::{
     banks::{Bank, BankRawBytes},
     get_bytes_slice,
     projects::Project,
     read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
 };
-use std::{
-    path::Path, path::PathBuf,
-};
-use octatools_lib::projects::options::ProjectSampleSlotType;
+use std::{path::Path, path::PathBuf};
 use utils::{
-    BankCopyPathsMeta,
-    BankMeta,
-    ProjectMeta,
-    create_backup_of_work_file,
-    calculate_copy_bank_changes,
-    transfer_sample_files,
-    get_bank_fname_from_id,
-    find_sample_slot_refs_in_bank,
-    get_zero_indexed_slots_from_one_indexed,
-    BankSlotReferenceType,
+    calculate_copy_bank_changes, create_backup_of_work_file, find_sample_slot_refs_in_bank,
+    get_bank_fname_from_id, get_zero_indexed_slots_from_one_indexed, transfer_sample_files,
+    BankCopyPathsMeta, BankMeta, BankSlotReferenceType, ProjectMeta,
 };
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
@@ -39,8 +30,6 @@ pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usiz
     println!("{:#?}", bytes);
     Ok(())
 }
-
-
 
 /// ### Copy Banks
 ///
@@ -70,9 +59,7 @@ pub fn copy_bank_by_paths(
     source_bank_number: usize,
     destination_bank_number: usize,
 ) -> RBoxErr<()> {
-    if !(1..=16).contains(&source_bank_number) ||
-        !(1..=16).contains(&destination_bank_number)
-    {
+    if !(1..=16).contains(&source_bank_number) || !(1..=16).contains(&destination_bank_number) {
         return Err(Box::new(OctatoolErrors::CliInvalidBankIndex));
     }
 
@@ -105,7 +92,7 @@ pub fn copy_bank_by_paths(
         .map(|x| (x.sample_type, x.slot_id))
         .into_group_map();
 
-    if ! mising_source_file_slot_ids.is_empty() {
+    if !mising_source_file_slot_ids.is_empty() {
         eprintln!("Missing sample files detected in source project! Not continuing.");
         eprintln!(
             "Slot IDs with no audio file: {:?}",
@@ -127,12 +114,8 @@ pub fn copy_bank_by_paths(
     println!("===================================================================================");
     println!("Calculating changes ...");
 
-    let (new_project, new_bank, sample_transfers) = calculate_copy_bank_changes(
-        source_project_dirpath,
-        &src_project,
-        &bank,
-        &dest_project,
-    )?;
+    let (new_project, new_bank, sample_transfers) =
+        calculate_copy_bank_changes(source_project_dirpath, &src_project, &bank, &dest_project)?;
 
     println!("===================================================================================");
 
@@ -146,9 +129,11 @@ pub fn copy_bank_by_paths(
     ================================================================================================
     */
 
-
-    if ! sample_transfers.is_empty() { println!("Copying necessary sample files ...") }
-    else { println!("No sample files need copying.") }
+    if !sample_transfers.is_empty() {
+        println!("Copying necessary sample files ...")
+    } else {
+        println!("No sample files need copying.")
+    }
 
     transfer_sample_files(
         &sample_transfers,
@@ -167,7 +152,6 @@ pub fn copy_bank_by_paths(
     println!("===================================================================================");
     println!("Bank copy complete.");
     Ok(())
-
 }
 
 /// ### Batched bank copying using a YAML config

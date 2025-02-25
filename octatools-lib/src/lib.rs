@@ -576,9 +576,9 @@ mod test {
             let binpath = std::path::Path::new("../data/tests/arrange/blank.work");
             let outyaml = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-blank.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");
@@ -594,9 +594,9 @@ mod test {
             let binpath = std::path::Path::new("../data/tests/arrange/full_options.work");
             let outyaml = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-fulloptions.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");
@@ -614,9 +614,9 @@ mod test {
             let outyaml =
                 std::env::temp_dir().join("serde-ot-bin2yaml-arrange-onereminderrow.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");

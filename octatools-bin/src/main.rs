@@ -17,18 +17,20 @@ use log::LevelFilter;
 
 use crate::actions::{
     arrangements::show_arrangement_bytes,
-    banks::{batch_copy_banks, copy_bank_by_paths, list_bank_sample_slot_references, show_bank_bytes},
+    banks::{
+        batch_copy_banks, copy_bank_by_paths, list_bank_sample_slot_references, show_bank_bytes,
+    },
     drive::create_file_index_yaml,
     parts::{
         list_saved_part_sample_slot_references, list_unsaved_part_sample_slot_references,
         show_saved_parts, show_unsaved_parts,
     },
     patterns::{list_pattern_sample_slot_references, show_pattern},
+    projects::slots::cmd_slots_deduplicate,
     projects::{
         consolidate_sample_slots_to_audio_pool, consolidate_sample_slots_to_project_pool,
         list_project_sample_slots, purge_project_pool,
     },
-    projects::slots::cmd_slots_deduplicate,
     samples::{
         create_default_ot_file_for_wav_file, create_default_ot_files_for_wav_files,
         create_equally_sliced_sample, create_index_samples_dir_full,

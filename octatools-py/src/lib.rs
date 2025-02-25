@@ -1,12 +1,12 @@
-use pyo3::prelude::{
-    pyfunction, pymodule, wrap_pyfunction, Bound, PyModule, PyModuleMethods, PyResult,
-};
 use octatools_lib::{
     arrangements::ArrangementFile, banks::Bank, projects::Project, samples::SampleAttributes,
 };
 use octatools_lib::{
     deserialize_bin_to_type, deserialize_json_to_type, read_type_from_bin_file,
     serialize_json_from_type, write_type_to_bin_file, Encode,
+};
+use pyo3::prelude::{
+    pyfunction, pymodule, wrap_pyfunction, Bound, PyModule, PyModuleMethods, PyResult,
 };
 
 use std::path::PathBuf;

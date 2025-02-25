@@ -1,4 +1,4 @@
-dirpath: /home/dijksterhuis/0-dox/1-dev/rs-octatools/data/tests/samples/indexing
+dirpath: "../data/tests/samples/indexing/"
 samples:
 - '../data/tests/samples/indexing/596990__stoltingmediagroup__smg_sound_drum_hat_0012035626.wav'
 - '../data/tests/samples/indexing/597018__stoltingmediagroup__smg_sound_drum_hat_0035158918.wav'

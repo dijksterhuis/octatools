@@ -1,18 +1,15 @@
 use crate::actions::banks::copy_bank_by_paths;
 use copy_dir;
-use octatools_lib::banks::Bank;
 use octatools_lib::banks::parts::AudioTrackMachineSlot;
-use octatools_lib::projects::{Project, options::ProjectSampleSlotType, slots::ProjectSampleSlot};
+use octatools_lib::banks::Bank;
+use octatools_lib::projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project};
 use octatools_lib::{read_type_from_bin_file, write_type_to_bin_file};
 use std::env::temp_dir;
 use std::path::PathBuf;
-use utils::{
-    resolve_fname_and_fext_from_path,
-};
+use utils::resolve_fname_and_fext_from_path;
 
-use crate::OctatoolErrors;
 use super::*;
-
+use crate::OctatoolErrors;
 
 mod unit {
     use super::*;
@@ -22,7 +19,10 @@ mod unit {
 
         #[test]
         fn success_unhidden_rel_path_with_parent_dirs() {
-            let path = PathBuf::from(".").join("some").join("path").join("file.ext");
+            let path = PathBuf::from(".")
+                .join("some")
+                .join("path")
+                .join("file.ext");
             let r = resolve_fname_and_fext_from_path(&path);
             assert!(r.is_ok());
             assert_eq!(r.unwrap(), "file.ext".to_string());
@@ -100,7 +100,6 @@ mod unit {
     }
 }
 
-
 mod integration {
 
     use super::*;
@@ -115,11 +114,10 @@ mod integration {
     }
 
     fn get_base_mock_path(test_name: &String) -> PathBuf {
-        let base = temp_dir()
+        temp_dir()
             .join("octatools-bin")
             .join("copyBankTesting")
-            .join(test_name);
-        base
+            .join(test_name)
     }
 
     fn tear_down_dirs(test_name: &String) {
@@ -128,7 +126,7 @@ mod integration {
     }
 
     fn mock_dirs(test_name: &String) -> TestPaths {
-        tear_down_dirs(&test_name);
+        tear_down_dirs(test_name);
         let base = get_base_mock_path(test_name);
 
         println!("BASE: {:?}", base);
@@ -153,7 +151,7 @@ mod integration {
                 .join("AUDIO"),
             &paths.audio_pool,
         )
-            .unwrap();
+        .unwrap();
 
         let _ = std::fs::create_dir_all(&paths.inproject);
 
@@ -168,27 +166,19 @@ mod integration {
         srcbank: &Bank,
         destproj: &Project,
     ) {
-        let _ = write_type_to_bin_file::<Project>(
-            srcproj,
-            &paths.inproject.join("project.work"),
-        );
-        let _ = write_type_to_bin_file::<Project>(
-            &destproj,
-            &paths.outproject.join("project.work"),
-        );
-        let _ = write_type_to_bin_file::<Bank>(&srcbank, &paths.inbank);
+        let _ = write_type_to_bin_file::<Project>(srcproj, &paths.inproject.join("project.work"));
+        let _ = write_type_to_bin_file::<Project>(destproj, &paths.outproject.join("project.work"));
+        let _ = write_type_to_bin_file::<Bank>(srcbank, &paths.inbank);
         // required by copy_bank to validate the dest bank file exists.
         let _ = write_type_to_bin_file::<Bank>(&Bank::default(), &paths.outbank);
     }
 
     fn edit_valid_test_data_part<F>(valid_destbank: &mut Bank, f: F)
     where
-        F: Fn(usize, usize, &mut AudioTrackMachineSlot) -> (),
+        F: Fn(usize, usize, &mut AudioTrackMachineSlot),
     {
         for (part_id, part) in valid_destbank.parts_unsaved.iter_mut().enumerate() {
-            for (track_id, audio_track) in
-                part.audio_track_machine_slots.iter_mut().enumerate()
-            {
+            for (track_id, audio_track) in part.audio_track_machine_slots.iter_mut().enumerate() {
                 f(part_id, track_id, audio_track);
             }
         }
@@ -255,10 +245,7 @@ mod integration {
                         if valid_plocks.static_slot_id != 255 {
                             println!("IDX: PATTERN: {} TRACK: {} TRIG: {} -- Static valid: {} v copied: {}", pattern_idx, track_idx, trig_idx, valid_plocks.static_slot_id, copied_plocks.static_slot_id);
                         }
-                        assert_eq!(
-                            valid_plocks.static_slot_id,
-                            copied_plocks.static_slot_id
-                        );
+                        assert_eq!(valid_plocks.static_slot_id, copied_plocks.static_slot_id);
                         assert_eq!(valid_plocks.flex_slot_id, copied_plocks.flex_slot_id);
                     }
                 }
@@ -284,7 +271,6 @@ mod integration {
             }
         }
 
-
         #[test]
         // tests that everything works with a default bank -- there will be 'inactive' audio track
         // machine sample slots to handle
@@ -305,13 +291,10 @@ mod integration {
             // track machine slot allocation will be pointed to the last free sample slot
             // if they do not already point at a sample slot -- track 1 in a default bank
             // will point at sample slot 1 --> so need to mutate in this case
-            edit_valid_test_data_part(
-                &mut valid_destbank,
-                | _, _, audio_track| {
-                    audio_track.flex_slot_id = 127;
-                    audio_track.static_slot_id = 127;
-                },
-            );
+            edit_valid_test_data_part(&mut valid_destbank, |_, _, audio_track| {
+                audio_track.flex_slot_id = 127;
+                audio_track.static_slot_id = 127;
+            });
 
             run_test(
                 &paths,
@@ -326,6 +309,7 @@ mod integration {
         }
 
         mod static_slots {
+            use std::cmp::Ordering;
 
             #[test]
             fn test_one_slot_active_pattern() {
@@ -356,7 +340,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -371,7 +355,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -381,15 +365,12 @@ mod integration {
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- track 1 in a default bank
                 // will point at sample slot 1 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |_, track_id, audio_track| {
-                        audio_track.flex_slot_id = 127;
-                        if track_id > 0 {
-                            audio_track.static_slot_id = 127;
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |_, track_id, audio_track| {
+                    audio_track.flex_slot_id = 127;
+                    if track_id > 0 {
+                        audio_track.static_slot_id = 127;
+                    }
+                });
 
                 run_test(
                     &paths,
@@ -433,7 +414,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -450,7 +431,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -467,7 +448,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -484,7 +465,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -499,7 +480,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -514,7 +495,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 println!("src slots original: {:#?}", srcproj.slots);
@@ -527,14 +508,10 @@ mod integration {
 
                 // handle slot remapping
                 let mut valid_destbank = srcbank.clone();
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[0]
-                    .static_slot_id = 0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1]
-                    .static_slot_id = 0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2]
-                    .static_slot_id = 0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3]
-                    .static_slot_id = 1;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[0].static_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].static_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].static_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].static_slot_id = 1;
 
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- need to mutate all track
@@ -563,8 +540,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/static/n_slots_active_pattern_mutate_machines".to_string();
+                let test_name = "int/static/n_slots_active_pattern_mutate_machines".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -587,7 +563,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -604,7 +580,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -621,7 +597,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -638,7 +614,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -653,7 +629,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -668,7 +644,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -680,30 +656,22 @@ mod integration {
                 // handle slot reuse
                 let mut valid_destbank = srcbank.clone();
                 // slot reuses -- slots 0, 1, 2 are now on slot 0
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1]
-                    .static_slot_id = 0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2]
-                    .static_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].static_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].static_slot_id = 0;
                 // slot reuses -- slots 3 is now on slot 1
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3]
-                    .static_slot_id = 1;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].static_slot_id = 1;
 
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- tracks 1 to 4 in a default bank
                 // will point at sample slots 1 to 4 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |_, track_id, audio_track| {
-                        audio_track.flex_slot_id = 127;
-                        audio_track.static_slot_id = if track_id == 3 {
-                            1
-                        } else if track_id < 3 {
-                            0
-                        } else {
-                            127
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |_, track_id, audio_track| {
+                    audio_track.flex_slot_id = 127;
+                    audio_track.static_slot_id = match track_id.cmp(&3) {
+                        Ordering::Less => 0,
+                        Ordering::Greater => 127,
+                        Ordering::Equal => 1,
+                    };
+                });
 
                 run_test(
                     &paths,
@@ -746,7 +714,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -761,7 +729,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -771,17 +739,14 @@ mod integration {
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- track 1 in a default bank
                 // will point at sample slot 1 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |part_id, track_id, audio_track| {
-                        audio_track.flex_slot_id = 127;
-                        if part_id == 0 && track_id == 0 {
-                            audio_track.static_slot_id = 0;
-                        } else {
-                            audio_track.static_slot_id = 127;
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |part_id, track_id, audio_track| {
+                    audio_track.flex_slot_id = 127;
+                    if part_id == 0 && track_id == 0 {
+                        audio_track.static_slot_id = 0;
+                    } else {
+                        audio_track.static_slot_id = 127;
+                    }
+                });
 
                 run_test(
                     &paths,
@@ -802,8 +767,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/static/no_free_dest_slots_no_slot_reuses".to_string();
+                let test_name = "int/static/no_free_dest_slots_no_slot_reuses".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -825,7 +789,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -841,7 +805,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -862,9 +826,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/static/no_free_dest_slots_can_slot_reuse__fails"
-                        .to_string();
+                let test_name = "int/static/no_free_dest_slots_can_slot_reuse__fails".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -886,7 +848,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -902,7 +864,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -924,9 +886,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/static/one_free_dest_slots_no_slot_reuses_fails"
-                        .to_string();
+                let test_name = "int/static/one_free_dest_slots_no_slot_reuses_fails".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -948,7 +908,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -964,7 +924,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -985,9 +945,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/static/one_free_dest_slots_only_slot_reuses_fail"
-                        .to_string();
+                let test_name = "int/static/one_free_dest_slots_only_slot_reuses_fail".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1008,7 +966,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -1024,7 +982,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -1038,6 +996,8 @@ mod integration {
         }
 
         mod flex_slots {
+            use std::cmp::Ordering;
+
             #[test]
             fn test_one_slot_active_pattern() {
                 use super::*;
@@ -1067,7 +1027,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1082,7 +1042,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -1092,15 +1052,12 @@ mod integration {
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- track 1 in a default bank
                 // will point at sample slot 1 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |_, track_id, audio_track| {
-                        audio_track.static_slot_id = 127;
-                        if track_id > 0 {
-                            audio_track.flex_slot_id = 127;
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |_, track_id, audio_track| {
+                    audio_track.static_slot_id = 127;
+                    if track_id > 0 {
+                        audio_track.flex_slot_id = 127;
+                    }
+                });
 
                 run_test(
                     &paths,
@@ -1144,7 +1101,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1161,7 +1118,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1178,7 +1135,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1195,7 +1152,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1210,7 +1167,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1225,7 +1182,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 println!("src slots original: {:#?}", srcproj.slots);
@@ -1238,14 +1195,10 @@ mod integration {
 
                 // handle slot remapping
                 let mut valid_destbank = srcbank.clone();
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[0].flex_slot_id =
-                    0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].flex_slot_id =
-                    0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].flex_slot_id =
-                    0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].flex_slot_id =
-                    1;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[0].flex_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].flex_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].flex_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].flex_slot_id = 1;
 
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- need to mutate all track
@@ -1274,8 +1227,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/flex/n_slots_active_pattern_mutate_machines".to_string();
+                let test_name = "int/flex/n_slots_active_pattern_mutate_machines".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1298,7 +1250,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1315,7 +1267,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1332,7 +1284,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: one indexed
@@ -1349,7 +1301,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1364,7 +1316,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1379,7 +1331,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -1391,30 +1343,22 @@ mod integration {
                 // handle slot reuse
                 let mut valid_destbank = srcbank.clone();
                 // slot reuses -- slots 0, 1, 2 are now on slot 0
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].flex_slot_id =
-                    0;
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].flex_slot_id =
-                    0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[1].flex_slot_id = 0;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[2].flex_slot_id = 0;
                 // slot reuses -- slots 3 is now on slot 1
-                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].flex_slot_id =
-                    1;
+                valid_destbank.patterns[0].audio_track_trigs[0].plocks.0[3].flex_slot_id = 1;
 
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- tracks 1 to 4 in a default bank
                 // will point at sample slots 1 to 4 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |_, track_id, audio_track| {
-                        audio_track.static_slot_id = 127;
-                        audio_track.flex_slot_id = if track_id == 3 {
-                            1
-                        } else if track_id < 3 {
-                            0
-                        } else {
-                            127
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |_, track_id, audio_track| {
+                    audio_track.static_slot_id = 127;
+                    audio_track.flex_slot_id = match track_id.cmp(&3) {
+                        Ordering::Less => 0,
+                        Ordering::Greater => 127,
+                        Ordering::Equal => 1,
+                    };
+                });
 
                 run_test(
                     &paths,
@@ -1457,7 +1401,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 valid_destproj.slots.push(
@@ -1472,7 +1416,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 // reminder: zero indexed
@@ -1482,17 +1426,14 @@ mod integration {
                 // track machine slot allocation will be pointed to the last free sample slot
                 // if they do not already point at a sample slot -- track 1 in a default bank
                 // will point at sample slot 1 --> so need to mutate in this case
-                edit_valid_test_data_part(
-                    &mut valid_destbank,
-                    |part_id, track_id, audio_track| {
-                        audio_track.static_slot_id = 127;
-                        if part_id == 0 && track_id == 0 {
-                            audio_track.flex_slot_id = 0;
-                        } else {
-                            audio_track.flex_slot_id = 127;
-                        }
-                    },
-                );
+                edit_valid_test_data_part(&mut valid_destbank, |part_id, track_id, audio_track| {
+                    audio_track.static_slot_id = 127;
+                    if part_id == 0 && track_id == 0 {
+                        audio_track.flex_slot_id = 0;
+                    } else {
+                        audio_track.flex_slot_id = 127;
+                    }
+                });
 
                 run_test(
                     &paths,
@@ -1513,8 +1454,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/flex/no_free_dest_slots_no_slot_reuses".to_string();
+                let test_name = "int/flex/no_free_dest_slots_no_slot_reuses".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1536,7 +1476,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -1552,7 +1492,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -1572,8 +1512,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/flex/no_free_dest_slots_can_slot_reuse__fails".to_string();
+                let test_name = "int/flex/no_free_dest_slots_can_slot_reuse__fails".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1595,7 +1534,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -1611,7 +1550,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -1633,8 +1572,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/flex/one_free_dest_slots_no_slot_reuses_fails".to_string();
+                let test_name = "int/flex/one_free_dest_slots_no_slot_reuses_fails".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1656,7 +1594,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -1672,7 +1610,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
@@ -1697,9 +1635,7 @@ mod integration {
                 #[cfg(target_os = "windows")]
                 let test_name = "copy2empty\\one_stat_act_pat".to_string();
                 #[cfg(not(target_os = "windows"))]
-                let test_name =
-                    "int/flex/one_free_dest_slots_only_slot_reuses_success"
-                        .to_string();
+                let test_name = "int/flex/one_free_dest_slots_only_slot_reuses_success".to_string();
 
                 let paths = mock_dirs(&test_name);
 
@@ -1720,7 +1656,7 @@ mod integration {
                             None,
                             None,
                         )
-                            .unwrap(),
+                        .unwrap(),
                     )
                 }
 
@@ -1736,7 +1672,7 @@ mod integration {
                         None,
                         None,
                     )
-                        .unwrap(),
+                    .unwrap(),
                 );
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);

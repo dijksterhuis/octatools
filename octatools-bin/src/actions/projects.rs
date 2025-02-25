@@ -270,7 +270,7 @@ mod test {
 
         make_sslot_mock_set_dir(&test_dir_path);
 
-        let _ = yaml_file_to_bin_file::<Project>(
+        yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
             &test_dir_path.join("PROJECT/project.work"),
         )
@@ -313,7 +313,7 @@ mod test {
         );
         println!("{:#?}", &test_dir_path.join("PROJECT/project.work"));
 
-        let _ = yaml_file_to_bin_file::<Project>(
+        yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
             &test_dir_path.join("PROJECT/project.work"),
         )
@@ -362,7 +362,7 @@ mod test {
             test_dir_path.join("PROJECT/deleteme2.wav"),
         );
 
-        let _ = yaml_file_to_bin_file::<Project>(
+        yaml_file_to_bin_file::<Project>(
             &base_path.join("init/project.yaml"),
             &test_dir_path.join("PROJECT/project.work"),
         )
