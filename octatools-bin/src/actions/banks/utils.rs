@@ -1,4 +1,3 @@
-
 use chrono;
 
 use crate::{OctatoolErrors, RBoxErr};
@@ -29,9 +28,7 @@ pub(crate) struct ProjectMeta {
     pub(crate) filepath: PathBuf,
 }
 
-
 impl ProjectMeta {
-
     /// Load `ProjectMeta` data given a project directory path `PathBuf`
     pub(crate) fn frompath(dirpath: &Path) -> Self {
         let project_filepath = resolve_project_work_file_from_project_dirpath(dirpath)
@@ -215,16 +212,27 @@ fn get_sample_slot_ids(sample_slots: &[Slot], sample_type: &SlotType) -> Vec<u8>
 
 /// Does this slot ID exist in the project sample slots for the given slot type?
 /// Yes: Active. No: Inactive.
-fn get_active_or_inactive_bank_slot_reference(slots: &[Slot], sample_type: SlotType, slot_id: u8) -> RBoxErr<BankSlotReference> {
+fn get_active_or_inactive_bank_slot_reference(
+    slots: &[Slot],
+    sample_type: SlotType,
+    slot_id: u8,
+) -> RBoxErr<BankSlotReference> {
     Ok(
         if get_sample_slot_ids(slots, &sample_type).contains(&slot_id) {
-            BankSlotReference { sample_type, slot_id, reference_type: BankSlotReferenceType::Active }
+            BankSlotReference {
+                sample_type,
+                slot_id,
+                reference_type: BankSlotReferenceType::Active,
+            }
         } else {
-            BankSlotReference { sample_type, slot_id, reference_type: BankSlotReferenceType::Inactive }
-        }
+            BankSlotReference {
+                sample_type,
+                slot_id,
+                reference_type: BankSlotReferenceType::Inactive,
+            }
+        },
     )
 }
-
 
 //noinspection DuplicatedCode
 /// Iterate over and into patterns to discover any references to sample slots.
@@ -248,9 +256,11 @@ pub(crate) fn find_sample_slot_refs_in_patterns(
                 ] {
                     // plock slot reference is enabled
                     if slot_id != 255 {
-                        slot_usage.insert(
-                            get_active_or_inactive_bank_slot_reference(slots, sample_type, slot_id)?
-                        );
+                        slot_usage.insert(get_active_or_inactive_bank_slot_reference(
+                            slots,
+                            sample_type,
+                            slot_id,
+                        )?);
                     }
                 }
             }
@@ -275,9 +285,11 @@ pub(crate) fn find_sample_slot_refs_in_parts(
                 (audio_track_slots.static_slot_id, SlotType::Static),
                 (audio_track_slots.flex_slot_id, SlotType::Flex),
             ] {
-                slot_usage.insert(
-                    get_active_or_inactive_bank_slot_reference(slots, sample_type, slot_id)?
-                );
+                slot_usage.insert(get_active_or_inactive_bank_slot_reference(
+                    slots,
+                    sample_type,
+                    slot_id,
+                )?);
             }
         }
     }
@@ -396,7 +408,6 @@ fn create_sample_slot_from_existing(
     )
 }
 
-
 /// Get a new vector of project slots, zero-indexed
 pub(crate) fn get_zero_indexed_slots_from_one_indexed(slots: &[Slot]) -> RBoxErr<Vec<Slot>> {
     Ok(slots
@@ -422,8 +433,6 @@ pub(crate) fn get_one_indexed_slots_from_zero_indexed(slots: &[Slot]) -> RBoxErr
         })
         .collect())
 }
-
-
 
 // TODO: The basics of an `octatools-bin projects slots deduplicate` command, except the actual
 //       command will need to mutate sample files to have content hash strings in the file names.
@@ -480,7 +489,7 @@ fn get_deduplicated_sample_slots_and_updated_banks(
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
-                    .expect("Failed to update sample slot reference in pattern p-locks.");
+                .expect("Failed to update sample slot reference in pattern p-locks.");
             });
             bank.parts_unsaved.iter_mut().for_each(|p| {
                 p.update_machine_sample_slot(
@@ -488,16 +497,15 @@ fn get_deduplicated_sample_slots_and_updated_banks(
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
-                    .expect(
-                        "Failed to update sample slot reference in unsaved part audio track machine.",
-                    );
+                .expect(
+                    "Failed to update sample slot reference in unsaved part audio track machine.",
+                );
             });
         }
     }
 
     Ok((deduped, new_banks))
 }
-
 
 /// Apply required sample slot changes to the provided bank, in place.
 fn apply_slot_changes_to_bank_inplace(operations: &HashSet<SampleSlotOperation>, bank: &mut Bank) {
@@ -516,11 +524,20 @@ fn apply_slot_changes_to_bank_inplace(operations: &HashSet<SampleSlotOperation>,
             //       ... it shouldn't have setters etc.
 
             bank.patterns.iter_mut().for_each(|p| {
-                p.update_plock_sample_slots(&x.src_slot.sample_type, &x.src_slot.slot_id, &x.dest_slot.slot_id)
-                    .expect("Failed to update sample slot reference in pattern p-locks.");
+                p.update_plock_sample_slots(
+                    &x.src_slot.sample_type,
+                    &x.src_slot.slot_id,
+                    &x.dest_slot.slot_id,
+                )
+                .expect("Failed to update sample slot reference in pattern p-locks.");
             });
             bank.parts_unsaved.iter_mut().for_each(|p| {
-                p.update_machine_sample_slot(&x.src_slot.sample_type, &x.src_slot.slot_id, &x.dest_slot.slot_id).expect(
+                p.update_machine_sample_slot(
+                    &x.src_slot.sample_type,
+                    &x.src_slot.slot_id,
+                    &x.dest_slot.slot_id,
+                )
+                .expect(
                     "Failed to update sample slot reference in unsaved part audio track machine.",
                 );
             });
@@ -536,7 +553,6 @@ pub fn calculate_copy_bank_changes(
     src_bank: &Bank,
     dest_project: &Project,
 ) -> RBoxErr<(Project, Bank, Vec<SlotFileCopy>)> {
-
     println!("Calculating destination project slot changes ...");
 
     let (deduped_src_zero_indexed_slots, deduped_banks) =
@@ -560,8 +576,7 @@ pub fn calculate_copy_bank_changes(
 
     println!(
         "Will use static/flex slots {:?}/{:?} for remapping inactive slot references.",
-        static_empty_slot,
-        flex_empty_slot,
+        static_empty_slot, flex_empty_slot,
     );
 
     // can't do anything without a free static/flex slot
@@ -639,8 +654,14 @@ pub fn calculate_copy_bank_changes(
 
     println!(
         "Will reuse {:?}/{:?} destination static/flex slots.",
-        src_slots_reuses.iter().filter(|x|x.sample_type == ProjectSampleSlotType::Static).count(),
-        src_slots_reuses.iter().filter(|x|x.sample_type == ProjectSampleSlotType::Flex).count(),
+        src_slots_reuses
+            .iter()
+            .filter(|x| x.sample_type == ProjectSampleSlotType::Static)
+            .count(),
+        src_slots_reuses
+            .iter()
+            .filter(|x| x.sample_type == ProjectSampleSlotType::Flex)
+            .count(),
     );
 
     println!(
@@ -648,9 +669,7 @@ pub fn calculate_copy_bank_changes(
         static_slot_inserts_count, flex_slot_inserts_count
     );
 
-    if static_slot_inserts_count > free_static.len()
-        || flex_slot_inserts_count > free_flex.len()
-    {
+    if static_slot_inserts_count > free_static.len() || flex_slot_inserts_count > free_flex.len() {
         eprintln!("Not enough free samples slots in destination project!");
         return Err(Box::new(OctatoolErrors::CliNoFreeSampleSlots));
     }
@@ -731,14 +750,14 @@ pub fn calculate_copy_bank_changes(
                     .ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots)),
                 _ => Some(255).ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots)),
             }
-                .unwrap();
+            .unwrap();
 
             let dest_slot = create_sample_slot_from_existing(
                 src_slot,
                 Some(&audio_fpath_rel_dest),
                 &dest_slot_id,
             )
-                .expect("Unable to create remapped sample slot.");
+            .expect("Unable to create remapped sample slot.");
 
             SampleSlotOperation {
                 src_slot: src_slot.clone(),
@@ -766,7 +785,10 @@ pub fn calculate_copy_bank_changes(
         println!("Adding new sample slots to destination project data ...");
         let static_sample_slot_insertions = &active_insert_ops
             .iter()
-            .filter(|x| x.op_type == SampleSlotOperationType::NewSlot && x.src_slot.sample_type == SlotType::Static)
+            .filter(|x| {
+                x.op_type == SampleSlotOperationType::NewSlot
+                    && x.src_slot.sample_type == SlotType::Static
+            })
             .cloned()
             .map(|x| x.dest_slot)
             .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
@@ -774,12 +796,14 @@ pub fn calculate_copy_bank_changes(
 
         let flex_sample_slot_insertions = &active_insert_ops
             .iter()
-            .filter(|x| x.op_type == SampleSlotOperationType::NewSlot && x.src_slot.sample_type == SlotType::Static)
+            .filter(|x| {
+                x.op_type == SampleSlotOperationType::NewSlot
+                    && x.src_slot.sample_type == SlotType::Static
+            })
             .cloned()
             .map(|x| x.dest_slot)
             .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
             .collect_vec();
-
 
         let mut dest_new_zero_indexed_slots = dest_zero_indexed_slots.clone();
         dest_new_zero_indexed_slots.append(&mut static_sample_slot_insertions.clone());
@@ -791,8 +815,7 @@ pub fn calculate_copy_bank_changes(
             flex_sample_slot_insertions.len(),
         );
         dest_new_zero_indexed_slots
-    }
-    else {
+    } else {
         println!("No sample slots will be added to destination project.");
         dest_zero_indexed_slots
     };
@@ -809,9 +832,7 @@ pub fn calculate_copy_bank_changes(
     new_project.slots = get_one_indexed_slots_from_zero_indexed(&dest_new_zero_indexed_slots)?;
 
     Ok((new_project, deduped_bank, sample_transfers))
-
 }
-
 
 /// Transfer sample files (audio and `.ot` files) related to `NewSlot` operations.
 ///
@@ -873,4 +894,3 @@ pub(crate) fn transfer_sample_files(
 
     Ok(())
 }
-

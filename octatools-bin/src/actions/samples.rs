@@ -92,7 +92,7 @@ pub fn create_default_ot_file_for_wav_file(path: &Path) -> RBoxErr<()> {
 pub fn create_default_ot_files_for_wav_files(paths: &[PathBuf]) -> RBoxErr<()> {
     for path in paths {
         create_default_ot_file_for_wav_file(path).expect("Failed to create an ot file");
-    };
+    }
     Ok(())
 }
 
@@ -248,7 +248,10 @@ pub fn create_samplechain_from_pathbufs_only(
         // edit the existing sample slot in all their projects.
         //
         // so just always suffix `-{idx}` to the filenames.
-        let base_outchain_path = outdir_path.to_path_buf().join(format!["{}-{}", outchain_name, idx + 1]);
+        let base_outchain_path =
+            outdir_path
+                .to_path_buf()
+                .join(format!["{}-{}", outchain_name, idx + 1]);
 
         let mut wav_sliced_outpath = base_outchain_path;
         wav_sliced_outpath.set_extension("wav");

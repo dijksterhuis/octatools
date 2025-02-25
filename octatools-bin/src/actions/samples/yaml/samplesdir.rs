@@ -10,7 +10,6 @@ use log::{debug, info};
 use md5::Digest;
 use octatools_derive::{Decodeable, Encodeable};
 use serde::{Deserialize, Serialize};
-use std::fs::canonicalize;
 
 fn get_stem_from_pathbuf(pathbuf: &PathBuf) -> RBoxErr<String> {
     debug!("Getting file stem from pathbuf: file={pathbuf:#?}");
@@ -72,7 +71,7 @@ impl SamplesDirAudioFile {
         let file_name = get_stem_from_pathbuf(&fp).unwrap();
 
         Ok(SamplesDirAudioFile {
-            path: canonicalize(fp)?,
+            path: fp,
             md5: md5_hash,
             name: file_name,
         })
@@ -101,7 +100,7 @@ impl SamplesDirIndexFull {
             .collect();
 
         let index = SamplesDirIndexFull {
-            dirpath: canonicalize(dirpath)?,
+            dirpath: dirpath.to_path_buf(),
             samples,
         };
 
@@ -125,7 +124,7 @@ impl SamplesDirIndexSimple {
 
         let index = SamplesDirIndexSimple {
             samples,
-            dirpath: canonicalize(dirpath)?,
+            dirpath: dirpath.to_path_buf(),
         };
 
         info!("Generated simple sample directory index.");

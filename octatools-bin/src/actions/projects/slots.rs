@@ -1,8 +1,18 @@
-use crate::{RBoxErr, actions::banks::utils::{find_sample_slot_settings_match, SlotReferenceReassignment, BankMeta, ProjectMeta, get_zero_indexed_slots_from_one_indexed, get_one_indexed_slots_from_zero_indexed, create_backup_of_work_file}};
-use octatools_lib::{banks::Bank, projects::{slots::ProjectSampleSlot, Project}, read_type_from_bin_file, write_type_to_bin_file};
+use crate::{
+    actions::banks::utils::{
+        create_backup_of_work_file, find_sample_slot_settings_match,
+        get_one_indexed_slots_from_zero_indexed, get_zero_indexed_slots_from_one_indexed, BankMeta,
+        ProjectMeta, SlotReferenceReassignment,
+    },
+    RBoxErr,
+};
 use itertools::Itertools;
+use octatools_lib::{
+    banks::Bank,
+    projects::{slots::ProjectSampleSlot, Project},
+    read_type_from_bin_file, write_type_to_bin_file,
+};
 use std::path::Path;
-
 
 /// De-duplicate sample slots based on the slot settings, reassigning references
 /// to the duplicate slots in the provided bank data.
@@ -63,7 +73,7 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
-                    .expect("Failed to update sample slot reference in pattern p-locks.");
+                .expect("Failed to update sample slot reference in pattern p-locks.");
             });
             bank.parts_unsaved.iter_mut().for_each(|p| {
                 p.update_machine_sample_slot(
@@ -71,9 +81,9 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
-                    .expect(
-                        "Failed to update sample slot reference in unsaved part audio track machine.",
-                    );
+                .expect(
+                    "Failed to update sample slot reference in unsaved part audio track machine.",
+                );
             });
         }
     }
@@ -86,36 +96,21 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
 fn load_work_banks_for_project(project_dirpath: &Path) -> RBoxErr<Vec<Bank>> {
     let mut banks: Vec<Bank> = vec![];
     for bank_id in 1..=16 {
-        let bank_paths = BankMeta::frompath(
-            project_dirpath,
-            bank_id,
-        );
+        let bank_paths = BankMeta::frompath(project_dirpath, bank_id);
         create_backup_of_work_file(&bank_paths.filepath)?;
-        banks.push(
-            read_type_from_bin_file::<Bank>(
-                &bank_paths.filepath,
-            )?
-        )
-    };
+        banks.push(read_type_from_bin_file::<Bank>(&bank_paths.filepath)?)
+    }
     Ok(banks)
 }
 
 /// Assumes `banks` ordering is the order in which to write the bank files
 fn write_work_banks_for_project(project_dirpath: &Path, banks: &[Bank]) -> RBoxErr<()> {
-
     for (bank_id, new_bank) in (1..=16).zip(banks) {
-        let bank_paths = BankMeta::frompath(
-            project_dirpath,
-            bank_id,
-        );
-        write_type_to_bin_file::<Bank>(
-            new_bank,
-            &bank_paths.filepath,
-        )?;
-    };
+        let bank_paths = BankMeta::frompath(project_dirpath, bank_id);
+        write_type_to_bin_file::<Bank>(new_bank, &bank_paths.filepath)?;
+    }
     Ok(())
 }
-
 
 /// Deduplicate sample slots for a project located at `dirpath`, removing
 /// duplicates based on slot settings.
@@ -130,42 +125,20 @@ fn write_work_banks_for_project(project_dirpath: &Path, banks: &[Bank]) -> RBoxE
 /// WARNING: Does not check whether sample files are unique based on content --
 /// requires end-users have been fastidious when naming their sample files.
 pub fn cmd_slots_deduplicate(project_dirpath: &Path) -> RBoxErr<()> {
-
-    let project_paths = ProjectMeta::frompath(
-        project_dirpath,
-    );
+    let project_paths = ProjectMeta::frompath(project_dirpath);
     create_backup_of_work_file(&project_paths.filepath)?;
-    let project = read_type_from_bin_file::<Project>(
-        &project_paths.filepath,
-    )?;
-    let banks = load_work_banks_for_project(
-        project_dirpath,
-    )?;
-    let zero_index_slots = get_zero_indexed_slots_from_one_indexed(
-        &project.slots,
-    )?;
-    let (
-        deduped_zero_index_slots,
-        new_banks,
-    ) = get_new_deduplicated_sample_slots_and_updated_banks(
-        &zero_index_slots,
-        &banks
-    )?;
-    let one_index_slots = get_one_indexed_slots_from_zero_indexed(
-        &deduped_zero_index_slots,
-    )?;
+    let project = read_type_from_bin_file::<Project>(&project_paths.filepath)?;
+    let banks = load_work_banks_for_project(project_dirpath)?;
+    let zero_index_slots = get_zero_indexed_slots_from_one_indexed(&project.slots)?;
+    let (deduped_zero_index_slots, new_banks) =
+        get_new_deduplicated_sample_slots_and_updated_banks(&zero_index_slots, &banks)?;
+    let one_index_slots = get_one_indexed_slots_from_zero_indexed(&deduped_zero_index_slots)?;
 
     let mut new_project = project.clone();
     new_project.slots = one_index_slots;
 
-    write_type_to_bin_file::<Project>(
-        &new_project,
-        &project_paths.filepath,
-    )?;
-    write_work_banks_for_project(
-        project_dirpath,
-        &new_banks,
-    )?;
+    write_type_to_bin_file::<Project>(&new_project, &project_paths.filepath)?;
+    write_work_banks_for_project(project_dirpath, &new_banks)?;
 
     Ok(())
 }

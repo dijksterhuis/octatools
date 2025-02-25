@@ -132,8 +132,7 @@ The command will also update slot references in all bankXX.work files within the
 (slot assignments are changed to point at the remaining unique slot).
 
 ** WARNING ** Does not check whether sample files are unique based on content -- be careful naming your sample files!
-"
-    )]
+")]
     Deduplicate {
         /// Project directory path to perform de-duplication on
         #[arg(value_hint = ValueHint::DirPath)]

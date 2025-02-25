@@ -1,13 +1,15 @@
 use std::path::{Path, PathBuf};
 
+use crate::actions::banks::utils::{
+    find_sample_slot_refs_in_patterns, get_bank_fname_from_id,
+    get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType,
+};
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use octatools_lib::{
     banks::Bank, projects::options::ProjectSampleSlotType, projects::Project,
     read_type_from_bin_file,
 };
-use crate::actions::banks::utils::{get_bank_fname_from_id, find_sample_slot_refs_in_patterns, get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType};
-
 
 pub(crate) fn pattern_index_is_valid(indexes: &[usize]) -> bool {
     let max_elem = *indexes.iter().max().unwrap();
@@ -86,8 +88,7 @@ pub fn list_pattern_sample_slot_references(
         };
 
         SlotUseListItem {
-            sample_loaded: (x.reference_type
-                == BankSlotReferenceType::Active),
+            sample_loaded: (x.reference_type == BankSlotReferenceType::Active),
             sample_type: x.sample_type.clone(),
             slot_id: x.slot_id + 1,
             path: path.cloned(),

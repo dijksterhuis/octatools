@@ -266,11 +266,11 @@ mod tests {
         // WARN: Depends on deserialization being functional.
         fn test_serialize_to_yaml() {
             let valid_yaml_path = std::path::Path::new("../data/tests/arrange/blank.yaml");
-            let valid_yaml = crate::read_str_file(&valid_yaml_path);
+            let valid_yaml = crate::read_str_file(valid_yaml_path);
 
             let bin_file_path = std::path::Path::new("../data/tests/arrange/blank.work");
             let arr = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(
-                &bin_file_path,
+                bin_file_path,
             );
             let yaml = crate::serialize_yaml_from_type::<crate::arrangements::ArrangementFile>(
                 &arr.unwrap(),

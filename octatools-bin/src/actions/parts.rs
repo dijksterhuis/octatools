@@ -1,11 +1,14 @@
+use crate::actions::banks::utils::{
+    find_sample_slot_refs_in_parts, get_bank_fname_from_id,
+    get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType,
+};
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
+use octatools_lib::banks::parts::Part;
 use octatools_lib::projects::options::ProjectSampleSlotType;
 use octatools_lib::projects::Project;
-use octatools_lib::banks::parts::Part;
 use octatools_lib::{banks::Bank, read_type_from_bin_file};
 use std::path::{Path, PathBuf};
-use crate::actions::banks::utils::{get_bank_fname_from_id, find_sample_slot_refs_in_parts, get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType};
 
 fn part_index_is_valid(indexes: &[usize]) -> bool {
     let max_elem = *indexes.iter().max().unwrap();
@@ -62,49 +65,49 @@ struct SlotUseListItem {
 
 // TODO: How to consolidate these two functions to avoid the mess that is duplicated code here?
 
-
-
-pub fn list_unsaved_part_sample_slot_references(project_dirpath: &Path, bank_id: usize, part_id: usize, ignore_empty_slots: bool) -> RBoxErr<()> {
-
+pub fn list_unsaved_part_sample_slot_references(
+    project_dirpath: &Path,
+    bank_id: usize,
+    part_id: usize,
+    ignore_empty_slots: bool,
+) -> RBoxErr<()> {
     let project_fpath = project_dirpath.to_path_buf().join("project.work");
     let bank_fpath = project_dirpath
         .to_path_buf()
         .join(get_bank_fname_from_id(bank_id));
 
-    let proj = read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+    let proj =
+        read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
     let part = bank.parts_unsaved[part_id - 1].clone();
 
     list_part_slot_refs(&proj, part, ignore_empty_slots)?;
 
     Ok(())
-
 }
 
-
-pub fn list_saved_part_sample_slot_references(project_dirpath: &Path, bank_id: usize, part_id: usize, ignore_empty_slots: bool) -> RBoxErr<()> {
-
+pub fn list_saved_part_sample_slot_references(
+    project_dirpath: &Path,
+    bank_id: usize,
+    part_id: usize,
+    ignore_empty_slots: bool,
+) -> RBoxErr<()> {
     let project_fpath = project_dirpath.to_path_buf().join("project.work");
     let bank_fpath = project_dirpath
         .to_path_buf()
         .join(get_bank_fname_from_id(bank_id));
 
-    let proj = read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+    let proj =
+        read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
     let part = bank.parts_saved[part_id - 1].clone();
 
     list_part_slot_refs(&proj, part, ignore_empty_slots)?;
 
     Ok(())
-
 }
 
-fn list_part_slot_refs(
-    project: &Project,
-    part: Part,
-    ignore_empty_slots: bool,
-) -> RBoxErr<()> {
-
+fn list_part_slot_refs(project: &Project, part: Part, ignore_empty_slots: bool) -> RBoxErr<()> {
     find_sample_slot_refs_in_parts(
         &get_zero_indexed_slots_from_one_indexed(&project.slots)?,
         &[part],
@@ -127,8 +130,7 @@ fn list_part_slot_refs(
         };
 
         SlotUseListItem {
-            sample_loaded: (x.reference_type
-                == BankSlotReferenceType::Active),
+            sample_loaded: (x.reference_type == BankSlotReferenceType::Active),
             sample_type: x.sample_type.clone(),
             slot_id: x.slot_id + 1,
             path: path.cloned(),
@@ -138,7 +140,6 @@ fn list_part_slot_refs(
 
     Ok(())
 }
-
 
 #[cfg(test)]
 #[allow(unused_imports)]
