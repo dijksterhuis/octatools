@@ -69,10 +69,7 @@ pub fn list_pattern_sample_slot_references(
         &[pattern],
     )?
     .iter()
-    .filter(|x| {
-        !ignore_empty_slots
-            == (x.reference_type == BankSlotReferenceType::Active)
-    })
+    .filter(|x| ignore_empty_slots != (x.reference_type == BankSlotReferenceType::Active))
     .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
     .map(|x| {
         let path = if x.reference_type == BankSlotReferenceType::Active {

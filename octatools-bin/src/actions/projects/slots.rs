@@ -1,4 +1,4 @@
-use crate::{OctatoolErrors, RBoxErr, actions::banks::utils::{find_sample_slot_settings_match, SlotReferenceReassignment, BankMeta, ProjectMeta, get_zero_indexed_slots_from_one_indexed, get_one_indexed_slots_from_zero_indexed, create_backup_of_work_file}};
+use crate::{RBoxErr, actions::banks::utils::{find_sample_slot_settings_match, SlotReferenceReassignment, BankMeta, ProjectMeta, get_zero_indexed_slots_from_one_indexed, get_one_indexed_slots_from_zero_indexed, create_backup_of_work_file}};
 use octatools_lib::{banks::Bank, projects::{slots::ProjectSampleSlot, Project}, read_type_from_bin_file, write_type_to_bin_file};
 use itertools::Itertools;
 use std::path::Path;
@@ -40,8 +40,8 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
     let mut reassignments: Vec<SlotReferenceReassignment> = vec![];
 
     for slot in slots {
-        if !deduped.contains(&slot) {
-            if let Some(found) = find_sample_slot_settings_match(&slot, &deduped) {
+        if !deduped.contains(slot) {
+            if let Some(found) = find_sample_slot_settings_match(slot, &deduped) {
                 reassignments.push(SlotReferenceReassignment {
                     initial_slot_id: slot.slot_id,
                     new_slot_id: found.slot_id,
@@ -87,10 +87,10 @@ fn load_work_banks_for_project(project_dirpath: &Path) -> RBoxErr<Vec<Bank>> {
     let mut banks: Vec<Bank> = vec![];
     for bank_id in 1..=16 {
         let bank_paths = BankMeta::frompath(
-            &project_dirpath,
+            project_dirpath,
             bank_id,
         );
-        let _ = create_backup_of_work_file(&bank_paths.filepath)?;
+        create_backup_of_work_file(&bank_paths.filepath)?;
         banks.push(
             read_type_from_bin_file::<Bank>(
                 &bank_paths.filepath,
@@ -105,10 +105,10 @@ fn write_work_banks_for_project(project_dirpath: &Path, banks: &[Bank]) -> RBoxE
 
     for (bank_id, new_bank) in (1..=16).zip(banks) {
         let bank_paths = BankMeta::frompath(
-            &project_dirpath,
+            project_dirpath,
             bank_id,
         );
-        let _ = write_type_to_bin_file::<Bank>(
+        write_type_to_bin_file::<Bank>(
             new_bank,
             &bank_paths.filepath,
         )?;
@@ -134,7 +134,7 @@ pub fn cmd_slots_deduplicate(project_dirpath: &Path) -> RBoxErr<()> {
     let project_paths = ProjectMeta::frompath(
         project_dirpath,
     );
-    let _ = create_backup_of_work_file(&project_paths.filepath)?;
+    create_backup_of_work_file(&project_paths.filepath)?;
     let project = read_type_from_bin_file::<Project>(
         &project_paths.filepath,
     )?;
@@ -158,11 +158,11 @@ pub fn cmd_slots_deduplicate(project_dirpath: &Path) -> RBoxErr<()> {
     let mut new_project = project.clone();
     new_project.slots = one_index_slots;
 
-    let _ = write_type_to_bin_file::<Project>(
+    write_type_to_bin_file::<Project>(
         &new_project,
         &project_paths.filepath,
     )?;
-    let _ = write_work_banks_for_project(
+    write_work_banks_for_project(
         project_dirpath,
         &new_banks,
     )?;

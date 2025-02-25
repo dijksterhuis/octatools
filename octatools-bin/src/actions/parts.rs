@@ -110,10 +110,7 @@ fn list_part_slot_refs(
         &[part],
     )?
     .iter()
-    .filter(|x| {
-        !ignore_empty_slots
-            == (x.reference_type == BankSlotReferenceType::Active)
-    })
+    .filter(|x| ignore_empty_slots != (x.reference_type == BankSlotReferenceType::Active))
     .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
     .map(|x| {
         let path = if x.reference_type == BankSlotReferenceType::Active {

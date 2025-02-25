@@ -61,26 +61,24 @@ pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usiz
 ///
 /// - Bank data is modified, remapping sample slots that are 'active' or 'inactive'.
 ///     - Active: An Audio Track's machine / P-Lock trig references a sample slot that has a sample
-///     loaded
+///       loaded
 ///     - Inactive: An Audio Track's machine / P-Lock trig references a sample slot that **does
-///     not** have a sample loaded
+///       not** have a sample loaded
 pub fn copy_bank_by_paths(
     source_project_dirpath: &Path,
     destination_project_dirpath: &Path,
     source_bank_number: usize,
     destination_bank_number: usize,
 ) -> RBoxErr<()> {
-    if source_bank_number < 1
-        || source_bank_number > 16
-        || destination_bank_number < 1
-        || destination_bank_number > 16
+    if !(1..=16).contains(&source_bank_number) ||
+        !(1..=16).contains(&destination_bank_number)
     {
         return Err(Box::new(OctatoolErrors::CliInvalidBankIndex));
     }
 
     let source_meta = BankCopyPathsMeta {
         project: ProjectMeta::frompath(source_project_dirpath),
-        bank: BankMeta::frompath(&source_project_dirpath, source_bank_number),
+        bank: BankMeta::frompath(source_project_dirpath, source_bank_number),
     };
 
     println!("===================================================================================");
@@ -91,7 +89,7 @@ pub fn copy_bank_by_paths(
 
     let destination_meta = BankCopyPathsMeta {
         project: ProjectMeta::frompath(destination_project_dirpath),
-        bank: BankMeta::frompath(&destination_project_dirpath, destination_bank_number),
+        bank: BankMeta::frompath(destination_project_dirpath, destination_bank_number),
     };
 
     // up-front check to make sure thee are no missing audio files, could be breakage if there are
@@ -107,7 +105,7 @@ pub fn copy_bank_by_paths(
         .map(|x| (x.sample_type, x.slot_id))
         .into_group_map();
 
-    if mising_source_file_slot_ids.len() > 0 {
+    if ! mising_source_file_slot_ids.is_empty() {
         eprintln!("Missing sample files detected in source project! Not continuing.");
         eprintln!(
             "Slot IDs with no audio file: {:?}",
@@ -130,7 +128,7 @@ pub fn copy_bank_by_paths(
     println!("Calculating changes ...");
 
     let (new_project, new_bank, sample_transfers) = calculate_copy_bank_changes(
-        &source_project_dirpath,
+        source_project_dirpath,
         &src_project,
         &bank,
         &dest_project,
@@ -149,13 +147,13 @@ pub fn copy_bank_by_paths(
     */
 
 
-    if sample_transfers.len() > 0 { println!("Copying necessary sample files ...") }
+    if ! sample_transfers.is_empty() { println!("Copying necessary sample files ...") }
     else { println!("No sample files need copying.") }
 
     transfer_sample_files(
         &sample_transfers,
-        &source_project_dirpath,
-        &destination_project_dirpath,
+        source_project_dirpath,
+        destination_project_dirpath,
     )?;
 
     println!("Writing sample slot modifications to destination ...");
@@ -227,7 +225,7 @@ pub fn list_bank_sample_slot_references(
         &bank,
     )?
     .iter()
-    .filter(|x| !ignore_empty_slots == (x.reference_type == BankSlotReferenceType::Active))
+    .filter(|x| ignore_empty_slots != (x.reference_type == BankSlotReferenceType::Active))
     .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
     .map(|x| {
         let path = if x.reference_type == BankSlotReferenceType::Active {
