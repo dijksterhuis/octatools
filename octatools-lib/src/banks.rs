@@ -3,10 +3,7 @@
 pub mod parts;
 pub mod patterns;
 
-use crate::{
-    banks::{parts::Part, patterns::Pattern},
-    Decode, DefaultsArrayBoxed, Encode,
-};
+use crate::{banks::{parts::Part, patterns::Pattern}, DefaultsArrayBoxed};
 
 use octatools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
