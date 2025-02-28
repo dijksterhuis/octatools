@@ -3,9 +3,6 @@
 Various Rust binaries/libraries for use with [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
 binary data files.
 
-Releases will be available on [GitHub](https://github.com/dijksterhuis/octatools).
-Development happens on [GitLab](https://gitlab.com/dijksterhuis/octatools).
-
 # Table of Contents
 
 - [Warnings](./README.md#warnings)
