@@ -1,11 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-include:
-  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
-    inputs:
-      stage: check
-
 .small-linux: &small_linux
   tags:
     - saas-linux-small-amd64
@@ -41,16 +36,11 @@ include:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       <<: *no_data_changes
-    - if: $CI_COMMIT_TAG != null
-      <<: *no_data_changes
 
 .with-datadir-changes-mr-only: &rules_mrbranch_with_datadir
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       <<: *no_data_changes
-    - if: $CI_COMMIT_TAG != null
-      <<: *no_data_changes
-
 
 .target-cache-pull-only: &cache_target_pull
   cache:
@@ -140,6 +130,12 @@ coverage_junit:
   <<: *cache_target_pull
   <<: *med_linux
   <<: *rules_mrbranch_with_datadir
+
+include:
+  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
+    inputs:
+      stage: check
+    <<: *rules_mrbranch_no_datadir
 
 cargo_fmt:
   stage: check
