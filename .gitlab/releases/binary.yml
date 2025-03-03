@@ -1,0 +1,153 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright © 2024 Mike Robeson [dijksterhuis]
+
+# A CI template for building rust based CLI binaries for the most common [0]
+# targets, including: Linux Intel/Arm, Windows Intel, macOS Intel/Arm.
+#
+# Will:
+# 1. build a release version of the binary for the targets listed above
+# 2. Create a generic package for each target release build
+# 3. Create a release, including links to each binary
+#
+# [0]: common meaning the most popular according to what I'm guessing are most
+# popular as I write this... there is no statistical analysis here. pure guesswork.
+#
+# TODO: Turn this into a separate CI template in the octatools user namespace, without defaults!
+
+variables:
+  # Helper variable, do not change this
+  BASE_PACKAGE_REGISTRY_URI: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic"
+
+# parallel matrix for most popular targets
+# - RUST_TARGET -- actual cargo/rust target id
+# - RUST_BINARY_FILENAME: the filename of the compiled binary (windows targets
+#   will suffix .exe on the end of all binaries)
+# - CI_RUNNER_TAG: the CI machine type to execute the release build step on
+# - CI_IMAGE: the CI image to run the release build step inside, macOS have
+#   special images: https://docs.gitlab.com/ci/runners/hosted_runners/macos/#supported-macos-images
+#   with a limited set of tools installed: https://gitlab-org.gitlab.io/ci-cd/shared-runners/images/macos-image-inventory/macos-14-xcode-15/
+# - CI_BEFORE_SCRIPT: any commands to execute as part of the `before_script` for
+#   the release build job. On macOs this means installing rust. For windows builds,
+#   this means installing gcc-mingw-w64-x86-64.
+.parallel_release_builds: &para
+  parallel:
+    matrix:
+      # ==========================================
+      # intel linux CLI
+      - RUST_TARGET: x86_64-unknown-linux-gnu
+        RUST_BINARY_FILENAME: "octatools-bin"
+        CI_RUNNER_TAG: saas-linux-small-amd64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # ARM linux CLI
+      - RUST_TARGET: aarch64-unknown-linux-gnu
+        RUST_BINARY_FILENAME: "octatools-bin"
+        CI_RUNNER_TAG: saas-linux-small-arm64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # Intel windows CLI (works for powershell/MYSYS2/CMD)
+      - RUST_TARGET: x86_64-pc-windows-gnu
+        RUST_BINARY_FILENAME: "octatools-bin.exe"
+        CI_RUNNER_TAG: saas-linux-small-amd64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # TODO: ARM windows CLI (works for powershell/MYSYS2/CMD)
+      #- RUST_TARGET: aarch64-pc-windows-gnu
+      #  CI_RUNNER_TAG: saas-linux-small-arm64
+      #  RUST_TARGET_FNAME_BIN: "octatools-bin.exe"
+      #  CI_IMAGE: "rust:latest"
+      # ==========================================
+      # Intel macOS CLI
+      - RUST_TARGET: x86_64-apple-darwin
+        RUST_BINARY_FILENAME: "octatools-bin"
+        CI_RUNNER_TAG: saas-macos-medium-m1
+        CI_IMAGE: "macos-14-xcode-15"
+      # ==========================================
+      # ARM macOS CLI
+      - RUST_TARGET: aarch64-apple-darwin
+        RUST_BINARY_FILENAME: "octatools-bin"
+        CI_RUNNER_TAG: saas-macos-medium-m1
+        CI_IMAGE: "macos-14-xcode-15"
+
+# https://docs.gitlab.com/ci/yaml/#parallelmatrix
+# > Job names must be 255 characters or fewer.
+# means we have to script the steps below in the before script :/
+
+# build the binary for the target
+release-build-bin:
+  stage: "release"
+  image: "${CI_IMAGE}"
+  before_script:
+    - |
+      if [[ "${RUST_TARGET}" == "aarch64-apple-darwin" ]] || [[ "${RUST_TARGET}" == "x86_64-apple-darwin" ]]
+      then
+        curl https://sh.rustup.rs -sSf -o ./rustup.sh
+        chmod +x ./rustup.sh
+        ./rustup.sh -y
+        rm -f ./rustup.sh
+      fi 
+      if [[ "${RUST_TARGET}" == "aarch64-pc-windows-gnu" ]] || [[ "${RUST_TARGET}" == "x86_64-pc-windows-gnu" ]]
+      then
+        apt update -yqq
+        apt install -yqq gcc-mingw-w64-x86-64
+      fi 
+      rustup target add "${RUST_TARGET}"
+  script:
+    - cargo build --bin "octatools-bin" --release --target "${RUST_TARGET}"
+  tags:
+    - $CI_RUNNER_TAG
+  artifacts:
+    when: always
+    paths:
+      - "target/${RUST_TARGET}/release/${RUST_BINARY_FILENAME}"
+    name: "bin_${RUST_TARGET}"
+  <<: *para
+
+# https://docs.gitlab.com/user/packages/generic_packages/?tab=CI%2FCD+job+token#publish-a-single-file
+# packages are uploaded a la: "mybinary_${CPU_ARCH}/${SEM_VER}/mybinary.exe"
+# so each "${BIN_NAME}_${CPU_ARCH}" is a separate package with different package version tracking
+release-upload-bin:
+  stage: "release"
+  image: curlimages/curl:latest
+  needs:
+    - release-build-bin
+  variables:
+    PACKAGE_PATH: "octatools-bin_${RUST_TARGET}/${CI_COMMIT_TAG}/${RUST_BINARY_FILENAME}"
+  script:
+    - |
+      curl \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "target/${RUST_TARGET}/release/${RUST_BINARY_FILENAME}" \
+        "${BASE_PACKAGE_REGISTRY_URI}/${PACKAGE_PATH}"
+  <<: *para
+
+# https://docs.gitlab.com/user/project/releases/release_fields/#use-a-generic-package-for-attaching-binaries
+release-create-bin:
+  stage: "release"
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  needs:
+    - release-upload-bin
+  release:
+    tag_name: "${CI_COMMIT_TAG}"
+    tag_message: "octatools-bin [${CI_COMMIT_TAG}]"
+    name: "octatools-bin [${CI_COMMIT_TAG}]"
+    description: "octatools-bin [${CI_COMMIT_TAG}] -- CLI tool for handling Elektron Octatrack DPS-1 data files"
+    # super annoying that this cannot be parallelized:
+    # https://gitlab.com/gitlab-org/release-cli/-/issues/94
+    assets:
+      links:
+        - name: "Download: x86_64-unknown-linux-gnu"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-bin"
+        - name: "Download: aarch64-unknown-linux-gnu"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-bin"
+        - name: "Download: x86_64-pc-windows-gnu"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-bin.exe"
+        # TODO: ARM windows CLI
+        #- name: "Download: aarch64-pc-windows-gnu"
+        #  url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-bin.exe"
+        - name: "Download: x86_64-apple-darwin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-apple-darwin/${CI_COMMIT_TAG}/octatools-bin"
+        - name: "Download: aarch64-apple-darwin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-apple-darwin/${CI_COMMIT_TAG}/octatools-bin"
+  script:
+    - echo "Creating release ..."

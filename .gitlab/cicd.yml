@@ -1,160 +1,43 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-.small-linux: &small_linux
-  tags:
-    - saas-linux-small-amd64
-
-.med-linux: &med_linux
-  tags:
-    - saas-linux-medium-amd64
-
-.changes-no-data: &no_data_changes
-  changes:
-    paths:
-      - octatools-bin/**
-      - octatools-lib/**
-      - octatools-py/**
-      - .gitlab/**
-    compare_to: main
-
-.changes-with-data: &with_data_changes
-  changes:
-    paths:
-      - octatools-bin/**
-      - octatools-lib/**
-      - octatools-py/**
-      - .gitlab/**
-      - data/**
-    compare_to: main
-
-.disabled: &rules_disabled
-  rules:
-    - when: never
-
-.no-datadir-changes-mr-only: &rules_mrbranch_no_datadir
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      <<: *no_data_changes
-
-.with-datadir-changes-mr-only: &rules_mrbranch_with_datadir
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      <<: *no_data_changes
-
-.target-cache-pull-only: &cache_target_pull
-  cache:
-    key: target-cache
-    paths:
-      - target
-    policy: pull
-
-.target-cache-push-only: &cache_target_push
-  cache:
-    key: target-cache
-    paths:
-      - target
-    policy: push
-
-# Either a merge request pipeline OR a branch pipeline -- not both
-# https://stackoverflow.com/a/74574075
-workflow:
-  rules:
-    # Explicitly enable merge request pipelines to be created (not done by default)
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    # Prevent duplicate pipelines from push events to branches that are the source
-    # branch of one or more open merge requests. If $CI_OPEN_MERGE_REQUESTS is
-    # non-empty on a branch pipeline, it means that the above rule has already
-    # caused (or will cause) a merge request pipeline to run. These rules are
-    # separately evaluated for the merge request event resulting from the same push.
-    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-      when: never
-    # Run a normal branch pipeline on a branch that isn't the source of an open MR
-    # NOTE: Will run once if the branch is pushed first, then an MR created.
-    - if: $CI_COMMIT_BRANCH
-
-image: "rust:latest"
+include:
+  - local: ".gitlab/builds/merge-request.yml"
+    # only run when the branch has a merge request open
+    rules:
+      - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+        changes:
+          - octatools-bin/**
+          - octatools-lib/**
+          - octatools-py/**
+          - .gitlab/**
+          - data/**
+  # only run binary release steps when a main tag push
+  - local: ".gitlab/releases/binary.yml"
+    rules:
+      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+  # TODO
+  #- local: ".gitlab/releases/cargo.yml"
+  #  rules:
+  #    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+  # TODO
+  #- local: ".gitlab/releases/python.yml"
+  #  rules:
+  #    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
 
 stages:
   - build
   - test
   - check
+  - release
 
-dev_build:
-  stage: build
-  script:
-    - cargo build
-  <<: *cache_target_push
-  <<: *small_linux
-  <<: *rules_mrbranch_no_datadir
-
-tests:
+# naive test run, only run when a branch push and no open merge requests for the
+# branch
+test-plain:
   stage: test
+  tags:
+    - saas-linux-small-amd64
   script:
     - cargo test --workspace --no-fail-fast
-  <<: *cache_target_pull
-  <<: *small_linux
-  <<: *rules_mrbranch_no_datadir
-
-# disabled for $$$ reasons
-coverage_cobertura:
-  stage: test
-  before_script:
-    - apt install -yqq libssl-dev
-    - cargo install cargo-tarpaulin
-  script:
-    - cargo tarpaulin -o xml --workspace --exclude octatools-py --exclude octatools-derive
-  coverage: '/^\d+.\d+% coverage/'
-  artifacts:
-    when: always
-    paths:
-      - cobertura.xml
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
-  <<: *cache_target_pull
-  <<: *med_linux
-  <<: *rules_mrbranch_with_datadir
-
-coverage_junit:
-  stage: test
-  image: rustlang/rust:nightly
-  script:
-    - "cargo +nightly install junitify"
-    - "cargo +nightly test -- --format=json -Z unstable-options --report-time | junitify --out test-results"
-  artifacts:
-    when: always
-    reports:
-      junit: test-results/*.xml
-  <<: *cache_target_pull
-  <<: *med_linux
-  <<: *rules_mrbranch_with_datadir
-
-include:
-  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
-    inputs:
-      stage: check
-    <<: *rules_mrbranch_no_datadir
-
-cargo_fmt:
-  stage: check
-  allow_failure: true
-  before_script:
-    - rustup component add rustfmt
-  script:
-    - cargo fmt --all --verbose --check
-  <<: *cache_target_pull
-  <<: *small_linux
-  <<: *rules_mrbranch_no_datadir
-
-cargo_clippy:
-  stage: check
-  allow_failure: true
-  before_script:
-    - rustup component add clippy
-  script:
-    - cargo clippy --all-targets --no-deps
-  <<: *cache_target_pull
-  <<: *small_linux
-  <<: *rules_mrbranch_no_datadir
+  rules:
+    - if: $CI_DEFAULT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null
