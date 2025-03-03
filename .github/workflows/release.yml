@@ -13,52 +13,60 @@ jobs:
       - uses: actions/checkout@v4
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create ${{ github.ref_name }}
+        run: |
+            gh release create \
+              ${{ github.ref_name }} \
+              --title "octatools-bin [${{ github.ref_name }}]" \
+              --verify-tag
   assets:
     needs: release
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          # 64-bit (x86)
-          - build: linux-64-bit
+          - build: linux-intel
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-          - build: macos-64-bit
+            command: cross
+            bin_fname: octatools-bin
+          - build: linux-arm
+            os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            command: cross
+            bin_fname: octatools-bin
+          - build: windows-intel
+            os: ubuntu-latest
+            target: x86_64-pc-windows-gnu
+            command: cross
+            bin_fname: octatools-bin.exe
+          - build: macos-intel
             os: macos-latest
             target: x86_64-apple-darwin
-          #- build: windows-64-bit
-          #  os: ubuntu-latest
-          #  target: x86_64-pc-windows-gnu
-          # 64-bit (ARM)
+            command: cargo
+            bin_fname: octatools-bin
           - build: macos-arm
             os: macos-latest
             target: aarch64-apple-darwin
-          #- build: linux-arm
-          #  os: ubuntu-latest
-          #  target: aarch64-unknown-linux-gnu
+            command: cargo
+            bin_fname: octatools-bin
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-      - run: cargo build --bin octatools-bin --release --target ${{ matrix.target }}
-      # 7z is available on all runners.
-      # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#preinstalled-software
-      - name: Create bin archive
-        id: archive-bin
-        shell: bash
-        run: |
-          DIRECTORY="octatools-bin-${{ github.ref_name }}-${{ matrix.build }}"
-          if [[ "${{ matrix.target }}" =~ "-pc-windows-" ]]; then
-            SUFFIX=".exe"
-          else
-            SUFFIX=""
-          fi
-          mkdir "$DIRECTORY"
-          cp LICENSE.md README.md "target/${{ matrix.target }}/release/octatools-bin$SUFFIX" "$DIRECTORY"
-          7z a "$DIRECTORY.zip" "$DIRECTORY"
-          echo "path=$DIRECTORY.zip" >> $GITHUB_OUTPUT
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload ${{ github.ref_name }} ${{ steps.archive-bin.outputs.path }}
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+          ${{ matrix.command }} build --bin octatools-bin --release --target ${{ matrix.target }}
+
+          DIRNAME="octatools-bin_${{ github.ref_name }}_${{ matrix.target }}"
+          mkdir "$DIRNAME"
+          cp \
+            LICENSE.md \
+            README.md \
+            "target/${{ matrix.target }}/release/${{ matrix.bin_fname }}" \
+            "$DIRNAME"
+          7z a "$DIRNAME.zip" "$DIRNAME"
+
+          gh release upload ${{ github.ref_name }} "$DIRNAME.zip"
