@@ -1,5 +1,5 @@
 [package]
-name = "octatools-bin"
+name = "octatools-cli"
 description = "CLI tool for handling Elektron Octatrack DPS-1 data files"
 
 version.workspace = true
@@ -12,7 +12,7 @@ repository.workspace = true
 # cargo uses a subpackage default-run key to determine the workspace default binary
 # :/
 # https://stackoverflow.com/a/51790493
-default-run = "octatools-bin"
+default-run = "octatools-cli"
 
 
 [dependencies]

@@ -436,10 +436,10 @@ pub enum Drive {
 #[derive(Subcommand, Debug, PartialEq, Clone)]
 pub enum ShellCompletions {
     /// Example usage:
-    /// `octatools-bin shell-completion bash > ./octatools.bash && . ./octatools.bash`
+    /// `octatools-cli shell-completion bash > ./octatools.bash && . ./octatools.bash`
     Bash,
     /// Example usage:
-    /// `octatools-bin shell-completion powershell > ./octatools.ps && . ./octatools.ps`
+    /// `octatools-cli shell-completion powershell > ./octatools.ps && . ./octatools.ps`
     // #[arg(alias = "ps")]
     Powershell,
 }

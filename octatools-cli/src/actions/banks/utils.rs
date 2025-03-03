@@ -434,7 +434,7 @@ pub(crate) fn get_one_indexed_slots_from_zero_indexed(slots: &[Slot]) -> RBoxErr
         .collect())
 }
 
-// TODO: The basics of an `octatools-bin projects slots deduplicate` command, except the actual
+// TODO: The basics of an `octatools-cli projects slots deduplicate` command, except the actual
 //       command will need to mutate sample files to have content hash strings in the file names.
 //       Although, this is only to catch the edge case where someone has files named the same in
 //       different projects... how likely is it to happen where they aren't actually the same file?

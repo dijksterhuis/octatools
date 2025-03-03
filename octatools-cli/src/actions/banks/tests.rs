@@ -115,7 +115,7 @@ mod integration {
 
     fn get_base_mock_path(test_name: &String) -> PathBuf {
         temp_dir()
-            .join("octatools-bin")
+            .join("octatools-cli")
             .join("copyBankTesting")
             .join(test_name)
     }

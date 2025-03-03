@@ -35,37 +35,37 @@ variables:
       # ==========================================
       # intel linux CLI
       - RUST_TARGET: x86_64-unknown-linux-gnu
-        RUST_BINARY_FILENAME: "octatools-bin"
+        RUST_BINARY_FILENAME: "octatools-cli"
         CI_RUNNER_TAG: saas-linux-small-amd64
         CI_IMAGE: "rust:latest"
       # ==========================================
       # ARM linux CLI
       - RUST_TARGET: aarch64-unknown-linux-gnu
-        RUST_BINARY_FILENAME: "octatools-bin"
+        RUST_BINARY_FILENAME: "octatools-cli"
         CI_RUNNER_TAG: saas-linux-small-arm64
         CI_IMAGE: "rust:latest"
       # ==========================================
       # Intel windows CLI (works for powershell/MYSYS2/CMD)
       - RUST_TARGET: x86_64-pc-windows-gnu
-        RUST_BINARY_FILENAME: "octatools-bin.exe"
+        RUST_BINARY_FILENAME: "octatools-cli.exe"
         CI_RUNNER_TAG: saas-linux-small-amd64
         CI_IMAGE: "rust:latest"
       # ==========================================
       # TODO: ARM windows CLI (works for powershell/MYSYS2/CMD)
       #- RUST_TARGET: aarch64-pc-windows-gnu
       #  CI_RUNNER_TAG: saas-linux-small-arm64
-      #  RUST_TARGET_FNAME_BIN: "octatools-bin.exe"
+      #  RUST_TARGET_FNAME_BIN: "octatools-cli.exe"
       #  CI_IMAGE: "rust:latest"
       # ==========================================
       # Intel macOS CLI
       - RUST_TARGET: x86_64-apple-darwin
-        RUST_BINARY_FILENAME: "octatools-bin"
+        RUST_BINARY_FILENAME: "octatools-cli"
         CI_RUNNER_TAG: saas-macos-medium-m1
         CI_IMAGE: "macos-14-xcode-15"
       # ==========================================
       # ARM macOS CLI
       - RUST_TARGET: aarch64-apple-darwin
-        RUST_BINARY_FILENAME: "octatools-bin"
+        RUST_BINARY_FILENAME: "octatools-cli"
         CI_RUNNER_TAG: saas-macos-medium-m1
         CI_IMAGE: "macos-14-xcode-15"
 
@@ -93,7 +93,7 @@ release-build-bin:
       fi 
       rustup target add "${RUST_TARGET}"
   script:
-    - cargo build --bin "octatools-bin" --release --target "${RUST_TARGET}"
+    - cargo build --bin "octatools-cli" --release --target "${RUST_TARGET}"
   tags:
     - $CI_RUNNER_TAG
   artifacts:
@@ -129,25 +129,25 @@ release-create-bin:
     - release-upload-bin
   release:
     tag_name: "${CI_COMMIT_TAG}"
-    tag_message: "octatools-bin [${CI_COMMIT_TAG}]"
-    name: "octatools-bin [${CI_COMMIT_TAG}]"
-    description: "octatools-bin [${CI_COMMIT_TAG}] -- CLI tool for handling Elektron Octatrack DPS-1 data files"
+    tag_message: "octatools-cli [${CI_COMMIT_TAG}]"
+    name: "octatools-cli [${CI_COMMIT_TAG}]"
+    description: "octatools-cli [${CI_COMMIT_TAG}] -- CLI tool for handling Elektron Octatrack DPS-1 data files"
     # super annoying that this cannot be parallelized:
     # https://gitlab.com/gitlab-org/release-cli/-/issues/94
     assets:
       links:
         - name: "Download: x86_64-unknown-linux-gnu"
-          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-bin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-cli"
         - name: "Download: aarch64-unknown-linux-gnu"
-          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-bin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-unknown-linux-gnu/${CI_COMMIT_TAG}/octatools-cli"
         - name: "Download: x86_64-pc-windows-gnu"
-          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-bin.exe"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-cli.exe"
         # TODO: ARM windows CLI
         #- name: "Download: aarch64-pc-windows-gnu"
-        #  url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-bin.exe"
+        #  url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-pc-windows-gnu/${CI_COMMIT_TAG}/octatools-cli.exe"
         - name: "Download: x86_64-apple-darwin"
-          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-apple-darwin/${CI_COMMIT_TAG}/octatools-bin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_x86_64-apple-darwin/${CI_COMMIT_TAG}/octatools-cli"
         - name: "Download: aarch64-apple-darwin"
-          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-apple-darwin/${CI_COMMIT_TAG}/octatools-bin"
+          url: "${BASE_PACKAGE_REGISTRY_URI}/octatools-bin_aarch64-apple-darwin/${CI_COMMIT_TAG}/octatools-cli"
   script:
     - echo "Creating release ..."
