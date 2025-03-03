@@ -1,17 +1,22 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-# Either a merge request pipeline OR a push to the default branch
-# https://stackoverflow.com/a/74574075
+# Control when a pipeline is *ever* able to run. One of
+# - a merge request pipeline (API setting changed so these always run in forks)
+# - a push to the default branch
+# - a newly pushed tag
+# based on: https://stackoverflow.com/a/74574075
 workflow:
   rules:
-    # Explicitly enable merge request pipelines to be created (not done by default)
+    # Explicitly enable merge request pipelines to be created (not done by
+    # default)
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    # Prevent duplicate pipelines from push events to branches that are the source
-    # branch of one or more open merge requests. If $CI_OPEN_MERGE_REQUESTS is
-    # non-empty on a branch pipeline, it means that the above rule has already
-    # caused (or will cause) a merge request pipeline to run. These rules are
-    # separately evaluated for the merge request event resulting from the same push.
+    # Prevent duplicate pipelines from push events to branches that are the
+    # source branch of one or more open merge requests. If
+    # $CI_OPEN_MERGE_REQUESTS is non-empty on a branch pipeline, it means that
+    # the above rule has already caused (or will cause) a merge request pipeline
+    # to run. These rules are separately evaluated for the merge request event
+    # resulting from the same push.
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never
     # no feature branch pipelines, only branch we can run on is the default
@@ -20,7 +25,7 @@ workflow:
     - if: $CI_COMMIT_TAG
 
 include:
-  # always run dependency scanning on default or in a merge request
+  # always run dependency scans on default branch, new tags or merge requests
   - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
     inputs:
       stage: check
@@ -28,22 +33,21 @@ include:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $CI_COMMIT_BRANCH
       - if: $CI_COMMIT_TAG
-  - local: ".gitlab/builds/merge-request.yml"
-    # only merge requests (not the default branch)
+  # always run coverage on default branch, new tags or merge requests
+  - local: ".gitlab/cicd/coverage.yml"
+    rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: $CI_COMMIT_BRANCH
+      - if: $CI_COMMIT_TAG
+  # only run linting checks in a merge request
+  - local: ".gitlab/cicd/lints.yml"
     rules:
       - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG == null
-  # only run binary release steps when a main tag push
-  - local: ".gitlab/releases/binary.yml"
+  # only publish to crates.io on a new tag push
+  # NOTE: Currently only does a dry-run publish
+  - local: ".gitlab/cicd/crates.yml"
     rules:
       - if: $CI_COMMIT_TAG
-  # TODO
-  #- local: ".gitlab/releases/cargo.yml"
-  #  rules:
-  #    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
-  # TODO
-  #- local: ".gitlab/releases/python.yml"
-  #  rules:
-  #    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
 
 stages:
   - build

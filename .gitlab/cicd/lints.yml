@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright © 2024 Mike Robeson [dijksterhuis]
+
+check-cargo-fmt:
+  stage: check
+  tags:
+    - saas-linux-small-amd64
+  image: "rust:latest"
+  allow_failure: true
+  before_script:
+    - rustup component add rustfmt
+  script:
+    - cargo fmt --all --verbose --check
+
+check-cargo-clippy:
+  stage: check
+  tags:
+    - saas-linux-small-amd64
+  image: "rust:latest"
+  allow_failure: true
+  before_script:
+    - rustup component add clippy
+  script:
+    - cargo clippy --all-targets --no-deps
+
+#check-qlty-metrics:
+#  stage: check
+#  tags:
+#    - saas-linux-small-amd64
+#  image: "rust:latest"
+#  allow_failure: true
+#  before_script:
+#    - curl https://qlty.sh | bash
+#    - source /root/.bashrc
+#    - qlty init -y
+#  script:
+#    - qlty metrics --all --sort complexity

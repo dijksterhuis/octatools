@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
+# !!! not currently in use.
+
 # A CI template for building rust based CLI binaries for the most common [0]
 # targets, including: Linux Intel/Arm, Windows Intel, macOS Intel/Arm.
 #

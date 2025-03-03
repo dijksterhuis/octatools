@@ -1,20 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-# standard merge request pipeline builds, tests and checks
-
-.small-linux: &small_linux
-  tags:
-    - saas-linux-small-amd64
-
-.med-linux: &med_linux
+coverage-cobertura:
+  stage: test
   tags:
     - saas-linux-medium-amd64
-
-image: "rust:latest"
-
-test-cobertura:
-  stage: test
+  image: "rust:latest"
   before_script:
     - apt install -yqq libssl-dev
     - cargo install cargo-tarpaulin
@@ -30,10 +21,11 @@ test-cobertura:
       coverage_report:
         coverage_format: cobertura
         path: cobertura.xml
-  <<: *med_linux
 
-test-junit:
+coverage-junit:
   stage: test
+  tags:
+    - saas-linux-medium-amd64
   image: rustlang/rust:nightly
   script:
     - "cargo +nightly install junitify"
@@ -42,34 +34,3 @@ test-junit:
     when: always
     reports:
       junit: test-results/*.xml
-  <<: *med_linux
-
-check-cargo-fmt:
-  stage: check
-  allow_failure: true
-  before_script:
-    - rustup component add rustfmt
-  script:
-    - cargo fmt --all --verbose --check
-  <<: *small_linux
-
-check-cargo-clippy:
-  stage: check
-  allow_failure: true
-  before_script:
-    - rustup component add clippy
-  script:
-    - cargo clippy --all-targets --no-deps
-  <<: *small_linux
-
-#check-qlty-metrics:
-#  stage: check
-#  allow_failure: true
-#  before_script:
-#    - curl https://qlty.sh | bash
-#    - source /root/.bashrc
-#    - qlty init -y
-#  script:
-#    - qlty metrics --all --sort complexity
-#  <<: *small_linux
-##  <<: *no_data_changes
