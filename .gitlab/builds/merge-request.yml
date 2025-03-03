@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright © 2024 Mike Robeson [dijksterhuis]
+
+# standard merge request pipeline builds, tests and checks
+
+.small-linux: &small_linux
+  tags:
+    - saas-linux-small-amd64
+
+.med-linux: &med_linux
+  tags:
+    - saas-linux-medium-amd64
+
+include:
+  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
+    inputs:
+      stage: check
+
+image: "rust:latest"
+
+test-cobertura:
+  stage: test
+  before_script:
+    - apt install -yqq libssl-dev
+    - cargo install cargo-tarpaulin
+  # need to exclude octatools-py and octatools-derive for now as they break tarpaulin
+  script:
+    - cargo tarpaulin -o xml --workspace --exclude octatools-py --exclude octatools-derive
+  coverage: '/^\d+.\d+% coverage/'
+  artifacts:
+    when: always
+    paths:
+      - cobertura.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
+  <<: *med_linux
+
+test-junit:
+  stage: test
+  image: rustlang/rust:nightly
+  script:
+    - "cargo +nightly install junitify"
+    - "cargo +nightly test -- --format=json -Z unstable-options --report-time | junitify --out test-results"
+  artifacts:
+    when: always
+    reports:
+      junit: test-results/*.xml
+  <<: *med_linux
+
+check-cargo-fmt:
+  stage: check
+  allow_failure: true
+  before_script:
+    - rustup component add rustfmt
+  script:
+    - cargo fmt --all --verbose --check
+  <<: *small_linux
+
+check-cargo-clippy:
+  stage: check
+  allow_failure: true
+  before_script:
+    - rustup component add clippy
+  script:
+    - cargo clippy --all-targets --no-deps
+  <<: *small_linux
+
+#check-qlty-metrics:
+#  stage: check
+#  allow_failure: true
+#  before_script:
+#    - curl https://qlty.sh | bash
+#    - source /root/.bashrc
+#    - qlty init -y
+#  script:
+#    - qlty metrics --all --sort complexity
+#  <<: *small_linux
+##  <<: *no_data_changes
