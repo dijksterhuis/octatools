@@ -597,9 +597,13 @@ pub struct MidiTrackTrigs {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub plocks: Box<Array<MidiTrackParameterLocks, 64>>,
 
-    /// Unknown data.
-    /// comes at the end, dunno what this block is yet
-    /// mostly a bunch of zero values
+    /// This will be micro-timings and conditional trig state. 64 length array for each (no trig
+    /// repeats for midi tracks IIRC).
+    ///
+    /// Conditionals will likely step up in increments,
+    /// Micro-timings likely will be 255/0 for "none"; x < 127 is negative; x > 127 is positive.
+    ///
+    /// TODO: Not inspected data values yet.
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub unknown_3: Box<Array<u8, 128>>,
 }
