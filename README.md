@@ -3,6 +3,10 @@
 Various Rust binaries/libraries for use with [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
 binary data files.
 
+![GitHub Release](https://img.shields.io/github/v/release/dijksterhuis/octatools?sort=semver&display_name=release&style=flat&label=Latest%20GitHub%20release&link=https%3A%2F%2Fgithub.com%2Fdijksterhuis%2Foctatools%2Freleases%2Flatest)
+[![pipeline status](https://gitlab.com/octatools/octatools/badges/main/pipeline.svg)](https://gitlab.com/octatools/octatools/-/commits/main)
+[![coverage report](https://gitlab.com/octatools/octatools/badges/main/coverage.svg)](https://gitlab.com/octatools/octatools/-/commits/main)
+
 # Table of Contents
 
 - [Warnings](./README.md#warnings)
