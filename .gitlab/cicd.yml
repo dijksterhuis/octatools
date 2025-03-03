@@ -17,6 +17,7 @@ workflow:
     # no feature branch pipelines, only branch we can run on is the default
     # branch
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
 
 include:
   # always run dependency scanning on default or in a merge request
@@ -26,14 +27,15 @@ include:
     rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $CI_COMMIT_BRANCH
+      - if: $CI_COMMIT_TAG
   - local: ".gitlab/builds/merge-request.yml"
     # only merge requests (not the default branch)
     rules:
-      - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG == null
   # only run binary release steps when a main tag push
   - local: ".gitlab/releases/binary.yml"
     rules:
-      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG
+      - if: $CI_COMMIT_TAG
   # TODO
   #- local: ".gitlab/releases/cargo.yml"
   #  rules:
