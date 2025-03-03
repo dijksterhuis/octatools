@@ -1,17 +1,35 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
+# Either a merge request pipeline OR a push to the default branch
+# https://stackoverflow.com/a/74574075
+workflow:
+  rules:
+    # Explicitly enable merge request pipelines to be created (not done by default)
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Prevent duplicate pipelines from push events to branches that are the source
+    # branch of one or more open merge requests. If $CI_OPEN_MERGE_REQUESTS is
+    # non-empty on a branch pipeline, it means that the above rule has already
+    # caused (or will cause) a merge request pipeline to run. These rules are
+    # separately evaluated for the merge request event resulting from the same push.
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    # no feature branch pipelines, only branch we can run on is the default
+    # branch
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
 include:
-  - local: ".gitlab/builds/merge-request.yml"
-    # only run when the branch has a merge request open
+  # always run dependency scanning on default or in a merge request
+  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
+    inputs:
+      stage: check
     rules:
-      - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-        changes:
-          - octatools-bin/**
-          - octatools-lib/**
-          - octatools-py/**
-          - .gitlab/**
-          - data/**
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      - if: $CI_COMMIT_BRANCH
+  - local: ".gitlab/builds/merge-request.yml"
+    # only merge requests (not the default branch)
+    rules:
+      - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
   # only run binary release steps when a main tag push
   - local: ".gitlab/releases/binary.yml"
     rules:
@@ -30,14 +48,3 @@ stages:
   - test
   - check
   - release
-
-# naive test run, only run when a branch push and no open merge requests for the
-# branch
-test-plain:
-  stage: test
-  tags:
-    - saas-linux-small-amd64
-  script:
-    - cargo test --workspace --no-fail-fast
-  rules:
-    - if: $CI_DEFAULT_BRANCH && $CI_OPEN_MERGE_REQUESTS == null

@@ -11,11 +11,6 @@
   tags:
     - saas-linux-medium-amd64
 
-include:
-  - component: $CI_SERVER_FQDN/components/dependency-scanning/cargo@0.6.0
-    inputs:
-      stage: check
-
 image: "rust:latest"
 
 test-cobertura:
