@@ -103,10 +103,10 @@ Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the
 
 ```bash
 octatools-cli banks copy \
-  ./path/to/SET/PROJECT_SOURCE \  # source project location 
-  ./path/to/SET/PROJECT_DEST \    # destination project location
-  1 \  # source bank number (bank to copy) 
-  16   # destination bank number
+  ./path/to/SET/PROJECT_SOURCE \
+  ./path/to/SET/PROJECT_DEST \
+  1 \ 
+  16
 ```
 
 The unsaved project/bank state should now be different when you load the project.
@@ -141,10 +141,10 @@ settings (e.g. gain/tempo) means that slot is treated as unique.
 You can also use this command to copy existing banks within the same project
 ```bash
 octatools-cli banks copy \
-  ./path/to/SET/PROJECT_SOURCE \  # source project location 
-  ./path/to/SET/PROJECT_SOURCE \  # same project
-  1 \  # source bank number (bank to copy) 
-  16   # destination bank number
+  ./path/to/SET/PROJECT_SOURCE \ 
+  ./path/to/SET/PROJECT_SOURCE \
+  1 \ 
+  16
 ```
 
 ### Example: Copying multiple banks with a YAML config
@@ -213,17 +213,16 @@ multiple wav files, all accessible in a single Octatrack sample slot using the
 slices
 ```bash
 octatools-cli samples chain create \
-  chained \         # base file name of the resulting sample files
-  ./outdir \        # directory path the new sample chain will be written to
-  ./sample_1.wav \  # file paths of the sample files to chain together
+  chained \
+  ./outdir \
+  ./sample_1.wav \
   ./sample_2.wav \
   ./sample_3.wav \
-  ./sample_4.wav \
-  # ... etc 
+  ./sample_4.wav
 ```
 The output chains are always suffixed with a number to cover the case where more 
 than 64 sample files are included in the chain. 100 input samples will create 2x
-output chain file pairs: `chained_1.wav`/`chained_1.ot` and `chained_2.wav`/`chained_2.ot`.
+output chain file pairs: `chained-1.wav`/`chained-1.ot` and `chained-2.wav`/`chained-2.ot`.
 
 So, you can include as many wav file paths as you want (sort of... memory limits 
 apply).
