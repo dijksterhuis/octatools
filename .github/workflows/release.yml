@@ -16,7 +16,7 @@ jobs:
         run: |
             gh release create \
               ${{ github.ref_name }} \
-              --title "octatools-bin [${{ github.ref_name }}]" \
+              --title "octatools-cli [${{ github.ref_name }}]" \
               --verify-tag
   assets:
     needs: release
@@ -58,9 +58,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-          ${{ matrix.command }} build --bin octatools-bin --release --target ${{ matrix.target }}
+          ${{ matrix.command }} build --bin octatools-cli --release --target ${{ matrix.target }}
 
-          DIRNAME="octatools-bin_${{ github.ref_name }}_${{ matrix.target }}"
+          DIRNAME="octatools-cli_{{ github.ref_name }}_${{ matrix.target }}"
           mkdir "$DIRNAME"
           cp \
             LICENSE.md \
