@@ -15,7 +15,7 @@ release-publish-derive:
     # make sure to hide the TOKEN variable on non-default branches
     - | 
       cargo publish \
-        --lib "octatools-derive" \
+        --package "octatools-derive" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
@@ -30,7 +30,7 @@ release-publish-lib:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --lib "octatools-lib" \
+        --package "octatools-lib" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
@@ -46,7 +46,7 @@ release-publish-cli:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --bin "octatools-cli" \
+        --package "octatools-cli" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
