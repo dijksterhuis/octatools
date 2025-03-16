@@ -178,7 +178,6 @@ where
 /// Deserialize a JSON string to a data structure of type `T`
 pub fn deserialize_json_to_type<T>(data: &str) -> RBoxErr<T>
 where
-    T: Decode,
     T: for<'a> Deserialize<'a>,
 {
     let x: T = serde_json::from_str(data)?;
@@ -188,7 +187,6 @@ where
 /// Serialize a JSON string from a data structure of type `T`
 pub fn serialize_json_from_type<T>(data: &T) -> RBoxErr<String>
 where
-    T: Encode,
     T: Serialize,
 {
     Ok(serde_json::to_string(&data)?)
@@ -197,7 +195,6 @@ where
 /// Deserialize a YAML string to a data structure of type `T`
 pub fn deserialize_yaml_to_type<T>(data: &str) -> RBoxErr<T>
 where
-    T: Decode,
     T: for<'a> Deserialize<'a>,
 {
     let x: T = serde_yml::from_str(data)?;
@@ -206,7 +203,6 @@ where
 /// Serialize a YAML string from a data structure of type `T`
 pub fn serialize_yaml_from_type<T>(data: &T) -> RBoxErr<String>
 where
-    T: Encode,
     T: Serialize,
 {
     Ok(serde_yml::to_string(&data)?)
@@ -218,7 +214,6 @@ where
 
 pub fn yaml_file_to_type<T>(path: &Path) -> RBoxErr<T>
 where
-    T: Decode,
     T: for<'a> Deserialize<'a>,
 {
     let string = read_str_file(path)?;
@@ -228,7 +223,6 @@ where
 
 pub fn type_to_yaml_file<T>(data: &T, path: &Path) -> RBoxErr<()>
 where
-    T: Encode,
     T: Serialize,
 {
     let yaml = serialize_yaml_from_type::<T>(data)?;
@@ -238,7 +232,6 @@ where
 
 pub fn json_file_to_type<T>(path: &Path) -> RBoxErr<T>
 where
-    T: Decode,
     T: for<'a> Deserialize<'a>,
 {
     let string = read_str_file(path)?;
@@ -248,7 +241,6 @@ where
 
 pub fn type_to_json_file<T>(data: &T, path: &Path) -> RBoxErr<()>
 where
-    T: Encode,
     T: Serialize,
 {
     let yaml = serialize_json_from_type::<T>(data)?;
@@ -266,7 +258,6 @@ where
 /// to a binary data file.
 pub fn default_type_to_bin_file<T>(outpath: &Path) -> RBoxErr<()>
 where
-    T: Debug,
     T: Encode,
     T: Default,
     T: Serialize,
@@ -311,7 +302,6 @@ where
 /// Read a YAML file then write the data to a new `<T>` type file
 pub fn yaml_file_to_bin_file<T>(yaml_filepath: &Path, bin_filepath: &Path) -> RBoxErr<()>
 where
-    T: Decode,
     T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
@@ -326,7 +316,6 @@ where
 pub fn bin_file_to_yaml_file<T>(bin_filepath: &Path, yaml_filepath: &Path) -> RBoxErr<()>
 where
     T: Decode,
-    T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
 {
@@ -339,7 +328,6 @@ where
 /// Read a JSON file then write the data to a new `<T>` type file
 pub fn json_file_to_bin_file<T>(json_filepath: &Path, bin_filepath: &Path) -> RBoxErr<()>
 where
-    T: Decode,
     T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
@@ -354,7 +342,6 @@ where
 pub fn bin_file_to_json_file<T>(bin_filepath: &Path, json_filepath: &Path) -> RBoxErr<()>
 where
     T: Decode,
-    T: Encode,
     T: Serialize,
     T: for<'a> Deserialize<'a>,
 {
@@ -381,7 +368,7 @@ where
     T: Encode,
     T: Serialize,
 {
-    let bytes = crate::serialize_bin_from_type::<T>(data)?;
+    let bytes = serialize_bin_from_type::<T>(data)?;
     write_bin_file(&bytes, path)?;
     Ok(())
 }

@@ -4,13 +4,12 @@
 
 use crate::octatrack_sets::OctatrackSetFiles;
 use crate::RBoxErr;
-use octatools_derive::{Decodeable, Encodeable};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 /// A compact flash card which we need to scan for audio files.
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Encodeable, Decodeable)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct CompactFlashDrive {
     /// The path to the current compact flash card.
     cfcard_path: PathBuf,

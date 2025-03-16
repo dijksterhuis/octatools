@@ -1,7 +1,6 @@
 //! Read/Write a YAML file config related to Octatrack compatible sample chains.
 //! Reading a config and creating a sample chain is currently implemented.
 
-use octatools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -19,7 +18,7 @@ pub struct YamlCopyBankDetails {
     pub dest: YamlCopyDetails,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Decodeable)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct YamlCopyBankConfig {
     pub bank_copies: Vec<YamlCopyBankDetails>,
 }

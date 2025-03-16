@@ -110,7 +110,7 @@ impl SamplesDirIndexFull {
     }
 }
 
-#[derive(PartialEq, Debug, Clone, Serialize, Deserialize, Decodeable, Encodeable)]
+#[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct SamplesDirIndexSimple {
     pub dirpath: PathBuf,
     pub samples: Vec<PathBuf>,
