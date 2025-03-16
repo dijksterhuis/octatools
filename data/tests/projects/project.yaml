@@ -103,7 +103,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -112,7 +112,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -121,7 +121,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -130,7 +130,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -139,7 +139,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -148,7 +148,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -157,7 +157,7 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120
 - sample_type: RecorderBuffer
@@ -166,6 +166,6 @@ slots:
   trim_bars_x100: 0
   timestrech_mode: Normal
   loop_mode: 'Off'
-  trig_quantization_mode: PatternLength
+  trig_quantization_mode: Direct
   gain: 24
   bpm: 120

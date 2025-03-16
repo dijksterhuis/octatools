@@ -2,50 +2,9 @@
 
 use crate::audio::wav::WavFile;
 use crate::RBoxErr;
-use octatools_lib::{
-    constants::DEFAULT_SAMPLE_RATE,
-    projects::slots::ProjectSampleSlot,
-    samples::slices::{Slice, Slices},
-};
+use octatools_lib::{constants::DEFAULT_SAMPLE_RATE, projects::slots::ProjectSampleSlot};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-
-/// Create a `Slice` object for an unchained wavfile.
-/// The starting `offset` position should be the sample index within the eventual chained wavfile.
-pub fn create_slice_from_wavfile(wavfile: &WavFile, trim_start: u32) -> RBoxErr<Slice> {
-    Ok(Slice {
-        trim_start,
-        trim_end: trim_start + wavfile.len,
-        loop_start: 0xFFFFFFFF,
-    })
-}
-
-/// Get a new `Slices` struct, given a `Vec` of `WavFile`s.
-pub fn create_slices_from_wavfiles(wavfiles: &[WavFile], offset: u32) -> RBoxErr<Slices> {
-    let mut new_slices: Vec<Slice> = Vec::new();
-    let mut off = offset;
-
-    for w in wavfiles.iter() {
-        new_slices.push(create_slice_from_wavfile(w, off).unwrap());
-        off += w.len;
-    }
-
-    let default_slice = Slice {
-        trim_end: 0,
-        trim_start: 0,
-        loop_start: 0,
-    };
-
-    let mut slices_arr: [Slice; 64] = [default_slice; 64];
-    for (i, slice_vec) in new_slices.iter().enumerate() {
-        slices_arr[i] = *slice_vec;
-    }
-
-    Ok(Slices {
-        slices: slices_arr,
-        count: wavfiles.len() as u32,
-    })
-}
 
 /// Calculate the effective number of bars for a single wav file.
 /// Assumes four beats per bar.
@@ -58,12 +17,16 @@ pub fn get_otsample_nbars_from_wavfile(wav: &WavFile, tempo_bpm: &f32) -> RBoxEr
 
 /// Calculate the effective number of bars for a vec of wav files.
 /// Assumes four beats per bar.
-pub fn get_otsample_nbars_from_wavfiles(wavs: &[WavFile], tempo_bpm: &f32) -> RBoxErr<u32> {
-    let total_samples: u32 = wavs.iter().map(|x| x.len).sum();
-    let beats = total_samples as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
-    let mut bars = ((tempo_bpm * 4.0 * beats) + 0.5) * 0.25;
-    bars -= bars % 0.25;
-    Ok((bars * 100.0) as u32)
+pub fn get_bin_nbars_ileaved_wavfiles(
+    wavs: &[WavFile],
+    tempo_bpm: &f32,
+    n_channels: u16,
+) -> RBoxErr<u32> {
+    let total_samples_interleaved: u32 = wavs.iter().map(|x| x.len).sum();
+    let real_sample_length = total_samples_interleaved / n_channels as u32;
+    let beats = real_sample_length as f32 / (DEFAULT_SAMPLE_RATE as f32 * 60.0 * 4.0);
+    let bars = (tempo_bpm * beats * 100.0).round();
+    Ok(bars as u32)
 }
 
 /// Each 'sample' can have two files present on an Octatrack:
@@ -130,113 +93,6 @@ pub struct ProjectSamples {
 #[cfg(test)]
 #[allow(unused_imports)]
 mod test {
-
-    mod slice_from_wav {
-
-        use crate::audio::wav::WavFile;
-        use crate::utils::create_slice_from_wavfile;
-        use octatools_lib::samples::slices::Slice;
-        use std::path::PathBuf;
-
-        #[test]
-        fn no_offset_ok() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-
-            let _valid = Slice {
-                trim_start: 0,
-                trim_end: wav.len,
-                loop_start: 0xFFFFFFFF,
-            };
-
-            assert!(create_slice_from_wavfile(&wav, 0).is_ok())
-        }
-
-        #[test]
-        fn no_offset_validated() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-
-            let valid = Slice {
-                trim_start: 0,
-                trim_end: wav.len,
-                loop_start: 0xFFFFFFFF,
-            };
-
-            assert_eq!(create_slice_from_wavfile(&wav, 0).unwrap(), valid)
-        }
-
-        #[test]
-        fn offset_100_validated() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-
-            let valid = Slice {
-                trim_start: 100,
-                trim_end: 100 + wav.len,
-                loop_start: 0xFFFFFFFF,
-            };
-
-            assert_eq!(create_slice_from_wavfile(&wav, 100).unwrap(), valid)
-        }
-    }
-
-    mod slices_from_wavs {
-
-        use crate::audio::wav::WavFile;
-        use crate::utils::create_slices_from_wavfiles;
-        use octatools_lib::samples::slices::Slice;
-        use std::path::PathBuf;
-
-        #[test]
-        fn no_offset_ok() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-            let wavs = [
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-            ]
-            .to_vec();
-
-            assert!(create_slices_from_wavfiles(&wavs, 0).is_ok())
-        }
-
-        #[test]
-        fn offset_100_ok() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-            let wavs = [
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-            ]
-            .to_vec();
-
-            assert!(create_slices_from_wavfiles(&wavs, 100).is_ok())
-        }
-
-        #[test]
-        fn offset_30000_ok() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-            let wavs = [
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-            ]
-            .to_vec();
-
-            assert!(create_slices_from_wavfiles(&wavs, 30000).is_ok())
-        }
-    }
-
     mod nbars_from_wav {
 
         use crate::audio::wav::WavFile;
@@ -301,7 +157,7 @@ mod test {
     mod nbars_from_wavs {
 
         use crate::audio::wav::WavFile;
-        use crate::utils::get_otsample_nbars_from_wavfiles;
+        use crate::utils::get_bin_nbars_ileaved_wavfiles;
         use octatools_lib::samples::slices::Slice;
         use std::path::PathBuf;
 
@@ -318,7 +174,7 @@ mod test {
             ]
             .to_vec();
 
-            assert!(get_otsample_nbars_from_wavfiles(&wavs, &120.0).is_ok())
+            assert!(get_bin_nbars_ileaved_wavfiles(&wavs, &120.0, 2).is_ok())
         }
 
         #[test]
@@ -334,25 +190,8 @@ mod test {
             ]
             .to_vec();
 
-            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &120.0).unwrap();
-            assert_eq!(nbarsx100, 325)
-        }
-
-        #[test]
-        fn simple_300bpm_valid() {
-            let fp = PathBuf::from("../data/tests/misc/test.wav");
-            let wav = WavFile::from_path(&fp).unwrap();
-            let wavs = [
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-                wav.clone(),
-            ]
-            .to_vec();
-
-            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &300.0).unwrap();
-            assert_eq!(nbarsx100, 800)
+            let nbarsx100 = get_bin_nbars_ileaved_wavfiles(&wavs, &120.0, 2).unwrap();
+            assert_eq!(nbarsx100, 158)
         }
 
         #[test]
@@ -368,8 +207,8 @@ mod test {
             ]
             .to_vec();
 
-            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &150.0).unwrap();
-            assert_eq!(nbarsx100, 400)
+            let nbarsx100 = get_bin_nbars_ileaved_wavfiles(&wavs, &150.0, 2).unwrap();
+            assert_eq!(nbarsx100, 198)
         }
 
         #[test]
@@ -385,8 +224,25 @@ mod test {
             ]
             .to_vec();
 
-            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &200.0).unwrap();
-            assert_eq!(nbarsx100, 525)
+            let nbarsx100 = get_bin_nbars_ileaved_wavfiles(&wavs, &200.0, 2).unwrap();
+            assert_eq!(nbarsx100, 264)
+        }
+
+        #[test]
+        fn simple_300bpm_valid() {
+            let fp = PathBuf::from("../data/tests/misc/test.wav");
+            let wav = WavFile::from_path(&fp).unwrap();
+            let wavs = [
+                wav.clone(),
+                wav.clone(),
+                wav.clone(),
+                wav.clone(),
+                wav.clone(),
+            ]
+            .to_vec();
+
+            let nbarsx100 = get_bin_nbars_ileaved_wavfiles(&wavs, &300.0, 2).unwrap();
+            assert_eq!(nbarsx100, 396)
         }
 
         #[test]
@@ -402,8 +258,8 @@ mod test {
             ]
             .to_vec();
 
-            let nbarsx100 = get_otsample_nbars_from_wavfiles(&wavs, &30.0).unwrap();
-            assert_eq!(nbarsx100, 75)
+            let nbarsx100 = get_bin_nbars_ileaved_wavfiles(&wavs, &30.0, 2).unwrap();
+            assert_eq!(nbarsx100, 40)
         }
     }
 

@@ -315,6 +315,7 @@ pub enum SampleSliceGrid {
 /// Create a 'sliced sample chain' from multiple audio files (chaining audio files together into one audio file with slice grids a la Octachainer).
 #[derive(Subcommand, Debug, PartialEq)]
 pub enum SampleChains {
+    /// Create a sample chain from the CLI
     Create {
         /// Name of the new sliced sample chain.
         /// Will automatically be suffixed with an index number
@@ -411,9 +412,8 @@ pub enum Samples {
 
     #[command(subcommand)]
     Otfile(Otfile),
-
-    #[command(subcommand)]
-    Search(SampleSearch),
+    // #[command(subcommand)]
+    // Search(SampleSearch),
 }
 
 /// Commands related to the 'drive' i.e. the whole Compact Flash Card

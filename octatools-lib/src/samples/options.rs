@@ -8,10 +8,10 @@ use serde::{Deserialize, Serialize};
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy, Hash, Eq)]
 pub enum SampleAttributeTimestrechMode {
     /// No timestreching applied.
-    #[default]
     Off,
 
     /// Regular timestreching.
+    #[default]
     Normal,
 
     /// Drum / Rythmic specific algorithm
@@ -84,12 +84,12 @@ impl OptionEnumValueConvert for SampleAttributeLoopMode {
 
 #[derive(PartialEq, Debug, Clone, Default, Serialize, Deserialize, Copy, Hash, Eq)]
 pub enum SampleAttributeTrigQuantizationMode {
+    /// Play once the pattern ends
+    PatternLength,
+
     /// Play back immediately, no quantization.
     #[default]
     Direct,
-
-    /// Play once the pattern ends
-    PatternLength,
 
     /// Play after 1 sequencer step(s).
     OneStep,
@@ -146,8 +146,8 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
 
     fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
         match v {
-            0 => Ok(SampleAttributeTrigQuantizationMode::Direct),
-            255 => Ok(SampleAttributeTrigQuantizationMode::PatternLength),
+            255 => Ok(SampleAttributeTrigQuantizationMode::Direct),
+            0 => Ok(SampleAttributeTrigQuantizationMode::PatternLength),
             1 => Ok(SampleAttributeTrigQuantizationMode::OneStep),
             2 => Ok(SampleAttributeTrigQuantizationMode::TwoSteps),
             3 => Ok(SampleAttributeTrigQuantizationMode::ThreeSteps),
@@ -170,8 +170,8 @@ impl OptionEnumValueConvert for SampleAttributeTrigQuantizationMode {
 
     fn value(&self) -> RBoxErr<Self::V> {
         match self {
-            SampleAttributeTrigQuantizationMode::Direct => Ok(0),
-            SampleAttributeTrigQuantizationMode::PatternLength => Ok(255),
+            SampleAttributeTrigQuantizationMode::Direct => Ok(255),
+            SampleAttributeTrigQuantizationMode::PatternLength => Ok(0),
             SampleAttributeTrigQuantizationMode::OneStep => Ok(1),
             SampleAttributeTrigQuantizationMode::TwoSteps => Ok(2),
             SampleAttributeTrigQuantizationMode::ThreeSteps => Ok(3),
@@ -207,7 +207,7 @@ mod test_spec {
             fn test_direct() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::Direct.value().unwrap(),
-                    0
+                    255
                 );
             }
             #[test]
@@ -216,7 +216,7 @@ mod test_spec {
                     SampleAttributeTrigQuantizationMode::PatternLength
                         .value()
                         .unwrap(),
-                    255
+                    0
                 );
             }
             #[test]
@@ -377,14 +377,14 @@ mod test_spec {
             fn test_direct() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::Direct,
-                    SampleAttributeTrigQuantizationMode::from_value(&0).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&255).unwrap()
                 );
             }
             #[test]
             fn test_patternlen() {
                 assert_eq!(
                     SampleAttributeTrigQuantizationMode::PatternLength,
-                    SampleAttributeTrigQuantizationMode::from_value(&255).unwrap()
+                    SampleAttributeTrigQuantizationMode::from_value(&0).unwrap()
                 );
             }
             #[test]

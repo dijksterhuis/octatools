@@ -89,10 +89,9 @@ impl ProjectSampleSlot {
             slot_id,
             path,
             trim_bars_x100: trim_bars_x100.unwrap_or(0),
-            timestrech_mode: timestretch_mode.unwrap_or(SampleAttributeTimestrechMode::Normal),
-            loop_mode: loop_mode.unwrap_or(SampleAttributeLoopMode::Off),
-            trig_quantization_mode: trig_quantization_mode
-                .unwrap_or(SampleAttributeTrigQuantizationMode::PatternLength),
+            timestrech_mode: timestretch_mode.unwrap_or_default(),
+            loop_mode: loop_mode.unwrap_or_default(),
+            trig_quantization_mode: trig_quantization_mode.unwrap_or_default(),
             gain: gain.unwrap_or(24),
             bpm: bpm.unwrap_or(120),
         })
@@ -106,9 +105,9 @@ impl ProjectSampleSlot {
                 slot_id: 129,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -117,9 +116,9 @@ impl ProjectSampleSlot {
                 slot_id: 130,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -128,9 +127,9 @@ impl ProjectSampleSlot {
                 slot_id: 131,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -139,9 +138,9 @@ impl ProjectSampleSlot {
                 slot_id: 132,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -150,9 +149,9 @@ impl ProjectSampleSlot {
                 slot_id: 133,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -161,9 +160,9 @@ impl ProjectSampleSlot {
                 slot_id: 134,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -172,9 +171,9 @@ impl ProjectSampleSlot {
                 slot_id: 135,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -183,9 +182,9 @@ impl ProjectSampleSlot {
                 slot_id: 136,
                 path: PathBuf::from(""),
                 trim_bars_x100: 0,
-                timestrech_mode: SampleAttributeTimestrechMode::Normal,
-                loop_mode: SampleAttributeLoopMode::Off,
-                trig_quantization_mode: SampleAttributeTrigQuantizationMode::PatternLength,
+                timestrech_mode: SampleAttributeTimestrechMode::default(),
+                loop_mode: SampleAttributeLoopMode::default(),
+                trig_quantization_mode: SampleAttributeTrigQuantizationMode::default(),
                 gain: 24,
                 bpm: 120,
             },
@@ -560,7 +559,7 @@ mod test {
         hmap.insert("trigquantization".to_string(), "255".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
         assert_eq!(
-            crate::samples::options::SampleAttributeTrigQuantizationMode::PatternLength,
+            crate::samples::options::SampleAttributeTrigQuantizationMode::Direct,
             r.unwrap()
         );
     }
@@ -571,7 +570,7 @@ mod test {
         hmap.insert("trigquantization".to_string(), "0".to_string());
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
         assert_eq!(
-            crate::samples::options::SampleAttributeTrigQuantizationMode::Direct,
+            crate::samples::options::SampleAttributeTrigQuantizationMode::PatternLength,
             r.unwrap()
         );
     }
@@ -632,7 +631,7 @@ mod test {
         let r = crate::projects::slots::parse_trig_quantize_mode(&hmap);
         assert_eq!(
             r.unwrap(),
-            crate::samples::options::SampleAttributeTrigQuantizationMode::PatternLength
+            crate::samples::options::SampleAttributeTrigQuantizationMode::default()
         );
     }
 }

@@ -69,20 +69,7 @@ they need examples created and loaded onto the Octatrack for IRL on-machine
 confirmation that they work; plus probably a bunch more automated test cases ...
 see [Help Wanted](./README.md#help-wanted).
 
-- Copy banks from one project to another: copies relevant project sample slots 
-  to the new project; copies sample files to the new project; remaps sample 
-  slots within bank data.
-- Create slice sample chains from multiple WAV files
-- Create a linear/random slice grid for an existing wav file
-- Deconstruct a slice sample chain into component WAV files
-- Write a new binary data file from a YAML/JSON source file (arrangement/project/bank/sample)
-- Dump binary data to a YAML/JSON file (arrangement/project/bank/sample)
-- Inspect various data files (project/arrangement/bank/part/pattern/sample)
-- List samples slots being used in a project
-- Find compatible WAV files in a local directory and write their file paths to a
-  YAML file
-
-Example usage:
+### Examples
 - [Copying a bank to a project in the same set](./README.md#example-copying-a-bank-to-a-project-in-the-same-set)
 - [Copying a bank within the same project](./README.md#example-copying-a-bank-within-the-same-project)
 - [Copying multiple banks with a YAML config](./README.md#example-copying-multiple-banks-with-a-yaml-config)
@@ -95,7 +82,7 @@ Example usage:
 - [Writing YAML/JSON files as new data files](./README.md#example-writing-yamljson-files-as-new-binary-data-files)
 - [Creating default project data files](./README.md#example-creating-default-project-data-files)
 
-### Example: Copying a bank to a project in the same set
+#### Example: Copying a bank to a project in the same set
 
 Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the 
 `PROJECT_DEST` project.  The bank will be copied to `Bank 16` in the 
@@ -136,7 +123,7 @@ copying. Sample slots are unique based on their current slot settings, including
 the file path of the sample loaded into the sample slot, so a difference in slot
 settings (e.g. gain/tempo) means that slot is treated as unique.
 
-### Example: Copying a bank within the same project
+#### Example: Copying a bank within the same project
 
 You can also use this command to copy existing banks within the same project
 ```bash
@@ -147,7 +134,7 @@ octatools-cli banks copy \
   16
 ```
 
-### Example: Copying multiple banks with a YAML config
+#### Example: Copying multiple banks with a YAML config
 
 If you have a lot of banks to copy, you can speed things up by creating a YAML 
 configuration file and using the `banks copy-n` command to copy each bank in 
@@ -206,7 +193,7 @@ I'm not really sure why you would want to do that, but you could :shrug:
 
 
 
-### Example: Slice based sample chaining with the CLI
+#### Example: Slice based sample chaining with the CLI
 
 Create new sample files `chained-1.wav` and `chained-1.ot` which chains together 
 multiple wav files, all accessible in a single Octatrack sample slot using the 
@@ -227,7 +214,7 @@ output chain file pairs: `chained-1.wav`/`chained-1.ot` and `chained-2.wav`/`cha
 So, you can include as many wav file paths as you want (sort of... memory limits 
 apply).
 
-### Example: Slice based sample chaining with a YAML config
+#### Example: Slice based sample chaining with a YAML config
 
 Doing the same thing as the CLI, but for two different chains using a YAML 
 config file, which also allows you to modify the other settings of a generated 
@@ -235,18 +222,16 @@ sample chain
 ```yaml
 # YAML file written to `./chains.yaml`
 global_settings:
-  # currently has no effect -- i might remove the option.
-  normalize: false
   # directory path where new sample chains will be written to
   # WARNING: Make sure `chain_name` is unique for the chains you want to generate
   out_dir_path: "./outdir" 
 chains:
   # first chain to be created
   - chain_name: chain_1
-    Octatrack_settings:
+    octatrack_settings:
       bpm: 120.0
-      # gain needs fixing as it's not working properly
-      gain: 48.0
+      # between -24.0 and 24.0
+      gain: 0.0
       # Time stretch options: "Off", "Normal" or "Beat"
       timestretch_mode: "Off"
       # Loop options: "Off", "Normal" or "PingPong"
@@ -255,7 +240,7 @@ chains:
       # "ThreeSteps", "FourSteps"  ...  etc. etc.
       # For a complete list, see: ./octatools-lib/src/samples.options.rs
       quantization_mode: "Direct"
-    sample_file_paths:
+    audio_file_paths:
       - "./sample_1.wav"
       - "./sample_2.wav"
       - "./sample_3.wav"
@@ -263,13 +248,13 @@ chains:
       - "./sample_5.wav"
   # a second chain, with different source samples and settings
   - chain_name: chain_2
-    Octatrack_settings:
+    octatrack_settings:
       bpm: 200.0
-      gain: 36.0
+      gain: -12.0
       timestretch_mode: "Normal"
       loop_mode: "PingPong"
       quantization_mode: "PatternLength"
-    sample_file_paths:
+    audio_file_paths:
       - "./other_sample_1.wav"
       - "./other_sample_2.wav"
       - "./sample_1.wav"
@@ -282,23 +267,19 @@ Then run
 octatools-cli samples chain create-n ./chains.yaml
 ```
 
-### Example: Creating a "god-chain" with a YAML config
+There will be 4x files in the `./outdir` directory, and `.ot` and a `.wav` file 
+for each chain.
+
+#### Example: Creating a "god-chain" with a YAML config
 Let's say you have a bunch of favourite audio files that you usually use in a 
 project. You can create a YAML config for these samples like so
 ```yaml
 # YAML file written to `./godchain.yaml`
 global_settings:
-  normalize: false  # doesn't do anything at the moment
   out_dir_path: "./outdir" 
 chains:
   - chain_name: godchain
-    Octatrack_settings:
-      bpm: 120.0
-      gain: 24.0
-      timestretch_mode: "Off"
-      loop_mode: "Off"
-      quantization_mode: "Direct"
-    sample_file_paths:
+    audio_file_paths:
       - "./favourite_1.wav"
       - "./favourite_2.wav"
       - "./favourite_3.wav"
@@ -312,10 +293,10 @@ octatools-cli samples chain create-n ./godchain.yaml
 ```
 
 If you find some new favourite samples at a later date, you can add them to the 
-"godchain" by adding them to the end of the `sample_file_paths` section (example
+"godchain" by adding them to the end of the `audio_file_paths` section (example
 YAML shortened for brevity)
 ```yaml
-    sample_file_paths:
+    audio_file_paths:
       - "./favourite_1.wav"
       - "./favourite_2.wav"
       - "./favourite_3.wav"
@@ -339,13 +320,13 @@ in a project.
 Any time you find new samples you like, just add them to the same config and 
 regenerate the chain.
 
-**WARNING**: Always add additional samples to the END of the `sample_file_paths` 
+**WARNING**: Always add additional samples to the END of the `audio_file_paths` 
 YAML list. The order of the list determines the order of slices. Adding files to
 the start of the list will put your new samples at the start of your sample 
 chain, potentially meaning existing projects will no longer be using the correct 
 slices!
 
-### Example: Creating random/linear slice grids
+#### Example: Creating random/linear slice grids
 
 If you're like me, you like finding weird sounds within a much larger sample file 
 to use within your music. Weird transients that can be used as drum hits, or 
@@ -369,7 +350,7 @@ are the same length and equally spaced apart. In which case, you can use:
 octatools-cli samples grid linear <WAV_FILE_PATH> <N_SLICES>
 ```
 
-### Example: Deconstructing samples based on slices
+#### Example: Deconstructing samples based on slices
 Let's say you've been creating slices in a sample on the Octatrack.
 You found four or five sections of a long audio file that you really like.
 You'd like to extract just those slices and add them to a "god-chain" that 
@@ -386,7 +367,7 @@ The file names will be: `my_sample_0.wav`, `my_sample_1.wav`, etc.
 You can then add these files to an existing YAML config for your "god-chain" 
 and recreate the sample chain with your newly discovered slices.
 
-### Example: Converting data files to YAML/JSON
+#### Example: Converting data files to YAML/JSON
 Let's say you wanted to inspect all the settings and sample slots for a project
 without having to navigate through all the menus on the Octatrack
 
@@ -400,7 +381,7 @@ octatools-cli projects bin-to-human \
 This writes the `project.work` data file for a project to `./project.yaml`, 
 where you can now inspect all the settings for the project.
 
-### Example: Writing YAML/JSON files as new binary data files
+#### Example: Writing YAML/JSON files as new binary data files
 Maybe I want to I can edit some of the settings for the project in the above 
 example?
 
@@ -440,7 +421,7 @@ value). Check the comments and documentation in `octatools-lib` documentation to
 get an idea of appropriate values. This is also why I explicitly mentioned 
 creating a backup in this example!
 
-### Example: Creating default project data files
+#### Example: Creating default project data files
 Maybe I want to create a new Octatrack project, but I don't have access to my 
 machine, or my compact flash card?
 
@@ -477,7 +458,9 @@ used to keep track of state within the sample editing UI on the Octatrack
 currently untested behaviour. I'm just using it as an example to show what you can do with
 the `create-default` commands.
 
-### Work in Progress features (need more work / need to start work on)
+### Work in Progress features (need more work / need to start work on / need to emotionally let go of)
+- Copy parts from one project/bank to another
+- Copy patterns from one project/bank to another
 - Collect a project's sample files to the project directory
 - Collect a project's sample files to the set Audio Pool
 - Purge project directory of any sample files not present in sample slots
@@ -530,15 +513,18 @@ Python extension module for reading/writing of Octatrack binary data to/from
 YAML or JSON string data.
 
 ```python
+# python
 import json
 from pathlib import Path
-from octatrack_py import bank_file_to_json
+from octatools_py import bank_file_to_json
 
-bank_file_path: Path = Path("./PROJECT/bank01.work")
-json_str: str = bank_file_to_json(bank_file_path)
-json_converted: dict = json.loads(json_str)
+json_data: dict = json.loads(
+    bank_file_to_json(
+        Path("./PROJECT/bank01.work"),
+    ),
+)
 
-print(json_converted.keys())
+print(json_data.keys())
 # prints: dict_keys(['header_data', 'patterns', 'parts_unsaved', 'parts_saved', 'unknown', 'part_names', 'remainder'])
 ```
 

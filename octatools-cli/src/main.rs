@@ -32,10 +32,10 @@ use crate::actions::{
         list_project_sample_slots, purge_project_pool,
     },
     samples::{
-        create_default_ot_file_for_wav_file, create_default_ot_files_for_wav_files,
-        create_equally_sliced_sample, create_index_samples_dir_full,
-        create_index_samples_dir_simple, create_randomly_sliced_sample,
-        create_samplechain_from_pathbufs_only, create_samplechains_from_yaml,
+        batch_create_samplechains, create_default_ot_file_for_wav_file,
+        create_default_ot_files_for_wav_files, create_equally_sliced_sample,
+        create_index_samples_dir_full, create_index_samples_dir_simple,
+        create_randomly_sliced_sample, create_samplechains_from_yaml,
         deconstruct_samplechain_from_paths, deconstruct_samplechains_from_yaml, show_ot_file_bytes,
     },
 };
@@ -461,10 +461,13 @@ fn cmd_select_samples(x: cli::Samples) {
                 wav_file_paths,
             } => {
                 print_err(|| {
-                    create_samplechain_from_pathbufs_only(
+                    batch_create_samplechains(
                         &wav_file_paths,
                         &out_dir_path,
                         &chain_name,
+                        None, // no detailed options allowed from command line
+                        None,
+                        None,
                     )
                 });
             }
@@ -546,20 +549,20 @@ fn cmd_select_samples(x: cli::Samples) {
                 print_err(|| create_default_ot_files_for_wav_files(&paths));
             }
         },
-        cli::Samples::Search(y) => match y {
-            cli::SampleSearch::Simple {
-                samples_dir_path,
-                yaml_file_path,
-            } => {
-                print_err(|| create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path));
-            }
-            cli::SampleSearch::Full {
-                samples_dir_path,
-                yaml_file_path,
-            } => {
-                print_err(|| create_index_samples_dir_full(&samples_dir_path, &yaml_file_path));
-            }
-        },
+        // cli::Samples::Search(y) => match y {
+        //     cli::SampleSearch::Simple {
+        //         samples_dir_path,
+        //         yaml_file_path,
+        //     } => {
+        //         print_err(|| create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path));
+        //     }
+        //     cli::SampleSearch::Full {
+        //         samples_dir_path,
+        //         yaml_file_path,
+        //     } => {
+        //         print_err(|| create_index_samples_dir_full(&samples_dir_path, &yaml_file_path));
+        //     }
+        // },
     }
 }
 

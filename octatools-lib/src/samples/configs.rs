@@ -13,7 +13,8 @@ pub struct SampleTrimConfig {
     pub start: u32,
     /// End of full audio sample (n samples)
     pub end: u32,
-    /// Length of audio sample to play before stopping/looping playback (n samples)
+    /// Length of audio sample to play before stopping/looping playback
+    /// NOTE: This is measured in number of bars.
     pub length: u32,
 }
 
