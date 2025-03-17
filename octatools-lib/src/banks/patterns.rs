@@ -23,7 +23,7 @@ const PATTERN_HEADER: [u8; 8] = [0x50, 0x54, 0x52, 0x4e, 0x00, 0x00, 0x00, 0x00]
 const MIDI_TRACK_HEADER: [u8; 4] = [0x4d, 0x54, 0x52, 0x41];
 
 /// Header array for a MIDI track section in binary data files: `TRAC`
-const AUDIO_TRACK_HEADER: [u8; 4] = [54, 0x52, 0x41, 0x43];
+const AUDIO_TRACK_HEADER: [u8; 4] = [0x54, 0x52, 0x41, 0x43];
 
 /// Given a half-page trig bit mask, get an array of 8x boolean values
 /// indicating whether each trig in the half-page is active or not
