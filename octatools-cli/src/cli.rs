@@ -188,15 +188,18 @@ pub enum Banks {
         /// Directory path of the source project
         #[arg(value_hint = ValueHint::DirPath)]
         src_project_path: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        src_bank_id: usize,
         /// Directory path of the destination project
         #[arg(value_hint = ValueHint::DirPath)]
         dest_project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the source bank to copy
-        #[arg(value_hint = ValueHint::Other)]
-        src_bank_id: usize,
-        /// Number 1-16 (inclusive) of the bank location in the destination project
+        /// Number 1-16 (inclusive) of the destination bank
         #[arg(value_hint = ValueHint::DirPath)]
         dest_bank_id: usize,
+        /// Force overwrite previously modified destination banks (default behaviour is to exit)
+        #[clap(short = 'f', long, action)]
+        force: bool,
     },
 
     /// List sample slot usages within the given bank

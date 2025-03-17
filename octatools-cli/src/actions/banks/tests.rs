@@ -197,7 +197,7 @@ mod integration {
         ) {
             write_mock_data_files(paths, srcproj, srcbank, destproj);
 
-            let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+            let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
             // copy op was successful
             assert!(r.is_ok());
 
@@ -274,10 +274,7 @@ mod integration {
         #[test]
         // tests that everything works with a default bank -- there will be 'inactive' audio track
         // machine sample slots to handle
-        fn test_copy_bank_default_bank() {
-            #[cfg(target_os = "windows")]
-            let test_name = "copy2empty\\one_stat_act_pat".to_string();
-            #[cfg(not(target_os = "windows"))]
+        fn ok_copy_bank_default_bank() {
             let test_name = "default".to_string();
 
             let paths = mock_dirs(&test_name);
@@ -306,6 +303,54 @@ mod integration {
             );
 
             tear_down_dirs(&test_name);
+        }
+
+        #[test]
+        fn err_copy_to_non_default_without_force() {
+            let test_name = "copy-to-non-empty-fail-no-force".to_string();
+
+            let paths = mock_dirs(&test_name);
+
+            let srcproj = Project::default();
+            let destproj = Project::default();
+            let srcbank = Bank::default();
+            let mut valid_destbank = Bank::default();
+
+            valid_destbank.patterns[0].header[0] = 24;
+
+            write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
+            // hack -- default bank is written in write_mock_data_files
+            let _ = write_type_to_bin_file::<Bank>(&valid_destbank, &paths.outbank);
+
+            let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
+
+            assert!(r.is_err());
+            assert_eq!(
+                r.unwrap_err().to_string(),
+                CliBankErrors::NoForceFlagWithModifiedDestination.to_string()
+            );
+        }
+
+        #[test]
+        fn ok_copy_to_non_default_with_force() {
+            let test_name = "copy-to-non-empty-ok-forced".to_string();
+
+            let paths = mock_dirs(&test_name);
+
+            let srcproj = Project::default();
+            let destproj = Project::default();
+            let srcbank = Bank::default();
+            let mut valid_destbank = Bank::default();
+
+            valid_destbank.patterns[0].header[0] = 24;
+
+            write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
+            // hack -- default bank is written in write_mock_data_files
+            let _ = write_type_to_bin_file::<Bank>(&valid_destbank, &paths.outbank);
+
+            let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, true);
+
+            assert!(r.is_ok());
         }
 
         mod static_slots {
@@ -810,7 +855,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_err());
 
                 tear_down_dirs(&test_name);
@@ -869,7 +914,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_ok());
 
                 tear_down_dirs(&test_name);
@@ -929,7 +974,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_err());
 
                 tear_down_dirs(&test_name);
@@ -987,7 +1032,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 println!("r: {:?}", r);
                 assert!(r.is_ok());
 
@@ -1497,7 +1542,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_err());
 
                 tear_down_dirs(&test_name);
@@ -1555,7 +1600,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_ok());
 
                 tear_down_dirs(&test_name);
@@ -1615,7 +1660,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 assert!(r.is_err());
 
                 tear_down_dirs(&test_name);
@@ -1677,7 +1722,7 @@ mod integration {
 
                 write_mock_data_files(&paths, &srcproj, &srcbank, &destproj);
 
-                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1);
+                let r = copy_bank_by_paths(&paths.inproject, &paths.outproject, 1, 1, false);
                 println!("r: {:?}", r);
                 assert!(r.is_ok());
 

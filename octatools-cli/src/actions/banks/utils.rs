@@ -1,5 +1,6 @@
 use chrono;
 
+use crate::actions::banks::CliBankErrors;
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use octatools_lib::samples::options::{
@@ -359,7 +360,7 @@ fn find_last_empty_slot(slots: &[Slot], sample_type: &SlotType) -> RBoxErr<u8> {
         .filter(|x| !used_slot_ids.contains(x))
         .cloned()
         .next()
-        .ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots))
+        .ok_or(CliBankErrors::NoFreeSampleSlots.into())
 }
 
 /// Find a match for a given sample slot based only on the SETTINGS of the sample slot, i.e. do not
@@ -671,7 +672,7 @@ pub fn calculate_copy_bank_changes(
 
     if static_slot_inserts_count > free_static.len() || flex_slot_inserts_count > free_flex.len() {
         eprintln!("Not enough free samples slots in destination project!");
-        return Err(Box::new(OctatoolErrors::CliNoFreeSampleSlots));
+        return Err(CliBankErrors::NoFreeSampleSlots.into());
     }
 
     let inactive_slot_ops = bank_slot_refs
@@ -744,11 +745,11 @@ pub fn calculate_copy_bank_changes(
             let dest_slot_id = match src_slot.sample_type {
                 SlotType::Static => free_static
                     .pop()
-                    .ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots)),
+                    .ok_or(Box::new(CliBankErrors::NoFreeSampleSlots)),
                 SlotType::Flex => free_flex
                     .pop()
-                    .ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots)),
-                _ => Some(255).ok_or(Box::new(OctatoolErrors::CliNoFreeSampleSlots)),
+                    .ok_or(Box::new(CliBankErrors::NoFreeSampleSlots)),
+                _ => Some(255).ok_or(Box::new(CliBankErrors::NoFreeSampleSlots)),
             }
             .unwrap();
 

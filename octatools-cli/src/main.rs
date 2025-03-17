@@ -66,9 +66,6 @@ pub enum OctatoolErrors {
     CliInvalidPatternIndex,
     CliMissingPatternIndex,
     InvalidFilenameOrExtension,
-    CliInvalidBankIndex,
-    CliCopyNoSourceSlotAudioFileFound,
-    CliNoFreeSampleSlots,
     // not in use yet
     CliInvalidTrackIndex,
     Unknown,
@@ -100,18 +97,6 @@ impl std::fmt::Display for OctatoolErrors {
                 "Invalid pattern number(s) - only numbers between 1-16 (inclusive) can be provided"
             ),
             Self::InvalidFilenameOrExtension => write!(f, "path does not have a file extension"),
-            Self::CliInvalidBankIndex => write!(
-                f,
-                "Invalid bank number(s) - only numbers between 1-16 (inclusive) can be provided"
-            ),
-            Self::CliCopyNoSourceSlotAudioFileFound => write!(
-                f,
-                "Could not find an associated audio file for source project sample slot",
-            ),
-            Self::CliNoFreeSampleSlots => write!(
-                f,
-                "Not enough sample slots in the project!.",
-            ),
             // not in use yet
             Self::CliInvalidTrackIndex => write!(
                 f,
@@ -265,6 +250,7 @@ fn cmd_select_banks(x: cli::Banks) {
             dest_project_path,
             src_bank_id,
             dest_bank_id,
+            force,
         } => {
             print_err(|| {
                 copy_bank_by_paths(
@@ -272,6 +258,7 @@ fn cmd_select_banks(x: cli::Banks) {
                     &dest_project_path,
                     src_bank_id,
                     dest_bank_id,
+                    force,
                 )
             });
         }

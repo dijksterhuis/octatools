@@ -22,6 +22,34 @@ use utils::{
     BankCopyPathsMeta, BankMeta, BankSlotReferenceType, ProjectMeta,
 };
 
+#[derive(Debug)]
+pub enum CliBankErrors {
+    InvalidBankIndex,
+    NoSourceSlotAudioFileFound,
+    NoFreeSampleSlots,
+    NoForceFlagWithModifiedDestination,
+}
+impl std::fmt::Display for CliBankErrors {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::InvalidBankIndex => write!(
+                f,
+                "Invalid bank number(s) - only numbers between 1-16 (inclusive) can be provided"
+            ),
+            Self::NoSourceSlotAudioFileFound => write!(
+                f,
+                "Could not find an associated audio file for source project sample slot",
+            ),
+            Self::NoFreeSampleSlots => write!(f, "Not enough sample slots in the project!.",),
+            Self::NoForceFlagWithModifiedDestination => write!(
+                f,
+                "destination bank has been modified, but no force flag provided"
+            ),
+        }
+    }
+}
+impl std::error::Error for CliBankErrors {}
+
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
 pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usize>) -> RBoxErr<()> {
     let raw_bank = read_type_from_bin_file::<BankRawBytes>(path).expect("Could not read bank file");
@@ -58,9 +86,10 @@ pub fn copy_bank_by_paths(
     destination_project_dirpath: &Path,
     source_bank_number: usize,
     destination_bank_number: usize,
+    force: bool,
 ) -> RBoxErr<()> {
     if !(1..=16).contains(&source_bank_number) || !(1..=16).contains(&destination_bank_number) {
-        return Err(Box::new(OctatoolErrors::CliInvalidBankIndex));
+        return Err(Box::new(CliBankErrors::InvalidBankIndex));
     }
 
     let source_meta = BankCopyPathsMeta {
@@ -71,13 +100,18 @@ pub fn copy_bank_by_paths(
     println!("===================================================================================");
     println!("Loading data files ...");
 
-    let src_project = read_type_from_bin_file::<Project>(&source_meta.project.filepath)
-        .expect("Failed to read source project file.");
+    let src_project = read_type_from_bin_file::<Project>(&source_meta.project.filepath)?;
 
     let destination_meta = BankCopyPathsMeta {
         project: ProjectMeta::frompath(destination_project_dirpath),
         bank: BankMeta::frompath(destination_project_dirpath, destination_bank_number),
     };
+
+    let dest_bank = read_type_from_bin_file::<Bank>(&destination_meta.bank.filepath)?;
+
+    if dest_bank != Bank::default() && !force {
+        return Err(CliBankErrors::NoForceFlagWithModifiedDestination.into());
+    }
 
     // up-front check to make sure thee are no missing audio files, could be breakage if there are
     // missing files.
@@ -162,8 +196,7 @@ pub fn copy_bank_by_paths(
 ///
 /// All the caveats and details for the `copy_bank_by_paths` function still apply.
 pub fn batch_copy_banks(yaml_config_path: &Path) -> RBoxErr<()> {
-    let conf = yaml_file_to_type::<YamlCopyBankConfig>(yaml_config_path)
-        .expect("Could not load YAML configuration for batch bank transfers");
+    let conf = yaml_file_to_type::<YamlCopyBankConfig>(yaml_config_path)?;
 
     for x in conf.bank_copies {
         copy_bank_by_paths(
@@ -171,8 +204,8 @@ pub fn batch_copy_banks(yaml_config_path: &Path) -> RBoxErr<()> {
             &x.dest.project,
             x.src.bank_id,
             x.dest.bank_id,
-        )
-        .expect("Could not copy bank");
+            x.force.unwrap_or(false),
+        )?;
     }
 
     Ok(())

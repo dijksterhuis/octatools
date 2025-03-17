@@ -16,6 +16,7 @@ pub struct YamlCopyDetails {
 pub struct YamlCopyBankDetails {
     pub src: YamlCopyDetails,
     pub dest: YamlCopyDetails,
+    pub force: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
