@@ -18,7 +18,8 @@ binary data files.
   - [`octatools-py`](./README.md#octatools-py----the-python-module-)
 - [How to build packages](./README.md#how-to-build-packages)
 - [How to run tests](./README.md#how-to-run-tests)
-- [Credit](./README.md#how-to-run-tests)
+- [Credit](./README.md#credits)
+- [License](./README.md#license)
 
 # Warnings
 
@@ -47,8 +48,6 @@ binary data files.
 - Another Octachainer
 - Tested against multiple version of Octatrack OS (only 1.40B)
 - A GUI application with pretty buttons
-- Supported on macOS
-- Fully supported on windows (I'm trying my best with it)
 - Currently stable
 - Thoroughly tested for all possible edge cases
 - Expertly written
@@ -56,7 +55,8 @@ binary data files.
 
 # octatools is ...
 
-Multiple rust packages for doing 'stuff' with Octatrack binary data files ...
+Multiple rust binaries/crates for doing 'stuff' with Octatrack binary data files
+in different ways ...
 
 ## `octatools-cli` -- the CLI binary
 
@@ -612,3 +612,6 @@ Other rust based credits:
 - the [serde](https://serde.rs) framework made reverse engineering data files a lot easier, 
   `octatools-lib` probably wouldn't exist without serde.
 - same with [bincode](https://github.com/bincode-org/bincode) for reading the binary data
+
+# License
+The octatools project is licensed under the GNU GPL v3.0 license.
