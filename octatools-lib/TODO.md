@@ -3,11 +3,10 @@
   - `MidiTrackParameterLocks.unknown` --> space for sample locks? but no samples for MIDI.
   - `AudioTrackTrigs.unknown_1`
   - `AudioTrackTrigs.unknown_2`
-  - `AudioTrackTrigs.unknown_3` --> big 192 length block?!
-  - `MidiTrackTrigMasks.unknown` --> looks like trig mask, but no trig trypes remain?
+  - `AudioTrackTrigs.unknown_3` --> 64 length trigs block, not offset/count/conditionals
+  - `MidiTrackTrigMasks.unknown` --> looks like trig mask, but no trig types remain?
   - `MidiTrackTrigs.unknown_1`
   - `MidiTrackTrigs.unknown_2` --> no idea what this is, some kind of mask?
-  - `MidiTrackTrigs.unknown_3` --> big 128 length block?!
   - `Pattern.unknown`
   - `AudioTrackSceneParams.unknown_1` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)
   - `AudioTrackSceneParams.unknown_2` --> seems the underlying machine OS code re-uses the same data structure in several places (this looks like sample locks?)

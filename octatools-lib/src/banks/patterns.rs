@@ -7,8 +7,9 @@ use crate::{
         MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
     },
     projects::options::ProjectSampleSlotType,
-    DefaultsArray, DefaultsArrayBoxed,
+    DefaultsArray, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
 };
+use std::array::from_fn;
 
 use octatools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
 
@@ -431,6 +432,300 @@ impl Default for TrackPerTrackModeScale {
     }
 }
 
+/// Sample Slot options for Projects.
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone, Eq, Hash)]
+pub enum TrigCondition {
+    None,
+    /// > FILL is true (will activate the trig) when fill mode is active (see below).
+    Fill,
+    /// > ... true when FILL is not.
+    NotFill,
+    /// > PRE is true if the most recently evaluated trig condition on the same track was true.
+    Pre,
+    /// > ... true when PRE is not.
+    NotPre,
+    /// > true if the most recently evaluated trig condition on the neighbor track was true.
+    /// > The neighbor track is the track before the one being edited.
+    /// > For example, the neighbor track of track 4 is track 3. If no conditions exist on the
+    /// > neighbor track, the condition is false.
+    Nei,
+    /// > ... true when NEI is not.
+    NotNei,
+    /// > only true the first time the pattern play (when looped).
+    First,
+    /// > ... true when 1st is not.
+    NotFirst,
+    /// > probability condition. 1% chance of being true.
+    Percent1,
+    /// > probability condition. 2% chance of being true.
+    Percent2,
+    /// > probability condition. 4% chance of being true.
+    Percent4,
+    /// > probability condition. 6% chance of being true.
+    Percent6,
+    /// > probability condition. 9% chance of being true.
+    Percent9,
+    /// > probability condition. 13% chance of being true.
+    Percent13,
+    /// > probability condition. 19% chance of being true.
+    Percent19,
+    /// > probability condition. 25% chance of being true.
+    Percent25,
+    /// > probability condition. 33% chance of being true.
+    Percent33,
+    /// > probability condition. 41% chance of being true.
+    Percent41,
+    /// > probability condition. 50% chance of being true.
+    Percent50,
+    /// > probability condition. 59% chance of being true.
+    Percent59,
+    /// > probability condition. 67% chance of being true.
+    Percent67,
+    /// > probability condition. 75% chance of being true.
+    Percent75,
+    /// > probability condition. 81% chance of being true.
+    Percent81,
+    /// > probability condition. 87% chance of being true.
+    Percent87,
+    /// > probability condition. 91% chance of being true.
+    Percent91,
+    /// > probability condition. 94% chance of being true.
+    Percent94,
+    /// > probability condition. 96% chance of being true.
+    Percent96,
+    /// > probability condition. 98% chance of being true.
+    Percent98,
+    /// > probability condition. 99% chance of being true.
+    Percent99,
+    /// pattern loop 1 triggers, pattern loop 2 resets
+    PatternT1R2,
+    /// pattern loop 2 triggers, pattern loop 2 resets
+    PatternT2R2,
+    /// pattern loop 1 triggers, pattern loop 3 resets
+    PatternT1R3,
+    /// pattern loop 2 triggers, pattern loop 3 resets
+    PatternT2R3,
+    /// pattern loop 3 triggers, pattern loop 3 resets
+    PatternT3R3,
+    /// pattern loop 1 triggers, pattern loop 4 resets
+    PatternT1R4,
+    /// pattern loop 2 triggers, pattern loop 4 resets
+    PatternT2R4,
+    /// pattern loop 3 triggers, pattern loop 4 resets
+    PatternT3R4,
+    /// pattern loop 4 triggers, pattern loop 4 resets
+    PatternT4R4,
+    /// pattern loop 1 triggers, pattern loop 5 resets
+    PatternT1R5,
+    /// pattern loop 2 triggers, pattern loop 5 resets
+    PatternT2R5,
+    /// pattern loop 3 triggers, pattern loop 5 resets
+    PatternT3R5,
+    /// pattern loop 4 triggers, pattern loop 5 resets
+    PatternT4R5,
+    /// pattern loop 5 triggers, pattern loop 5 resets
+    PatternT5R5,
+    /// pattern loop 1 triggers, pattern loop 6 resets
+    PatternT1R6,
+    /// pattern loop 2 triggers, pattern loop 6 resets
+    PatternT2R6,
+    /// pattern loop 3 triggers, pattern loop 6 resets
+    PatternT3R6,
+    /// pattern loop 4 triggers, pattern loop 6 resets
+    PatternT4R6,
+    /// pattern loop 5 triggers, pattern loop 6 resets
+    PatternT5R6,
+    /// pattern loop 6 triggers, pattern loop 6 resets
+    PatternT6R6,
+    /// pattern loop 1 triggers, pattern loop 7 resets
+    PatternT1R7,
+    /// pattern loop 2 triggers, pattern loop 7 resets
+    PatternT2R7,
+    /// pattern loop 3 triggers, pattern loop 7 resets
+    PatternT3R7,
+    /// pattern loop 4 triggers, pattern loop 7 resets
+    PatternT4R7,
+    /// pattern loop 5 triggers, pattern loop 7 resets
+    PatternT5R7,
+    /// pattern loop 6 triggers, pattern loop 7 resets
+    PatternT6R7,
+    /// pattern loop 7 triggers, pattern loop 7 resets
+    PatternT7R7,
+    /// pattern loop 1 triggers, pattern loop 8 resets
+    PatternT1R8,
+    /// pattern loop 2 triggers, pattern loop 8 resets
+    PatternT2R8,
+    /// pattern loop 3 triggers, pattern loop 8 resets
+    PatternT3R8,
+    /// pattern loop 4 triggers, pattern loop 8 resets
+    PatternT4R8,
+    /// pattern loop 5 triggers, pattern loop 8 resets
+    PatternT5R8,
+    /// pattern loop 6 triggers, pattern loop 8 resets
+    PatternT6R8,
+    /// pattern loop 7 triggers, pattern loop 8 resets
+    PatternT7R8,
+    /// pattern loop 8 triggers, pattern loop 8 resets
+    PatternT8R8,
+}
+
+impl OptionEnumValueConvert for TrigCondition {
+    type T = TrigCondition;
+    type V = u8;
+
+    fn from_value(v: &Self::V) -> RBoxErr<Self::T> {
+        // read the essay for `AudioTrackTrigs.trig_timings_repeats_conditions`
+        // to understand why rem_euclid is used here
+        match v.rem_euclid(128) {
+            0 => Ok(TrigCondition::None),
+            1 => Ok(TrigCondition::Fill),
+            2 => Ok(TrigCondition::NotFill),
+            3 => Ok(TrigCondition::Pre),
+            4 => Ok(TrigCondition::NotPre),
+            5 => Ok(TrigCondition::Nei),
+            6 => Ok(TrigCondition::NotNei),
+            7 => Ok(TrigCondition::First),
+            8 => Ok(TrigCondition::NotFirst),
+            //
+            9 => Ok(TrigCondition::Percent1),
+            10 => Ok(TrigCondition::Percent2),
+            11 => Ok(TrigCondition::Percent4),
+            12 => Ok(TrigCondition::Percent6),
+            13 => Ok(TrigCondition::Percent9),
+            14 => Ok(TrigCondition::Percent13),
+            15 => Ok(TrigCondition::Percent19),
+            16 => Ok(TrigCondition::Percent25),
+            17 => Ok(TrigCondition::Percent33),
+            18 => Ok(TrigCondition::Percent41),
+            19 => Ok(TrigCondition::Percent50),
+            20 => Ok(TrigCondition::Percent59),
+            21 => Ok(TrigCondition::Percent67),
+            22 => Ok(TrigCondition::Percent75),
+            23 => Ok(TrigCondition::Percent81),
+            24 => Ok(TrigCondition::Percent87),
+            25 => Ok(TrigCondition::Percent91),
+            26 => Ok(TrigCondition::Percent94),
+            27 => Ok(TrigCondition::Percent96),
+            28 => Ok(TrigCondition::Percent98),
+            29 => Ok(TrigCondition::Percent99),
+            //
+            30 => Ok(TrigCondition::PatternT1R2),
+            31 => Ok(TrigCondition::PatternT2R2),
+            //
+            32 => Ok(TrigCondition::PatternT1R3),
+            33 => Ok(TrigCondition::PatternT2R3),
+            34 => Ok(TrigCondition::PatternT3R3),
+            //
+            35 => Ok(TrigCondition::PatternT1R4),
+            36 => Ok(TrigCondition::PatternT2R4),
+            37 => Ok(TrigCondition::PatternT3R4),
+            38 => Ok(TrigCondition::PatternT4R4),
+            //
+            39 => Ok(TrigCondition::PatternT1R5),
+            40 => Ok(TrigCondition::PatternT2R5),
+            41 => Ok(TrigCondition::PatternT3R5),
+            42 => Ok(TrigCondition::PatternT4R5),
+            43 => Ok(TrigCondition::PatternT5R5),
+            //
+            44 => Ok(TrigCondition::PatternT1R6),
+            45 => Ok(TrigCondition::PatternT2R6),
+            46 => Ok(TrigCondition::PatternT3R6),
+            47 => Ok(TrigCondition::PatternT4R6),
+            48 => Ok(TrigCondition::PatternT5R6),
+            49 => Ok(TrigCondition::PatternT6R6),
+            //
+            50 => Ok(TrigCondition::PatternT1R7),
+            51 => Ok(TrigCondition::PatternT2R7),
+            52 => Ok(TrigCondition::PatternT3R7),
+            53 => Ok(TrigCondition::PatternT4R7),
+            54 => Ok(TrigCondition::PatternT5R7),
+            55 => Ok(TrigCondition::PatternT6R7),
+            56 => Ok(TrigCondition::PatternT7R7),
+            //
+            57 => Ok(TrigCondition::PatternT1R8),
+            58 => Ok(TrigCondition::PatternT2R8),
+            59 => Ok(TrigCondition::PatternT3R8),
+            60 => Ok(TrigCondition::PatternT4R8),
+            61 => Ok(TrigCondition::PatternT5R8),
+            62 => Ok(TrigCondition::PatternT6R8),
+            63 => Ok(TrigCondition::PatternT7R8),
+            64 => Ok(TrigCondition::PatternT8R8),
+            //
+            _ => Err(SerdeOctatrackErrors::NoMatchingOptionEnumValue.into()),
+        }
+    }
+
+    fn value(&self) -> RBoxErr<Self::V> {
+        match self {
+            Self::None => Ok(0),
+            Self::Fill => Ok(0),
+            Self::NotFill => Ok(0),
+            Self::Pre => Ok(0),
+            Self::NotPre => Ok(0),
+            Self::Nei => Ok(0),
+            Self::NotNei => Ok(0),
+            Self::First => Ok(0),
+            Self::NotFirst => Ok(0),
+            Self::Percent1 => Ok(0),
+            Self::Percent2 => Ok(0),
+            Self::Percent4 => Ok(0),
+            Self::Percent6 => Ok(0),
+            Self::Percent9 => Ok(0),
+            Self::Percent13 => Ok(0),
+            Self::Percent19 => Ok(0),
+            Self::Percent25 => Ok(0),
+            Self::Percent33 => Ok(0),
+            Self::Percent41 => Ok(0),
+            Self::Percent50 => Ok(0),
+            Self::Percent59 => Ok(0),
+            Self::Percent67 => Ok(0),
+            Self::Percent75 => Ok(0),
+            Self::Percent81 => Ok(0),
+            Self::Percent87 => Ok(0),
+            Self::Percent91 => Ok(0),
+            Self::Percent94 => Ok(0),
+            Self::Percent96 => Ok(0),
+            Self::Percent98 => Ok(0),
+            Self::Percent99 => Ok(0),
+            Self::PatternT1R2 => Ok(0),
+            Self::PatternT2R2 => Ok(0),
+            Self::PatternT1R3 => Ok(0),
+            Self::PatternT2R3 => Ok(0),
+            Self::PatternT3R3 => Ok(0),
+            Self::PatternT1R4 => Ok(0),
+            Self::PatternT2R4 => Ok(0),
+            Self::PatternT3R4 => Ok(0),
+            Self::PatternT4R4 => Ok(0),
+            Self::PatternT1R5 => Ok(0),
+            Self::PatternT2R5 => Ok(0),
+            Self::PatternT3R5 => Ok(0),
+            Self::PatternT4R5 => Ok(0),
+            Self::PatternT5R5 => Ok(0),
+            Self::PatternT1R6 => Ok(0),
+            Self::PatternT2R6 => Ok(0),
+            Self::PatternT3R6 => Ok(0),
+            Self::PatternT4R6 => Ok(0),
+            Self::PatternT5R6 => Ok(0),
+            Self::PatternT6R6 => Ok(0),
+            Self::PatternT1R7 => Ok(0),
+            Self::PatternT2R7 => Ok(0),
+            Self::PatternT3R7 => Ok(0),
+            Self::PatternT4R7 => Ok(0),
+            Self::PatternT5R7 => Ok(0),
+            Self::PatternT6R7 => Ok(0),
+            Self::PatternT7R7 => Ok(0),
+            Self::PatternT1R8 => Ok(0),
+            Self::PatternT2R8 => Ok(0),
+            Self::PatternT3R8 => Ok(0),
+            Self::PatternT4R8 => Ok(0),
+            Self::PatternT5R8 => Ok(0),
+            Self::PatternT6R8 => Ok(0),
+            Self::PatternT7R8 => Ok(0),
+            Self::PatternT8R8 => Ok(0),
+        }
+    }
+}
+
 /// Track trigs assigned on an Audio Track within a Pattern
 #[derive(PartialEq, Debug, Serialize, Deserialize, Clone, DefaultsAsArray)]
 pub struct AudioTrackTrigs {
@@ -468,15 +763,156 @@ pub struct AudioTrackTrigs {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub plocks: Box<Array<AudioTrackParameterLocks, 64>>,
 
-    /// This will be micro-timings, trig repeats and conditional trig state. 64 length array for
-    /// each.
-    ///
-    /// Trig Repeats and Conditionals will likely step up in increments,
-    /// Micro-timings likely will be 255/0 for "none"; x < 127 is negative; x > 127 is positive.
-    ///
-    /// TODO: Not inspected data values yet.
+    /// What the hell is this field?!?!
+    /// It **has to** be something to do with trigs, but i have no idea what it could be.
     #[serde(with = "BigArray")]
-    pub unknown_3: [u8; 192],
+    pub unknown_3: [u8; 64],
+
+    /// Trig Offsets, Trig Counts and Trig Conditions
+    /// ====
+    /// This is ..... slightly frustrating.
+    ///
+    /// This 64 length array consisting of a pair of bytes for each array element hold three
+    /// data references... Trig Cunts and Trig Conditions use the two bytes independently,
+    /// so they're easier to explain first
+    ///
+    /// Trig Counts and Trig Conditions
+    /// ====
+    ///
+    /// Trig Counts and Trig Conditions data is interleaved for each trig.
+    /// For Trig position 1, array index 0 is the count value and array index 1 is the Trig
+    /// Condition.
+    ///
+    /// For trig counts (1st byte), the value (zero-indexed) is multiplied by 32.
+    /// - 8 trig counts (7 repeats) --> 7 * 3 = 224
+    /// - 4 trig counts (3 repeats) -- 3 * 32 = 96
+    /// - 1 trig counts (0 repeats) -- 0 * 32 = 0
+    ///
+    /// For conditionals, see the `TrigCondition` enum and associated traits for more details.
+    /// The maximum value for a Trig Condition byte is 64.
+    ///
+    /// ```rust
+    /// // no trig micro-timings at all
+    /// [
+    ///     // trig 1
+    ///     [
+    ///         0,   // trig counts (number)
+    ///         0,   // trig condition (enum rep)
+    ///     ],
+    ///     // trig 2
+    ///     [
+    ///         224, // trig counts (max value)
+    ///         64,  // trig condition (max value)
+    ///     ],
+    ///     // trig 3
+    ///     [
+    ///         32,  // trig counts (minimum non-zero value)
+    ///         1,   // trig condition (minimum non-zero value)
+    ///     ],
+    ///     // ... and so on
+    /// ];
+    /// ```
+    ///
+    /// Trig Offsets
+    /// ====
+    ///
+    /// Trig Offset values use both of these interleaved bytes on top of the
+    /// trig repeat and trig condition values... Which makes life more complex
+    /// and somewhat frustrating.
+    ///
+    /// Inspected values
+    /// - -23/384 -> 1st byte 20, 2nd byte 128
+    /// - -1/32 -> 1st byte 26, 2nd byte 0
+    /// - -1/64 -> 1st byte 29, 2nd byte 0
+    /// - -1/128 -> 1st byte 30, 2nd byte 128
+    /// - 1/128 -> 1st byte 1, 2nd byte 128
+    /// - 1/64 -> 1st byte 3, 2nd byte 0
+    /// - 1/32 -> 1st byte 6, 2nd byte 0
+    /// - 23/384 -> 1st byte 11, 2nd byte 128
+    ///
+    /// #### 1st byte
+    /// The 1st byte only has 31 possible values: 255 - 224 (trig count max) = 31.
+    /// So it makes sense sort of that this is a mask? I guess?
+    ///
+    /// #### 2nd byte
+    /// From what I can tell, the second offset byte is either 0 or 128.
+    /// So a 2nd byte for an offset adjusted trig with a `8:8` trig condition is either
+    /// - 128 + 64 = 192
+    /// - 0 + 64 = 64
+    ///
+    /// So you will need to a `x.rem_euclid(128)` somewhere if you want to parse this.
+    ///
+    /// Combining the trig offset with trig count and trig conditions, we end up with
+    /// ```rust
+    /// [
+    ///     // trig one, -23/384 offset with 1x trig count and None condition
+    ///     [
+    ///         20,  // 20 + (32 * 0)
+    ///         128, // 128 + 0
+    ///     ],
+    ///     // trig two, -23/384 offset with 2x trig count and Fill condition
+    ///     [
+    ///         52,  // 20 + (32 * 1)
+    ///         129, // 128 + 1
+    ///     ],
+    ///     // trig three, -23/384 offset with 3x trig count and Fill condition
+    ///     [
+    ///         84,  // 20 + (32 * 2)
+    ///         129, // 128 + 1
+    ///     ],
+    ///     // trig four, -23/384 offset with 3x trig count and NotFill condition
+    ///     [
+    ///         84,  // 20 + (32 * 2)
+    ///         130, // 128 + 2
+    ///     ],
+    ///     // trig five, +1/32 offset with 2x trig count and Fill condition
+    ///     [
+    ///         38,  // 6 + (32 * 1)
+    ///         1,   // 0 + 1
+    ///     ],
+    ///     // trig six, +1/32 offset with 3x trig count and Fill condition
+    ///     [
+    ///         70,  // 6 + (32 * 2)
+    ///         1,   // 0 + 1
+    ///     ],
+    ///     // trig seven, +1/32 offset with 3x trig count and NotFill condition
+    ///     [
+    ///         70,  // 6 + (32 * 2)
+    ///         2,   // 0 + 2
+    ///     ],
+    ///     // .... and so on
+    /// ];
+    /// ```
+    ///
+    /// #### Extending pages and offsets
+    ///
+    /// If you have a trig offset on Trig 1 with only one pattern page activated,
+    /// the trig offsets for Trig 1 are replicated over the relevant trig
+    /// positions for each first trig in the inactive pages in this array.
+    ///
+    /// So, for a 1/32 offset on trig 1 with only one page active, you get the
+    /// following values showing up in this array:
+    /// - pair of bytes at array index 15 -> 1/32
+    /// - pair of bytes at array index 31 -> 1/32
+    /// - pair of bytes at array index 47 -> 1/32
+    ///
+    /// This does not happen for offset values at any other trig position
+    /// (from what I can tell in my limited testing -- trig values 2-4 and 9-11
+    /// inclusive are not replicated in the same way).
+    ///
+    /// This 'replicating trig offset values over unused pages' behaviour does
+    /// not happen for trig counts. I haven't tested whether this applies to trig
+    /// conditions yet.
+    ///
+    /// It seems that this behaviour could be to make sure the octatack plays
+    /// correctly offset trigs when you extend a page live, i.e. when extending
+    /// a one-page pattern to a two-page pattern, if there is a negative offset
+    /// value there the octatrack will need to play the offset trig before the
+    /// first page has completed.
+    ///
+    /// Or it could be a bug :shrug:
+    #[serde(with = "BigArray")]
+    pub trig_offsets_repeats_conditions: [[u8; 2]; 64],
 }
 
 impl Default for AudioTrackTrigs {
@@ -493,12 +929,9 @@ impl Default for AudioTrackTrigs {
             unknown_3: [
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0,
             ],
+            trig_offsets_repeats_conditions: from_fn(|_| [0, 0]),
         }
     }
 }
@@ -600,15 +1033,9 @@ pub struct MidiTrackTrigs {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub plocks: Box<Array<MidiTrackParameterLocks, 64>>,
 
-    /// This will be micro-timings and conditional trig state. 64 length array for each (no trig
-    /// repeats for midi tracks IIRC).
-    ///
-    /// Conditionals will likely step up in increments,
-    /// Micro-timings likely will be 255/0 for "none"; x < 127 is negative; x > 127 is positive.
-    ///
-    /// TODO: Not inspected data values yet.
-    // note -- stack overflow if tring to use #[serde(with = "BigArray")]
-    pub unknown_3: Box<Array<u8, 128>>,
+    /// See the documentation for `AudioTrackTrigs` on how this field works.
+    #[serde(with = "BigArray")]
+    pub trig_offsets_repeats_conditions: [[u8; 2]; 64],
 }
 
 impl Default for MidiTrackTrigs {
@@ -622,7 +1049,7 @@ impl Default for MidiTrackTrigs {
             swing_amount: 0,
             pattern_settings: TrackPatternSettings::default(),
             plocks: MidiTrackParameterLocks::defaults(),
-            unknown_3: Box::new(Array([0; 128])),
+            trig_offsets_repeats_conditions: from_fn(|_| [0, 0]),
         }
     }
 }
