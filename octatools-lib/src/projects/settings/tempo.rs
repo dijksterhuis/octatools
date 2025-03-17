@@ -2,7 +2,7 @@
 //! **NOTE**: This tempo setting works independently to arrangement mode tempo.
 
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 use crate::projects::{parse_hashmap_string_value, parse_hashmap_string_value_bool, FromHashMap};
 

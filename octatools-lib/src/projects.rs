@@ -7,7 +7,7 @@ pub mod slots;
 pub mod states;
 
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error, fmt::Debug, str::FromStr};
+use std::{collections::HashMap, fmt::Debug, str::FromStr};
 
 use crate::{
     projects::{
