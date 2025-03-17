@@ -28,7 +28,7 @@ where
     Ok(v)
 }
 
-/// Custom Deserialize trait for `ArrangeBlock` struct data.
+/// Custom Deserialize trait for `ArrangementFile` struct data.
 /// Needs to be customised so we can force the correct number of bytes be passed to the Deserializer
 /// with `deserialize_tuple`, otherwise we end up with an `io::UnexpectedEof` error whenever we try
 /// to deserialize.
@@ -127,7 +127,7 @@ impl<'de> Deserialize<'de> for ArrangementFile {
                 })
             }
 
-            /// Human-readable deserialization for JSON/YAML etc. for ArrangementBlock type data.
+            /// Human-readable deserialization for JSON/YAML etc. for `ArrangementFile`.
             /// Uses the standard Serde custom struct deserialization pattern with Field enum
             /// deserialization.
             fn visit_map<V>(self, mut map: V) -> Result<Self::Value, V::Error>
@@ -241,7 +241,7 @@ impl<'de> Deserialize<'de> for ArrangementFile {
     }
 }
 
-/// Custom Deserialize trait for `ArrangeBlock` struct data.
+/// Custom Deserialize trait for `ArrangementBlock` struct data.
 /// Needs to be customised so we can handle any rows after `n_rows` being deserialized into
 /// `ArrangeRow::EmptyRow` variants.
 impl<'de> Deserialize<'de> for ArrangementBlock {
@@ -302,7 +302,7 @@ impl<'de> Deserialize<'de> for ArrangementBlock {
                 })
             }
 
-            /// Human-readable deserialization for JSON/YAML etc. for ArrangementBlock type data.
+            /// Human-readable deserialization for JSON/YAML etc. for `ArrangementBlock`.
             /// *Does not* uses the standard Serde custom struct deserialization pattern with Field
             /// enum deserialization. Field names are matched manually for now.
             fn visit_map<V>(self, mut map: V) -> Result<ArrangementBlock, V::Error>
