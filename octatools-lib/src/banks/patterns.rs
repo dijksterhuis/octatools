@@ -16,6 +16,12 @@ use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
+const ZEROED_32_LEN_BYTES_ARRAY: [u8; 32] = [
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+];
+
+const ZEROED_8_LEN_BYTES_ARRAY: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+
 const HALF_PAGE_TRIG_BITMASK_VALUES: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
 const PATTERN_HEADER: [u8; 8] = [0x50, 0x54, 0x52, 0x4e, 0x00, 0x00, 0x00, 0x00];
 
@@ -383,16 +389,13 @@ pub struct AudioTrackTrigMasks {
 impl Default for AudioTrackTrigMasks {
     fn default() -> Self {
         Self {
-            trigger: [0, 0, 0, 0, 0, 0, 0, 0],
-            trigless: [0, 0, 0, 0, 0, 0, 0, 0],
-            plock: [0, 0, 0, 0, 0, 0, 0, 0],
-            oneshot: [0, 0, 0, 0, 0, 0, 0, 0],
-            recorder: [
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0,
-            ],
+            trigger: ZEROED_8_LEN_BYTES_ARRAY,
+            trigless: ZEROED_8_LEN_BYTES_ARRAY,
+            plock: ZEROED_8_LEN_BYTES_ARRAY,
+            oneshot: ZEROED_8_LEN_BYTES_ARRAY,
+            recorder: ZEROED_32_LEN_BYTES_ARRAY,
             swing: [170, 170, 170, 170, 170, 170, 170, 170],
-            slide: [0, 0, 0, 0, 0, 0, 0, 0],
+            slide: ZEROED_8_LEN_BYTES_ARRAY,
         }
     }
 }
@@ -541,11 +544,11 @@ pub struct MidiTrackTrigMasks {
 impl Default for MidiTrackTrigMasks {
     fn default() -> Self {
         Self {
-            trigger: [0, 0, 0, 0, 0, 0, 0, 0],
-            trigless: [0, 0, 0, 0, 0, 0, 0, 0],
-            plock: [0, 0, 0, 0, 0, 0, 0, 0],
+            trigger: ZEROED_8_LEN_BYTES_ARRAY,
+            trigless: ZEROED_8_LEN_BYTES_ARRAY,
+            plock: ZEROED_8_LEN_BYTES_ARRAY,
             swing: [170, 170, 170, 170, 170, 170, 170, 170],
-            unknown: [0, 0, 0, 0, 0, 0, 0, 0],
+            unknown: ZEROED_8_LEN_BYTES_ARRAY,
         }
     }
 }
