@@ -69,6 +69,14 @@ they need examples created and loaded onto the Octatrack for IRL on-machine
 confirmation that they work; plus probably a bunch more automated test cases ...
 see [Help Wanted](./README.md#help-wanted).
 
+**WARNING**: Before using any of the binary data file actions -- make sure you 
+`SAVE PROJECT` in the octatrack project menu. Make sure there are both `.work` 
+and `.strd` files in your project directory. octatools does not create `.strd` 
+files for your projects (yet). If you make changes after only doing 
+`SYNC TO CARD` then you will not be able to restore your project's previous 
+state (`.work` files are the current state, `.strd` are the saved version which 
+are used in a reload operation).
+
 ### Examples
 - [Copying a bank to a project in the same set](./README.md#example-copying-a-bank-to-a-project-in-the-same-set)
 - [Copying a bank within the same project](./README.md#example-copying-a-bank-within-the-same-project)
@@ -91,8 +99,8 @@ Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the
 ```bash
 octatools-cli banks copy \
   ./path/to/SET/PROJECT_SOURCE \
-  ./path/to/SET/PROJECT_DEST \
   1 \ 
+  ./path/to/SET/PROJECT_DEST \
   16
 ```
 
@@ -100,12 +108,29 @@ The unsaved project/bank state should now be different when you load the project
 If you are happy with the changes, save the project and the bank with 
 `PROJECT MENU > PROJECT > SAVE`.
 
-If anything looks wrong, you should be able to use `PROJECT MENU > PROJECT > 
-RELOAD` to undo all changes. Failing that, there are backup files created you 
-can use to manually restore the project/bank. However, please be aware **sample 
-files cannot be un-copied/un-transferred**, see the warning below as it is 
-possible to have sample files be overwritten if you are not careful with file 
-names.
+If the destination bank is not empty -- i.e. you have modified it previously 
+-- then you will see this error:
+```txt
+ERROR: destination bank has been modified, but no force flag provided
+```
+
+If you are **absolutely sure** that you want to overwrite that bank, provide the 
+`--force` flag
+```bash
+octatools-cli banks copy \
+  ./path/to/SET/PROJECT_SOURCE \
+  1 \ 
+  ./path/to/SET/PROJECT_DEST \
+  16 \
+  --force
+```
+
+This operation is only performed on the `*.work` files. So if anything looks 
+wrong, you should be able to use `PROJECT MENU > PROJECT > RELOAD` to undo all 
+changes (untested!). Failing that, there are backup files created you can use to 
+manually restore the project/banks. However, please be aware **sample files 
+cannot be un-copied/un-transferred**, see the warning below as it is possible to
+have sample files be overwritten if you are not careful with file names.
 
 **WARNING 1**: sample files are copied to the new project based on the sample
 file names. You will encounter issues/breakage if you have sample files between
@@ -129,8 +154,8 @@ You can also use this command to copy existing banks within the same project
 ```bash
 octatools-cli banks copy \
   ./path/to/SET/PROJECT_SOURCE \ 
-  ./path/to/SET/PROJECT_SOURCE \
   1 \ 
+  ./path/to/SET/PROJECT_SOURCE \
   16
 ```
 
@@ -155,13 +180,14 @@ bank_copies:
     dest:
       project: "./path/to/SET/PROJECT_A"
       bank_id: 1
-  # copy the bank to another project
+  # copy the bank to another project, overwriting the destination bank
   - src:
       project: "./path/to/SET/PROJECT_SOURCE"
       bank_id: 1
     dest:
       project: "./path/to/SET/PROJECT_B"
       bank_id: 16
+    force: true
   # copy the bank within the same project
   - src:
       project: "./path/to/SET/PROJECT_SOURCE"
@@ -238,7 +264,7 @@ chains:
       loop_mode: "Off"
       # Quantization options: "Direct", "PatternLength", "OneStep", "TwoSteps",
       # "ThreeSteps", "FourSteps"  ...  etc. etc.
-      # For a complete list, see: ./octatools-lib/src/samples.options.rs
+      # For a complete list, see: ./octatools-lib/src/samples/options.rs
       quantization_mode: "Direct"
     audio_file_paths:
       - "./sample_1.wav"
@@ -266,8 +292,7 @@ Then run
 ```bash
 octatools-cli samples chain create-n ./chains.yaml
 ```
-
-There will be 4x files in the `./outdir` directory, and `.ot` and a `.wav` file 
+There will be 4x files in the `./outdir` directory, an `.ot` and a `.wav` file 
 for each chain.
 
 #### Example: Creating a "god-chain" with a YAML config
@@ -340,17 +365,16 @@ seeking business. Now I can just turn the SLICE knob and see what I get!
 ```bash
 octatools-cli samples grid random <WAV_FILE_PATH> <N_SLICES>
 ```
-**WARNING**: Unique sample file name conventions apply. If you want multiple 
-random grids then you need to make copies of the files with different names and 
-then run this command multiple times.
-
 Or maybe you want to create a slice grid which is linear, i.e. all the slices 
 are the same length and equally spaced apart. In which case, you can use:
 ```bash
 octatools-cli samples grid linear <WAV_FILE_PATH> <N_SLICES>
 ```
+**WARNING**: Unique sample file name conventions apply. If you want multiple
+random/linear grids then you need to make copies of the files with different 
+names and then run this command multiple times.
 
-#### Example: Deconstructing samples based on slices
+#### Example: Splitting samples based on slices
 Let's say you've been creating slices in a sample on the Octatrack.
 You found four or five sections of a long audio file that you really like.
 You'd like to extract just those slices and add them to a "god-chain" that 
@@ -362,7 +386,7 @@ You can create new WAV files from the slices of a sample file pair like so:
 octatools-cli samples chain deconstruct my_sample.ot my_sample.wav ./outdir
 ```
 This will extract the slices and write them as new files in `./outdir`.
-The file names will be: `my_sample_0.wav`, `my_sample_1.wav`, etc.
+The file names will be: `my_sample-0.wav`, `my_sample-1.wav`, etc.
 
 You can then add these files to an existing YAML config for your "god-chain" 
 and recreate the sample chain with your newly discovered slices.
@@ -452,11 +476,11 @@ arr02.work  arr04.work  arr06.work  arr08.work  bank02.work  bank04.work  bank06
 ```
 
 The only thing missing is a `markers.work` file ... which *seems* to only be 
-used to keep track of state within the sample editing UI on the Octatrack
+used to keep track of state within the sample editing UI on the Octatrack.
 
-**WARNING**: Creating a completely new project without a `markers.work`file is 
-currently untested behaviour. I'm just using it as an example to show what you can do with
-the `create-default` commands.
+**WARNING**: Creating a completely new project without a `markers.work` file is 
+currently untested behaviour. I'm just using it as an example to show what you 
+can do with the `create-default` commands.
 
 ### Work in Progress features (need more work / need to start work on / need to emotionally let go of)
 - Copy parts from one project/bank to another
@@ -482,8 +506,9 @@ the `create-default` commands.
 ## `octatools-lib` -- the read/write files library
 
 Library with functions for reading/writing Octatrack binary data.
-Most of this is just the [`serde` crate](https://serde.rs) with a bunch of function 
-definitions for doing different things.
+Most of this is just the [`serde`](https://serde.rs) and 
+[`bincode`](https://github.com/bincode-org/bincode) crates with a bunch of 
+function definitions for reading/writing different files or creating new types.
 
 ### Current Features (mostly working-ish)
 - Deserialize Octatrack data files into rust types
@@ -495,9 +520,9 @@ definitions for doing different things.
 
 ### Notes
 
-There are a small number of fields in data files which I haven't worked out what they do / 
-are used for yet. If anyone can help here then I would be very grateful 
-(see the list in [./octatools-lib/TODO.md](./octatools-lib/TODO.md)).
+There are a small number of fields in data files which I haven't worked out what 
+they do / are used for yet. If anyone can help here then I would be very 
+grateful (see the list in [./octatools-lib/TODO.md](./octatools-lib/TODO.md)).
 
 The JSON / YAML data structures are a bit ... weird. I have done my best to not 
 parse the underlying data into new structures, keeping it so that the library 
@@ -537,6 +562,9 @@ their own software. Rust has (fairly) stable bindings for Python provided by
 Might be useful for an application based on python HTTP APIs if someone is so 
 inclined -- read the file from your website into bytes, pass to `octatools_py`, 
 get the json for it etc. etc.
+
+I'm tempted to include some of the `octatools-cli` functions in this at some 
+point. But that's something I'll worry about much later.
 
 ### Current Features (mostly working-ish)
 - Deserialize all Octatrack data structures from binarized data
@@ -591,7 +619,7 @@ cargo install tarpaulin
 make cov
 ```
 
-The project is currently hanging around 50-60% test coverage. 
+The project is currently hanging around 70% test coverage. 
 
 # Credits
 
