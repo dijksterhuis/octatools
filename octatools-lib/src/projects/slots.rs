@@ -338,12 +338,12 @@ impl ProjectFromString for ProjectSampleSlot {
 
 impl ProjectToString for ProjectSampleSlot {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+    fn to_string(&self) -> RBoxErr<String> {
         // Recording buffers are actually stored as FLEX slots with
         // a slot ID > 128.
         let sample_type = match self.sample_type {
             ProjectSampleSlotType::Static | ProjectSampleSlotType::Flex => {
-                self.sample_type.value().unwrap()
+                self.sample_type.value()?
             }
             ProjectSampleSlotType::RecorderBuffer => "FLEX".to_string(),
         };
@@ -357,19 +357,13 @@ impl ProjectToString for ProjectSampleSlot {
         s.push_str("\r\n");
         s.push_str(format!("TRIM_BARSx100={}", self.trim_bars_x100).as_str());
         s.push_str("\r\n");
-        s.push_str(format!("TSMODE={}", self.timestrech_mode.value().unwrap()).as_str());
+        s.push_str(format!("TSMODE={}", self.timestrech_mode.value()?).as_str());
         s.push_str("\r\n");
-        s.push_str(format!("LOOPMODE={}", self.loop_mode.value().unwrap()).as_str());
+        s.push_str(format!("LOOPMODE={}", self.loop_mode.value()?).as_str());
         s.push_str("\r\n");
         s.push_str(format!("GAIN={}", self.gain + 48).as_str());
         s.push_str("\r\n");
-        s.push_str(
-            format!(
-                "TRIGQUANTIZATION={}",
-                self.trig_quantization_mode.value().unwrap()
-            )
-            .as_str(),
-        );
+        s.push_str(format!("TRIGQUANTIZATION={}", self.trig_quantization_mode.value()?).as_str());
         s.push_str("\r\n[/SAMPLE]");
 
         Ok(s)

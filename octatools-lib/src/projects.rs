@@ -29,7 +29,7 @@ trait FromHashMap {
     type T;
 
     /// Crete a new struct from a `HashMap`.
-    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>>;
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> RBoxErr<Self::T>;
 }
 
 /// Trait to use when a new struct can be created by reading a string.
@@ -38,13 +38,13 @@ trait ProjectFromString {
     type T;
 
     /// Crete a new struct by parsing a `String`.
-    fn from_string(data: &str) -> Result<Self::T, Box<dyn std::error::Error>>;
+    fn from_string(data: &str) -> RBoxErr<Self::T>;
 }
 
 /// Trait to use when a new struct can be created by reading a string.
 trait ProjectToString {
     /// Crete a new struct by parsing a `String`.
-    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>>;
+    fn to_string(&self) -> RBoxErr<String>;
 }
 
 /// Return the string value of a `HashMap<_, String>` parsed into specified type `T`
@@ -68,12 +68,59 @@ fn parse_hashmap_string_value_bool(
     hmap: &HashMap<String, String>,
     key: &str,
     default_str: Option<&str>,
-) -> Result<bool, Box<dyn std::error::Error>> {
+) -> RBoxErr<bool> {
     // NOTE: https://rust-lang.github.io/rust-clippy/master/index.html#match_like_matches_macro
     Ok(matches!(
         parse_hashmap_string_value::<u8>(hmap, key, default_str)?,
         1
     ))
+}
+
+/// Extract ASCII string project data for a specified section as a HashMap of k-v pairs.
+fn string_to_hashmap(
+    data: &str,
+    section: &ProjectRawFileSection,
+) -> RBoxErr<HashMap<String, String>> {
+    let start_idx: usize = data.find(&section.start_string()?).unwrap();
+    let start_idx_shifted: usize = start_idx + section.start_string()?.len();
+    let end_idx: usize = data.find(&section.end_string()?).unwrap();
+
+    let section: String = data[start_idx_shifted..end_idx].to_string();
+
+    let mut hmap: HashMap<String, String> = HashMap::new();
+    let mut trig_mode_midi_field_idx = 1;
+
+    for split_s in section.split("\r\n") {
+        // new line splits returns empty fields :/
+
+        if !split_s.is_empty() {
+            let key_pair_string = split_s.to_string();
+            let mut key_pair_split: Vec<&str> = key_pair_string.split('=').collect();
+
+            // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
+            // but the keys do not have audio track number indicators. i assume they're
+            // stored in order of the midi track number, and each subsequent one we
+            // read is the next track.
+            let key_renamed: String = format!("trig_mode_midi_track_{}", &trig_mode_midi_field_idx);
+            if key_pair_split[0] == "TRIG_MODE_MIDI" {
+                key_pair_split[0] = key_renamed.as_str();
+                trig_mode_midi_field_idx += 1;
+            }
+
+            hmap.insert(
+                key_pair_split[0].to_string().to_ascii_lowercase(),
+                key_pair_split[1].to_string(),
+            );
+        }
+    }
+
+    Ok(hmap)
+}
+
+fn sslots_vec_to_string(v: &[ProjectSampleSlot]) -> String {
+    let sslots_mapped: Vec<String> = v.iter().map(|x| x.to_string().unwrap()).collect();
+
+    sslots_mapped.join("\r\n\r\n")
 }
 
 /// ASCII data section headings within an Octatrack `project.*` file
@@ -117,53 +164,6 @@ impl ProjectRawFileSection {
     fn end_string(&self) -> RBoxErr<String> {
         Ok(format!("[/{}]", self.value()?))
     }
-}
-
-/// Extract ASCII string project data for a specified section as a HashMap of k-v pairs.
-fn string_to_hashmap(
-    data: &str,
-    section: &ProjectRawFileSection,
-) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
-    let start_idx: usize = data.find(&section.start_string()?).unwrap();
-    let start_idx_shifted: usize = start_idx + section.start_string()?.len();
-    let end_idx: usize = data.find(&section.end_string()?).unwrap();
-
-    let section: String = data[start_idx_shifted..end_idx].to_string();
-
-    let mut hmap: HashMap<String, String> = HashMap::new();
-    let mut trig_mode_midi_field_idx = 1;
-
-    for split_s in section.split("\r\n") {
-        // new line splits returns empty fields :/
-
-        if !split_s.is_empty() {
-            let key_pair_string = split_s.to_string();
-            let mut key_pair_split: Vec<&str> = key_pair_string.split('=').collect();
-
-            // there are 8x TRIG_MODE_MIDI key value pairs in project settings data
-            // but the keys do not have audio track number indicators. i assume they're
-            // stored in order of the midi track number, and each subsequent one we
-            // read is the next track.
-            let key_renamed: String = format!("trig_mode_midi_track_{}", &trig_mode_midi_field_idx);
-            if key_pair_split[0] == "TRIG_MODE_MIDI" {
-                key_pair_split[0] = key_renamed.as_str();
-                trig_mode_midi_field_idx += 1;
-            }
-
-            hmap.insert(
-                key_pair_split[0].to_string().to_ascii_lowercase(),
-                key_pair_split[1].to_string(),
-            );
-        }
-    }
-
-    Ok(hmap)
-}
-
-fn sslots_vec_to_string(v: &[ProjectSampleSlot]) -> String {
-    let sslots_mapped: Vec<String> = v.iter().map(|x| x.to_string().unwrap()).collect();
-
-    sslots_mapped.join("\r\n\r\n")
 }
 
 /// A parsed representation of an Octatrack Project file (`project.work` or `project.strd`).
@@ -229,7 +229,7 @@ impl Default for Project {
 
 impl ProjectToString for Project {
     /// Turn a Project struct into a String configuration, ready for writing to binary data files
-    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+    fn to_string(&self) -> RBoxErr<String> {
         let states_header =
             "############################\r\n# Project States\r\n############################"
                 .to_string();

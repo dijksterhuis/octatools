@@ -18,7 +18,7 @@ use trig_mode_midi_tracks::MidiTrackTrigModes;
 
 use serde::{Deserialize, Serialize};
 
-use crate::OptionEnumValueConvert;
+use crate::{OptionEnumValueConvert, RBoxErr};
 
 use crate::projects::{
     options::ProjectMidiChannels, parse_hashmap_string_value_bool, string_to_hashmap, FromHashMap,
@@ -217,7 +217,7 @@ impl ProjectFromString for ProjectSettings {
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
-    fn from_string(s: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_string(s: &str) -> RBoxErr<Self> {
         let hmap = string_to_hashmap(s, &ProjectRawFileSection::Settings)?;
 
         Ok(Self {
@@ -235,7 +235,7 @@ impl ProjectFromString for ProjectSettings {
 
 impl ProjectToString for ProjectSettings {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+    fn to_string(&self) -> RBoxErr<String> {
         let mut s = "".to_string();
         s.push_str("[SETTINGS]");
         s.push_str("\r\n");

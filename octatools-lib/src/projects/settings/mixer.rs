@@ -1,7 +1,7 @@
 //! Current settings for the Project Mixer
 
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 use crate::projects::{parse_hashmap_string_value, FromHashMap};
 
@@ -47,7 +47,7 @@ impl FromHashMap for MixerMenu {
     type B = String;
     type T = MixerMenu;
 
-    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> crate::RBoxErr<Self::T> {
         Ok(Self {
             gain_ab: parse_hashmap_string_value::<u8>(hmap, "gain_ab", None)?,
             gain_cd: parse_hashmap_string_value::<u8>(hmap, "gain_cd", None)?,

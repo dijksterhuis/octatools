@@ -1,6 +1,6 @@
 //! Current Trig mode setting for MIDI tracks.
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 use crate::projects::{parse_hashmap_string_value, FromHashMap};
 
@@ -43,7 +43,7 @@ impl FromHashMap for MidiTrackTrigModes {
     type B = String;
     type T = MidiTrackTrigModes;
 
-    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> crate::RBoxErr<Self::T> {
         Ok(Self {
             trig_mode_midi_track_1: parse_hashmap_string_value::<u8>(
                 hmap,

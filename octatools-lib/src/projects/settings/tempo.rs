@@ -26,7 +26,7 @@ impl FromHashMap for TempoMenu {
     type B = String;
     type T = TempoMenu;
 
-    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> Result<Self::T, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<Self::A, Self::B>) -> crate::RBoxErr<Self::T> {
         Ok(Self {
             tempo: parse_hashmap_string_value::<u32>(hmap, "tempox24", None)? / 24,
             pattern_tempo_enabled: parse_hashmap_string_value_bool(

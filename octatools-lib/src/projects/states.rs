@@ -1,6 +1,7 @@
 //! A project's related state, usually what lights will be shown on the box.
 //! e.g. the currently seleced pattern/bank/wehther either scene is muted, current muted tracks etc.
 
+use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 
 use crate::projects::{
@@ -87,7 +88,7 @@ impl ProjectFromString for ProjectStates {
     type T = Self;
 
     /// Load project 'state' data from the raw project ASCII file.
-    fn from_string(s: &str) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_string(s: &str) -> RBoxErr<Self> {
         let hmap = string_to_hashmap(s, &ProjectRawFileSection::States)?;
 
         Ok(Self {
@@ -120,7 +121,7 @@ impl ProjectFromString for ProjectStates {
 
 impl ProjectToString for ProjectStates {
     /// Extract `OctatrackProjectMetadata` fields from the project file's ASCII data
-    fn to_string(&self) -> Result<String, Box<dyn std::error::Error>> {
+    fn to_string(&self) -> RBoxErr<String> {
         let mut s = "".to_string();
         s.push_str("[STATES]\r\n");
         s.push_str(format!("BANK={}", self.bank).as_str());

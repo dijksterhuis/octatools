@@ -1,8 +1,8 @@
 //! Data structures for the Octatrack Project Settings 'Control Menu'.
 
+use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::error::Error;
 
 use crate::projects::{
     options::ProjectMidiChannels, parse_hashmap_string_value, parse_hashmap_string_value_bool,
@@ -42,7 +42,7 @@ impl FromHashMap for ControlMenu {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             audio: AudioControlPage::from_hashmap(hmap)?,
             input: InputControlPage::from_hashmap(hmap)?,
@@ -72,7 +72,7 @@ impl FromHashMap for MidiSubMenu {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             control: MidiControlMidiPage::from_hashmap(hmap)?,
             sync: MidiSyncMidiPage::from_hashmap(hmap)?,
@@ -101,7 +101,7 @@ impl FromHashMap for AudioControlPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             master_track: parse_hashmap_string_value_bool(hmap, "master_track", None)?,
             cue_studio_mode: parse_hashmap_string_value_bool(hmap, "cue_studio_mode", None)?,
@@ -131,7 +131,7 @@ impl FromHashMap for InputControlPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             gate_ab: parse_hashmap_string_value::<u8>(hmap, "gate_ab", None)?,
             gate_cd: parse_hashmap_string_value::<u8>(hmap, "gate_cd", None)?,
@@ -171,7 +171,7 @@ impl FromHashMap for SequencerControlPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             pattern_change_chain_behaviour: parse_hashmap_string_value::<u8>(
                 hmap,
@@ -229,7 +229,7 @@ impl FromHashMap for MemoryControlPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             load_24bit_flex: parse_hashmap_string_value_bool(hmap, "load_24bit_flex", None)?,
             dynamic_recorders: parse_hashmap_string_value_bool(hmap, "dynamic_recorders", None)?,
@@ -293,7 +293,7 @@ impl FromHashMap for MetronomeControlPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             metronome_time_signature: parse_hashmap_string_value::<u8>(
                 hmap,
@@ -372,7 +372,7 @@ impl FromHashMap for MidiControlMidiPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             midi_audio_track_cc_in: parse_hashmap_string_value_bool(
                 hmap,
@@ -455,7 +455,7 @@ impl FromHashMap for MidiSyncMidiPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             midi_clock_send: parse_hashmap_string_value_bool(hmap, "midi_clock_send", None)?,
             midi_clock_receive: parse_hashmap_string_value_bool(hmap, "midi_clock_receive", None)?,
@@ -544,7 +544,7 @@ impl FromHashMap for MidiChannelsMidiPage {
     type B = String;
     type T = Self;
 
-    fn from_hashmap(hmap: &HashMap<String, String>) -> Result<Self, Box<dyn Error>> {
+    fn from_hashmap(hmap: &HashMap<String, String>) -> RBoxErr<Self> {
         Ok(Self {
             midi_trig_ch1: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch1", None)?,
             midi_trig_ch2: parse_hashmap_string_value::<u8>(hmap, "midi_trig_ch2", None)?,
