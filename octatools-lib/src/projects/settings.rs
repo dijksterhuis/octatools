@@ -225,7 +225,7 @@ impl ProjectFromString for ProjectSettings {
             // Unknown: Whether MIDI 'Thru' is enabled/disabled?
             midi_soft_thru: parse_hashmap_string_value_bool(&hmap, "midi_soft_thru", None)?,
             //
-            control: ControlMenu::from_hashmap(&hmap).unwrap(),
+            control: ControlMenu::from_hashmap(&hmap)?,
             mixer: MixerMenu::from_hashmap(&hmap)?,
             tempo: TempoMenu::from_hashmap(&hmap)?,
             midi_tracks_trig_mode: MidiTrackTrigModes::from_hashmap(&hmap)?,
@@ -300,8 +300,7 @@ impl ProjectToString for ProjectSettings {
                     .midi
                     .sync
                     .midi_progchange_send_channel
-                    .value()
-                    .unwrap()
+                    .value()?
             )
             .as_str(),
         );
@@ -321,8 +320,7 @@ impl ProjectToString for ProjectSettings {
                     .midi
                     .sync
                     .midi_progchange_receive_channel
-                    .value()
-                    .unwrap()
+                    .value()?
             )
             .as_str(),
         );

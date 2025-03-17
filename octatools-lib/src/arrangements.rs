@@ -26,6 +26,7 @@ use crate::DefaultsArrayBoxed;
 use octatools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
+use std::array::from_fn;
 
 const ARRANGEMENT_FILE_HEADER: [u8; 22] = [
     70, 79, 82, 77, 0, 0, 0, 0, 68, 80, 83, 49, 65, 82, 82, 65, 0, 0, 0, 0, 0, 6,
@@ -89,12 +90,12 @@ impl Default for ArrangementFile {
     fn default() -> Self {
         Self {
             header: ARRANGEMENT_FILE_HEADER,
-            unk1: [0, 0],
+            unk1: from_fn(|_| 0),
             arrangement_state_current: ArrangementBlock::default(),
-            unk2: [0, 0],
+            unk2: from_fn(|_| 0),
             arrangement_state_previous: ArrangementBlock::default(),
-            arrangements_active_flag: [0, 0, 0, 0, 0, 0, 0, 0],
-            check_sum: [0, 0],
+            arrangements_active_flag: from_fn(|_| 0),
+            check_sum: from_fn(|_| 0),
         }
     }
 }
@@ -126,7 +127,7 @@ impl Default for ArrangementBlock {
     fn default() -> Self {
         Self {
             name: ARRANGEMENT_DEFAULT_NAME,
-            unknown_1: [0, 0],
+            unknown_1: from_fn(|_| 0),
             n_rows: 0,
             rows: ArrangeRow::defaults(),
         }

@@ -926,8 +926,8 @@ pub struct SceneXlvAssignments {
 impl Default for SceneXlvAssignments {
     fn default() -> Self {
         Self {
-            track_xlvs: [255, 255, 255, 255, 255, 255, 255, 255],
-            unknown: [255, 255],
+            track_xlvs: from_fn(|_| 255),
+            unknown: from_fn(|_| 255),
         }
     }
 }
@@ -1085,15 +1085,15 @@ impl Default for Part {
     fn default() -> Self {
         Self {
             header: PART_HEADER,
-            data_block_1: [0, 0, 0, 0, 0],
-            audio_track_fx1: [4, 4, 4, 4, 4, 4, 4, 4],
-            audio_track_fx2: [8, 8, 8, 8, 8, 8, 8, 8],
+            data_block_1: from_fn(|_| 0),
+            audio_track_fx1: from_fn(|_| 4),
+            audio_track_fx2: from_fn(|_| 8),
             active_scenes: ActiveScenes {
                 scene_a: 0,
                 scene_b: 0,
             },
             audio_track_volumes: AudioTrackVolume::defaults(),
-            audio_track_machine_types: [0, 0, 0, 0, 0, 0, 0, 0],
+            audio_track_machine_types: from_fn(|_| 0),
             audio_track_machine_params: AudioTrackMachinesParamsValues::defaults(),
             audio_track_params_values: AudioTrackParamsValues::defaults(),
             audio_track_machine_setup: AudioTrackMachinesParamsSetup::defaults(),
@@ -1108,9 +1108,7 @@ impl Default for Part {
             audio_tracks_custom_lfos_interpolation_masks: CustomLfoInterpolationMask::defaults(),
             midi_tracks_custom_lfos: CustomLfoDesign::defaults(),
             midi_tracks_custom_lfos_interpolation_masks: CustomLfoInterpolationMask::defaults(),
-            midi_tracks_arp_mute_masks: [
-                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-            ],
+            midi_tracks_arp_mute_masks: from_fn(|_| 255),
             midi_tracks_arp_seqs: MidiArpSequence::defaults(),
         }
     }

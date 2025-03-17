@@ -25,7 +25,6 @@ use utils::{
 #[derive(Debug)]
 pub enum CliBankErrors {
     InvalidBankIndex,
-    NoSourceSlotAudioFileFound,
     NoFreeSampleSlots,
     NoForceFlagWithModifiedDestination,
 }
@@ -35,10 +34,6 @@ impl std::fmt::Display for CliBankErrors {
             Self::InvalidBankIndex => write!(
                 f,
                 "Invalid bank number(s) - only numbers between 1-16 (inclusive) can be provided"
-            ),
-            Self::NoSourceSlotAudioFileFound => write!(
-                f,
-                "Could not find an associated audio file for source project sample slot",
             ),
             Self::NoFreeSampleSlots => write!(f, "Not enough sample slots in the project!.",),
             Self::NoForceFlagWithModifiedDestination => write!(
@@ -52,7 +47,7 @@ impl std::error::Error for CliBankErrors {}
 
 /// Show bytes output as u8 values for a Sample Attributes file located at `path`
 pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usize>) -> RBoxErr<()> {
-    let raw_bank = read_type_from_bin_file::<BankRawBytes>(path).expect("Could not read bank file");
+    let raw_bank = read_type_from_bin_file::<BankRawBytes>(path)?;
 
     let bytes = get_bytes_slice(raw_bank.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
@@ -93,8 +88,8 @@ pub fn copy_bank_by_paths(
     }
 
     let source_meta = BankCopyPathsMeta {
-        project: ProjectMeta::frompath(source_project_dirpath),
-        bank: BankMeta::frompath(source_project_dirpath, source_bank_number),
+        project: ProjectMeta::frompath(source_project_dirpath)?,
+        bank: BankMeta::frompath(source_project_dirpath, source_bank_number)?,
     };
 
     println!("===================================================================================");
@@ -103,8 +98,8 @@ pub fn copy_bank_by_paths(
     let src_project = read_type_from_bin_file::<Project>(&source_meta.project.filepath)?;
 
     let destination_meta = BankCopyPathsMeta {
-        project: ProjectMeta::frompath(destination_project_dirpath),
-        bank: BankMeta::frompath(destination_project_dirpath, destination_bank_number),
+        project: ProjectMeta::frompath(destination_project_dirpath)?,
+        bank: BankMeta::frompath(destination_project_dirpath, destination_bank_number)?,
     };
 
     let dest_bank = read_type_from_bin_file::<Bank>(&destination_meta.bank.filepath)?;
@@ -135,13 +130,10 @@ pub fn copy_bank_by_paths(
         return Err(Box::new(OctatoolErrors::PathDoesNotExist));
     }
 
-    create_backup_of_work_file(&destination_meta.project.filepath)
-        .expect("Failed to create destination project file backup.");
-    create_backup_of_work_file(&destination_meta.bank.filepath)
-        .expect("Failed to create destination bank file backup.");
+    create_backup_of_work_file(&destination_meta.project.filepath)?;
+    create_backup_of_work_file(&destination_meta.bank.filepath)?;
 
-    let dest_project = read_type_from_bin_file::<Project>(&destination_meta.project.filepath)
-        .expect("Failed to read destination project file.");
+    let dest_project = read_type_from_bin_file::<Project>(&destination_meta.project.filepath)?;
 
     let bank = read_type_from_bin_file::<Bank>(&source_meta.bank.filepath)?;
 
@@ -176,12 +168,10 @@ pub fn copy_bank_by_paths(
     )?;
 
     println!("Writing sample slot modifications to destination ...");
-    write_type_to_bin_file::<Project>(&new_project, &destination_meta.project.filepath)
-        .expect("Could not write modified project data to destination location.");
+    write_type_to_bin_file::<Project>(&new_project, &destination_meta.project.filepath)?;
 
     println!("Writing bank modifications to destination ...");
-    write_type_to_bin_file::<Bank>(&new_bank, &destination_meta.bank.filepath)
-        .expect("Could not write modified bank to destination location.");
+    write_type_to_bin_file::<Bank>(&new_bank, &destination_meta.bank.filepath)?;
 
     println!("===================================================================================");
     println!("Bank copy complete.");
@@ -232,10 +222,9 @@ pub fn list_bank_sample_slot_references(
         .to_path_buf()
         .join(get_bank_fname_from_id(bank_id));
 
-    let src_project =
-        read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+    let src_project = read_type_from_bin_file::<Project>(&project_fpath)?;
 
-    let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
+    let bank = read_type_from_bin_file::<Bank>(&bank_fpath)?;
 
     find_sample_slot_refs_in_bank(
         &get_zero_indexed_slots_from_one_indexed(&src_project.slots)?,
@@ -245,6 +234,7 @@ pub fn list_bank_sample_slot_references(
     .filter(|x| ignore_empty_slots != (x.reference_type == BankSlotReferenceType::Active))
     .sorted_by(|x, y| Ord::cmp(&x.slot_id, &y.slot_id))
     .map(|x| {
+        // TODO: option plain unwrap
         let path = if x.reference_type == BankSlotReferenceType::Active {
             Some(
                 &src_project

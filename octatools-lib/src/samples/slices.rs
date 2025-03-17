@@ -53,21 +53,20 @@ pub struct Slice {
     pub loop_start: u32,
 }
 
+const SLICE_LOOP_POINT_DEFAULT: u32 = 0xFFFFFFFF;
+
 impl Slice {
     pub fn new(trim_start: u32, trim_end: u32, loop_start: Option<u32>) -> RBoxErr<Self> {
         if trim_start > trim_end {
             return Err(SliceError::InvalidTrim.into());
         }
 
-        if loop_start.is_some() {
-            let lp = loop_start.unwrap();
-            if !(trim_start..trim_end).contains(&lp) {
-                return Err(SliceError::InvalidLoopPoint.into());
-            }
-        }
-
         // default is disabled
-        let loop_point = loop_start.unwrap_or(0xFFFFFFFF);
+        let loop_point = loop_start.unwrap_or(SLICE_LOOP_POINT_DEFAULT);
+
+        if loop_point != SLICE_LOOP_POINT_DEFAULT && !(trim_start..trim_end).contains(&loop_point) {
+            return Err(SliceError::InvalidLoopPoint.into());
+        }
 
         Ok(Self {
             trim_start,

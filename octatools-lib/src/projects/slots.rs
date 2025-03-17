@@ -205,7 +205,7 @@ fn parse_id(hmap: &HashMap<String, String>) -> RBoxErr<u8> {
         ));
     }
 
-    Ok(x.unwrap())
+    Ok(x?)
 }
 
 fn parse_trim_bars(hmap: &HashMap<String, String>) -> RBoxErr<u16> {
@@ -255,10 +255,12 @@ impl FromHashMap for ProjectSampleSlot {
         let sample_slot_type = if slot_id >= 129 {
             "RECORDER".to_string()
         } else {
+            // TODO: option plain unwrap
             hmap.get("type").unwrap().to_string()
         };
 
         let sample_type = ProjectSampleSlotType::from_value(&sample_slot_type)?;
+        // TODO: option plain unwrap
         let path = PathBuf::from_str(hmap.get("path").unwrap())?;
         let trim_bars = parse_trim_bars(hmap)?;
         let loop_mode = parse_loop_mode(hmap)?;
@@ -289,6 +291,7 @@ impl ProjectFromString for ProjectSampleSlot {
 
     /// Load project 'samples' data from the raw project ASCII file.
     fn from_string(data: &str) -> RBoxErr<Vec<Self>> {
+        // TODO: option plain unwrap
         let footer_stripped = data
             .strip_suffix("\r\n\r\n############################\r\n\r\n")
             .unwrap();
@@ -305,6 +308,7 @@ impl ProjectFromString for ProjectSampleSlot {
         let samples: Vec<Vec<Vec<&str>>> = samples_string
             .into_iter()
             .map(|sample: &str| {
+                // TODO: option plain unwraps
                 sample
                     .strip_prefix("\r\n\r\n[SAMPLE]\r\n")
                     .unwrap()

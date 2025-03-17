@@ -17,12 +17,6 @@ use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 
-const ZEROED_32_LEN_BYTES_ARRAY: [u8; 32] = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-];
-
-const ZEROED_8_LEN_BYTES_ARRAY: [u8; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
-
 const HALF_PAGE_TRIG_BITMASK_VALUES: [u8; 8] = [1, 2, 4, 8, 16, 32, 64, 128];
 const PATTERN_HEADER: [u8; 8] = [0x50, 0x54, 0x52, 0x4e, 0x00, 0x00, 0x00, 0x00];
 
@@ -390,13 +384,13 @@ pub struct AudioTrackTrigMasks {
 impl Default for AudioTrackTrigMasks {
     fn default() -> Self {
         Self {
-            trigger: ZEROED_8_LEN_BYTES_ARRAY,
-            trigless: ZEROED_8_LEN_BYTES_ARRAY,
-            plock: ZEROED_8_LEN_BYTES_ARRAY,
-            oneshot: ZEROED_8_LEN_BYTES_ARRAY,
-            recorder: ZEROED_32_LEN_BYTES_ARRAY,
-            swing: [170, 170, 170, 170, 170, 170, 170, 170],
-            slide: ZEROED_8_LEN_BYTES_ARRAY,
+            trigger: from_fn(|_| 0),
+            trigless: from_fn(|_| 0),
+            plock: from_fn(|_| 0),
+            oneshot: from_fn(|_| 0),
+            recorder: from_fn(|_| 0),
+            swing: from_fn(|_| 170),
+            slide: from_fn(|_| 0),
         }
     }
 }
@@ -919,7 +913,7 @@ impl Default for AudioTrackTrigs {
     fn default() -> Self {
         Self {
             header: AUDIO_TRACK_HEADER,
-            unknown_1: [0, 0, 0, 0, 0],
+            unknown_1: from_fn(|_| 0),
             trig_masks: AudioTrackTrigMasks::default(),
             scale_per_track_mode: TrackPerTrackModeScale::default(),
             swing_amount: 0,
@@ -973,11 +967,11 @@ pub struct MidiTrackTrigMasks {
 impl Default for MidiTrackTrigMasks {
     fn default() -> Self {
         Self {
-            trigger: ZEROED_8_LEN_BYTES_ARRAY,
-            trigless: ZEROED_8_LEN_BYTES_ARRAY,
-            plock: ZEROED_8_LEN_BYTES_ARRAY,
-            swing: [170, 170, 170, 170, 170, 170, 170, 170],
-            unknown: ZEROED_8_LEN_BYTES_ARRAY,
+            trigger: from_fn(|_| 0),
+            trigless: from_fn(|_| 0),
+            plock: from_fn(|_| 0),
+            swing: from_fn(|_| 170),
+            unknown: from_fn(|_| 0),
         }
     }
 }
@@ -1038,7 +1032,7 @@ impl Default for MidiTrackTrigs {
     fn default() -> Self {
         Self {
             header: MIDI_TRACK_HEADER,
-            unknown_1: [0, 0, 0, 0],
+            unknown_1: from_fn(|_| 0),
             unknown_2: 0,
             trig_masks: MidiTrackTrigMasks::default(),
             scale_per_track_mode: TrackPerTrackModeScale::default(),

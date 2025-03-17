@@ -7,6 +7,7 @@ use crate::{
     banks::{parts::Part, patterns::Pattern},
     DefaultsArrayBoxed,
 };
+use std::array::from_fn;
 
 use octatools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
@@ -75,9 +76,9 @@ impl Default for Bank {
             patterns: Pattern::defaults(),
             parts_unsaved: Part::defaults(),
             parts_saved: Part::defaults(),
-            unknown: [0, 0, 0, 0, 0],
+            unknown: from_fn(|_| 0),
             part_names: DEFAULT_PART_NAMES,
-            remainder: [0, 0],
+            remainder: from_fn(|_| 0),
         }
     }
 }

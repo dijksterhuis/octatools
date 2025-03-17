@@ -96,7 +96,7 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
 fn load_work_banks_for_project(project_dirpath: &Path) -> RBoxErr<Vec<Bank>> {
     let mut banks: Vec<Bank> = vec![];
     for bank_id in 1..=16 {
-        let bank_paths = BankMeta::frompath(project_dirpath, bank_id);
+        let bank_paths = BankMeta::frompath(project_dirpath, bank_id)?;
         create_backup_of_work_file(&bank_paths.filepath)?;
         banks.push(read_type_from_bin_file::<Bank>(&bank_paths.filepath)?)
     }
@@ -106,7 +106,7 @@ fn load_work_banks_for_project(project_dirpath: &Path) -> RBoxErr<Vec<Bank>> {
 /// Assumes `banks` ordering is the order in which to write the bank files
 fn write_work_banks_for_project(project_dirpath: &Path, banks: &[Bank]) -> RBoxErr<()> {
     for (bank_id, new_bank) in (1..=16).zip(banks) {
-        let bank_paths = BankMeta::frompath(project_dirpath, bank_id);
+        let bank_paths = BankMeta::frompath(project_dirpath, bank_id)?;
         write_type_to_bin_file::<Bank>(new_bank, &bank_paths.filepath)?;
     }
     Ok(())
@@ -125,7 +125,7 @@ fn write_work_banks_for_project(project_dirpath: &Path, banks: &[Bank]) -> RBoxE
 /// WARNING: Does not check whether sample files are unique based on content --
 /// requires end-users have been fastidious when naming their sample files.
 pub fn cmd_slots_deduplicate(project_dirpath: &Path) -> RBoxErr<()> {
-    let project_paths = ProjectMeta::frompath(project_dirpath);
+    let project_paths = ProjectMeta::frompath(project_dirpath)?;
     create_backup_of_work_file(&project_paths.filepath)?;
     let project = read_type_from_bin_file::<Project>(&project_paths.filepath)?;
     let banks = load_work_banks_for_project(project_dirpath)?;

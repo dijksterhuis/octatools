@@ -269,16 +269,11 @@ where
 /* NO TESTS BLOCK ENDS */
 /// Get a slice of a byte vector (`Vec<u8>`) -- mostly for reverse engineering utility purposes
 pub fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
-    let start: usize = match start_idx {
-        None => 0,
-        _ => start_idx.unwrap(),
-    };
-
-    let end: usize = match len {
+    let start = start_idx.unwrap_or(0);
+    let end = match len {
         None => data.len(),
         _ => len.unwrap() + start,
     };
-
     data[start..end].to_vec()
 }
 

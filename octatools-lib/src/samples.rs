@@ -191,7 +191,7 @@ impl SwapBytes for SampleAttributes {
         let mut bswapped_slices: [Slice; 64] = self.slices;
 
         for (i, slice) in self.slices.iter().enumerate() {
-            bswapped_slices[i] = slice.swap_bytes().unwrap();
+            bswapped_slices[i] = slice.swap_bytes()?;
         }
 
         let bswapped = Self {

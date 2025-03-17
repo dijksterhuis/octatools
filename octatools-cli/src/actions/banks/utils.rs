@@ -31,14 +31,13 @@ pub(crate) struct ProjectMeta {
 
 impl ProjectMeta {
     /// Load `ProjectMeta` data given a project directory path `PathBuf`
-    pub(crate) fn frompath(dirpath: &Path) -> Self {
-        let project_filepath = resolve_project_work_file_from_project_dirpath(dirpath)
-            .expect("Project file not found.");
+    pub(crate) fn frompath(dirpath: &Path) -> RBoxErr<Self> {
+        let project_filepath = resolve_project_work_file_from_project_dirpath(dirpath)?;
 
-        Self {
+        Ok(Self {
             dirpath: dirpath.to_path_buf(),
             filepath: project_filepath, // used later
-        }
+        })
     }
 }
 
@@ -49,11 +48,10 @@ pub(crate) struct BankMeta {
 
 impl BankMeta {
     /// Create a bank file from the project directory path and the bank's ID number (1-16 inclusive)
-    pub(crate) fn frompath(dirpath: &Path, bank_id: usize) -> Self {
-        let filepath = resolve_bank_work_file_from_project_dirpath(dirpath, bank_id)
-            .expect("Bank file not found.");
+    pub(crate) fn frompath(dirpath: &Path, bank_id: usize) -> RBoxErr<Self> {
+        let filepath = resolve_bank_work_file_from_project_dirpath(dirpath, bank_id)?;
 
-        Self { filepath }
+        Ok(Self { filepath })
     }
 }
 
@@ -569,11 +567,9 @@ pub fn calculate_copy_bank_changes(
 
     // this is so we can remap 'inactive' sample slot references somewhere safer
     let static_empty_slot =
-        find_last_empty_slot(&dest_zero_indexed_slots, &ProjectSampleSlotType::Flex)
-            .expect("No empty static sample slot in destination project.");
+        find_last_empty_slot(&dest_zero_indexed_slots, &ProjectSampleSlotType::Flex)?;
     let flex_empty_slot =
-        find_last_empty_slot(&dest_zero_indexed_slots, &ProjectSampleSlotType::Flex)
-            .expect("No empty flex sample slot in destination project.");
+        find_last_empty_slot(&dest_zero_indexed_slots, &ProjectSampleSlotType::Flex)?;
 
     println!(
         "Will use static/flex slots {:?}/{:?} for remapping inactive slot references.",
@@ -587,12 +583,10 @@ pub fn calculate_copy_bank_changes(
     };
 
     let mut free_static =
-        find_free_sample_slot_ids(&dest_zero_indexed_slots, ProjectSampleSlotType::Static)
-            .expect("Failed to find free static sample slots in destination project.");
+        find_free_sample_slot_ids(&dest_zero_indexed_slots, ProjectSampleSlotType::Static)?;
 
     let mut free_flex =
-        find_free_sample_slot_ids(&dest_zero_indexed_slots, ProjectSampleSlotType::Flex)
-            .expect("Failed to find free flex sample slots in destination project.");
+        find_free_sample_slot_ids(&dest_zero_indexed_slots, ProjectSampleSlotType::Flex)?;
 
     free_static.retain(|x| *x != reserved_slot_meta.static_slot);
     free_flex.retain(|x| *x != reserved_slot_meta.flex_slot);
@@ -610,8 +604,7 @@ pub fn calculate_copy_bank_changes(
     );
 
     let bank_slot_refs =
-        find_sample_slot_refs_in_bank(&deduped_src_zero_indexed_slots, &deduped_bank)
-            .expect("Failed to resolve sample slots usage within source bank data.");
+        find_sample_slot_refs_in_bank(&deduped_src_zero_indexed_slots, &deduped_bank)?;
 
     // the set of source slots where
     // - the slot can be mapped onto existing destination slots
@@ -848,9 +841,7 @@ pub(crate) fn transfer_sample_files(
         let src_path_audio_abs = &src_dirpath.to_path_buf().join(&transfer.from.path);
         let src_ot_filepath_abs = resolve_otfile_fpath_from_audio_fpath(src_path_audio_abs);
 
-        let dest_filename_and_ext = resolve_fname_and_fext_from_path(&transfer.to.path).expect(
-            "Failed to resolve file name and/or extension of audio file destination location.",
-        );
+        let dest_filename_and_ext = resolve_fname_and_fext_from_path(&transfer.to.path)?;
         let dest_path_audio_abs = dest_dirpath.join(dest_filename_and_ext);
         let dest_ot_filepath_abs = resolve_otfile_fpath_from_audio_fpath(&dest_path_audio_abs);
 
@@ -868,8 +859,7 @@ pub(crate) fn transfer_sample_files(
                 "Transferring audio file: {:?} -> {:?}",
                 src_path_audio_abs, dest_path_audio_abs
             );
-            std::fs::copy(src_path_audio_abs, dest_path_audio_abs)
-                .expect("Failed to copy audio file from source to destination.");
+            std::fs::copy(src_path_audio_abs, dest_path_audio_abs)?;
         }
 
         println!(
@@ -883,8 +873,7 @@ pub(crate) fn transfer_sample_files(
                 "Transferring OT file: {:?} -> {:?}",
                 src_ot_filepath_abs, dest_ot_filepath_abs
             );
-            std::fs::copy(src_ot_filepath_abs, dest_ot_filepath_abs)
-                .expect("Failed to copy OT file from source to destination.");
+            std::fs::copy(src_ot_filepath_abs, dest_ot_filepath_abs)?;
         } else {
             println!(
                 "OT file doesn't exist in source, skipping copy: {:?}",

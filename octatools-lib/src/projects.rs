@@ -199,6 +199,7 @@ impl Project {
             .find_position(|x| x.slot_id == *old_slot_id && x.sample_type == type_filt);
 
         // there are samples assigned to slots
+        // TODO: option plain unwrap
         if sample_slot_find.is_some() {
             println!("Found matchin slot id");
             let mut sample_slot = sample_slot_find.clone().unwrap().1;
