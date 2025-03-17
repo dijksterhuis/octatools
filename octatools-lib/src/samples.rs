@@ -16,14 +16,6 @@ use octatools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
 use serde_big_array::BigArray;
 
-/// Raw header bytes in an Octatrack `.ot` metadata settings file (Header always equates to: `FORM....DPS1SMPA`)
-pub const HEADER_BYTES: [u8; 16] = [
-    0x46, 0x4F, 0x52, 0x4D, 0x00, 0x00, 0x00, 0x00, 0x44, 0x50, 0x53, 0x31, 0x53, 0x4D, 0x50, 0x41,
-];
-
-/// Raw bytes written after the header in an Octatrack `.ot` metadata settings file.
-pub const UNKNOWN_BYTES: [u8; 7] = [0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00];
-
 // in `hexdump -C` format:
 // ```
 // FORM....DPS1SMPA
@@ -63,10 +55,61 @@ impl std::fmt::Display for SampleAttributeErrors {
 }
 impl std::error::Error for SampleAttributeErrors {}
 
+/// Convert from a human (device UI) representation of gain (-24.0 <= x <= 24.0)
+/// to binary data file representation of gain (0 <= x <= 96).
+/// Note that binary gain uses two bytes (hence u16).
+fn bin_gain_from_human(human_gain: &f32) -> RBoxErr<u16> {
+    // don't use contains range trick here. need to explicitly check range bounds.
+    #[allow(clippy::manual_range_contains)]
+    if human_gain < &-24.0 || human_gain > &24.0 {
+        Err(SampleAttributeErrors::GainOutOfBounds.into())
+    } else {
+        let new_gain_f32 = (2.0 * (10.0 * (human_gain + 24.0)).round()) * 0.1;
+        Ok(new_gain_f32 as u16)
+    }
+}
+
+/// Convert from a human (device UI) representation of tempo (30.0 <= x <= 300.0)
+/// to binary data file representation of gain (720 <= x <= 7200)
+/// Note that binary tempo uses four bytes (hence u32).
+fn bin_tempo_from_human(human_tempo: &f32) -> RBoxErr<u32> {
+    // don't use contains range trick here. need to explicitly check range bounds.
+    #[allow(clippy::manual_range_contains)]
+    if human_tempo < &30.0 || human_tempo > &300.0 {
+        Err(SampleAttributeErrors::TempoOutOfBounds.into())
+    } else {
+        let bin_tempo_f32 = human_tempo * 24.0;
+        Ok(bin_tempo_f32 as u32)
+    }
+}
+
+/// The checksum value on sample attributes files is two bytes and is just the
+/// sum of all non-checksum u8 bytes.
+fn calculate_checksum_sample_attr_bytes(bytes: &[u8]) -> RBoxErr<u16> {
+    // should always be 832 bytes
+    let checksum_bytes = &bytes[16..bytes.len() - 2];
+
+    /*
+    the checksum value for the samples attributes file is the sum of all
+    bytes, excluding header and checksum bytes, stored as a u16 (two last bytes
+    in the binary file).
+
+    however, the checksum can overflow beyond u16. in that case, the checksum
+    is `x modulo U16::MAX` (wrap around on the type).
+    */
+
+    let chk: u32 = checksum_bytes
+        .iter()
+        .map(|x| *x as u32)
+        .sum::<u32>()
+        .rem_euclid(u16::MAX as u32 + 1);
+
+    Ok(chk as u16)
+}
+
 /// Struct to create a valid Octatrack `.ot` file.
 /// General metadata for the sample's configuration on the OT
 /// and the slice array with pointer positions for the sliced WAV.
-
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
 pub struct SampleAttributes {
     /// Header
@@ -172,34 +215,6 @@ impl SwapBytes for SampleAttributes {
     }
 }
 
-/// Convert from a human (device UI) representation of gain (-24.0 <= x <= 24.0)
-/// to binary data file representation of gain (0 <= x <= 96).
-/// Note that binary gain uses two bytes (hence u16).
-fn bin_gain_from_human(human_gain: &f32) -> RBoxErr<u16> {
-    // don't use contains range trick here. need to explicitly check range bounds.
-    #[allow(clippy::manual_range_contains)]
-    if human_gain < &-24.0 || human_gain > &24.0 {
-        Err(SampleAttributeErrors::GainOutOfBounds.into())
-    } else {
-        let new_gain_f32 = (2.0 * (10.0 * (human_gain + 24.0)).round()) * 0.1;
-        Ok(new_gain_f32 as u16)
-    }
-}
-
-/// Convert from a human (device UI) representation of tempo (30.0 <= x <= 300.0)
-/// to binary data file representation of gain (720 <= x <= 7200)
-/// Note that binary tempo uses four bytes (hence u32).
-fn bin_tempo_from_human(human_tempo: &f32) -> RBoxErr<u32> {
-    // don't use contains range trick here. need to explicitly check range bounds.
-    #[allow(clippy::manual_range_contains)]
-    if human_tempo < &30.0 || human_tempo > &300.0 {
-        Err(SampleAttributeErrors::TempoOutOfBounds.into())
-    } else {
-        let bin_tempo_f32 = human_tempo * 24.0;
-        Ok(bin_tempo_f32 as u32)
-    }
-}
-
 impl SampleAttributes {
     pub fn new(
         tempo: &f32,
@@ -245,30 +260,6 @@ impl Decode for SampleAttributes {
 
         Ok(bswapd)
     }
-}
-
-/// The checksum value on sample attributes files is two bytes and is just the
-/// sum of all non-checksum u8 bytes.
-fn calculate_checksum_sample_attr_bytes(bytes: &[u8]) -> RBoxErr<u16> {
-    // should always be 832 bytes
-    let checksum_bytes = &bytes[16..bytes.len() - 2];
-
-    /*
-    the checksum value for the samples attributes file is the sum of all
-    bytes, excluding header and checksum bytes, stored as a u16 (two last bytes
-    in the binary file).
-
-    however, the checksum can overflow beyond u16. in that case, the checksum
-    is `x modulo U16::MAX` (wrap around on the type).
-    */
-
-    let chk: u32 = checksum_bytes
-        .iter()
-        .map(|x| *x as u32)
-        .sum::<u32>()
-        .rem_euclid(u16::MAX as u32 + 1);
-
-    Ok(chk as u16)
 }
 
 // For sample data, need swap bytes depending on endianness and calculate a checksum
