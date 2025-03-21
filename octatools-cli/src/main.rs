@@ -20,23 +20,17 @@ use crate::actions::{
     banks::{
         batch_copy_banks, copy_bank_by_paths, list_bank_sample_slot_references, show_bank_bytes,
     },
-    drive::create_file_index_yaml,
-    parts::{
-        list_saved_part_sample_slot_references, list_unsaved_part_sample_slot_references,
-        show_saved_parts, show_unsaved_parts,
-    },
-    patterns::{list_pattern_sample_slot_references, show_pattern},
+    parts::{list_saved_part_sample_slot_references, list_unsaved_part_sample_slot_references},
+    patterns::list_pattern_sample_slot_references,
     projects::slots::cmd_slots_deduplicate,
     projects::{
         consolidate_sample_slots_to_audio_pool, consolidate_sample_slots_to_project_pool,
-        list_project_sample_slots, purge_project_pool,
+        list_project_sample_slots, purge_project_pool, show_project_bytes,
     },
     samples::{
-        batch_create_samplechains, create_default_ot_file_for_wav_file,
-        create_default_ot_files_for_wav_files, create_equally_sliced_sample,
-        create_index_samples_dir_full, create_index_samples_dir_simple,
-        create_randomly_sliced_sample, create_samplechains_from_yaml,
-        deconstruct_samplechain_from_paths, deconstruct_samplechains_from_yaml, show_ot_file_bytes,
+        batch_create_samplechains, create_equally_sliced_sample, create_randomly_sliced_sample,
+        create_samplechains_from_yaml, deconstruct_samplechain_from_paths,
+        deconstruct_samplechains_from_yaml, show_ot_file_bytes,
     },
 };
 use cli::{Cli, Commands};
@@ -61,6 +55,8 @@ pub enum OctatoolErrors {
     PathIsNotADirectory,
     PathIsNotAFile,
     PathIsNotASet,
+    // it's a clap thang
+    CreateDefaultSampleAttrUseOtherCommand,
     CliInvalidPartIndex,
     CliMissingPartIndex,
     CliInvalidPatternIndex,
@@ -79,6 +75,10 @@ impl std::fmt::Display for OctatoolErrors {
             Self::PathIsNotASet => write!(
                 f,
                 "path is not an Octatrack set directory (no 'AUDIO' subdirectory found)"
+            ),
+            Self::CreateDefaultSampleAttrUseOtherCommand => write!(
+                f,
+                "`create-default` not implemented for sample attributes files, use `octatools-cli samples-files new` instead"
             ),
             Self::CliMissingPartIndex => write!(
                 f,
@@ -160,192 +160,319 @@ where
 }
 
 #[doc(hidden)]
-fn cmd_select_arrangements(x: cli::Arrangements) {
+fn cmd_select_binfiles(x: cli::BinFiles) {
     match x {
-        cli::Arrangements::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| octatools_lib::show_type::<ArrangementFile>(&bin_path, None));
-        }
-        cli::Arrangements::InspectBytes(cli::InspectBytes {
+        cli::BinFiles::Inspect { bin_type, bin_path } => match bin_type {
+            cli::BinTypes::Arrangement => {
+                print_err(|| octatools_lib::show_type::<ArrangementFile>(&bin_path, None));
+            }
+            cli::BinTypes::Bank => {
+                print_err(|| octatools_lib::show_type::<Bank>(&bin_path, None));
+            }
+            cli::BinTypes::Project => {
+                print_err(|| octatools_lib::show_type::<Project>(&bin_path, None));
+            }
+            cli::BinTypes::SampleAttributes => {
+                print_err(|| octatools_lib::show_type::<SampleAttributes>(&bin_path, None));
+            }
+        },
+        cli::BinFiles::InspectBytes {
+            bin_type,
             bin_path,
             start,
             len,
-        }) => {
-            print_err(|| show_arrangement_bytes(&bin_path, &start, &len));
+        } => match bin_type {
+            cli::BinTypes::Arrangement => {
+                print_err(|| show_arrangement_bytes(&bin_path, &start, &len));
+            }
+            cli::BinTypes::Bank => {
+                print_err(|| show_bank_bytes(&bin_path, &start, &len));
+            }
+            cli::BinTypes::Project => {
+                print_err(|| show_project_bytes(&bin_path, &start, &len));
+            }
+            cli::BinTypes::SampleAttributes => {
+                print_err(|| show_ot_file_bytes(&bin_path, &start, &len));
+            }
+        },
+        cli::BinFiles::CreateDefault { bin_type, bin_path } => {
+            match bin_type {
+                cli::BinTypes::Arrangement => {
+                    print_err(|| {
+                        octatools_lib::default_type_to_bin_file::<ArrangementFile>(&bin_path)
+                    });
+                }
+                cli::BinTypes::Bank => {
+                    print_err(|| octatools_lib::default_type_to_bin_file::<Bank>(&bin_path));
+                }
+                cli::BinTypes::Project => {
+                    print_err(|| octatools_lib::default_type_to_bin_file::<Project>(&bin_path));
+                }
+                cli::BinTypes::SampleAttributes => {
+                    // it's a clap thang
+                    print_err(|| {
+                        let e: RBoxErr<()> =
+                            Err(OctatoolErrors::CreateDefaultSampleAttrUseOtherCommand.into());
+                        e
+                    });
+                }
+            }
         }
-        cli::Arrangements::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| octatools_lib::default_type_to_bin_file::<ArrangementFile>(&path));
-        }
-        cli::Arrangements::BinToHuman(cli::BinToHuman {
+        cli::BinFiles::BinToHuman {
+            bin_type,
             bin_path,
             dest_type,
             dest_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<ArrangementFile>(
-                    ConvertFromTo::BinToHuman,
-                    dest_type,
-                    dest_path,
-                    bin_path,
-                )
-            });
-        }
-        cli::Arrangements::HumanToBin(cli::HumanToBin {
+        } => match bin_type {
+            cli::BinTypes::Arrangement => {
+                print_err(|| {
+                    convert_from_to::<ArrangementFile>(
+                        ConvertFromTo::HumanToBin,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Bank => {
+                print_err(|| {
+                    convert_from_to::<Bank>(
+                        ConvertFromTo::HumanToBin,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Project => {
+                print_err(|| {
+                    convert_from_to::<Project>(
+                        ConvertFromTo::HumanToBin,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::SampleAttributes => {
+                print_err(|| {
+                    convert_from_to::<SampleAttributes>(
+                        ConvertFromTo::HumanToBin,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+        },
+        cli::BinFiles::HumanToBin {
             source_type,
             source_path,
+            bin_type,
             bin_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<ArrangementFile>(
-                    ConvertFromTo::HumanToBin,
-                    source_type,
-                    source_path,
-                    bin_path,
-                )
-            });
-        }
+        } => match bin_type {
+            cli::BinTypes::Arrangement => {
+                print_err(|| {
+                    convert_from_to::<ArrangementFile>(
+                        ConvertFromTo::BinToHuman,
+                        source_type,
+                        source_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Bank => {
+                print_err(|| {
+                    convert_from_to::<Bank>(
+                        ConvertFromTo::BinToHuman,
+                        source_type,
+                        source_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Project => {
+                print_err(|| {
+                    convert_from_to::<Project>(
+                        ConvertFromTo::BinToHuman,
+                        source_type,
+                        source_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::SampleAttributes => {
+                print_err(|| {
+                    convert_from_to::<SampleAttributes>(
+                        ConvertFromTo::BinToHuman,
+                        source_type,
+                        source_path,
+                        bin_path,
+                    )
+                });
+            }
+        },
     }
 }
 
 #[doc(hidden)]
-fn cmd_select_banks(x: cli::Banks) {
+fn cmd_select_copying(x: cli::Copying) {
     match x {
-        cli::Banks::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| octatools_lib::show_type::<Bank>(&bin_path, None));
-        }
-        cli::Banks::InspectBytes(cli::InspectBytes {
-            bin_path,
-            start,
-            len,
-        }) => {
-            print_err(|| show_bank_bytes(&bin_path, &start, &len));
-        }
-        cli::Banks::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| octatools_lib::default_type_to_bin_file::<Bank>(&path));
-        }
-        cli::Banks::BinToHuman(cli::BinToHuman {
-            bin_path,
-            dest_type,
-            dest_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<Bank>(ConvertFromTo::BinToHuman, dest_type, dest_path, bin_path)
-            });
-        }
-        cli::Banks::HumanToBin(cli::HumanToBin {
-            source_type,
-            source_path,
-            bin_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<Bank>(
-                    ConvertFromTo::HumanToBin,
-                    source_type,
-                    source_path,
-                    bin_path,
-                )
-            });
-        }
-        cli::Banks::Copy {
-            src_project_path,
-            dest_project_path,
+        cli::Copying::Bank {
+            src_project_dirpath,
+            dest_project_dirpath,
             src_bank_id,
             dest_bank_id,
             force,
+            // TODO
+            // _no_reassign_slots,
         } => {
             print_err(|| {
                 copy_bank_by_paths(
-                    &src_project_path,
-                    &dest_project_path,
+                    &src_project_dirpath,
+                    &dest_project_dirpath,
                     src_bank_id,
                     dest_bank_id,
                     force,
                 )
             });
         }
-        cli::Banks::ListSlotUsage {
-            project_path,
-            bank_id,
-            list_opts,
-        } => {
-            print_err(|| {
-                let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
-                list_bank_sample_slot_references(&project_path, bank_id, exclude_empty)
-            });
-        }
-        cli::Banks::CopyN { yaml_file_path } => {
+        cli::Copying::BankYaml { yaml_file_path } => {
             print_err(|| batch_copy_banks(&yaml_file_path));
         }
     }
 }
 
 #[doc(hidden)]
-fn cmd_select_drive(x: cli::Drive) {
+#[allow(dead_code)] // coming back to it later
+fn cmd_select_project(x: cli::ProjectSamples) {
     match x {
-        cli::Drive::Scan {
-            cfcard_dir_path,
-            yaml_file_path,
+        cli::ProjectSamples::Purge { project_dirpath } => {
+            print_err(|| purge_project_pool(&project_dirpath));
+        }
+        cli::ProjectSamples::Consolidate { project_dirpath } => {
+            print_err(|| consolidate_sample_slots_to_project_pool(&project_dirpath));
+        }
+        cli::ProjectSamples::Centralise { project_dirpath } => {
+            print_err(|| consolidate_sample_slots_to_audio_pool(&project_dirpath));
+        }
+        cli::ProjectSamples::Deduplicate { project_dirpath } => {
+            print_err(|| cmd_slots_deduplicate(&project_dirpath));
+        }
+    }
+}
+
+#[doc(hidden)]
+fn cmd_select_samples(x: cli::SampleFiles) {
+    match x {
+        cli::SampleFiles::Chain {
+            chain_name,
+            out_dir_path,
+            wav_file_paths,
         } => {
-            print_err(|| create_file_index_yaml(&cfcard_dir_path, &yaml_file_path));
+            print_err(|| {
+                batch_create_samplechains(
+                    &wav_file_paths,
+                    &out_dir_path,
+                    &chain_name,
+                    None, // no detailed options allowed from command line
+                    None,
+                    None,
+                )
+            });
         }
+        cli::SampleFiles::ChainYaml { yaml_file_path } => {
+            print_err(|| create_samplechains_from_yaml(&yaml_file_path));
+        }
+        cli::SampleFiles::SplitSlices {
+            ot_file_path,
+            audio_file_path,
+            out_dir_path,
+        } => {
+            let _ =
+                deconstruct_samplechain_from_paths(&audio_file_path, &ot_file_path, &out_dir_path);
+        }
+        cli::SampleFiles::SplitSlicesYaml { yaml_file_path } => {
+            print_err(|| deconstruct_samplechains_from_yaml(&yaml_file_path));
+        }
+        cli::SampleFiles::GridRandom {
+            wav_file_path,
+            n_slices,
+        } => {
+            print_err(|| create_randomly_sliced_sample(&wav_file_path, n_slices));
+        }
+        cli::SampleFiles::GridLinear {
+            wav_file_path,
+            n_slices,
+        } => {
+            print_err(|| create_equally_sliced_sample(&wav_file_path, n_slices));
+        } // cli::Samples::Search(y) => match y {
+          //     cli::SampleSearch::Simple {
+          //         samples_dir_path,
+          //         yaml_file_path,
+          //     } => {
+          //         print_err(|| create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path));
+          //     }
+          //     cli::SampleSearch::Full {
+          //         samples_dir_path,
+          //         yaml_file_path,
+          //     } => {
+          //         print_err(|| create_index_samples_dir_full(&samples_dir_path, &yaml_file_path));
+          //     }
+          // },
     }
 }
 
 #[doc(hidden)]
-fn cmd_select_parts(x: cli::Parts) {
+fn cmd_select_list_slots(x: cli::ListSampleSlotUsage) {
     match x {
-        cli::Parts::Saved(y) => match y {
-            cli::PartsCmd::Inspect { bin_path, index } => {
-                print_err(|| show_saved_parts(&bin_path, index));
-            }
-            cli::PartsCmd::ListSlotUsage {
-                project_path,
-                bank_id,
-                part_id,
-                list_opts,
-            } => {
-                print_err(|| {
-                    let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
-                    list_saved_part_sample_slot_references(
-                        &project_path,
-                        bank_id,
-                        part_id,
-                        exclude_empty,
-                    )
-                });
-            }
-        },
-        cli::Parts::Unsaved(y) => match y {
-            cli::PartsCmd::Inspect { bin_path, index } => {
-                print_err(|| show_unsaved_parts(&bin_path, index));
-            }
-            cli::PartsCmd::ListSlotUsage {
-                project_path,
-                bank_id,
-                part_id,
-                list_opts,
-            } => {
-                print_err(|| {
-                    let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
-                    list_unsaved_part_sample_slot_references(
-                        &project_path,
-                        bank_id,
-                        part_id,
-                        exclude_empty,
-                    )
-                });
-            }
-        },
-    }
-}
-
-#[doc(hidden)]
-fn cmd_select_patterns(x: cli::Patterns) {
-    match x {
-        cli::Patterns::Inspect { bin_path, index } => {
-            print_err(|| show_pattern(&bin_path, &index[..]));
+        cli::ListSampleSlotUsage::Project { project_dirpath } => {
+            print_err(|| list_project_sample_slots(&project_dirpath));
         }
-        cli::Patterns::ListSlotUsage {
-            project_path,
+        cli::ListSampleSlotUsage::Bank {
+            project_dirpath,
+            bank_id,
+            list_opts,
+        } => {
+            print_err(|| {
+                let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                list_bank_sample_slot_references(&project_dirpath, bank_id, exclude_empty)
+            });
+        }
+        cli::ListSampleSlotUsage::Part {
+            project_dirpath,
+            bank_id,
+            part_id,
+            part_state,
+            list_opts,
+        } => {
+            match part_state {
+                cli::PartStateOpts::Saved => {
+                    print_err(|| {
+                        let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                        list_saved_part_sample_slot_references(
+                            &project_dirpath,
+                            bank_id,
+                            part_id,
+                            exclude_empty,
+                        )
+                    });
+                }
+                cli::PartStateOpts::Unsaved => {
+                    print_err(|| {
+                        let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
+                        list_unsaved_part_sample_slot_references(
+                            &project_dirpath,
+                            bank_id,
+                            part_id,
+                            exclude_empty,
+                        )
+                    });
+                }
+            };
+        }
+        cli::ListSampleSlotUsage::Pattern {
+            project_dirpath,
             bank_id,
             pattern_id,
             list_opts,
@@ -353,203 +480,13 @@ fn cmd_select_patterns(x: cli::Patterns) {
             print_err(|| {
                 let cli::ListSlotUsageOpts { exclude_empty } = list_opts;
                 list_pattern_sample_slot_references(
-                    &project_path,
+                    &project_dirpath,
                     bank_id,
                     pattern_id,
                     exclude_empty,
                 )
             });
         }
-    }
-}
-
-#[doc(hidden)]
-fn cmd_select_project(x: cli::Projects) {
-    match x {
-        cli::Projects::Inspect(cli::Inspect { bin_path }) => {
-            print_err(|| octatools_lib::show_type::<Project>(&bin_path, None));
-        }
-        cli::Projects::CreateDefault(cli::CreateDefault { path }) => {
-            print_err(|| octatools_lib::default_type_to_bin_file::<Project>(&path));
-        }
-        cli::Projects::Settings(y) => match y {
-            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
-                unimplemented!();
-            }
-        },
-        cli::Projects::Metadata(y) => match y {
-            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
-                unimplemented!();
-            }
-        },
-        cli::Projects::State(y) => match y {
-            cli::ProjectData::Inspect(cli::Inspect { bin_path: _ }) => {
-                unimplemented!();
-            }
-        },
-        cli::Projects::SampleSlots(y) => match y {
-            cli::SampleSlots::Inspect(cli::Inspect { bin_path: _ }) => {
-                unimplemented!();
-            }
-            cli::SampleSlots::List { path } => {
-                print_err(|| list_project_sample_slots(&path));
-            }
-            cli::SampleSlots::Purge { path } => {
-                print_err(|| purge_project_pool(&path));
-            }
-            cli::SampleSlots::Consolidate { path } => {
-                print_err(|| consolidate_sample_slots_to_project_pool(&path));
-            }
-            cli::SampleSlots::Centralise { path } => {
-                print_err(|| consolidate_sample_slots_to_audio_pool(&path));
-            }
-            cli::SampleSlots::Deduplicate { project_dirpath } => {
-                print_err(|| cmd_slots_deduplicate(&project_dirpath));
-            }
-        },
-        cli::Projects::BinToHuman(cli::BinToHuman {
-            bin_path,
-            dest_type,
-            dest_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<Project>(
-                    ConvertFromTo::BinToHuman,
-                    dest_type,
-                    dest_path,
-                    bin_path,
-                )
-            });
-        }
-        cli::Projects::HumanToBin(cli::HumanToBin {
-            source_type,
-            source_path,
-            bin_path,
-        }) => {
-            print_err(|| {
-                convert_from_to::<Project>(
-                    ConvertFromTo::HumanToBin,
-                    source_type,
-                    source_path,
-                    bin_path,
-                )
-            });
-        }
-    }
-}
-
-#[doc(hidden)]
-fn cmd_select_samples(x: cli::Samples) {
-    match x {
-        cli::Samples::Chain(y) => match y {
-            cli::SampleChains::Create {
-                chain_name,
-                out_dir_path,
-                wav_file_paths,
-            } => {
-                print_err(|| {
-                    batch_create_samplechains(
-                        &wav_file_paths,
-                        &out_dir_path,
-                        &chain_name,
-                        None, // no detailed options allowed from command line
-                        None,
-                        None,
-                    )
-                });
-            }
-            cli::SampleChains::CreateN { yaml_file_path } => {
-                print_err(|| create_samplechains_from_yaml(&yaml_file_path));
-            }
-            cli::SampleChains::Deconstruct {
-                ot_file_path,
-                audio_file_path,
-                out_dir_path,
-            } => {
-                let _ = deconstruct_samplechain_from_paths(
-                    &audio_file_path,
-                    &ot_file_path,
-                    &out_dir_path,
-                );
-            }
-            cli::SampleChains::DeconstructN { yaml_file_path } => {
-                print_err(|| deconstruct_samplechains_from_yaml(&yaml_file_path));
-            }
-        },
-        cli::Samples::Grid(y) => match y {
-            cli::SampleSliceGrid::Random {
-                wav_file_path,
-                n_slices,
-            } => {
-                print_err(|| create_randomly_sliced_sample(&wav_file_path, n_slices));
-            }
-            cli::SampleSliceGrid::Linear {
-                wav_file_path,
-                n_slices,
-            } => {
-                print_err(|| create_equally_sliced_sample(&wav_file_path, n_slices));
-            }
-        },
-        cli::Samples::Otfile(y) => match y {
-            cli::Otfile::Inspect(cli::Inspect { bin_path }) => {
-                print_err(|| octatools_lib::show_type::<SampleAttributes>(&bin_path, None));
-            }
-            cli::Otfile::InspectBytes(cli::InspectBytes {
-                bin_path,
-                start,
-                len,
-            }) => {
-                print_err(|| show_ot_file_bytes(&bin_path, &start, &len));
-            }
-            cli::Otfile::BinToHuman(cli::BinToHuman {
-                bin_path,
-                dest_type,
-                dest_path,
-            }) => {
-                print_err(|| {
-                    convert_from_to::<SampleAttributes>(
-                        ConvertFromTo::BinToHuman,
-                        dest_type,
-                        dest_path,
-                        bin_path,
-                    )
-                });
-            }
-            cli::Otfile::HumanToBin(cli::HumanToBin {
-                source_type,
-                source_path,
-                bin_path,
-            }) => {
-                print_err(|| {
-                    convert_from_to::<SampleAttributes>(
-                        ConvertFromTo::HumanToBin,
-                        source_type,
-                        source_path,
-                        bin_path,
-                    )
-                });
-            }
-            cli::Otfile::CreateDefault(cli::CreateDefault { path }) => {
-                print_err(|| create_default_ot_file_for_wav_file(&path));
-            }
-            cli::Otfile::CreateDefaultN { paths } => {
-                print_err(|| create_default_ot_files_for_wav_files(&paths));
-            }
-        },
-        // cli::Samples::Search(y) => match y {
-        //     cli::SampleSearch::Simple {
-        //         samples_dir_path,
-        //         yaml_file_path,
-        //     } => {
-        //         print_err(|| create_index_samples_dir_simple(&samples_dir_path, &yaml_file_path));
-        //     }
-        //     cli::SampleSearch::Full {
-        //         samples_dir_path,
-        //         yaml_file_path,
-        //     } => {
-        //         print_err(|| create_index_samples_dir_full(&samples_dir_path, &yaml_file_path));
-        //     }
-        // },
     }
 }
 
@@ -653,13 +590,11 @@ fn main() {
     logger.target(Target::Stdout).init();
 
     match Cli::parse().command {
-        Commands::Arrangements(x) => cmd_select_arrangements(x),
-        Commands::Banks(x) => cmd_select_banks(x),
-        Commands::Drive(x) => cmd_select_drive(x),
-        Commands::Patterns(x) => cmd_select_patterns(x),
-        Commands::Parts(x) => cmd_select_parts(x),
-        Commands::Projects(x) => cmd_select_project(x),
-        Commands::Samples(x) => cmd_select_samples(x),
+        Commands::BinFiles(x) => cmd_select_binfiles(x),
+        Commands::Copying(x) => cmd_select_copying(x),
+        Commands::ListSlots(x) => cmd_select_list_slots(x),
+        Commands::SampleFiles(x) => cmd_select_samples(x),
+        // Commands::ProjectSamples(x) => cmd_select_project(x),
         Commands::ShellCompletion(x) => cmd_shell_completions(x),
         Commands::HelpFull => cmd_help_full(),
     };

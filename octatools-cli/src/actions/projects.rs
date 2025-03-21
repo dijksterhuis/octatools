@@ -4,6 +4,7 @@ use crate::audio::utils::scan_dir_path_for_audio_files;
 use crate::RBoxErr;
 
 use octatools_lib::{
+    get_bytes_slice,
     projects::{slots::ProjectSampleSlot, Project},
     read_type_from_bin_file, write_type_to_bin_file,
 };
@@ -13,6 +14,22 @@ use std::{
     fs,
     path::{Path, PathBuf},
 };
+
+use octatools_lib::projects::ProjectToString;
+
+/// Show bytes output as u8 values for a project file located at `path`
+pub fn show_project_bytes(
+    path: &Path,
+    start_idx: &Option<usize>,
+    len: &Option<usize>,
+) -> RBoxErr<()> {
+    let raw_project = read_type_from_bin_file::<Project>(path)?;
+
+    let proj_bytes = raw_project.to_string()?.into_bytes();
+    let bytes = get_bytes_slice(proj_bytes, start_idx, len);
+    println!("{:#?}", bytes);
+    Ok(())
+}
 
 /// List all the sample slots within an Octatrack Project, given a path to a Project data file
 pub fn list_project_sample_slots(path: &Path) -> RBoxErr<()> {
@@ -32,6 +49,7 @@ pub fn list_project_sample_slots(path: &Path) -> RBoxErr<()> {
 
 /// Copy sample files for project sample slots to the project set's audio pool directory,
 /// updating the project sample slot location.
+// TODO: What about file name duplicates...
 pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxErr<()> {
     let abs_project_fp = fs::canonicalize(project_file_path)?;
 
@@ -97,7 +115,8 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
 }
 
 /// Copy sample files for project sample slots to the project set's audio pool directory,
-/// updating the project sample slot location.
+/// updating the project sample slot file path location -- does not reassign slots!.
+// TODO: What about file name duplicates...
 pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBoxErr<()> {
     let abs_project_fp = fs::canonicalize(project_file_path)?;
 

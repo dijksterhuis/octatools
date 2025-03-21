@@ -41,8 +41,9 @@ trait ProjectFromString {
     fn from_string(data: &str) -> RBoxErr<Self::T>;
 }
 
+// TODO: implement std ToString trait (s that the name for it?).
 /// Trait to use when a new struct can be created by reading a string.
-trait ProjectToString {
+pub trait ProjectToString {
     /// Crete a new struct by parsing a `String`.
     fn to_string(&self) -> RBoxErr<String>;
 }

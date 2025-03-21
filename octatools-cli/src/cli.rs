@@ -1,6 +1,6 @@
 //! Module for CLAP based CLI arguments.
 
-use clap::{command, Args, Parser, Subcommand, ValueEnum, ValueHint};
+use clap::{command, Parser, Subcommand, ValueEnum, ValueHint};
 use std::path::PathBuf;
 
 #[doc(hidden)]
@@ -19,109 +19,292 @@ pub enum HumanReadableFileFormat {
     Yaml,
 }
 
-/// Read a binary data file and print the deserialized output to stdout
-#[derive(Args, Debug, PartialEq)]
-pub struct Inspect {
-    /// Path of the OctaTrack binary data file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub bin_path: PathBuf,
+#[derive(Debug, PartialEq, Clone, ValueEnum)]
+// #[group(required = false, multiple = false)]
+pub enum BinTypes {
+    /// Binary data file is a `project.work` or `project.strd`
+    Project,
+    /// Binary data file is a `bank??.work` or `bank??.strd`
+    Bank,
+    /// Binary data file is an `arr??.work` or `arr??.strd`
+    Arrangement,
+    /// Binary data file is an `*.ot` file
+    SampleAttributes,
 }
 
-/// Read a binary data file and print raw u8 byte values to stdout
-#[derive(Args, Debug, PartialEq)]
-pub struct InspectBytes {
-    /// Path of the OctaTrack binary data file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub bin_path: PathBuf,
-    /// Index of starting byte range to inspect
-    #[arg(value_hint = ValueHint::Other)]
-    pub start: Option<usize>,
-    /// Number of bytes to display after starting byte index
-    #[arg(value_hint = ValueHint::Other)]
-    pub len: Option<usize>,
-}
-
-/// Create a OctaTrack binary data file with default data (default values not set up yet!)
-#[derive(Args, Debug, PartialEq)]
-pub struct CreateDefault {
-    /// Write path
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub path: PathBuf,
-}
-
-/// Use a human-readable data file to create a new binary data file
-#[derive(Args, Debug, PartialEq)]
-pub struct HumanToBin {
-    /// Read from this type of human-readable format
-    #[arg(value_enum)]
-    pub source_type: HumanReadableFileFormat,
-    /// Path to the human-readable source file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub source_path: PathBuf,
-    /// Path to the output OctaTrack data file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub bin_path: PathBuf,
-}
-
-/// Create a human-readable data file from an OctaTrack's binary data file
-#[derive(Args, Debug, PartialEq)]
-pub struct BinToHuman {
-    /// Path to the source OctaTrack data file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub bin_path: PathBuf,
-    /// Convert to this type of human-readable format
-    #[arg(value_enum)]
-    pub dest_type: HumanReadableFileFormat,
-    /// Path to the human-readable output file
-    #[arg(value_hint = ValueHint::FilePath)]
-    pub dest_path: PathBuf,
-}
-
-/// Commands related to data in OctaTrack Arrangement files (examples: arr01.work, arr01.strd)
+/// Commands for working with individual binary data files directly.
 #[derive(Subcommand, Debug, PartialEq)]
-pub enum Arrangements {
-    Inspect(Inspect),
-    InspectBytes(InspectBytes),
-    CreateDefault(CreateDefault),
-    BinToHuman(BinToHuman),
-    HumanToBin(HumanToBin),
-}
-
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum ProjectData {
-    Inspect(Inspect),
-}
-
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum SampleSlots {
-    Inspect(Inspect),
-
-    /// List Sample Slots used in a Project.
-    List {
-        /// File path of the project.work or project.strd file
+pub enum BinFiles {
+    /// Read a binary data file and print the deserialized output to stdout
+    Inspect {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path of the binary data file
         #[arg(value_hint = ValueHint::FilePath)]
-        path: PathBuf,
+        bin_path: PathBuf,
+    },
+    /// Read a binary data file and print raw u8 byte values to stdout
+    InspectBytes {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path of the OctaTrack binary data file
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+        /// Index of starting byte range to inspect
+        #[arg(value_hint = ValueHint::Other)]
+        start: Option<usize>,
+        /// Number of bytes to display after starting byte index
+        #[arg(value_hint = ValueHint::Other)]
+        len: Option<usize>,
+    },
+    /// Create a binary data file with default data
+    CreateDefault {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path of where to write the new binary data file to
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+    },
+    /// Create a human-readable data file from a binary data file
+    BinToHuman {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path to the source binary data file
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+        /// Convert to this type of human-readable format
+        #[arg(value_enum)]
+        dest_type: HumanReadableFileFormat,
+        /// Path to the human-readable output file
+        #[arg(value_hint = ValueHint::FilePath)]
+        dest_path: PathBuf,
+    },
+    /// Create a binary data file from a human-readable data file
+    HumanToBin {
+        /// Read from this type of human-readable format
+        #[arg(value_enum)]
+        source_type: HumanReadableFileFormat,
+        /// Path to the human-readable source file
+        #[arg(value_hint = ValueHint::FilePath)]
+        source_path: PathBuf,
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path to the output OctaTrack data file
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+    },
+}
+
+/// Copy sections of a project from one location to another, e.g. banks between projects
+#[derive(Subcommand, Debug, PartialEq)]
+pub enum Copying {
+    /// Copy a bank between projects via the CLI
+    /// (updates active sample slot assignments if required)
+    Bank {
+        /// Directory path of the source project
+        #[arg(value_hint = ValueHint::DirPath)]
+        src_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        src_bank_id: usize,
+        /// Directory path of the destination project
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the destination bank
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_bank_id: usize,
+        /// Force overwrite previously modified destination banks (default behaviour is to exit)
+        #[clap(short = 'f', long, action)]
+        force: bool,
+        // // TODO
+        // /// Do not reassign sample slots in destination project (not in use currently!)
+        // #[clap(long, action)]
+        // _no_reassign_slots: bool,
     },
 
-    /// Remove Project Sample Slots when the slot is not being used in any related Bank files.
+    /// Copy bank(s) between projects via YAML config
+    /// (updates active sample slot assignments if required)
+    BankYaml {
+        /// File path of the YAML config detailing the changes to make
+        yaml_file_path: PathBuf,
+    },
+    /*
+    TODO!
+
+    /// Copy a part between banks/projects via the CLI
+    /// (updates active sample slot assignments if required)
+    Part {
+        /// Directory path of the source project
+        #[arg(value_hint = ValueHint::DirPath)]
+        src_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        src_bank_id: usize,
+        /// Number 1-4 (inclusive) of the source part
+        #[arg(value_hint = ValueHint::Other)]
+        src_part_id: usize,
+        /// State of the source part to copy
+        #[arg(value_hint = ValueHint::Other)]
+        src_part_state: PartStateOpts,
+        /// Directory path of the destination project
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the destination bank
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_bank_id: usize,
+        /// Number 1-4 (inclusive) of the destination part
+        #[arg(value_hint = ValueHint::Other)]
+        dest_part_id: usize,
+        /// State of the destination part to copy to
+        #[arg(value_hint = ValueHint::Other)]
+        dest_part_state: PartStateOpts,
+        /// Force overwrite previously modified destination banks (default behaviour is to exit)
+        #[clap(short = 'f', long, action)]
+        force: bool,
+    },
+
+    /// Copy part(s) between banks/projects via YAML config
+    /// (updates active sample slot assignments if required)
+    PartYaml {
+        /// File path of the YAML config detailing the changes to make
+        yaml_file_path: PathBuf,
+    },
+    /// Copy a pattern between banks/projects via the CLI
+    /// (updates active sample slot assignments if required)
+    Pattern {
+        /// Directory path of the source project
+        #[arg(value_hint = ValueHint::DirPath)]
+        src_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        src_bank_id: usize,
+        /// Number 1-4 (inclusive) of the source part
+        #[arg(value_hint = ValueHint::Other)]
+        src_pattern_id: usize,
+        /// Directory path of the destination project
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the destination bank
+        #[arg(value_hint = ValueHint::DirPath)]
+        dest_bank_id: usize,
+        /// Number 1-4 (inclusive) of the destination part
+        #[arg(value_hint = ValueHint::Other)]
+        dest_pattern_id: usize,
+        /// Force overwrite previously modified destination banks (default behaviour is to exit)
+        #[clap(short = 'f', long, action)]
+        force: bool,
+    },
+
+    /// Copy patterns(s) between banks/projects via YAML config
+    /// (updates active sample slot assignments if required)
+    PatternYaml {
+        /// File path of the YAML config detailing the changes to make
+        yaml_file_path: PathBuf,
+    },
+    */
+}
+
+#[derive(Debug, clap::Args, PartialEq, Clone)]
+#[group(required = false, multiple = false)]
+pub(crate) struct ListSlotUsageOpts {
+    /// Don't list usages for sample slots without an audio file loaded
+    #[clap(long, action)]
+    pub(crate) exclude_empty: bool,
+}
+#[derive(Debug, PartialEq, Clone, ValueEnum)]
+pub enum ListSlotsTypes {
+    Project,
+    Bank,
+    Part,
+    Pattern,
+}
+
+#[derive(Debug, PartialEq, Clone, ValueEnum)]
+pub enum PartStateOpts {
+    Saved,
+    Unsaved,
+}
+
+/// List sample slots within sections of an existing project
+#[derive(Subcommand, Debug, PartialEq)]
+pub enum ListSampleSlotUsage {
+    /// List sample slots assigned in a project
+    Project {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_dirpath: PathBuf,
+    },
+    /// List sample slots assigned in a specific bank of a project
+    Bank {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
+    },
+    /// List sample slots assigned in a specific part of a bank (of a project)
+    Part {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the source bank
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        /// Number 1-4 (inclusive) of the pattern
+        #[arg(value_hint = ValueHint::Other)]
+        part_id: usize,
+        /// Whether to list slots for saved or unsaved part state
+        #[arg(value_hint = ValueHint::Other)]
+        part_state: PartStateOpts,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
+    },
+    /// List sample slots used within a specific pattern of a bank (of a project)
+    Pattern {
+        /// Directory path of the project
+        #[arg(value_hint = ValueHint::DirPath)]
+        project_dirpath: PathBuf,
+        /// Number 1-16 (inclusive) of the bank
+        #[arg(value_hint = ValueHint::Other)]
+        bank_id: usize,
+        /// Number 1-16 (inclusive) of the pattern
+        #[arg(value_hint = ValueHint::Other)]
+        pattern_id: usize,
+        #[clap(flatten)]
+        list_opts: ListSlotUsageOpts,
+    },
+}
+
+/// Modifying sample slots within an existing project
+#[derive(Subcommand, Debug, PartialEq)]
+pub enum ProjectSamples {
+    /// Remove sample slots if a slot is not being in any project banks
     Purge {
-        /// Project directory path, NOT the project.work/project.strd file (command needs to inspect related bank files)
+        /// Project directory path
         #[arg(value_hint = ValueHint::DirPath)]
-        path: PathBuf,
+        project_dirpath: PathBuf,
     },
 
-    /// Copy relevant audio files to the Project directory
+    /// Copy all sample files to the project directory and change file path of the slot
     Consolidate {
-        /// Project directory path, NOT the project.work/project.strd file (command needs to find the related Set Audio Pool)
+        /// Project directory path
         #[arg(value_hint = ValueHint::DirPath)]
-        path: PathBuf,
+        project_dirpath: PathBuf,
     },
 
-    /// Copy relevant audio files to the Project Set's Audio Pool directory
+    /// Copy all sample files to the set's audio pool directory and change file path of the slot
     Centralise {
-        /// Project directory path, NOT the project.work/project.strd file (command needs to find the related Set Audio Pool)
+        /// Project directory path
         #[arg(value_hint = ValueHint::DirPath)]
-        path: PathBuf,
+        project_dirpath: PathBuf,
     },
 
     /// Deduplicate sample slots within a project.
@@ -140,186 +323,11 @@ The command will also update slot references in all bankXX.work files within the
     },
 }
 
-/// Commands related to data contained in OctaTrack Project files (examples: project.work, project.strd)
+/// Create sample chains, slice grids and other utilities for audio sample files
 #[derive(Subcommand, Debug, PartialEq)]
-pub enum Projects {
-    Inspect(Inspect),
-    CreateDefault(CreateDefault),
-
-    /// Specific commands for Project Metadata
-    #[command(subcommand)]
-    Metadata(ProjectData),
-
-    /// Specific commands for Project State
-    #[command(subcommand)]
-    State(ProjectData),
-
-    /// Specific commands for Project Settings
-    #[command(subcommand)]
-    Settings(ProjectData),
-
-    /// Specific commands for Project Sample Slots
-    #[command(subcommand)]
-    SampleSlots(SampleSlots),
-
-    BinToHuman(BinToHuman),
-    HumanToBin(HumanToBin),
-}
-
-#[derive(Debug, clap::Args, PartialEq, Clone)]
-#[group(required = false, multiple = false)]
-pub(crate) struct ListSlotUsageOpts {
-    /// Don't list usages for sample slots without an audio file loaded,
-    /// conflicts with `--exclude-loaded`.
-    #[clap(long, action)]
-    pub(crate) exclude_empty: bool,
-}
-
-/// Commands related to data contained in OctaTrack Bank files (examples: bank01.work, bank01.strd)
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Banks {
-    Inspect(Inspect),
-    InspectBytes(InspectBytes),
-    CreateDefault(CreateDefault),
-
-    /// Move a Bank from one Project to another Project while updating active sample slot
-    /// assignments in the destination Project.
-    Copy {
-        /// Directory path of the source project
-        #[arg(value_hint = ValueHint::DirPath)]
-        src_project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the source bank
-        #[arg(value_hint = ValueHint::Other)]
-        src_bank_id: usize,
-        /// Directory path of the destination project
-        #[arg(value_hint = ValueHint::DirPath)]
-        dest_project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the destination bank
-        #[arg(value_hint = ValueHint::DirPath)]
-        dest_bank_id: usize,
-        /// Force overwrite previously modified destination banks (default behaviour is to exit)
-        #[clap(short = 'f', long, action)]
-        force: bool,
-    },
-
-    /// List sample slot usages within the given bank
-    ListSlotUsage {
-        /// Directory path of the project
-        #[arg(value_hint = ValueHint::DirPath)]
-        project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the source bank to search for sample slot usages
-        #[arg(value_hint = ValueHint::Other)]
-        bank_id: usize,
-        #[clap(flatten)]
-        list_opts: ListSlotUsageOpts,
-    },
-
-    /// Move Nx Banks from their source Project to another destination Project while updating active
-    /// sample slot assignments in each destination Projects.
-    CopyN {
-        /// File path of the YAML config detailing the changes to make
-        yaml_file_path: PathBuf,
-    },
-
-    BinToHuman(BinToHuman),
-    HumanToBin(HumanToBin),
-}
-
-/// Commands related to Pattern data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Patterns {
-    /// Show the deserialized representation of one or more Patterns
-    Inspect {
-        #[arg(value_hint = ValueHint::FilePath)]
-        bin_path: PathBuf,
-        #[arg(value_hint = ValueHint::Other)]
-        index: Vec<usize>,
-    },
-
-    /// List sample slot usages within the given pattern
-    ListSlotUsage {
-        /// Directory path of the project
-        #[arg(value_hint = ValueHint::DirPath)]
-        project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the bank
-        #[arg(value_hint = ValueHint::Other)]
-        bank_id: usize,
-        /// Number 1-16 (inclusive) of the pattern
-        #[arg(value_hint = ValueHint::Other)]
-        pattern_id: usize,
-        #[clap(flatten)]
-        list_opts: ListSlotUsageOpts,
-    },
-}
-
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum PartsCmd {
-    /// Show the deserialized representation of one or more Parts
-    Inspect {
-        #[arg(value_hint = ValueHint::FilePath)]
-        bin_path: PathBuf,
-        #[arg(value_hint = ValueHint::Other)]
-        index: Vec<usize>,
-    },
-
-    /// List sample slot usages within the given part
-    ListSlotUsage {
-        /// Directory path of the project
-        #[arg(value_hint = ValueHint::DirPath)]
-        project_path: PathBuf,
-        /// Number 1-16 (inclusive) of the bank
-        #[arg(value_hint = ValueHint::Other)]
-        bank_id: usize,
-        /// Number 1-16 (inclusive) of the pattern
-        #[arg(value_hint = ValueHint::Other)]
-        part_id: usize,
-        #[clap(flatten)]
-        list_opts: ListSlotUsageOpts,
-    },
-}
-
-/// Commands related to Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd).
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Parts {
-    /// Commands related to SAVED Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
-    #[command(subcommand)]
-    Saved(PartsCmd),
-
-    /// Commands related to UNSAVED Part data in OctaTrack Bank files (examples: bank01.work, bank01.strd)
-    #[command(subcommand)]
-    Unsaved(PartsCmd),
-}
-
-/// Create slice grids for existing audio files (no chaining sample files together, just slice grids).
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum SampleSliceGrid {
-    /// Create an `.ot` file with random slice grid from the cli
-    Random {
-        /// Location of the audio file to generate a random slices for
-        #[arg(value_hint = ValueHint::FilePath)]
-        wav_file_path: PathBuf,
-
-        /// How many random slices to create
-        #[arg(value_hint = ValueHint::Other)]
-        n_slices: usize,
-    },
-    /// Create an `.ot` file with linear slice grid from the cli
-    Linear {
-        /// Location of the audio file to generate a linear grid for
-        #[arg(value_hint = ValueHint::FilePath)]
-        wav_file_path: PathBuf,
-
-        /// How many slices to put in the slice grid
-        #[arg(value_hint = ValueHint::Other)]
-        n_slices: usize,
-    },
-}
-
-/// Create a 'sliced sample chain' from multiple audio files (chaining audio files together into one audio file with slice grids a la Octachainer).
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum SampleChains {
+pub enum SampleFiles {
     /// Create a sample chain from the CLI
-    Create {
+    Chain {
         /// Name of the new sliced sample chain.
         /// Will automatically be suffixed with an index number
         /// e.g. 'my_sample_chain_0'
@@ -336,13 +344,13 @@ pub enum SampleChains {
         wav_file_paths: Vec<PathBuf>,
     },
     /// Create batches of sample chains from a YAML config file
-    CreateN {
+    ChainYaml {
         /// File path of the YAML file for batched samplechains construction.
         #[arg(value_hint = ValueHint::FilePath)]
         yaml_file_path: PathBuf,
     },
-    /// Use the CLI to deconstruct an individual sliced samplechain.
-    Deconstruct {
+    /// Use the CLI to split an individual sample using slices.
+    SplitSlices {
         /// Path to the '.ot' file to use for deconstruction.
         #[arg(value_hint = ValueHint::FilePath)]
         ot_file_path: PathBuf,
@@ -353,86 +361,34 @@ pub enum SampleChains {
         #[arg(value_hint = ValueHint::DirPath)]
         out_dir_path: PathBuf,
     },
-    /// Use a YAML config to deconstruct batches of sliced samplechains.
-    DeconstructN {
+    /// Use a YAML config to split batches of sliced samples.
+    SplitSlicesYaml {
         /// File path of the YAML file.
         #[arg(value_hint = ValueHint::FilePath)]
         yaml_file_path: PathBuf,
     },
-}
-
-/// Find OctaTrack compatible audio files on filesystems
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum SampleSearch {
-    /// Creates a YAML file output just listing all compatible files.
-    Simple {
-        /// Path to the top of the directory tree to search through.
-        #[arg(value_hint = ValueHint::DirPath)]
-        samples_dir_path: PathBuf,
-
-        /// File path for the output YAML file
+    /// Create an `.ot` file with random slice grid from the cli
+    GridRandom {
+        /// Location of the audio file to generate a random slices for
         #[arg(value_hint = ValueHint::FilePath)]
-        yaml_file_path: Option<PathBuf>,
+        wav_file_path: PathBuf,
+
+        /// How many random slices to create
+        #[arg(value_hint = ValueHint::Other)]
+        n_slices: usize,
     },
-
-    /// Creates a YAML file output including useful file metadata.
-    Full {
-        /// Path to the top of the directory tree to search through.
-        #[arg(value_hint = ValueHint::DirPath)]
-        samples_dir_path: PathBuf,
-
-        /// File path for the output YAML file
+    /// Create an `.ot` file with linear slice grid from the cli
+    GridLinear {
+        /// Location of the audio file to generate a linear grid for
         #[arg(value_hint = ValueHint::FilePath)]
-        yaml_file_path: Option<PathBuf>,
+        wav_file_path: PathBuf,
+
+        /// How many slices to put in the slice grid
+        #[arg(value_hint = ValueHint::Other)]
+        n_slices: usize,
     },
-}
-
-/// Commands related to OctaTrack '.ot' sample metadata files (examples: sampleName.ot, anotherSampleName.ot)
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Otfile {
-    Inspect(Inspect),
-    InspectBytes(InspectBytes),
-    CreateDefault(CreateDefault),
-
-    /// Create Nx OctaTrack binary data files with default data
-    CreateDefaultN {
-        /// Wav File paths to generate default sample attribute files for
-        paths: Vec<PathBuf>,
-    },
-
-    BinToHuman(BinToHuman),
-    HumanToBin(HumanToBin),
-}
-
-/// Commands related to samples (audio files and metadata files for those audio files).
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Samples {
-    #[command(subcommand)]
-    Chain(SampleChains),
-
-    #[command(subcommand)]
-    Grid(SampleSliceGrid),
-
-    #[command(subcommand)]
-    Otfile(Otfile),
     // #[command(subcommand)]
     // Search(SampleSearch),
-}
-
-/// Commands related to the 'drive' i.e. the whole Compact Flash Card
-#[derive(Subcommand, Debug, PartialEq)]
-pub enum Drive {
-    /// Generate an in-depth YAML representation of OctaTrack data for a Set.
-    /// WARNING: A 1x Project Set will generate a circa 200MB YAML file!
-    Scan {
-        /// Directory path of the Compact Flash Card directory
-        #[arg(value_hint = ValueHint::DirPath)]
-        cfcard_dir_path: PathBuf,
-
-        /// File path location where the output YAML file will be written
-        #[arg(value_hint = ValueHint::FilePath)]
-        yaml_file_path: Option<PathBuf>,
-    },
 }
 
 /// Generates completion files for the specified shell.
@@ -449,30 +405,24 @@ pub enum ShellCompletions {
 
 #[derive(Subcommand, Debug, PartialEq)]
 pub enum Commands {
-    /// Prints a list of all available commands and a description of what they do
-    HelpFull,
+    #[command(subcommand, visible_aliases = &["bin"])]
+    BinFiles(BinFiles),
 
-    #[command(subcommand)]
+    #[command(subcommand, visible_aliases = &["copy", "cp"])]
+    Copying(Copying),
+
+    #[command(subcommand, visible_aliases = &["list", "ls"])]
+    ListSlots(ListSampleSlotUsage),
+
+    // TODO: disabled until i work out content hashing stuff
+    // #[command(subcommand, visible_aliases = &["project", "slots"])]
+    // ProjectSamples(ProjectSamples),
+    #[command(subcommand, visible_aliases = &["samples"])]
+    SampleFiles(SampleFiles),
+
+    #[command(subcommand, visible_aliases = &["shell"])]
     ShellCompletion(ShellCompletions),
 
-    #[command(subcommand)]
-    Arrangements(Arrangements),
-
-    #[command(subcommand)]
-    Banks(Banks),
-
-    #[command(subcommand)]
-    Drive(Drive),
-
-    #[command(subcommand)]
-    Parts(Parts),
-
-    #[command(subcommand)]
-    Patterns(Patterns),
-
-    #[command(subcommand)]
-    Projects(Projects),
-
-    #[command(subcommand)]
-    Samples(Samples),
+    /// Prints a list of all available commands and a description of what they do
+    HelpFull,
 }
