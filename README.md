@@ -97,7 +97,7 @@ Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the
 `PROJECT_DEST` project.
 
 ```bash
-octatools-cli banks copy \
+octatools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -117,7 +117,7 @@ ERROR: destination bank has been modified, but no force flag provided
 If you are **absolutely sure** that you want to overwrite that bank, provide the 
 `--force` flag
 ```bash
-octatools-cli banks copy \
+octatools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -152,7 +152,7 @@ settings (e.g. gain/tempo) means that slot is treated as unique.
 
 You can also use this command to copy existing banks within the same project
 ```bash
-octatools-cli banks copy \
+octatools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \ 
   1 \ 
   ./path/to/SET/PROJECT_SOURCE \
@@ -162,8 +162,8 @@ octatools-cli banks copy \
 #### Example: Copying multiple banks with a YAML config
 
 If you have a lot of banks to copy, you can speed things up by creating a YAML 
-configuration file and using the `banks copy-n` command to copy each bank in 
-series i.e. one after the other.
+configuration file and using the `copying bank-yaml` command to copy each bank 
+in series i.e. one after the other.
 
 Example configuration file for copying the same bank multiple times to different 
 projects
@@ -207,7 +207,7 @@ bank_copies:
 
 Then run
 ```bash
-octatools-cli banks copy-n ./bank_copies.yaml
+octatools-cli copying bank-yaml ./bank_copies.yaml
 ```
 
 **NOTE**: Because the bank copy operations are performed in series, you could do
@@ -225,7 +225,7 @@ Create new sample files `chained-1.wav` and `chained-1.ot` which chains together
 multiple wav files, all accessible in a single Octatrack sample slot using the 
 slices
 ```bash
-octatools-cli samples chain create \
+octatools-cli sample-files chain \
   chained \
   ./outdir \
   ./sample_1.wav \
@@ -235,7 +235,8 @@ octatools-cli samples chain create \
 ```
 The output chains are always suffixed with a number to cover the case where more 
 than 64 sample files are included in the chain. 100 input samples will create 2x
-output chain file pairs: `chained-1.wav`/`chained-1.ot` and `chained-2.wav`/`chained-2.ot`.
+output chain file pairs: `chained-1.wav`/`chained-1.ot` and `chained-2.wav`/
+`chained-2.ot`.
 
 So, you can include as many wav file paths as you want (sort of... memory limits 
 apply).
@@ -290,7 +291,7 @@ chains:
 
 Then run
 ```bash
-octatools-cli samples chain create-n ./chains.yaml
+octatools-cli sample-files chain-yaml ./chains.yaml
 ```
 There will be 4x files in the `./outdir` directory, an `.ot` and a `.wav` file 
 for each chain.
@@ -314,7 +315,7 @@ chains:
 Running the following command will create the files `./outdir/godchain-1.wav` and 
 `./outdir/godchain-1.ot`, which you can load into your Octatrack projects
 ```bash
-octatools-cli samples chain create-n ./godchain.yaml
+octatools-cli sample-files chain-yaml ./godchain.yaml
 ```
 
 If you find some new favourite samples at a later date, you can add them to the 
@@ -335,7 +336,7 @@ YAML shortened for brevity)
 ```
 and then running the command again
 ```bash
-octatools-cli samples chain create-n ./godchain.yaml
+octatools-cli sample-files chain-yaml ./godchain.yaml
 ```
 The "godchain" files will be recreated with the new samples added as slices 
 after the existing slices. On the Octatrack, replace the existing `godchain-1.wav` 
@@ -363,12 +364,12 @@ The `octatools-cli samples grid random` command pre-generates a bunch of random
 slices for a single audio file, to basically skip me having to do all this 
 seeking business. Now I can just turn the SLICE knob and see what I get!
 ```bash
-octatools-cli samples grid random <WAV_FILE_PATH> <N_SLICES>
+octatools-cli sample-files grid-random <WAV_FILE_PATH> <N_SLICES>
 ```
 Or maybe you want to create a slice grid which is linear, i.e. all the slices 
 are the same length and equally spaced apart. In which case, you can use:
 ```bash
-octatools-cli samples grid linear <WAV_FILE_PATH> <N_SLICES>
+octatools-cli sample-files grid-linear <WAV_FILE_PATH> <N_SLICES>
 ```
 **WARNING**: Unique sample file name conventions apply. If you want multiple
 random/linear grids then you need to make copies of the files with different 
@@ -383,7 +384,7 @@ contains all of your favourite slices.
 You can create new WAV files from the slices of a sample file pair like so:
 
 ```bash
-octatools-cli samples chain deconstruct my_sample.ot my_sample.wav ./outdir
+octatools-cli sample-files split-slices my_sample.ot my_sample.wav ./outdir
 ```
 This will extract the slices and write them as new files in `./outdir`.
 The file names will be: `my_sample-0.wav`, `my_sample-1.wav`, etc.
@@ -396,7 +397,8 @@ Let's say you wanted to inspect all the settings and sample slots for a project
 without having to navigate through all the menus on the Octatrack
 
 ```bash
-octatools-cli projects bin-to-human \
+octatools-cli bin-files bin-to-human \
+  project \
   ./path/to/SET/PROJECT/project.work \
   yaml \
   ./project.yaml
@@ -422,9 +424,10 @@ settings:
 
 I can convert this to a new binary data file
 ```bash
-octatools-cli projects human-to-bin \
+octatools-cli bin-files human-to-bin \
   yaml \
   ./project.yaml \
+  project \
   ./new_project.work
 ```
 
@@ -454,17 +457,17 @@ convert to YAML and start editing settings
 ```bash
 mkdir ./NEW_PROJECT/
 # new project file
-octatools-cli projects create-default ./NEW_PROJECT/project.work
+octatools-cli bin-files create-default project ./NEW_PROJECT/project.work
 
 # bank files 1 to 16, inclusive
 for i in `seq 1 16` 
 do 
-  ./octatools-cli banks create-default ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
+  ./octatools-cli bin-files create-default bank ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
 done
 # arrangements files 1 to 8, inclusive
 for i in `seq 1 8` 
 do 
-  octatools-cli arrangements create-default ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
+  octatools-cli bin-files create-default arrangement ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
 done
 ```
 
