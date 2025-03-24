@@ -28,7 +28,7 @@ pub fn show_unsaved_parts(path: &Path, indexes: Vec<usize>) -> RBoxErr<()> {
     let b = read_type_from_bin_file::<Bank>(path).expect("Could not load bank file");
 
     for index in indexes {
-        let x = &b.parts_saved[index - 1];
+        let x = &b.parts.saved[index - 1];
         println!("{x:#?}");
     }
     Ok(())
@@ -46,7 +46,7 @@ pub fn show_saved_parts(path: &Path, indexes: Vec<usize>) -> RBoxErr<()> {
     let b = read_type_from_bin_file::<Bank>(path).expect("Could not load bank file");
 
     for index in indexes {
-        let x = &b.parts_saved[index - 1];
+        let x = &b.parts.saved[index - 1];
         println!("{x:#?}");
     }
 
@@ -79,7 +79,7 @@ pub fn list_unsaved_part_sample_slot_references(
     let proj =
         read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
-    let part = bank.parts_unsaved[part_id - 1].clone();
+    let part = bank.parts.unsaved[part_id - 1].clone();
 
     list_part_slot_refs(&proj, part, ignore_empty_slots)?;
 
@@ -100,7 +100,7 @@ pub fn list_saved_part_sample_slot_references(
     let proj =
         read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
-    let part = bank.parts_saved[part_id - 1].clone();
+    let part = bank.parts.saved[part_id - 1].clone();
 
     list_part_slot_refs(&proj, part, ignore_empty_slots)?;
 

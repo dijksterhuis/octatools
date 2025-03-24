@@ -4,6 +4,7 @@ use crate::{
         get_one_indexed_slots_from_zero_indexed, get_zero_indexed_slots_from_one_indexed, BankMeta,
         ProjectMeta, SlotReferenceReassignment,
     },
+    actions::{part_update_sample_slot_refs, pattern_update_sample_slot_refs},
     RBoxErr,
 };
 use itertools::Itertools;
@@ -68,15 +69,17 @@ fn get_new_deduplicated_sample_slots_and_updated_banks(
     for reassignment in reassignments {
         for bank in &mut new_banks {
             bank.patterns.iter_mut().for_each(|p| {
-                p.update_plock_sample_slots(
+                pattern_update_sample_slot_refs(
+                    p,
                     &reassignment.slot_type,
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
                 .expect("Failed to update sample slot reference in pattern p-locks.");
             });
-            bank.parts_unsaved.iter_mut().for_each(|p| {
-                p.update_machine_sample_slot(
+            bank.parts.unsaved.iter_mut().for_each(|p| {
+                part_update_sample_slot_refs(
+                    p,
                     &reassignment.slot_type,
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,

@@ -1,9 +1,9 @@
 //! Serialization and Deserialization of Part related data for Bank files.
 
-use crate::{projects::options::ProjectSampleSlotType, DefaultsArray, DefaultsArrayBoxed, RBoxErr};
+use crate::{DefaultsArray, DefaultsArrayBoxed};
 use octatools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
 use serde::{Deserialize, Serialize};
-use serde_big_array::BigArray;
+use serde_big_array::{Array, BigArray};
 use std::array::from_fn;
 
 /// Header data for Parts, indicating when a new Part data section starts in binary data files:
@@ -1114,39 +1114,23 @@ impl Default for Part {
     }
 }
 
-impl Part {
-    pub fn update_machine_sample_slot(
-        &mut self,
-        sample_type: &ProjectSampleSlotType,
-        old: &u8,
-        new: &u8,
-    ) -> RBoxErr<()> {
-        for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
-            match sample_type {
-                ProjectSampleSlotType::Static => {
-                    if audio_track_slots.static_slot_id == *old {
-                        audio_track_slots.static_slot_id = *new;
-                    }
-                }
-                ProjectSampleSlotType::Flex => {
-                    if audio_track_slots.flex_slot_id == *old {
-                        audio_track_slots.flex_slot_id = *new;
-                    }
-                }
-                ProjectSampleSlotType::RecorderBuffer => {}
-            }
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct Parts {
+    /// Unsaved Part data for a Bank.
+    ///
+    /// Part state prior to before saving a Part is captured here.
+    pub unsaved: Box<Array<Part, 4>>,
+    /// Saved Part data for a Bank.
+    ///
+    /// Part state once the Part has been saved is stored here.
+    pub saved: Box<Array<Part, 4>>,
+}
+
+impl Default for Parts {
+    fn default() -> Self {
+        Self {
+            unsaved: Part::defaults(),
+            saved: Part::defaults(),
         }
-
-        Ok(())
-    }
-
-    pub fn update_flex_machine_slot(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
-        for audio_track_slots in self.audio_track_machine_slots.iter_mut() {
-            if audio_track_slots.flex_slot_id == *old {
-                audio_track_slots.flex_slot_id = *new;
-            }
-        }
-
-        Ok(())
     }
 }

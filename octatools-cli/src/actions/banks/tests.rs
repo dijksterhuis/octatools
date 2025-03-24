@@ -177,7 +177,7 @@ mod integration {
     where
         F: Fn(usize, usize, &mut AudioTrackMachineSlot),
     {
-        for (part_id, part) in valid_destbank.parts_unsaved.iter_mut().enumerate() {
+        for (part_id, part) in valid_destbank.parts.unsaved.iter_mut().enumerate() {
             for (track_id, audio_track) in part.audio_track_machine_slots.iter_mut().enumerate() {
                 f(part_id, track_id, audio_track);
             }
@@ -253,9 +253,10 @@ mod integration {
 
             // all the track machines slots in the written data match what we created as validation data
             for (part_idx, (valid_part, copied_part)) in valid_destbank
-                .parts_unsaved
+                .parts
+                .unsaved
                 .iter()
-                .zip(copiedbank.parts_unsaved.iter())
+                .zip(copiedbank.parts.unsaved.iter())
                 .enumerate()
             {
                 for (track_idx, (valid_track, copied_track)) in valid_part
@@ -778,7 +779,7 @@ mod integration {
                 );
 
                 // reminder: zero indexed
-                srcbank.parts_unsaved[0].audio_track_machine_slots[0].static_slot_id = 16;
+                srcbank.parts.unsaved[0].audio_track_machine_slots[0].static_slot_id = 16;
                 let mut valid_destbank = srcbank.clone();
 
                 // track machine slot allocation will be pointed to the last free sample slot
@@ -1465,7 +1466,7 @@ mod integration {
                 );
 
                 // reminder: zero indexed
-                srcbank.parts_unsaved[0].audio_track_machine_slots[0].flex_slot_id = 16;
+                srcbank.parts.unsaved[0].audio_track_machine_slots[0].flex_slot_id = 16;
                 let mut valid_destbank = srcbank.clone();
 
                 // track machine slot allocation will be pointed to the last free sample slot

@@ -4,7 +4,7 @@ pub mod parts;
 pub mod patterns;
 
 use crate::{
-    banks::{parts::Part, patterns::Pattern},
+    banks::{parts::Parts, patterns::Pattern},
     DefaultsArrayBoxed,
 };
 use std::array::from_fn;
@@ -45,15 +45,8 @@ pub struct Bank {
     // note -- stack overflow if tring to use #[serde(with = "BigArray")]
     pub patterns: Box<Array<Pattern, 16>>,
 
-    /// Unsaved Part data for a Bank.
-    ///
-    /// Part state prior to before saving a Part is captured here.
-    pub parts_unsaved: Box<Array<Part, 4>>,
-
-    /// Saved Part data for a Bank.
-    ///
-    /// Part state once the Part has been saved is stored here.
-    pub parts_saved: Box<Array<Part, 4>>,
+    /// All part data for this bank, includes currently unsaved and previously saved state
+    pub parts: Parts,
 
     /// Unknown what these bytes refer to.
     #[serde(with = "BigArray")]
@@ -74,8 +67,7 @@ impl Default for Bank {
         Self {
             header_data: BANK_HEADER,
             patterns: Pattern::defaults(),
-            parts_unsaved: Part::defaults(),
-            parts_saved: Part::defaults(),
+            parts: Parts::default(),
             unknown: from_fn(|_| 0),
             part_names: DEFAULT_PART_NAMES,
             remainder: from_fn(|_| 0),

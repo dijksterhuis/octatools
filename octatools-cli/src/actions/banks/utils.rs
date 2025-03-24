@@ -1,6 +1,8 @@
 use chrono;
 
-use crate::actions::banks::CliBankErrors;
+use crate::actions::{
+    banks::CliBankErrors, part_update_sample_slot_refs, pattern_update_sample_slot_refs,
+};
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use octatools_lib::samples::options::{
@@ -311,7 +313,7 @@ pub(crate) fn find_sample_slot_refs_in_bank(
 
     let unsaved_part_slot_usage = find_sample_slot_refs_in_parts(
         slots,
-        bank.parts_unsaved.as_slice(), // boxed serde_big_array needs to be sliced
+        bank.parts.unsaved.as_slice(), // boxed serde_big_array needs to be sliced
     )?;
 
     Ok(pattern_slot_usage
@@ -483,15 +485,17 @@ fn get_deduplicated_sample_slots_and_updated_banks(
     for reassignment in reassignments {
         for bank in &mut new_banks {
             bank.patterns.iter_mut().for_each(|p| {
-                p.update_plock_sample_slots(
+                pattern_update_sample_slot_refs(
+                    p,
                     &reassignment.slot_type,
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
                 )
                 .expect("Failed to update sample slot reference in pattern p-locks.");
             });
-            bank.parts_unsaved.iter_mut().for_each(|p| {
-                p.update_machine_sample_slot(
+            bank.parts.unsaved.iter_mut().for_each(|p| {
+                part_update_sample_slot_refs(
+                    p,
                     &reassignment.slot_type,
                     &reassignment.initial_slot_id,
                     &reassignment.new_slot_id,
@@ -523,15 +527,17 @@ fn apply_slot_changes_to_bank_inplace(operations: &HashSet<SampleSlotOperation>,
             //       ... it shouldn't have setters etc.
 
             bank.patterns.iter_mut().for_each(|p| {
-                p.update_plock_sample_slots(
+                pattern_update_sample_slot_refs(
+                    p,
                     &x.src_slot.sample_type,
                     &x.src_slot.slot_id,
                     &x.dest_slot.slot_id,
                 )
                 .expect("Failed to update sample slot reference in pattern p-locks.");
             });
-            bank.parts_unsaved.iter_mut().for_each(|p| {
-                p.update_machine_sample_slot(
+            bank.parts.unsaved.iter_mut().for_each(|p| {
+                part_update_sample_slot_refs(
+                    p,
                     &x.src_slot.sample_type,
                     &x.src_slot.slot_id,
                     &x.dest_slot.slot_id,

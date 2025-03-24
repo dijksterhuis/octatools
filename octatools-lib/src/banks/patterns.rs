@@ -6,7 +6,6 @@ use crate::{
         MidiTrackArpParamsValues, MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues,
         MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
     },
-    projects::options::ProjectSampleSlotType,
     DefaultsArray, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
 };
 use std::array::from_fn;
@@ -1224,44 +1223,6 @@ impl Default for Pattern {
             tempo_1: 11,
             tempo_2: 64,
         }
-    }
-}
-
-impl Pattern {
-    pub fn update_plock_sample_slots(
-        &mut self,
-        sample_type: &ProjectSampleSlotType,
-        old: &u8,
-        new: &u8,
-    ) -> RBoxErr<()> {
-        for audio_track_trigs in self.audio_track_trigs.iter_mut() {
-            for plock in audio_track_trigs.plocks.iter_mut() {
-                match sample_type {
-                    ProjectSampleSlotType::Static => {
-                        if plock.static_slot_id == *old {
-                            plock.static_slot_id = *new;
-                        }
-                    }
-                    ProjectSampleSlotType::Flex => {
-                        if plock.flex_slot_id == *old {
-                            plock.flex_slot_id = *new;
-                        }
-                    }
-                    ProjectSampleSlotType::RecorderBuffer => {}
-                }
-            }
-        }
-        Ok(())
-    }
-    pub fn update_flex_sample_plocks(&mut self, old: &u8, new: &u8) -> RBoxErr<()> {
-        for audio_track_trigs in self.audio_track_trigs.iter_mut() {
-            for plock in audio_track_trigs.plocks.iter_mut() {
-                if plock.flex_slot_id == *old {
-                    plock.flex_slot_id = *new;
-                }
-            }
-        }
-        Ok(())
     }
 }
 

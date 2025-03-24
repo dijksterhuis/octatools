@@ -1,5 +1,10 @@
 //! Module containing code related to running commands
 
+use crate::RBoxErr;
+use octatools_lib::banks::parts::Part;
+use octatools_lib::banks::patterns::Pattern;
+use octatools_lib::projects::options::ProjectSampleSlotType;
+
 pub mod arrangements;
 pub mod banks;
 pub mod drive;
@@ -31,3 +36,54 @@ pub mod samples;
 //     Ok(())
 // }
 //
+
+pub fn pattern_update_sample_slot_refs(
+    pattern: &mut Pattern,
+    sample_type: &ProjectSampleSlotType,
+    old: &u8,
+    new: &u8,
+) -> RBoxErr<()> {
+    for audio_track_trigs in pattern.audio_track_trigs.iter_mut() {
+        for plock in audio_track_trigs.plocks.iter_mut() {
+            match sample_type {
+                ProjectSampleSlotType::Static => {
+                    if plock.static_slot_id == *old {
+                        plock.static_slot_id = *new;
+                    }
+                }
+                ProjectSampleSlotType::Flex => {
+                    if plock.flex_slot_id == *old {
+                        plock.flex_slot_id = *new;
+                    }
+                }
+                ProjectSampleSlotType::RecorderBuffer => {}
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn part_update_sample_slot_refs(
+    part: &mut Part,
+    sample_type: &ProjectSampleSlotType,
+    old: &u8,
+    new: &u8,
+) -> RBoxErr<()> {
+    for audio_track_slots in part.audio_track_machine_slots.iter_mut() {
+        match sample_type {
+            ProjectSampleSlotType::Static => {
+                if audio_track_slots.static_slot_id == *old {
+                    audio_track_slots.static_slot_id = *new;
+                }
+            }
+            ProjectSampleSlotType::Flex => {
+                if audio_track_slots.flex_slot_id == *old {
+                    audio_track_slots.flex_slot_id = *new;
+                }
+            }
+            ProjectSampleSlotType::RecorderBuffer => {}
+        }
+    }
+
+    Ok(())
+}
