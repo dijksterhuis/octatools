@@ -430,24 +430,13 @@ checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 name = "ot-tools-cli"
 version = "0.1.0"
 dependencies = [
- "aifc",
- "base64ct",
- "bincode",
- "chrono",
  "clap",
  "clap_complete",
- "copy_dir",
  "env_logger",
- "hound",
- "itertools",
  "log",
- "md5",
- "ot-tools-derive",
  "ot-tools-io",
- "rand",
+ "ot-tools-ops",
  "serde",
- "serde_yml",
- "walkdir",
 ]
 
 [[package]]
@@ -469,6 +458,25 @@ dependencies = [
  "serde-big-array",
  "serde_json",
  "serde_yml",
+]
+
+[[package]]
+name = "ot-tools-ops"
+version = "0.1.0"
+dependencies = [
+ "aifc",
+ "base64ct",
+ "chrono",
+ "copy_dir",
+ "hound",
+ "itertools",
+ "log",
+ "md5",
+ "ot-tools-derive",
+ "ot-tools-io",
+ "rand",
+ "serde",
+ "walkdir",
 ]
 
 [[package]]

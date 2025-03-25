@@ -267,15 +267,6 @@ where
 }
 
 /* NO TESTS BLOCK ENDS */
-/// Get a slice of a byte vector (`Vec<u8>`) -- mostly for reverse engineering utility purposes
-pub fn get_bytes_slice(data: Vec<u8>, start_idx: &Option<usize>, len: &Option<usize>) -> Vec<u8> {
-    let start = start_idx.unwrap_or(0);
-    let end = match len {
-        None => data.len(),
-        _ => len.unwrap() + start,
-    };
-    data[start..end].to_vec()
-}
 
 /// Show deserialized representation of a binary data file of type `T` at `path`
 pub fn show_type<T>(path: &Path, newlines: Option<bool>) -> RBoxErr<()>
@@ -934,39 +925,6 @@ mod test {
             let p_reread = read_type_from_bin_file::<Project>(&infile).unwrap();
 
             assert_eq!(p, p_reread)
-        }
-    }
-    mod get_byte_slice {
-        use super::*;
-        #[test]
-        fn test_no_options() {
-            let data: Vec<u8> = vec![1, 2, 3];
-            let r = get_bytes_slice(data, &None, &None);
-            assert_eq!(r, vec![1, 2, 3]);
-        }
-        #[test]
-        fn test_no_options_one_byte_data() {
-            let data: Vec<u8> = vec![1];
-            let r = get_bytes_slice(data, &None, &None);
-            assert_eq!(r, vec![1]);
-        }
-        #[test]
-        fn test_non_zero_start() {
-            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
-            let r = get_bytes_slice(data, &Some(1), &None);
-            assert_eq!(r, vec![2, 3, 4, 5]);
-        }
-        #[test]
-        fn test_non_zero_end() {
-            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
-            let r = get_bytes_slice(data, &None, &Some(3));
-            assert_eq!(r, vec![1, 2, 3]);
-        }
-        #[test]
-        fn test_non_zero_start_and_end() {
-            let data: Vec<u8> = vec![1, 2, 3, 4, 5];
-            let r = get_bytes_slice(data, &Some(1), &Some(3));
-            assert_eq!(r, vec![2, 3, 4]);
         }
     }
 }

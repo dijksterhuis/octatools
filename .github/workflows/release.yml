@@ -16,7 +16,7 @@ jobs:
         run: |
             gh release create \
               ${{ github.ref_name }} \
-              --title "ot-tools-cli [${{ github.ref_name }}]" \
+              --title "ot-tools CLI [${{ github.ref_name }}]" \
               --verify-tag
   assets:
     needs: release
@@ -28,27 +28,27 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             command: cross
-            bin_fname: ot-tools-cli
+            bin_fname: ot-tools
           - build: linux-arm
             os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             command: cross
-            bin_fname: ot-tools-cli
+            bin_fname: ot-tools
           - build: windows-intel
             os: ubuntu-latest
             target: x86_64-pc-windows-gnu
             command: cross
-            bin_fname: ot-tools-cli.exe
+            bin_fname: ot-tools.exe
           - build: macos-intel
             os: macos-latest
             target: x86_64-apple-darwin
             command: cargo
-            bin_fname: ot-tools-cli
+            bin_fname: ot-tools
           - build: macos-arm
             os: macos-latest
             target: aarch64-apple-darwin
             command: cargo
-            bin_fname: ot-tools-cli
+            bin_fname: ot-tools
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -58,9 +58,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-          ${{ matrix.command }} build --bin ot-tools-cli --release --target ${{ matrix.target }}
+          ${{ matrix.command }} build --bin ot-tools --release --target ${{ matrix.target }}
 
-          DIRNAME="ot-tools-cli_{{ github.ref_name }}_${{ matrix.target }}"
+          DIRNAME="ot-tools_{{ github.ref_name }}_${{ matrix.target }}"
           mkdir "$DIRNAME"
           cp \
             LICENSE.md \

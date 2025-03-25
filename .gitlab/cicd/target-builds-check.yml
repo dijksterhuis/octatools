@@ -61,7 +61,7 @@ smoke-builds:
       rustup target add "${RUST_TARGET}"
   script:
     - cargo build --package "ot-tools-io" --target "${RUST_TARGET}"
-    - cargo build --bin "ot-tools-cli" --target "${RUST_TARGET}"
+    - cargo build --bin "ot-tools" --target "${RUST_TARGET}"
   tags:
     - $CI_RUNNER_TAG
   <<: *para

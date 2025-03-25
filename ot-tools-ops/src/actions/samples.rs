@@ -12,7 +12,7 @@ use ot_tools_io::samples::{
         SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
     },
     slices::{Slice, Slices},
-    SampleAttributes, SampleAttributesRawBytes,
+    SampleAttributes,
 };
 
 use crate::{
@@ -27,8 +27,7 @@ use std::array::from_fn;
 use std::path::{Path, PathBuf};
 
 use ot_tools_io::{
-    get_bytes_slice, read_type_from_bin_file, type_to_yaml_file, write_type_to_bin_file,
-    yaml_file_to_type,
+    read_type_from_bin_file, type_to_yaml_file, write_type_to_bin_file, yaml_file_to_type,
 };
 use yaml::{
     create::YamlChainCreate,
@@ -92,19 +91,6 @@ impl std::error::Error for CliSampleErrors {
             CliSampleErrors::NotADirectory => None,
         }
     }
-}
-
-/// Show bytes output as u8 values for a Sample Attributes file located at `path`
-pub fn show_ot_file_bytes(
-    path: &Path,
-    start_idx: &Option<usize>,
-    len: &Option<usize>,
-) -> RBoxErr<()> {
-    let raw = read_type_from_bin_file::<SampleAttributesRawBytes>(path)?;
-
-    let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
-    println!("{:#?}", bytes);
-    Ok(())
 }
 
 // todo: tests
@@ -199,7 +185,7 @@ pub fn create_samplechains_from_yaml(yaml_conf_fpath: &Path) -> RBoxErr<()> {
 /// Options that can be provided to `create_samplechain_from_pathbufs_only` for
 /// controlling some of the global Octatrack sample attributes settings
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) struct SampleChainOpts {
+pub struct SampleChainOpts {
     bpm: Option<f32>,
     gain: Option<f32>,
     timestretch_mode: Option<SampleAttributeTimestrechMode>,
@@ -209,7 +195,7 @@ pub(crate) struct SampleChainOpts {
 
 /// Options that control audio processing of each slice in a sample chain
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) struct SliceProcOpts {
+pub struct SliceProcOpts {
     /// normalize individual slices
     pub normalize: Option<bool>,
     /// %-age length of linear fade in to apply to slices
@@ -222,7 +208,7 @@ pub(crate) struct SliceProcOpts {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[non_exhaustive]
-pub(crate) enum FileFormat {
+pub enum FileFormat {
     Wav,
     // TODO
     // Aiff
@@ -230,7 +216,7 @@ pub(crate) enum FileFormat {
 
 /// Options that control the output file formats
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub(crate) struct FileFormatOpts {
+pub struct FileFormatOpts {
     /// normalize individual slices
     pub bit_depth: Option<u16>,
     /// %-age length of linear fade in to apply to slices

@@ -19,7 +19,7 @@ release-publish-derive:
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
-release-publish-lib:
+release-publish-lib-io:
   stage: "release"
   image: "rust:latest"
   needs:
@@ -34,7 +34,7 @@ release-publish-lib:
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
-release-publish-cli:
+release-publish-lib-ops:
   stage: "release"
   image: "rust:latest"
   needs:
@@ -46,7 +46,7 @@ release-publish-cli:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --package "ot-tools-cli" \
+        --package "ot-tools-ops" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 

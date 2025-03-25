@@ -10,10 +10,8 @@ use crate::{actions::banks::yaml::YamlCopyBankConfig, OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use ot_tools_io::projects::options::ProjectSampleSlotType;
 use ot_tools_io::{
-    banks::{Bank, BankRawBytes},
-    get_bytes_slice,
-    projects::Project,
-    read_type_from_bin_file, write_type_to_bin_file, yaml_file_to_type,
+    banks::Bank, projects::Project, read_type_from_bin_file, write_type_to_bin_file,
+    yaml_file_to_type,
 };
 use std::{path::Path, path::PathBuf};
 use utils::{
@@ -44,15 +42,6 @@ impl std::fmt::Display for CliBankErrors {
     }
 }
 impl std::error::Error for CliBankErrors {}
-
-/// Show bytes output as u8 values for a Sample Attributes file located at `path`
-pub fn show_bank_bytes(path: &Path, start_idx: &Option<usize>, len: &Option<usize>) -> RBoxErr<()> {
-    let raw_bank = read_type_from_bin_file::<BankRawBytes>(path)?;
-
-    let bytes = get_bytes_slice(raw_bank.data.to_vec(), start_idx, len);
-    println!("{:#?}", bytes);
-    Ok(())
-}
 
 /// ### Copy Banks
 ///

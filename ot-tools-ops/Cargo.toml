@@ -1,0 +1,29 @@
+[package]
+name = "ot-tools-ops"
+description = "Crate for inspecting and modifying Elektron Octatrack projects."
+
+version.workspace = true
+edition.workspace = true
+readme.workspace = true
+license-file.workspace = true
+homepage.workspace = true
+repository.workspace = true
+
+[lib]
+name = "ot_tools_ops"
+
+[dependencies]
+aifc = "0.5.3"
+base64ct = "1.6.0"
+copy_dir = "0.1.3"
+hound = "3.5.1"
+log = "0.4.22"
+md5 = "0.7.0"
+rand = "0.8.5"
+ot-tools-io = { path = "../ot-tools-io" }
+
+itertools.workspace = true
+serde.workspace = true
+walkdir.workspace = true
+ot-tools-derive = { path = "../ot-tools-derive" }
+chrono = "0.4.39"

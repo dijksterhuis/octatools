@@ -7,7 +7,6 @@ use ot_tools_io::projects::options::ProjectSampleSlotType;
 
 pub mod arrangements;
 pub mod banks;
-pub mod drive;
 pub mod parts;
 pub mod patterns;
 pub mod projects;

@@ -1,3 +1,5 @@
+# ot-tools
+
 Various Rust binaries/libraries for use with [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
 binary data files.
 
@@ -8,55 +10,46 @@ binary data files.
 # Table of Contents
 
 - [Warnings](./README.md#warnings)
-- [ot-tools is not ...](./README.md#ot-tools-is-not-)
+- [License](./README.md#license)
 - [ot-tools is ...](./README.md#ot-tools-is-)
-  - [`ot-tools-cli`](./README.md#ot-tools-cli----the-cli-binary)
-  - [`ot-tools-io`](./README.md#ot-tools-io----the-readwrite-files-library)
-  - [`ot-tools-derive`](./README.md#ot-tools-derive)
-  - [`ot-tools-py`](./README.md#ot-tools-py----the-python-module-)
+  - [`ot-tools` -- CLI binary](./README.md#ot-tools----the-cli-binary)
+  - [`ot-tools-ops` -- operations library](./README.md#ot-tools-ops----the-projectssets-operations-library)
+  - [`ot-tools-io` -- file read/write library](./README.md#ot-tools-io----the-readwrite-files-library)
+  - [`ot-tools-derive` -- rust derive macros](./README.md#ot-tools-derive)
+  - [`ot-tools-py` -- python extension module](./README.md#ot-tools-py----the-python-module-)
 - [How to build packages](./README.md#how-to-build-packages)
 - [How to run tests](./README.md#how-to-run-tests)
 - [Credit](./README.md#credits)
-- [License](./README.md#license)
 
 # Warnings
 
 - There will be bugs.
-- ot-tools only works with OS version 1.40B (the one I have installed)
-- AIFF files are not currently supported for `ot-tools-cli samples` commands.
+- ot-tools only works with OS version 1.40B.
+- AIFF files are not currently supported for `ot-tools sample-files` commands.
   Only WAV files are currently supported.
-- Most commands from `ot-tools-cli` can *probably* be run on Windows, but I 
-  mainly develop on Linux, so I might have missed some issues. macOs will be a
-  whole other kettle of fish.
+- Most commands from `ot-tools` can *probably* be run on Windows/macOs with 
+  release builds, but I mainly develop on Linux so I might miss some issues.
 - If you are worried about destroying your Octatrack projects / data files -- 
   take a backup copy of the compact flash card / set / project folder and work 
-  on that copy first.
+  on that copy.
 - This has mostly been a **learning** project for me to get to grips with Rust. 
   **Please do not expect high quality or reliable rust code**.
 - **Name your sample files uniquely**. I cannot stress this enough. Especially
   with respect to the copying banks between projects command.
-- Every API and/or command is currently in an 'unstable' state and will possibly 
-  change in the future.
+- Every function/module/command is currently in an 'unstable' state and will 
+  possibly (probably) change in the future.
 - There will be bugs.
 
-# ot-tools is not ...
-
-- A replacement DigiChain
-- A new OctaEdit
-- Another Octachainer
-- Tested against multiple version of Octatrack OS (only 1.40B)
-- A GUI application with pretty buttons
-- Currently stable
-- Thoroughly tested for all possible edge cases
-- Expertly written
-- Paid-for software with a dedicated support team 
+# License
+The ot-tools project is licensed under the 
+[GNU GPL v3.0 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
 
 # ot-tools is ...
 
 Multiple rust binaries/crates for doing 'stuff' with Octatrack binary data files
-in different ways ...
+in different ways.
 
-## `ot-tools-cli` -- the CLI binary
+## `ot-tools` -- the CLI binary
 
 Perform various useful actions to create and/or modify Octatrack projects/files, 
 like copying banks between projects or chaining sample files together with 
@@ -83,7 +76,7 @@ are used in a reload operation).
 - [Slice based sample chaining with a YAML config](./README.md#example-slice-based-sample-chaining-with-a-yaml-config)
 - [Creating a "god-chain" with a YAML config](./README.md#example-creating-a-god-chain-with-a-yaml-config)
 - [Creating random/linear slice grids](./README.md#example-creating-randomlinear-slice-grids)
-- [Deconstructing samples based on slices](./README.md#example-deconstructing-samples-based-on-slices)
+- [Splitting samples based on slices](./README.md#example-splitting-samples-based-on-slices)
 - [Converting data files to YAML/JSON](./README.md#example-converting-data-files-to-yamljson)
 - [Writing YAML/JSON files as new data files](./README.md#example-writing-yamljson-files-as-new-binary-data-files)
 - [Creating default project data files](./README.md#example-creating-default-project-data-files)
@@ -95,7 +88,7 @@ Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the
 `PROJECT_DEST` project.
 
 ```bash
-ot-tools-cli copying bank \
+ot-tools operations copy bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -115,7 +108,7 @@ ERROR: destination bank has been modified, but no force flag provided
 If you are **absolutely sure** that you want to overwrite that bank, provide the 
 `--force` flag
 ```bash
-ot-tools-cli copying bank \
+ot-tools operations copy bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -150,7 +143,7 @@ settings (e.g. gain/tempo) means that slot is treated as unique.
 
 You can also use this command to copy existing banks within the same project
 ```bash
-ot-tools-cli copying bank \
+ot-tools operations copy bank \
   ./path/to/SET/PROJECT_SOURCE \ 
   1 \ 
   ./path/to/SET/PROJECT_SOURCE \
@@ -205,7 +198,7 @@ bank_copies:
 
 Then run
 ```bash
-ot-tools-cli copying bank-yaml ./bank_copies.yaml
+ot-tools operations copy bank-yaml ./bank_copies.yaml
 ```
 
 **NOTE**: Because the bank copy operations are performed in series, you could do
@@ -223,7 +216,7 @@ Create new sample files `chained-1.wav` and `chained-1.ot` which chains together
 multiple wav files, all accessible in a single Octatrack sample slot using the 
 slices
 ```bash
-ot-tools-cli sample-files chain \
+ot-tools sample-files chain \
   chained \
   ./outdir \
   ./sample_1.wav \
@@ -289,10 +282,13 @@ chains:
 
 Then run
 ```bash
-ot-tools-cli sample-files chain-yaml ./chains.yaml
+ot-tools sample-files chain-yaml ./chains.yaml
 ```
 There will be 4x files in the `./outdir` directory, an `.ot` and a `.wav` file 
 for each chain.
+
+See the [chain-create.yaml example](./examples/confs/chain-create.yaml) for more 
+details on all the available configuration options when creating sample chains.
 
 #### Example: Creating a "god-chain" with a YAML config
 Let's say you have a bunch of favourite audio files that you usually use in a 
@@ -313,7 +309,7 @@ chains:
 Running the following command will create the files `./outdir/godchain-1.wav` and 
 `./outdir/godchain-1.ot`, which you can load into your Octatrack projects
 ```bash
-ot-tools-cli sample-files chain-yaml ./godchain.yaml
+ot-tools sample-files chain-yaml ./godchain.yaml
 ```
 
 If you find some new favourite samples at a later date, you can add them to the 
@@ -334,7 +330,7 @@ YAML shortened for brevity)
 ```
 and then running the command again
 ```bash
-ot-tools-cli sample-files chain-yaml ./godchain.yaml
+ot-tools sample-files chain-yaml ./godchain.yaml
 ```
 The "godchain" files will be recreated with the new samples added as slices 
 after the existing slices. On the Octatrack, replace the existing `godchain-1.wav` 
@@ -358,20 +354,28 @@ strange tones that can be used as background ambience. I usually do this is by
 randomly seeking through a sample in the Octatrack audio editor menu and 
 previewing the audio.
 
-The `ot-tools-cli samples grid random` command pre-generates a bunch of random 
+The `ot-tools samples grid random` command pre-generates a bunch of random 
 slices for a single audio file, to basically skip me having to do all this 
 seeking business. Now I can just turn the SLICE knob and see what I get!
 ```bash
-ot-tools-cli sample-files grid-random <WAV_FILE_PATH> <N_SLICES>
+ot-tools sample-files grid-random <WAV_FILE_PATH> <N_SLICES>
 ```
 Or maybe you want to create a slice grid which is linear, i.e. all the slices 
 are the same length and equally spaced apart. In which case, you can use:
 ```bash
-ot-tools-cli sample-files grid-linear <WAV_FILE_PATH> <N_SLICES>
+ot-tools sample-files grid-linear <WAV_FILE_PATH> <N_SLICES>
 ```
-**WARNING**: Unique sample file name conventions apply. If you want multiple
+
+Unique sample file name conventions apply. If you want multiple
 random/linear grids then you need to make copies of the files with different 
-names and then run this command multiple times.
+names and then run this command multiple times, like in this `bash` example
+```bash
+for i in $(seq 1 10)
+do
+  cp ./my_sample_file.wav "./my_sample_file-rand-${i}.wav"
+  ot-tools sample-files grid-random "./my_sample_file-rand-${i}.wav" 64
+done  
+```
 
 #### Example: Splitting samples based on slices
 Let's say you've been creating slices in a sample on the Octatrack.
@@ -382,7 +386,7 @@ contains all of your favourite slices.
 You can create new WAV files from the slices of a sample file pair like so:
 
 ```bash
-ot-tools-cli sample-files split-slices my_sample.ot my_sample.wav ./outdir
+ot-tools sample-files split-slices my_sample.ot my_sample.wav ./outdir
 ```
 This will extract the slices and write them as new files in `./outdir`.
 The file names will be: `my_sample-0.wav`, `my_sample-1.wav`, etc.
@@ -390,12 +394,16 @@ The file names will be: `my_sample-0.wav`, `my_sample-1.wav`, etc.
 You can then add these files to an existing YAML config for your "god-chain" 
 and recreate the sample chain with your newly discovered slices.
 
+You can also split samples in bulk using the `split-slices-yaml` command. See
+the [split-by-slices.yaml example](./examples/confs/split-by-slices.yaml) for 
+more details on the required YAML options/format.
+
 #### Example: Converting data files to YAML/JSON
 Let's say you wanted to inspect all the settings and sample slots for a project
 without having to navigate through all the menus on the Octatrack
 
 ```bash
-ot-tools-cli bin-files bin-to-human \
+ot-tools bin-files bin-to-human \
   project \
   ./path/to/SET/PROJECT/project.work \
   yaml \
@@ -404,6 +412,9 @@ ot-tools-cli bin-files bin-to-human \
 
 This writes the `project.work` data file for a project to `./project.yaml`, 
 where you can now inspect all the settings for the project.
+
+See the [project.yaml example](./examples/human-readable/yaml/project.yaml) for
+an example of this command's output for a default `project.work` file.
 
 #### Example: Writing YAML/JSON files as new binary data files
 Maybe I want to I can edit some of the settings for the project in the above 
@@ -422,7 +433,7 @@ settings:
 
 I can convert this to a new binary data file
 ```bash
-ot-tools-cli bin-files human-to-bin \
+ot-tools bin-files human-to-bin \
   yaml \
   ./project.yaml \
   project \
@@ -455,17 +466,17 @@ convert to YAML and start editing settings
 ```bash
 mkdir ./NEW_PROJECT/
 # new project file
-ot-tools-cli bin-files create-default project ./NEW_PROJECT/project.work
+ot-tools bin-files create-default project ./NEW_PROJECT/project.work
 
 # bank files 1 to 16, inclusive
 for i in `seq 1 16` 
 do 
-  ./ot-tools-cli bin-files create-default bank ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
+  ./ot-tools bin-files create-default bank ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
 done
 # arrangements files 1 to 8, inclusive
 for i in `seq 1 8` 
 do 
-  ot-tools-cli bin-files create-default arrangement ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
+  ot-tools bin-files create-default arrangement ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
 done
 ```
 
@@ -503,6 +514,30 @@ can do with the `create-default` commands.
 - User guide / documentation
 - Writing tests
 - General testing of the software
+
+## `ot-tools-ops` -- the projects/sets operations library
+Rust library with a bunch of functions for inspecting and modifying files 
+contained within Octatrack Set and Project directories. The code for things like
+copying banks between projects or generating sample chains (see examples above) 
+lives in this package.
+
+The `ot-tools` CLI is basically a wrapper on top of this and the `ot-tools-io` 
+package.
+
+### Current Features
+- Copy a bank to a project in the same set/in a different set
+- Copying a bank within the same project
+- Copying multiple banks with a YAML config
+- Slice based sample chaining with the CLI
+- Slice based sample chaining with a YAML config
+- Creating a "god-chain" with a YAML config
+- Creating random/linear slice grids
+- Splitting samples based on slices
+- Deduplicate a project's sample slots (needs more testing)
+- Purge a project's sample slots (needs more testing)
+- Consolidate project samples to project directory (needs more testing)
+- Centralize project samples to the set's audio pool directory (needs more testing)
+- Purge project directory samples that are not in use (needs more testing)
 
 ## `ot-tools-io` -- the read/write files library
 
@@ -564,7 +599,7 @@ Might be useful for an application based on python HTTP APIs if someone is so
 inclined -- read the file from your website into bytes, pass to the `ot_tools` 
 python module, get the json for it etc. etc.
 
-I'm tempted to include some of the `ot-tools-cli` functions in this at some 
+I'm tempted to include some of the `ot-tools` functions in this at some 
 point. But that's something I'll worry about much later.
 
 ### Current Features (mostly working-ish)
@@ -585,12 +620,12 @@ Used to create `#[derive(XXXX)]` macros for the following:
 See the trait descriptions for more information.
 
 # How to build packages
-For a dev versions of `ot-tools-cli` and `ot-tools-io`:
+For a dev versions of `ot-tools` and `ot-tools-io`:
 ```bash
 make build
 ```
 
-For a release version of `ot-tools-cli` and `ot-tools-io`:
+For a release version of `ot-tools` and `ot-tools-io`:
 ```bash
 make release
 ```
@@ -641,6 +676,3 @@ Other rust based credits:
 - the [serde](https://serde.rs) framework made reverse engineering data files a lot easier, 
   `ot-tools-io` probably wouldn't exist without serde.
 - same with [bincode](https://github.com/bincode-org/bincode) for reading the binary data
-
-# License
-The ot-tools project is licensed under the GNU GPL v3.0 license.
