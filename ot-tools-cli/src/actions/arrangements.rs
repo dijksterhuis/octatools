@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use ot_tools_lib::{get_bytes_slice, read_type_from_bin_file};
+use ot_tools_io::{get_bytes_slice, read_type_from_bin_file};
 
 use crate::RBoxErr;
-use ot_tools_lib::arrangements::ArrangementFileRawBytes;
+use ot_tools_io::arrangements::ArrangementFileRawBytes;
 
 /// Show bytes output as u8 values for an Arrangement file located at `path`
 pub fn show_arrangement_bytes(

@@ -6,7 +6,7 @@ use crate::actions::banks::utils::{
 };
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
-use ot_tools_lib::{
+use ot_tools_io::{
     banks::Bank, projects::options::ProjectSampleSlotType, projects::Project,
     read_type_from_bin_file,
 };

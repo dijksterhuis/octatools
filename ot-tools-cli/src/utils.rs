@@ -2,7 +2,7 @@
 
 use crate::audio::wav::WavFile;
 use crate::RBoxErr;
-use ot_tools_lib::{constants::DEFAULT_SAMPLE_RATE, projects::slots::ProjectSampleSlot};
+use ot_tools_io::{constants::DEFAULT_SAMPLE_RATE, projects::slots::ProjectSampleSlot};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -97,7 +97,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::get_otsample_nbars_from_wavfile;
-        use ot_tools_lib::samples::slices::Slice;
+        use ot_tools_io::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]
@@ -158,7 +158,7 @@ mod test {
 
         use crate::audio::wav::WavFile;
         use crate::utils::get_bin_nbars_ileaved_wavfiles;
-        use ot_tools_lib::samples::slices::Slice;
+        use ot_tools_io::samples::slices::Slice;
         use std::path::PathBuf;
 
         #[test]

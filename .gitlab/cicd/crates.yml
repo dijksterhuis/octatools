@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-# Publish ot-tools-cli, ot-tools-derive and ot-tools-lib to crates.io.
+# Publish ot-tools-cli, ot-tools-derive and ot-tools-io to crates.io.
 # ot-tools-derive has to be published to crates.io first, otherwise
-# ot-tools-lib cannot be published.
+# ot-tools-io cannot be published.
 # ot-tools-cli has to be published last as it depends on the others.
 
 release-publish-derive:
@@ -30,7 +30,7 @@ release-publish-lib:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --package "ot-tools-lib" \
+        --package "ot-tools-io" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 

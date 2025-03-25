@@ -1,5 +1,5 @@
-use ot_tools_lib::banks::Bank;
-use ot_tools_lib::read_type_from_bin_file;
+use ot_tools_io::banks::Bank;
+use ot_tools_io::read_type_from_bin_file;
 use std::path::PathBuf;
 
 fn main() {

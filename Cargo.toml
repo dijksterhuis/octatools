@@ -1,5 +1,5 @@
 [workspace]
-members = ["ot-tools-lib", "ot-tools-cli", "ot-tools-derive", "ot-tools-py"]
+members = ["ot-tools-io", "ot-tools-cli", "ot-tools-derive", "ot-tools-py"]
 resolver = "2"
 
 [workspace.package]

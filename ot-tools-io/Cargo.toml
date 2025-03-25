@@ -1,6 +1,6 @@
 [package]
-name = "ot-tools-lib"
-description = "Library for handling Elektron Octatrack DPS-1 data files."
+name = "ot-tools-io"
+description = "Library for reading/writing Elektron Octatrack DPS-1 binary data files."
 
 version.workspace = true
 edition.workspace = true
@@ -10,7 +10,7 @@ homepage.workspace = true
 repository.workspace = true
 
 [lib]
-name = "ot_tools_lib"
+name = "ot_tools_io"
 
 [dependencies]
 bincode.workspace = true

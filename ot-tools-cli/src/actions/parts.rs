@@ -4,10 +4,10 @@ use crate::actions::banks::utils::{
 };
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
-use ot_tools_lib::banks::parts::Part;
-use ot_tools_lib::projects::options::ProjectSampleSlotType;
-use ot_tools_lib::projects::Project;
-use ot_tools_lib::{banks::Bank, read_type_from_bin_file};
+use ot_tools_io::banks::parts::Part;
+use ot_tools_io::projects::options::ProjectSampleSlotType;
+use ot_tools_io::projects::Project;
+use ot_tools_io::{banks::Bank, read_type_from_bin_file};
 use std::path::{Path, PathBuf};
 
 fn part_index_is_valid(indexes: &[usize]) -> bool {

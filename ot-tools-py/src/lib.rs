@@ -1,7 +1,7 @@
-use ot_tools_lib::{
+use ot_tools_io::{
     arrangements::ArrangementFile, banks::Bank, projects::Project, samples::SampleAttributes,
 };
-use ot_tools_lib::{
+use ot_tools_io::{
     deserialize_bin_to_type, deserialize_json_to_type, read_type_from_bin_file,
     serialize_json_from_type, write_type_to_bin_file, Encode,
 };

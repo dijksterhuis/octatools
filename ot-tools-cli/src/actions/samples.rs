@@ -6,7 +6,7 @@ mod test;
 mod yaml;
 
 use log::trace;
-use ot_tools_lib::samples::{
+use ot_tools_io::samples::{
     configs::{SampleLoopConfig, SampleTrimConfig},
     options::{
         SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
@@ -26,7 +26,7 @@ use serde::{Deserialize, Serialize};
 use std::array::from_fn;
 use std::path::{Path, PathBuf};
 
-use ot_tools_lib::{
+use ot_tools_io::{
     get_bytes_slice, read_type_from_bin_file, type_to_yaml_file, write_type_to_bin_file,
     yaml_file_to_type,
 };

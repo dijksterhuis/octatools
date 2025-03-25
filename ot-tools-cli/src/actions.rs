@@ -1,9 +1,9 @@
 //! Module containing code related to running commands
 
 use crate::RBoxErr;
-use ot_tools_lib::banks::parts::Part;
-use ot_tools_lib::banks::patterns::Pattern;
-use ot_tools_lib::projects::options::ProjectSampleSlotType;
+use ot_tools_io::banks::parts::Part;
+use ot_tools_io::banks::patterns::Pattern;
+use ot_tools_io::projects::options::ProjectSampleSlotType;
 
 pub mod arrangements;
 pub mod banks;

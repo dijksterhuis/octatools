@@ -33,8 +33,8 @@ mod chain_create {
     use crate::audio::wav::WavFile;
     use crate::RBoxErr;
 
-    use ot_tools_lib::read_type_from_bin_file;
-    use ot_tools_lib::samples::{
+    use ot_tools_io::read_type_from_bin_file;
+    use ot_tools_io::samples::{
         options::{SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode},
         SampleAttributes,
     };
@@ -466,7 +466,7 @@ mod indexing {
     #[test]
     fn simple_with_yaml_matches_validation() {
         use crate::actions::samples::SamplesDirIndexSimple;
-        use ot_tools_lib::yaml_file_to_type;
+        use ot_tools_io::yaml_file_to_type;
 
         let testpath = PathBuf::from("../data/tests/samples/indexing/simple-valid.yaml");
         let outpath = std::env::temp_dir().join("test-samples-search-simple-validate.yaml");
@@ -486,7 +486,7 @@ mod indexing {
     // #[ignore]
     fn full_with_yaml_matches_validation() {
         use crate::actions::samples::SamplesDirIndexFull;
-        use ot_tools_lib::yaml_file_to_type;
+        use ot_tools_io::yaml_file_to_type;
 
         let testpath = PathBuf::from("../data/tests/samples/indexing/full-valid.yaml");
         let outpath = std::env::temp_dir().join("test-samples-search-full-validate.yaml");

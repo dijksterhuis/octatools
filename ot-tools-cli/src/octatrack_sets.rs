@@ -1,6 +1,6 @@
 //! Module to recursively scan through an Octatrack Set directory and build up listings of various entities.
 //!
-//! Please note: this is not included in the `ot-tools-lib` library crate because there
+//! Please note: this is not included in the `ot-tools-io` library crate because there
 //! is no serialization or deserialization of raw binary data files from an Octatrack.
 //! This is just _walking through directories and listing things_.
 

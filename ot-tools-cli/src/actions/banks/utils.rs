@@ -5,10 +5,10 @@ use crate::actions::{
 };
 use crate::{OctatoolErrors, RBoxErr};
 use itertools::Itertools;
-use ot_tools_lib::samples::options::{
+use ot_tools_io::samples::options::{
     SampleAttributeLoopMode, SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
 };
-use ot_tools_lib::{
+use ot_tools_io::{
     banks::{parts::Part, patterns::Pattern, Bank},
     projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project},
 };

@@ -443,7 +443,7 @@ dependencies = [
  "log",
  "md5",
  "ot-tools-derive",
- "ot-tools-lib",
+ "ot-tools-io",
  "rand",
  "serde",
  "serde_yml",
@@ -459,7 +459,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ot-tools-lib"
+name = "ot-tools-io"
 version = "0.1.0"
 dependencies = [
  "bincode",
@@ -475,7 +475,7 @@ dependencies = [
 name = "ot-tools-py"
 version = "0.1.0"
 dependencies = [
- "ot-tools-lib",
+ "ot-tools-io",
  "pyo3",
 ]
 

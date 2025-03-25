@@ -8,7 +8,7 @@ use crate::{
     RBoxErr,
 };
 use itertools::Itertools;
-use ot_tools_lib::{
+use ot_tools_io::{
     banks::Bank,
     projects::{slots::ProjectSampleSlot, Project},
     read_type_from_bin_file, write_type_to_bin_file,

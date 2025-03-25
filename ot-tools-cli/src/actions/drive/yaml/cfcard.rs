@@ -36,7 +36,7 @@ impl CompactFlashDrive {
 #[allow(unused_imports)]
 mod test {
     use super::*;
-    use ot_tools_lib::yaml_file_to_type;
+    use ot_tools_io::yaml_file_to_type;
 
     #[test]
     fn from_yaml_ok() {

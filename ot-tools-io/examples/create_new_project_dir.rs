@@ -1,5 +1,5 @@
-use ot_tools_lib::write_type_to_bin_file;
-use ot_tools_lib::{arrangements::ArrangementFile, banks::Bank, projects::Project};
+use ot_tools_io::write_type_to_bin_file;
+use ot_tools_io::{arrangements::ArrangementFile, banks::Bank, projects::Project};
 use std::path::PathBuf;
 
 fn bank_fname_from_id(id: usize) -> String {

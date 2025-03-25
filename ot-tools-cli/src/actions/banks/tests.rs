@@ -1,9 +1,9 @@
 use crate::actions::banks::copy_bank_by_paths;
 use copy_dir;
-use ot_tools_lib::banks::parts::AudioTrackMachineSlot;
-use ot_tools_lib::banks::Bank;
-use ot_tools_lib::projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project};
-use ot_tools_lib::{read_type_from_bin_file, write_type_to_bin_file};
+use ot_tools_io::banks::parts::AudioTrackMachineSlot;
+use ot_tools_io::banks::Bank;
+use ot_tools_io::projects::{options::ProjectSampleSlotType, slots::ProjectSampleSlot, Project};
+use ot_tools_io::{read_type_from_bin_file, write_type_to_bin_file};
 use std::env::temp_dir;
 use std::path::PathBuf;
 use utils::resolve_fname_and_fext_from_path;

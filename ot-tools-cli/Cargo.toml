@@ -25,7 +25,7 @@ hound = "3.5.1"
 log = "0.4.22"
 md5 = "0.7.0"
 rand = "0.8.5"
-ot-tools-lib = { path = "../ot-tools-lib" }
+ot-tools-io = { path = "../ot-tools-io" }
 
 bincode.workspace = true
 itertools.workspace = true

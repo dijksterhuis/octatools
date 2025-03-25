@@ -11,7 +11,7 @@ binary data files.
 - [ot-tools is not ...](./README.md#ot-tools-is-not-)
 - [ot-tools is ...](./README.md#ot-tools-is-)
   - [`ot-tools-cli`](./README.md#ot-tools-cli----the-cli-binary)
-  - [`ot-tools-lib`](./README.md#ot-tools-lib----the-readwrite-files-library)
+  - [`ot-tools-io`](./README.md#ot-tools-io----the-readwrite-files-library)
   - [`ot-tools-derive`](./README.md#ot-tools-derive)
   - [`ot-tools-py`](./README.md#ot-tools-py----the-python-module-)
 - [How to build packages](./README.md#how-to-build-packages)
@@ -263,7 +263,7 @@ chains:
       loop_mode: "Off"
       # Quantization options: "Direct", "PatternLength", "OneStep", "TwoSteps",
       # "ThreeSteps", "FourSteps"  ...  etc. etc.
-      # For a complete list, see: ./ot-tools-lib/src/samples/options.rs
+      # For a complete list, see: ./ot-tools-io/src/samples/options.rs
       quantization_mode: "Direct"
     audio_file_paths:
       - "./sample_1.wav"
@@ -442,7 +442,7 @@ cp ./new_project.work ./path/to/SET/PROJECT/project.work
 **WARNING**: ot-tools will not perform validation when converting 
 human-readable values back to the binary data formats, except for basic type 
 overflows (e.g. a setting that cannot be negative, but you provided a negative 
-value). Check the comments and documentation in `ot-tools-lib` documentation to 
+value). Check the comments and documentation in `ot-tools-io` documentation to 
 get an idea of appropriate values. This is also why I explicitly mentioned 
 creating a backup in this example!
 
@@ -504,7 +504,7 @@ can do with the `create-default` commands.
 - Writing tests
 - General testing of the software
 
-## `ot-tools-lib` -- the read/write files library
+## `ot-tools-io` -- the read/write files library
 
 Library with functions for reading/writing Octatrack binary data.
 Most of this is just the [`serde`](https://serde.rs) and 
@@ -523,7 +523,7 @@ function definitions for reading/writing different files or creating new types.
 
 There are a small number of fields in data files which I haven't worked out what 
 they do / are used for yet. If anyone can help here then I would be very 
-grateful (see the list in [./ot-tools-lib/TODO.md](ot-tools-lib/TODO.md)).
+grateful (see the list in [./ot-tools-io/TODO.md](ot-tools-io/TODO.md)).
 
 The JSON / YAML data structures are a bit ... weird. I have done my best to not 
 parse the underlying data into new structures, keeping it so that the library 
@@ -577,20 +577,20 @@ point. But that's something I'll worry about much later.
 **If you don't write rust code you can ignore this**.
 
 Used to create `#[derive(XXXX)]` macros for the following:
-- `#[derive(Decodeable)]` for the `ot_tools_lib::Decode` trait
-- `#[derive(Encodeable)]` for the `ot_tools_lib::Encode` trait
-- `#[derive(DefaultsAsArray)]` for the `ot_tools_lib::DefaultsArray` trait
-- `#[derive(DefaultsAsArrayBoxed)]` for the `ot_tools_lib::DefaultsArrayBoxed` trait
+- `#[derive(Decodeable)]` for the `ot_tools_io::Decode` trait
+- `#[derive(Encodeable)]` for the `ot_tools_io::Encode` trait
+- `#[derive(DefaultsAsArray)]` for the `ot_tools_io::DefaultsArray` trait
+- `#[derive(DefaultsAsArrayBoxed)]` for the `ot_tools_io::DefaultsArrayBoxed` trait
 
 See the trait descriptions for more information.
 
 # How to build packages
-For a dev versions of `ot-tools-cli` and `ot-tools-lib`:
+For a dev versions of `ot-tools-cli` and `ot-tools-io`:
 ```bash
 make build
 ```
 
-For a release version of `ot-tools-cli` and `ot-tools-lib`:
+For a release version of `ot-tools-cli` and `ot-tools-io`:
 ```bash
 make release
 ```
@@ -639,7 +639,7 @@ Other rust based credits:
 
 - [PyO3](https://pyo3.rs/v0.15.1/) is basically the entire reason `ot-tools-py` can exist
 - the [serde](https://serde.rs) framework made reverse engineering data files a lot easier, 
-  `ot-tools-lib` probably wouldn't exist without serde.
+  `ot-tools-io` probably wouldn't exist without serde.
 - same with [bincode](https://github.com/bincode-org/bincode) for reading the binary data
 
 # License

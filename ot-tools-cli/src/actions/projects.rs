@@ -3,7 +3,7 @@ pub mod slots;
 use crate::audio::utils::scan_dir_path_for_audio_files;
 use crate::RBoxErr;
 
-use ot_tools_lib::{
+use ot_tools_io::{
     get_bytes_slice,
     projects::{slots::ProjectSampleSlot, Project},
     read_type_from_bin_file, write_type_to_bin_file,
@@ -15,7 +15,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use ot_tools_lib::projects::ProjectToString;
+use ot_tools_io::projects::ProjectToString;
 
 /// Show bytes output as u8 values for a project file located at `path`
 pub fn show_project_bytes(
@@ -230,7 +230,7 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
 #[allow(unused_imports)]
 mod test {
     use super::*;
-    use ot_tools_lib::yaml_file_to_bin_file;
+    use ot_tools_io::yaml_file_to_bin_file;
 
     #[test]
     fn test_list_sample_slots_ok() {

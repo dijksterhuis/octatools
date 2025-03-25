@@ -8,8 +8,8 @@ mod yaml;
 
 use crate::{actions::banks::yaml::YamlCopyBankConfig, OctatoolErrors, RBoxErr};
 use itertools::Itertools;
-use ot_tools_lib::projects::options::ProjectSampleSlotType;
-use ot_tools_lib::{
+use ot_tools_io::projects::options::ProjectSampleSlotType;
+use ot_tools_io::{
     banks::{Bank, BankRawBytes},
     get_bytes_slice,
     projects::Project,

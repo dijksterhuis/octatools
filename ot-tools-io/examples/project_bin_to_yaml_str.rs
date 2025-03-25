@@ -1,5 +1,5 @@
-use ot_tools_lib::projects::Project;
-use ot_tools_lib::{read_type_from_bin_file, serialize_yaml_from_type};
+use ot_tools_io::projects::Project;
+use ot_tools_io::{read_type_from_bin_file, serialize_yaml_from_type};
 use std::path::PathBuf;
 
 fn main() {

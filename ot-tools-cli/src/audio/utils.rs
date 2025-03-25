@@ -4,7 +4,7 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::audio::{aiff::AiffFile, wav::WavFile};
 use crate::RBoxErr;
-use ot_tools_lib::constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS;
+use ot_tools_io::constants::OCTATRACK_COMPATIBLE_AUDIO_SPECS;
 
 /// A filter for walkdir rescursive search: include directories
 fn direntry_is_dir(entry: &DirEntry) -> bool {
@@ -47,8 +47,8 @@ fn file_path_is_compat_wav(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening WAV spec: path={path:#?}");
     let spec = WavFile::read_spec(&mut reader)?;
 
-    trace!("Creating ot-tools-lib AudioSpec: path={path:#?}");
-    let audio_spec = ot_tools_lib::constants::AudioSpec {
+    trace!("Creating ot-tools-io AudioSpec: path={path:#?}");
+    let audio_spec = ot_tools_io::constants::AudioSpec {
         channels: spec.channels as u8,
         sample_rate: spec.sample_rate,
         bit_depth: spec.bits_per_sample as u8,
@@ -66,8 +66,8 @@ fn file_path_is_compat_aiff(path: &PathBuf) -> RBoxErr<bool> {
     trace!("Opening AIFF spec: path={path:#?}");
     let spec = AiffFile::read_spec(&mut reader)?;
 
-    trace!("Creating ot-tools-lib AudioSpec: path={path:#?}");
-    let audio_spec = ot_tools_lib::constants::AudioSpec {
+    trace!("Creating ot-tools-io AudioSpec: path={path:#?}");
+    let audio_spec = ot_tools_io::constants::AudioSpec {
         channels: spec.channels as u8,
         sample_rate: spec.sample_rate as u32,
         bit_depth: spec.comm_sample_size as u8,

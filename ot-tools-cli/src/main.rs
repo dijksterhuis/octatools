@@ -34,11 +34,11 @@ use crate::actions::{
     },
 };
 use cli::{Cli, Commands};
-use ot_tools_lib::arrangements::ArrangementFile;
-use ot_tools_lib::banks::Bank;
-use ot_tools_lib::projects::Project;
-use ot_tools_lib::samples::SampleAttributes;
-use ot_tools_lib::{Decode, Encode};
+use ot_tools_io::arrangements::ArrangementFile;
+use ot_tools_io::banks::Bank;
+use ot_tools_io::projects::Project;
+use ot_tools_io::samples::SampleAttributes;
+use ot_tools_io::{Decode, Encode};
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::fmt::Display;
@@ -142,18 +142,18 @@ where
     match conversion_type {
         ConvertFromTo::BinToHuman => match human_type {
             cli::HumanReadableFileFormat::Json => {
-                ot_tools_lib::bin_file_to_json_file::<T>(&bin_path, &human_path)
+                ot_tools_io::bin_file_to_json_file::<T>(&bin_path, &human_path)
             }
             cli::HumanReadableFileFormat::Yaml => {
-                ot_tools_lib::bin_file_to_yaml_file::<T>(&bin_path, &human_path)
+                ot_tools_io::bin_file_to_yaml_file::<T>(&bin_path, &human_path)
             }
         },
         ConvertFromTo::HumanToBin => match human_type {
             cli::HumanReadableFileFormat::Json => {
-                ot_tools_lib::json_file_to_bin_file::<T>(&human_path, &bin_path)
+                ot_tools_io::json_file_to_bin_file::<T>(&human_path, &bin_path)
             }
             cli::HumanReadableFileFormat::Yaml => {
-                ot_tools_lib::yaml_file_to_bin_file::<T>(&human_path, &bin_path)
+                ot_tools_io::yaml_file_to_bin_file::<T>(&human_path, &bin_path)
             }
         },
     }
@@ -164,16 +164,16 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
     match x {
         cli::BinFiles::Inspect { bin_type, bin_path } => match bin_type {
             cli::BinTypes::Arrangement => {
-                print_err(|| ot_tools_lib::show_type::<ArrangementFile>(&bin_path, None));
+                print_err(|| ot_tools_io::show_type::<ArrangementFile>(&bin_path, None));
             }
             cli::BinTypes::Bank => {
-                print_err(|| ot_tools_lib::show_type::<Bank>(&bin_path, None));
+                print_err(|| ot_tools_io::show_type::<Bank>(&bin_path, None));
             }
             cli::BinTypes::Project => {
-                print_err(|| ot_tools_lib::show_type::<Project>(&bin_path, None));
+                print_err(|| ot_tools_io::show_type::<Project>(&bin_path, None));
             }
             cli::BinTypes::SampleAttributes => {
-                print_err(|| ot_tools_lib::show_type::<SampleAttributes>(&bin_path, None));
+                print_err(|| ot_tools_io::show_type::<SampleAttributes>(&bin_path, None));
             }
         },
         cli::BinFiles::InspectBytes {
@@ -199,14 +199,14 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
             match bin_type {
                 cli::BinTypes::Arrangement => {
                     print_err(|| {
-                        ot_tools_lib::default_type_to_bin_file::<ArrangementFile>(&bin_path)
+                        ot_tools_io::default_type_to_bin_file::<ArrangementFile>(&bin_path)
                     });
                 }
                 cli::BinTypes::Bank => {
-                    print_err(|| ot_tools_lib::default_type_to_bin_file::<Bank>(&bin_path));
+                    print_err(|| ot_tools_io::default_type_to_bin_file::<Bank>(&bin_path));
                 }
                 cli::BinTypes::Project => {
-                    print_err(|| ot_tools_lib::default_type_to_bin_file::<Project>(&bin_path));
+                    print_err(|| ot_tools_io::default_type_to_bin_file::<Project>(&bin_path));
                 }
                 cli::BinTypes::SampleAttributes => {
                     // it's a clap thang

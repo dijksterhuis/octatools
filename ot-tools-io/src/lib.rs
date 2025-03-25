@@ -1,4 +1,4 @@
-//! # `ot-tools-lib`
+//! # `ot-tools-io`
 //!
 //! Serialization and Deserialization library for Elektron Octatrack data files, including
 //!
@@ -447,8 +447,7 @@ mod test {
         #[test]
         fn test_arrangement_blank() {
             let testfile = PathBuf::from("../data/tests/arrange/blank.work");
-            let outfile =
-                std::env::temp_dir().join("ot-tools-lib-arrangement-load-test-blank.work");
+            let outfile = std::env::temp_dir().join("ot-tools-io-arrangement-load-test-blank.work");
             let yaml = PathBuf::from("../data/tests/arrange/blank.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
@@ -466,7 +465,7 @@ mod test {
         fn test_arrangement_full_options() {
             let testfile = PathBuf::from("../data/tests/arrange/full_options.work");
             let outfile =
-                std::env::temp_dir().join("ot-tools-lib-arrangement-load-test-full_options.work");
+                std::env::temp_dir().join("ot-tools-io-arrangement-load-test-full_options.work");
             let yaml = PathBuf::from("../data/tests/arrange/full_options.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
@@ -484,7 +483,7 @@ mod test {
         fn test_arrangement_one_reminder_row() {
             let testfile = PathBuf::from("../data/tests/arrange/one_reminder_row.work");
             let outfile = std::env::temp_dir()
-                .join("ot-tools-lib-arrangement-load-test-one_reminder_row.work");
+                .join("ot-tools-io-arrangement-load-test-one_reminder_row.work");
             let yaml = PathBuf::from("../data/tests/arrange/one_reminder_row.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
