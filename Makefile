@@ -6,17 +6,17 @@ all:
 
 gen-examples-human-readable:
 	echo "Generating YAML example files ..."
-	rm -f ./examples/human-readable/yaml
+	rm -rf ./examples/human-readable/yaml
 	mkdir -p ./examples/human-readable/yaml
 	cargo r bin-files bin-to-human bank data/tests/blank-project/bank01.work yaml ./examples/human-readable/yaml/bank01.yaml >/dev/null 2>&1
-	cargo r bin-files bin-to-human bank data/tests/blank-project/project.work yaml ./examples/human-readable/yaml/project.yaml >/dev/null 2>&1
-	cargo r bin-files bin-to-human bank data/tests/blank-project/arr01.work yaml ./examples/human-readable/yaml/arr01.yaml >/dev/null 2>&1
+	cargo r bin-files bin-to-human project data/tests/blank-project/project.work yaml ./examples/human-readable/yaml/project.yaml >/dev/null 2>&1
+	cargo r bin-files bin-to-human arrangement data/tests/blank-project/arr01.work yaml ./examples/human-readable/yaml/arr01.yaml >/dev/null 2>&1
 	echo "Generating JSON example files ..."
-	rm -f ./examples/human-readable/json
+	rm -rf ./examples/human-readable/json
 	mkdir -p ./examples/human-readable/json
 	cargo r bin-files bin-to-human bank data/tests/blank-project/bank01.work json ./examples/human-readable/json/bank01.json >/dev/null 2>&1
-	cargo r bin-files bin-to-human bank data/tests/blank-project/project.work json ./examples/human-readable/json/project.json >/dev/null 2>&1
-	cargo r bin-files bin-to-human bank data/tests/blank-project/arr01.work json ./examples/human-readable/json/arr01.json >/dev/null 2>&1
+	cargo r bin-files bin-to-human project data/tests/blank-project/project.work json ./examples/human-readable/json/project.json >/dev/null 2>&1
+	cargo r bin-files bin-to-human arrangement data/tests/blank-project/arr01.work json ./examples/human-readable/json/arr01.json >/dev/null 2>&1
 	echo "Done."
 
 install-qlty:

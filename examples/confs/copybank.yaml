@@ -1,0 +1,26 @@
+to_copy:
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
+    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
+
+
+bank_copies:
+  # copy the bank to a different project
+  - src:
+      # I'm using Linux based relative file paths here
+      # for windows you will need to change these to:
+      #   project: ".\\path\\to\\SET\\PROJECT_SOURCE"
+      project: "./path/to/SET/PROJECT_SOURCE"
+      bank_id: 1
+    dest:
+      project: "./path/to/SET/PROJECT_A"
+      bank_id: 1
