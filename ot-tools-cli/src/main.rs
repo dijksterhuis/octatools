@@ -218,53 +218,6 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
                 }
             }
         }
-        cli::BinFiles::BinToHuman {
-            bin_type,
-            bin_path,
-            dest_type,
-            dest_path,
-        } => match bin_type {
-            cli::BinTypes::Arrangement => {
-                print_err(|| {
-                    convert_from_to::<ArrangementFile>(
-                        ConvertFromTo::HumanToBin,
-                        dest_type,
-                        dest_path,
-                        bin_path,
-                    )
-                });
-            }
-            cli::BinTypes::Bank => {
-                print_err(|| {
-                    convert_from_to::<Bank>(
-                        ConvertFromTo::HumanToBin,
-                        dest_type,
-                        dest_path,
-                        bin_path,
-                    )
-                });
-            }
-            cli::BinTypes::Project => {
-                print_err(|| {
-                    convert_from_to::<Project>(
-                        ConvertFromTo::HumanToBin,
-                        dest_type,
-                        dest_path,
-                        bin_path,
-                    )
-                });
-            }
-            cli::BinTypes::SampleAttributes => {
-                print_err(|| {
-                    convert_from_to::<SampleAttributes>(
-                        ConvertFromTo::HumanToBin,
-                        dest_type,
-                        dest_path,
-                        bin_path,
-                    )
-                });
-            }
-        },
         cli::BinFiles::HumanToBin {
             source_type,
             source_path,
@@ -274,7 +227,7 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
             cli::BinTypes::Arrangement => {
                 print_err(|| {
                     convert_from_to::<ArrangementFile>(
-                        ConvertFromTo::BinToHuman,
+                        ConvertFromTo::HumanToBin,
                         source_type,
                         source_path,
                         bin_path,
@@ -284,7 +237,7 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
             cli::BinTypes::Bank => {
                 print_err(|| {
                     convert_from_to::<Bank>(
-                        ConvertFromTo::BinToHuman,
+                        ConvertFromTo::HumanToBin,
                         source_type,
                         source_path,
                         bin_path,
@@ -294,7 +247,7 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
             cli::BinTypes::Project => {
                 print_err(|| {
                     convert_from_to::<Project>(
-                        ConvertFromTo::BinToHuman,
+                        ConvertFromTo::HumanToBin,
                         source_type,
                         source_path,
                         bin_path,
@@ -304,9 +257,56 @@ fn cmd_select_binfiles(x: cli::BinFiles) {
             cli::BinTypes::SampleAttributes => {
                 print_err(|| {
                     convert_from_to::<SampleAttributes>(
-                        ConvertFromTo::BinToHuman,
+                        ConvertFromTo::HumanToBin,
                         source_type,
                         source_path,
+                        bin_path,
+                    )
+                });
+            }
+        },
+        cli::BinFiles::BinToHuman {
+            bin_type,
+            bin_path,
+            dest_type,
+            dest_path,
+        } => match bin_type {
+            cli::BinTypes::Arrangement => {
+                print_err(|| {
+                    convert_from_to::<ArrangementFile>(
+                        ConvertFromTo::BinToHuman,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Bank => {
+                print_err(|| {
+                    convert_from_to::<Bank>(
+                        ConvertFromTo::BinToHuman,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::Project => {
+                print_err(|| {
+                    convert_from_to::<Project>(
+                        ConvertFromTo::BinToHuman,
+                        dest_type,
+                        dest_path,
+                        bin_path,
+                    )
+                });
+            }
+            cli::BinTypes::SampleAttributes => {
+                print_err(|| {
+                    convert_from_to::<SampleAttributes>(
+                        ConvertFromTo::BinToHuman,
+                        dest_type,
+                        dest_path,
                         bin_path,
                     )
                 });
