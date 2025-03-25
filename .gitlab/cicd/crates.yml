@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright © 2024 Mike Robeson [dijksterhuis]
 
-# Publish octatools-cli, octatools-derive and octatools-lib to crates.io.
-# octatools-derive has to be published to crates.io first, otherwise
-# octatools-lib cannot be published.
-# octatools-cli has to be published last as it depends on the others.
+# Publish ot-tools-cli, ot-tools-derive and ot-tools-lib to crates.io.
+# ot-tools-derive has to be published to crates.io first, otherwise
+# ot-tools-lib cannot be published.
+# ot-tools-cli has to be published last as it depends on the others.
 
 release-publish-derive:
   stage: "release"
@@ -15,7 +15,7 @@ release-publish-derive:
     # make sure to hide the TOKEN variable on non-default branches
     - | 
       cargo publish \
-        --package "octatools-derive" \
+        --package "ot-tools-derive" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
@@ -30,7 +30,7 @@ release-publish-lib:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --package "octatools-lib" \
+        --package "ot-tools-lib" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 
@@ -46,7 +46,7 @@ release-publish-cli:
     # make sure to hide the TOKEN variable on non-default branches
     - |
       cargo publish \
-        --package "octatools-cli" \
+        --package "ot-tools-cli" \
         --dry-run \
         --token ${CARGO_PUBLISH_TOKEN}
 

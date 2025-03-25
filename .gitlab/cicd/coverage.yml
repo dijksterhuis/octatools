@@ -9,9 +9,9 @@ coverage-cobertura:
   before_script:
     - apt install -yqq libssl-dev
     - cargo install cargo-tarpaulin
-  # need to exclude octatools-py and octatools-derive for now as they break tarpaulin
+  # need to exclude ot-tools-py and ot-tools-derive for now as they break tarpaulin
   script:
-    - cargo tarpaulin -o xml --workspace --exclude octatools-py --exclude octatools-derive
+    - cargo tarpaulin -o xml --workspace --exclude ot-tools-py --exclude ot-tools-derive
   coverage: '/^\d+.\d+% coverage/'
   artifacts:
     when: always

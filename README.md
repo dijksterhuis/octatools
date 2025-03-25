@@ -1,21 +1,19 @@
-![Utilities for the Elektron Octatrack DPS-1](assets/logo-wide.png "octatools")
-
 Various Rust binaries/libraries for use with [Elektron Octatrack DPS-1](https://www.elektron.se/en/octratrack-mkii-explorer)
 binary data files.
 
-![GitHub Release](https://img.shields.io/github/v/release/dijksterhuis/octatools?sort=semver&display_name=release&style=flat&label=Latest%20GitHub%20release&link=https%3A%2F%2Fgithub.com%2Fdijksterhuis%2Foctatools%2Freleases%2Flatest)
-[![pipeline status](https://gitlab.com/octatools/octatools/badges/main/pipeline.svg)](https://gitlab.com/octatools/octatools/-/commits/main)
-[![coverage report](https://gitlab.com/octatools/octatools/badges/main/coverage.svg)](https://gitlab.com/octatools/octatools/-/commits/main)
+![GitHub Release](https://img.shields.io/github/v/release/dijksterhuis/ot-tools?sort=semver&display_name=release&style=flat&label=Latest%20GitHub%20release&link=https%3A%2F%2Fgithub.com%2Fdijksterhuis%2Fot-tools%2Freleases%2Flatest)
+[![pipeline status](https://gitlab.com/ot-tools/ot-tools/badges/main/pipeline.svg)](https://gitlab.com/ot-tools/ot-tools/-/commits/main)
+[![coverage report](https://gitlab.com/ot-tools/ot-tools/badges/main/coverage.svg)](https://gitlab.com/ot-tools/ot-tools/-/commits/main)
 
 # Table of Contents
 
 - [Warnings](./README.md#warnings)
-- [octatools is not ...](./README.md#octatools-is-not-)
-- [octatools is ...](./README.md#octatools-is-)
-  - [`octatools-cli`](./README.md#octatools-cli----the-cli-binary)
-  - [`octatools-lib`](./README.md#octatools-lib----the-readwrite-files-library)
-  - [`octatools-derive`](./README.md#octatools-derive)
-  - [`octatools-py`](./README.md#octatools-py----the-python-module-)
+- [ot-tools is not ...](./README.md#ot-tools-is-not-)
+- [ot-tools is ...](./README.md#ot-tools-is-)
+  - [`ot-tools-cli`](./README.md#ot-tools-cli----the-cli-binary)
+  - [`ot-tools-lib`](./README.md#ot-tools-lib----the-readwrite-files-library)
+  - [`ot-tools-derive`](./README.md#ot-tools-derive)
+  - [`ot-tools-py`](./README.md#ot-tools-py----the-python-module-)
 - [How to build packages](./README.md#how-to-build-packages)
 - [How to run tests](./README.md#how-to-run-tests)
 - [Credit](./README.md#credits)
@@ -24,10 +22,10 @@ binary data files.
 # Warnings
 
 - There will be bugs.
-- octatools only works with OS version 1.40B (the one I have installed)
-- AIFF files are not currently supported for `octatools-cli samples` commands.
+- ot-tools only works with OS version 1.40B (the one I have installed)
+- AIFF files are not currently supported for `ot-tools-cli samples` commands.
   Only WAV files are currently supported.
-- Most commands from `octatools-cli` can *probably* be run on Windows, but I 
+- Most commands from `ot-tools-cli` can *probably* be run on Windows, but I 
   mainly develop on Linux, so I might have missed some issues. macOs will be a
   whole other kettle of fish.
 - If you are worried about destroying your Octatrack projects / data files -- 
@@ -41,7 +39,7 @@ binary data files.
   change in the future.
 - There will be bugs.
 
-# octatools is not ...
+# ot-tools is not ...
 
 - A replacement DigiChain
 - A new OctaEdit
@@ -53,12 +51,12 @@ binary data files.
 - Expertly written
 - Paid-for software with a dedicated support team 
 
-# octatools is ...
+# ot-tools is ...
 
 Multiple rust binaries/crates for doing 'stuff' with Octatrack binary data files
 in different ways ...
 
-## `octatools-cli` -- the CLI binary
+## `ot-tools-cli` -- the CLI binary
 
 Perform various useful actions to create and/or modify Octatrack projects/files, 
 like copying banks between projects or chaining sample files together with 
@@ -71,7 +69,7 @@ see [Help Wanted](./README.md#help-wanted).
 
 **WARNING**: Before using any of the binary data file actions -- make sure you 
 `SAVE PROJECT` in the octatrack project menu. Make sure there are both `.work` 
-and `.strd` files in your project directory. octatools does not create `.strd` 
+and `.strd` files in your project directory. ot-tools does not create `.strd` 
 files for your projects (yet). If you make changes after only doing 
 `SYNC TO CARD` then you will not be able to restore your project's previous 
 state (`.work` files are the current state, `.strd` are the saved version which 
@@ -97,7 +95,7 @@ Here's an example of copying `Bank 1` from the `PROJECT_SOURCE` project to the
 `PROJECT_DEST` project.
 
 ```bash
-octatools-cli copying bank \
+ot-tools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -117,7 +115,7 @@ ERROR: destination bank has been modified, but no force flag provided
 If you are **absolutely sure** that you want to overwrite that bank, provide the 
 `--force` flag
 ```bash
-octatools-cli copying bank \
+ot-tools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \
   1 \ 
   ./path/to/SET/PROJECT_DEST \
@@ -152,7 +150,7 @@ settings (e.g. gain/tempo) means that slot is treated as unique.
 
 You can also use this command to copy existing banks within the same project
 ```bash
-octatools-cli copying bank \
+ot-tools-cli copying bank \
   ./path/to/SET/PROJECT_SOURCE \ 
   1 \ 
   ./path/to/SET/PROJECT_SOURCE \
@@ -207,7 +205,7 @@ bank_copies:
 
 Then run
 ```bash
-octatools-cli copying bank-yaml ./bank_copies.yaml
+ot-tools-cli copying bank-yaml ./bank_copies.yaml
 ```
 
 **NOTE**: Because the bank copy operations are performed in series, you could do
@@ -225,7 +223,7 @@ Create new sample files `chained-1.wav` and `chained-1.ot` which chains together
 multiple wav files, all accessible in a single Octatrack sample slot using the 
 slices
 ```bash
-octatools-cli sample-files chain \
+ot-tools-cli sample-files chain \
   chained \
   ./outdir \
   ./sample_1.wav \
@@ -265,7 +263,7 @@ chains:
       loop_mode: "Off"
       # Quantization options: "Direct", "PatternLength", "OneStep", "TwoSteps",
       # "ThreeSteps", "FourSteps"  ...  etc. etc.
-      # For a complete list, see: ./octatools-lib/src/samples/options.rs
+      # For a complete list, see: ./ot-tools-lib/src/samples/options.rs
       quantization_mode: "Direct"
     audio_file_paths:
       - "./sample_1.wav"
@@ -291,7 +289,7 @@ chains:
 
 Then run
 ```bash
-octatools-cli sample-files chain-yaml ./chains.yaml
+ot-tools-cli sample-files chain-yaml ./chains.yaml
 ```
 There will be 4x files in the `./outdir` directory, an `.ot` and a `.wav` file 
 for each chain.
@@ -315,7 +313,7 @@ chains:
 Running the following command will create the files `./outdir/godchain-1.wav` and 
 `./outdir/godchain-1.ot`, which you can load into your Octatrack projects
 ```bash
-octatools-cli sample-files chain-yaml ./godchain.yaml
+ot-tools-cli sample-files chain-yaml ./godchain.yaml
 ```
 
 If you find some new favourite samples at a later date, you can add them to the 
@@ -336,7 +334,7 @@ YAML shortened for brevity)
 ```
 and then running the command again
 ```bash
-octatools-cli sample-files chain-yaml ./godchain.yaml
+ot-tools-cli sample-files chain-yaml ./godchain.yaml
 ```
 The "godchain" files will be recreated with the new samples added as slices 
 after the existing slices. On the Octatrack, replace the existing `godchain-1.wav` 
@@ -360,16 +358,16 @@ strange tones that can be used as background ambience. I usually do this is by
 randomly seeking through a sample in the Octatrack audio editor menu and 
 previewing the audio.
 
-The `octatools-cli samples grid random` command pre-generates a bunch of random 
+The `ot-tools-cli samples grid random` command pre-generates a bunch of random 
 slices for a single audio file, to basically skip me having to do all this 
 seeking business. Now I can just turn the SLICE knob and see what I get!
 ```bash
-octatools-cli sample-files grid-random <WAV_FILE_PATH> <N_SLICES>
+ot-tools-cli sample-files grid-random <WAV_FILE_PATH> <N_SLICES>
 ```
 Or maybe you want to create a slice grid which is linear, i.e. all the slices 
 are the same length and equally spaced apart. In which case, you can use:
 ```bash
-octatools-cli sample-files grid-linear <WAV_FILE_PATH> <N_SLICES>
+ot-tools-cli sample-files grid-linear <WAV_FILE_PATH> <N_SLICES>
 ```
 **WARNING**: Unique sample file name conventions apply. If you want multiple
 random/linear grids then you need to make copies of the files with different 
@@ -384,7 +382,7 @@ contains all of your favourite slices.
 You can create new WAV files from the slices of a sample file pair like so:
 
 ```bash
-octatools-cli sample-files split-slices my_sample.ot my_sample.wav ./outdir
+ot-tools-cli sample-files split-slices my_sample.ot my_sample.wav ./outdir
 ```
 This will extract the slices and write them as new files in `./outdir`.
 The file names will be: `my_sample-0.wav`, `my_sample-1.wav`, etc.
@@ -397,7 +395,7 @@ Let's say you wanted to inspect all the settings and sample slots for a project
 without having to navigate through all the menus on the Octatrack
 
 ```bash
-octatools-cli bin-files bin-to-human \
+ot-tools-cli bin-files bin-to-human \
   project \
   ./path/to/SET/PROJECT/project.work \
   yaml \
@@ -424,7 +422,7 @@ settings:
 
 I can convert this to a new binary data file
 ```bash
-octatools-cli bin-files human-to-bin \
+ot-tools-cli bin-files human-to-bin \
   yaml \
   ./project.yaml \
   project \
@@ -441,10 +439,10 @@ cp ./path/to/SET/PROJECT/project.work ./path/to/SET/PROJECT/project.work.backup
 cp ./new_project.work ./path/to/SET/PROJECT/project.work
 ```
 
-**WARNING**: octatools will not perform validation when converting 
+**WARNING**: ot-tools will not perform validation when converting 
 human-readable values back to the binary data formats, except for basic type 
 overflows (e.g. a setting that cannot be negative, but you provided a negative 
-value). Check the comments and documentation in `octatools-lib` documentation to 
+value). Check the comments and documentation in `ot-tools-lib` documentation to 
 get an idea of appropriate values. This is also why I explicitly mentioned 
 creating a backup in this example!
 
@@ -457,17 +455,17 @@ convert to YAML and start editing settings
 ```bash
 mkdir ./NEW_PROJECT/
 # new project file
-octatools-cli bin-files create-default project ./NEW_PROJECT/project.work
+ot-tools-cli bin-files create-default project ./NEW_PROJECT/project.work
 
 # bank files 1 to 16, inclusive
 for i in `seq 1 16` 
 do 
-  ./octatools-cli bin-files create-default bank ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
+  ./ot-tools-cli bin-files create-default bank ./NEW_PROJECT/bank$(printf "%02d\n" $i).work
 done
 # arrangements files 1 to 8, inclusive
 for i in `seq 1 8` 
 do 
-  octatools-cli bin-files create-default arrangement ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
+  ot-tools-cli bin-files create-default arrangement ./NEW_PROJECT/arr$(printf "%02d\n" $i).work
 done
 ```
 
@@ -506,7 +504,7 @@ can do with the `create-default` commands.
 - Writing tests
 - General testing of the software
 
-## `octatools-lib` -- the read/write files library
+## `ot-tools-lib` -- the read/write files library
 
 Library with functions for reading/writing Octatrack binary data.
 Most of this is just the [`serde`](https://serde.rs) and 
@@ -525,7 +523,7 @@ function definitions for reading/writing different files or creating new types.
 
 There are a small number of fields in data files which I haven't worked out what 
 they do / are used for yet. If anyone can help here then I would be very 
-grateful (see the list in [./octatools-lib/TODO.md](./octatools-lib/TODO.md)).
+grateful (see the list in [./ot-tools-lib/TODO.md](ot-tools-lib/TODO.md)).
 
 The JSON / YAML data structures are a bit ... weird. I have done my best to not 
 parse the underlying data into new structures, keeping it so that the library 
@@ -535,7 +533,7 @@ Like, the arrangements data could do with some work to deal with all the
 `{"empty": ""}` arranger rows. Header fields *probably* don't need to be there
 and can be injected in during deserialization.
 
-## `octatools-py` -- the python module 
+## `ot-tools-py` -- the python module 
 
 Python extension module for reading/writing of Octatrack binary data to/from 
 YAML or JSON string data.
@@ -544,7 +542,7 @@ YAML or JSON string data.
 # python
 import json
 from pathlib import Path
-from octatools_py import bank_file_to_json
+from ot_tools import bank_file_to_json
 
 json_data: dict = json.loads(
     bank_file_to_json(
@@ -563,10 +561,10 @@ their own software. Rust has (fairly) stable bindings for Python provided by
 [PyO3](https://pyo3.rs/v0.15.1/).
 
 Might be useful for an application based on python HTTP APIs if someone is so 
-inclined -- read the file from your website into bytes, pass to `octatools_py`, 
-get the json for it etc. etc.
+inclined -- read the file from your website into bytes, pass to the `ot_tools` 
+python module, get the json for it etc. etc.
 
-I'm tempted to include some of the `octatools-cli` functions in this at some 
+I'm tempted to include some of the `ot-tools-cli` functions in this at some 
 point. But that's something I'll worry about much later.
 
 ### Current Features (mostly working-ish)
@@ -574,30 +572,30 @@ point. But that's something I'll worry about much later.
 - Serialize all Octatrack data files to rust types
 - Serialize/deserialize to/from YAML and JSON
 
-## `octatools-derive`
+## `ot-tools-derive`
 
 **If you don't write rust code you can ignore this**.
 
 Used to create `#[derive(XXXX)]` macros for the following:
-- `#[derive(Decodeable)]` for the `octatools-lib::Decode` trait
-- `#[derive(Encodeable)]` for the `octatools-lib::Encode` trait
-- `#[derive(DefaultsAsArray)]` for the `octatools-lib::DefaultsArray` trait
-- `#[derive(DefaultsAsArrayBoxed)]` for the `octatools-lib::DefaultsArrayBoxed` trait
+- `#[derive(Decodeable)]` for the `ot_tools_lib::Decode` trait
+- `#[derive(Encodeable)]` for the `ot_tools_lib::Encode` trait
+- `#[derive(DefaultsAsArray)]` for the `ot_tools_lib::DefaultsArray` trait
+- `#[derive(DefaultsAsArrayBoxed)]` for the `ot_tools_lib::DefaultsArrayBoxed` trait
 
 See the trait descriptions for more information.
 
 # How to build packages
-For a dev versions of `octatools-cli` and `octatools-lib`:
+For a dev versions of `ot-tools-cli` and `ot-tools-lib`:
 ```bash
 make build
 ```
 
-For a release version of `octatools-cli` and `octatools-lib`:
+For a release version of `ot-tools-cli` and `ot-tools-lib`:
 ```bash
 make release
 ```
 
-For a dev version of `octatools-py` (linux only)
+For a dev version of `ot-tools-py` (linux only)
 ```bash
 # builds python extension module, 
 # installs it in a local virtual environment,
@@ -605,7 +603,7 @@ For a dev version of `octatools-py` (linux only)
 make build-py
 ```
 
-For a release version of `octatools-py`  (linux only)
+For a release version of `ot-tools-py`  (linux only)
 ```bash
 # not available yet
 ```
@@ -628,7 +626,7 @@ The project is currently hanging around 70% test coverage.
 
 The following projects were used a starting references for the initial
 serialization/deserialization efforts of data files (mostly the `.ot` files). 
-Without them, octatools probably wouldn't exist.
+Without them, ot-tools probably wouldn't exist.
 
 - Digichain by brian3kb -- https://github.com/brian3kb/digichain
 - OctaChainer by KaiDrange -- https://github.com/KaiDrange/OctaChainer
@@ -639,10 +637,10 @@ Hopefully there are lots of moonbeams and bunny rabbits wherever you are.
 
 Other rust based credits:
 
-- [PyO3](https://pyo3.rs/v0.15.1/) is basically the entire reason `octatools-py` can exist
+- [PyO3](https://pyo3.rs/v0.15.1/) is basically the entire reason `ot-tools-py` can exist
 - the [serde](https://serde.rs) framework made reverse engineering data files a lot easier, 
-  `octatools-lib` probably wouldn't exist without serde.
+  `ot-tools-lib` probably wouldn't exist without serde.
 - same with [bincode](https://github.com/bincode-org/bincode) for reading the binary data
 
 # License
-The octatools project is licensed under the GNU GPL v3.0 license.
+The ot-tools project is licensed under the GNU GPL v3.0 license.

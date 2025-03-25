@@ -21,7 +21,7 @@ contemplate when making requests/suggestions/sharing ideas.
 ## Development work on GitLab, not GitHub
 
 All development work happens in the main GitLab project 
-(https://gitlab.com/octatools/octatools).
+(https://gitlab.com/ot-tools/ot-tools).
 
 Creating issues in GitHub is fine, and they'll be treated as "user reported 
 issues". GitLab issues will likely lean more towards "developer work planning" 
@@ -33,7 +33,7 @@ The steps for moving a PR over to GitLab are pretty simple
 1. Create a GitLab account: https://gitlab.com/users/sign_up
 2. Set up an SSH key for GitLab:
    https://docs.gitlab.co.jp/ee/user/ssh.html#add-an-ssh-key-to-your-gitlab-account
-3. Fork the project: https://gitlab.com/octatools/octatools/-/forks/new
+3. Fork the project: https://gitlab.com/ot-tools/ot-tools/-/forks/new
 4. Change your local origin remote's url:
    `git remote origin set-url ssh://YOUR_NEW_FORK_SSH_ADDRESS`
 

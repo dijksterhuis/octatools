@@ -1,5 +1,5 @@
 [workspace]
-members = ["octatools-lib", "octatools-cli", "octatools-derive", "octatools-py"]
+members = ["ot-tools-lib", "ot-tools-cli", "ot-tools-derive", "ot-tools-py"]
 resolver = "2"
 
 [workspace.package]
@@ -7,8 +7,8 @@ version = "0.1.0"
 edition = "2021"
 readme = "./README.md"
 license-file = "./LICENSE.md"
-homepage = "https://gitlab.come/dijksterhuis/octatools/"
-repository = "https://gitlab.come/dijksterhuis/octatools/"
+homepage = "https://gitlab.come/ot-tools/ot-tools/"
+repository = "https://gitlab.come/ot-tools/ot-tools/"
 
 [workspace.dependencies]
 bincode = "1.3.3"
