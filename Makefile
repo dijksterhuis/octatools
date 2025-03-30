@@ -58,10 +58,10 @@ build-py: setup-py
 	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -m pip install --force-reinstall $(wildcard ./target/wheels/ot_tools_py*.whl)
 
 smoke-py: build-py
-	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.bank_file_to_json(\"./data/tests/blank-project/bank01.work\")).keys(); print('arrange:', keys)"
-	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.arrangement_file_to_json(\"./data/tests/blank-project/arr01.work\")).keys(); print('bank:', keys)"
-	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.project_file_to_json(\"./data/tests/blank-project/project.work\")).keys(); print('project:', keys)"
-	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.sample_attributes_file_to_json(\"./data/tests/misc/pair.ot\")).keys(); print('sample:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.binfiles.bank_file_to_json(\"./data/tests/blank-project/bank01.work\")).keys(); print('arrange:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.binfiles.arrangement_file_to_json(\"./data/tests/blank-project/arr01.work\")).keys(); print('bank:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.binfiles.project_file_to_json(\"./data/tests/blank-project/project.work\")).keys(); print('project:', keys)"
+	./${PYTHON_EXT_PACKAGE_NAME}/venv/bin/python3 -Bc "import ${PYTHON_EXT_MODULE_NAME}, json; keys = json.loads(${PYTHON_EXT_MODULE_NAME}.binfiles.sample_attributes_file_to_json(\"./data/tests/misc/pair.ot\")).keys(); print('sample:', keys)"
 
 run:
 	cargo run

@@ -484,6 +484,7 @@ name = "ot-tools-py"
 version = "0.1.0"
 dependencies = [
  "ot-tools-io",
+ "ot-tools-ops",
  "pyo3",
 ]
 
