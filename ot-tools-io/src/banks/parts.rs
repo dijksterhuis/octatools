@@ -1,6 +1,6 @@
 //! Serialization and Deserialization of Part related data for Bank files.
 
-use crate::{DefaultsArray, DefaultsArrayBoxed};
+use crate::{CheckHeader, DefaultsArray, DefaultsArrayBoxed};
 use ot_tools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
@@ -1114,6 +1114,12 @@ impl Default for Part {
     }
 }
 
+impl CheckHeader for Part {
+    fn check_header(&self) -> bool {
+        self.header == PART_HEADER
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Parts {
     /// Unsaved Part data for a Bank.
@@ -1126,11 +1132,26 @@ pub struct Parts {
     pub saved: Box<Array<Part, 4>>,
 }
 
+impl CheckHeader for Parts {
+    fn check_header(&self) -> bool {
+        self.unsaved.iter().all(|x| x.check_header())
+    }
+}
+
 impl Default for Parts {
     fn default() -> Self {
         Self {
             unsaved: Part::defaults(),
             saved: Part::defaults(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    mod integrity_check {
+        mod part {}
+
+        mod parts {}
     }
 }

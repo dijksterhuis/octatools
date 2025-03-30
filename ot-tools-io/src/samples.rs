@@ -10,7 +10,7 @@ use crate::{
         configs::{SampleLoopConfig, SampleTrimConfig},
         slices::{Slice, Slices},
     },
-    Decode, Encode, OptionEnumValueConvert, RBoxErr,
+    CheckHeader, Decode, Encode, OptionEnumValueConvert, RBoxErr,
 };
 use ot_tools_derive::Decodeable;
 use serde::{Deserialize, Serialize};
@@ -292,6 +292,12 @@ impl Encode for SampleAttributes {
     }
 }
 
+impl CheckHeader for SampleAttributes {
+    fn check_header(&self) -> bool {
+        self.header == FULL_HEADER
+    }
+}
+
 /// Used with the `ot-tools-cli inspect bytes bank` command.
 /// Only really useful for debugging and / or reverse engineering purposes.
 #[derive(Debug, Serialize, Deserialize, Decodeable)]
@@ -302,6 +308,36 @@ pub struct SampleAttributesRawBytes {
 
 #[cfg(test)]
 mod test {
+    use crate::samples::configs::{SampleLoopConfig, SampleTrimConfig};
+    use crate::samples::options::SampleAttributeLoopMode;
+    use crate::samples::slices::{Slice, Slices};
+
+    fn create_mock_configs_blank() -> (SampleTrimConfig, SampleLoopConfig, Slices) {
+        let trim_config = SampleTrimConfig {
+            start: 0,
+            end: 0,
+            length: 0,
+        };
+
+        let loop_config = SampleLoopConfig {
+            start: 0,
+            length: 0,
+            mode: SampleAttributeLoopMode::Normal,
+        };
+
+        let default_slice = Slice {
+            trim_start: 0,
+            trim_end: 0,
+            loop_start: 0xFFFFFFFF,
+        };
+
+        let slices: [Slice; 64] = [default_slice; 64];
+
+        let slice_conf = Slices { slices, count: 0 };
+
+        (trim_config, loop_config, slice_conf)
+    }
+
     mod checksum {
 
         mod array_based {
@@ -530,36 +566,11 @@ mod test {
 
     mod create_new {
 
+        use super::create_mock_configs_blank;
         use crate::samples::options::{
-            SampleAttributeLoopMode, SampleAttributeTimestrechMode,
-            SampleAttributeTrigQuantizationMode,
+            SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
         };
-        use crate::samples::{SampleAttributes, SampleLoopConfig, SampleTrimConfig, Slice, Slices};
-        fn create_mock_configs_blank() -> (SampleTrimConfig, SampleLoopConfig, Slices) {
-            let trim_config = SampleTrimConfig {
-                start: 0,
-                end: 0,
-                length: 0,
-            };
-
-            let loop_config = SampleLoopConfig {
-                start: 0,
-                length: 0,
-                mode: SampleAttributeLoopMode::Normal,
-            };
-
-            let default_slice = Slice {
-                trim_start: 0,
-                trim_end: 0,
-                loop_start: 0xFFFFFFFF,
-            };
-
-            let slices: [Slice; 64] = [default_slice; 64];
-
-            let slice_conf = Slices { slices, count: 0 };
-
-            (trim_config, loop_config, slice_conf)
-        }
+        use crate::samples::SampleAttributes;
 
         #[test]
         fn err_oob_tempo() {
@@ -593,6 +604,47 @@ mod test {
             );
 
             assert!(composed_chain.is_err());
+        }
+    }
+
+    mod integrity {
+        use super::create_mock_configs_blank;
+        use crate::samples::options::{
+            SampleAttributeTimestrechMode, SampleAttributeTrigQuantizationMode,
+        };
+        use crate::samples::SampleAttributes;
+        use crate::CheckHeader;
+        #[test]
+        fn true_valid_header() {
+            let (trim_conf, loop_conf, slices) = create_mock_configs_blank();
+            let new = SampleAttributes::new(
+                &120.0,
+                &SampleAttributeTimestrechMode::Off,
+                &SampleAttributeTrigQuantizationMode::PatternLength,
+                &0.0,
+                &trim_conf,
+                &loop_conf,
+                &slices,
+            );
+            assert!(new.unwrap().check_header());
+        }
+
+        #[test]
+        fn false_invalid_header() {
+            let (trim_conf, loop_conf, slices) = create_mock_configs_blank();
+            let new = SampleAttributes::new(
+                &120.0,
+                &SampleAttributeTimestrechMode::Off,
+                &SampleAttributeTrigQuantizationMode::PatternLength,
+                &0.0,
+                &trim_conf,
+                &loop_conf,
+                &slices,
+            );
+            let mut mutated = new.unwrap();
+            mutated.header[0] = 0x00;
+            mutated.header[22] = 0x10;
+            assert_eq!(mutated.check_header(), false);
         }
     }
 }

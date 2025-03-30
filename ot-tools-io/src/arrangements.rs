@@ -22,7 +22,7 @@
 mod deserialize;
 mod serialize;
 
-use crate::DefaultsArrayBoxed;
+use crate::{CheckHeader, DefaultsArrayBoxed};
 use ot_tools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
@@ -97,6 +97,12 @@ impl Default for ArrangementFile {
             arrangements_active_flag: from_fn(|_| 0),
             check_sum: from_fn(|_| 0),
         }
+    }
+}
+
+impl CheckHeader for ArrangementFile {
+    fn check_header(&self) -> bool {
+        self.header == ARRANGEMENT_FILE_HEADER
     }
 }
 
@@ -202,4 +208,27 @@ impl Default for ArrangeRow {
 pub struct ArrangementFileRawBytes {
     #[serde(with = "BigArray")]
     pub data: [u8; 11336],
+}
+
+#[cfg(test)]
+mod test {
+    mod integrity_check {
+        use crate::arrangements::ArrangementFile;
+        use crate::CheckHeader;
+
+        #[test]
+        fn true_valid_header() {
+            let arr = ArrangementFile::default();
+            assert!(arr.check_header());
+        }
+
+        #[test]
+        fn false_invalid_header() {
+            let mut arr = ArrangementFile::default();
+            arr.header[0] = 0x01;
+            arr.header[1] = 0x01;
+            arr.header[2] = 0x50;
+            assert_eq!(arr.check_header(), false);
+        }
+    }
 }

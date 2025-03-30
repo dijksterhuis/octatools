@@ -4,7 +4,7 @@ use ot_tools_io::arrangements::{ArrangementFile, ArrangementFileRawBytes};
 use ot_tools_io::banks::{Bank, BankRawBytes};
 use ot_tools_io::projects::{Project, ProjectToString};
 use ot_tools_io::samples::{SampleAttributes, SampleAttributesRawBytes};
-use ot_tools_io::{read_type_from_bin_file, Decode, Encode};
+use ot_tools_io::{read_type_from_bin_file, CheckHeader, Decode, Encode};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -109,6 +109,15 @@ pub(crate) enum SubCmds {
         #[arg(value_enum)]
         bin_type: BinTypes,
         /// Path to the output OctaTrack data file
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+    },
+    /// Read the binary data file and inspect all headers within it to check if there are any problems
+    VerifyHeaders {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path to the binary data file to read and verify
         #[arg(value_hint = ValueHint::FilePath)]
         bin_path: PathBuf,
     },
@@ -238,6 +247,84 @@ fn show_arrangement_bytes(
     let bytes = get_bytes_slice(raw.data.to_vec(), start_idx, len);
     println!("{:#?}", bytes);
     Ok(())
+}
+
+fn helper_ok_not_ok(r: bool) -> String {
+    if r {
+        "ok".to_string()
+    } else {
+        "NOT OK".to_string()
+    }
+}
+
+fn arrangement_check_header(path: &Path) {
+    let arr: ArrangementFile =
+        read_type_from_bin_file::<ArrangementFile>(path).expect("Could not read arrangement file");
+
+    println!(
+        "Arrangement header is {}",
+        helper_ok_not_ok(arr.check_header())
+    );
+}
+
+fn bank_check_header(path: &Path) {
+    let bank: Bank = read_type_from_bin_file::<Bank>(path).expect("Could not read bank file");
+
+    // main header
+    println!("Bank header: {}", helper_ok_not_ok(bank.check_header()));
+
+    // parts
+    for (idx, part) in bank.parts.saved.iter().enumerate() {
+        println!(
+            "Saved part {} header: {}",
+            idx + 1,
+            helper_ok_not_ok(part.check_header())
+        );
+    }
+    for (idx, part) in bank.parts.unsaved.iter().enumerate() {
+        println!(
+            "Unsaved part {} header: {}",
+            idx + 1,
+            helper_ok_not_ok(part.check_header())
+        );
+    }
+
+    // patterns
+    for (p_idx, pattern) in bank.patterns.iter().enumerate() {
+        println!(
+            "Pattern {} header: {}",
+            p_idx + 1,
+            helper_ok_not_ok(pattern.check_header())
+        );
+
+        for (idx, trigs) in pattern.audio_track_trigs.iter().enumerate() {
+            println!(
+                "Pattern {} audio track {} trigs header: {}",
+                p_idx + 1,
+                idx + 1,
+                helper_ok_not_ok(trigs.check_header())
+            );
+        }
+
+        for (idx, trigs) in pattern.midi_track_trigs.iter().enumerate() {
+            println!(
+                "Pattern {} midi track {} trigs header: {}",
+                p_idx + 1,
+                idx + 1,
+                helper_ok_not_ok(trigs.check_header())
+            );
+        }
+    }
+}
+
+fn sample_attr_check_header(path: &Path) {
+    let samp: SampleAttributes = read_type_from_bin_file::<SampleAttributes>(path)
+        .expect("Could not sample attributes file");
+
+    println!(
+        "Sample attributes header is {}",
+        helper_ok_not_ok(samp.check_header())
+    );
 }
 
 #[cfg(test)]
@@ -432,6 +519,12 @@ pub(crate) fn subcmd_runner(x: SubCmds) {
                     )
                 });
             }
+        },
+        SubCmds::VerifyHeaders { bin_type, bin_path } => match bin_type {
+            BinTypes::Arrangement => arrangement_check_header(&bin_path),
+            BinTypes::Project => unimplemented!("Project binary files have no headers."),
+            BinTypes::Bank => bank_check_header(&bin_path),
+            BinTypes::SampleAttributes => sample_attr_check_header(&bin_path),
         },
     }
 }

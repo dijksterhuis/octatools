@@ -6,7 +6,7 @@ use crate::{
         MidiTrackArpParamsValues, MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues,
         MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
     },
-    DefaultsArray, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
+    CheckHeader, DefaultsArray, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
 };
 use std::array::from_fn;
 
@@ -925,6 +925,12 @@ impl Default for AudioTrackTrigs {
     }
 }
 
+impl CheckHeader for AudioTrackTrigs {
+    fn check_header(&self) -> bool {
+        self.header == AUDIO_TRACK_HEADER
+    }
+}
+
 /// MIDI Track Trig masks.
 /// Can be converted into an array of booleans using the `get_track_trigs_from_bitmasks` function.
 /// See `AudioTrackTrigMasks` for more information.
@@ -1040,6 +1046,12 @@ impl Default for MidiTrackTrigs {
             plocks: MidiTrackParameterLocks::defaults(),
             trig_offsets_repeats_conditions: from_fn(|_| [0, 0]),
         }
+    }
+}
+
+impl CheckHeader for MidiTrackTrigs {
+    fn check_header(&self) -> bool {
+        self.header == MIDI_TRACK_HEADER
     }
 }
 
@@ -1226,6 +1238,12 @@ impl Default for Pattern {
     }
 }
 
+impl CheckHeader for Pattern {
+    fn check_header(&self) -> bool {
+        self.header == PATTERN_HEADER
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_imports)]
 mod test {
@@ -1378,6 +1396,67 @@ mod test {
                 crate::banks::patterns::get_halfpage_trigs_from_bitmask_value(&255).unwrap(),
                 [true, true, true, true, true, true, true, true],
             );
+        }
+    }
+
+    mod integrity {
+        mod pattern {
+            // valid header: [0x50, 0x54, 0x52, 0x4e, 0x00, 0x00, 0x00, 0x00];
+            use crate::banks::patterns::Pattern;
+            use crate::CheckHeader;
+
+            #[test]
+            fn true_valid_header() {
+                let pattern = Pattern::default();
+                assert!(pattern.check_header());
+            }
+
+            #[test]
+            fn false_invalid_header() {
+                let mut pattern = Pattern::default();
+                pattern.header[0] = 0x01;
+                pattern.header[1] = 0x01;
+                pattern.header[7] = 0x50;
+                assert_eq!(pattern.check_header(), false);
+            }
+        }
+        mod audio_track_trigs {
+            use crate::banks::patterns::AudioTrackTrigs;
+            use crate::CheckHeader;
+
+            #[test]
+            fn true_valid_header() {
+                let trigs = AudioTrackTrigs::default();
+                assert!(trigs.check_header());
+            }
+
+            #[test]
+            fn false_invalid_header() {
+                let mut trigs = AudioTrackTrigs::default();
+                trigs.header[0] = 0x01;
+                trigs.header[1] = 0x01;
+                trigs.header[2] = 0x50;
+                assert_eq!(trigs.check_header(), false);
+            }
+        }
+        mod midi_track_trigs {
+            use crate::banks::patterns::MidiTrackTrigs;
+            use crate::CheckHeader;
+
+            #[test]
+            fn true_valid_header() {
+                let trigs = MidiTrackTrigs::default();
+                assert!(trigs.check_header());
+            }
+
+            #[test]
+            fn false_invalid_header() {
+                let mut trigs = MidiTrackTrigs::default();
+                trigs.header[0] = 0x01;
+                trigs.header[1] = 0x01;
+                trigs.header[2] = 0x50;
+                assert_eq!(trigs.check_header(), false);
+            }
         }
     }
 }

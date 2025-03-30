@@ -5,7 +5,7 @@ pub mod patterns;
 
 use crate::{
     banks::{parts::Parts, patterns::Pattern},
-    DefaultsArrayBoxed,
+    CheckHeader, DefaultsArrayBoxed,
 };
 use std::array::from_fn;
 
@@ -72,6 +72,12 @@ impl Default for Bank {
             part_names: DEFAULT_PART_NAMES,
             remainder: from_fn(|_| 0),
         }
+    }
+}
+
+impl CheckHeader for Bank {
+    fn check_header(&self) -> bool {
+        self.header_data == BANK_HEADER
     }
 }
 

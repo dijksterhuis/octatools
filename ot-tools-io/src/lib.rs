@@ -154,6 +154,19 @@ pub trait DefaultsArrayBoxed {
     }
 }
 
+/// Verify if headers are valid in some read data.
+/// See this thread to understand why this is useful:
+/// https://www.elektronauts.com/t/bank-unavailable-octatrack/190647/27
+// NOTE: ot-tools-io does not validate headers on file read, which means it is
+// possible to perform checks like this when a data file has been read.
+// otherwise we'd have to do a complicated check to verify headers on every
+// file we read, then throw out an error and probably do some complicated
+// error handling to explain to the end user exactly why we couldn't load the
+// file (bad header, which patterns, which track within patterns etc.).
+pub trait CheckHeader {
+    fn check_header(&self) -> bool;
+}
+
 /* SER/DE GENERICS ============================================================================== */
 
 /// TODO Serialize a JSON string to a data structure of type `T`
