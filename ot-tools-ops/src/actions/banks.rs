@@ -13,7 +13,7 @@ use itertools::Itertools;
 use ot_tools_io::projects::options::ProjectSampleSlotType;
 use ot_tools_io::{
     banks::Bank, projects::Project, read_type_from_bin_file, write_type_to_bin_file,
-    yaml_file_to_type,
+    yaml_file_to_type, IsDefault,
 };
 use std::{path::Path, path::PathBuf};
 use utils::{
@@ -99,7 +99,7 @@ pub fn copy_bank_by_paths(
 
     let dest_bank = read_type_from_bin_file::<Bank>(&destination_meta.bank.filepath)?;
 
-    if dest_bank != Bank::default() && !force {
+    if !dest_bank.is_default() && !force {
         return Err(CliBankErrors::NoForceFlagWithModifiedDestination.into());
     }
 
