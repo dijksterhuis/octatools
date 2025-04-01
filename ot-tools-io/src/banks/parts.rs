@@ -1,7 +1,7 @@
 //! Serialization and Deserialization of Part related data for Bank files.
 
-use crate::{CheckHeader, DefaultsArray, DefaultsArrayBoxed};
-use ot_tools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
+use crate::{CheckHeader, DefaultsArray};
+use ot_tools_derive::DefaultsAsArray;
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
 use std::array::from_fn;
@@ -28,8 +28,8 @@ pub struct AudioTrackVolume {
 impl Default for AudioTrackVolume {
     fn default() -> Self {
         Self {
-            main: 127,
-            cue: 127,
+            main: 0x6c, // 108
+            cue: 0x6c,  // 108
         }
     }
 }
@@ -40,6 +40,15 @@ impl Default for AudioTrackVolume {
 pub struct ActiveScenes {
     pub scene_a: u8,
     pub scene_b: u8,
+}
+
+impl Default for ActiveScenes {
+    fn default() -> Self {
+        Self {
+            scene_a: 0,
+            scene_b: 8,
+        }
+    }
 }
 
 /// An Audio Track's Setup values for the Static machine on the track (loop setting/slice setting/len setting etc.).
@@ -115,7 +124,7 @@ impl Default for AudioTrackMachinesParamsSetup {
             static_machine: AudioTrackMachineParamsSetupStatic {
                 xloop: 1,
                 slic: 0,
-                len: 1,
+                len: 0,
                 rate: 0,
                 tstr: 1,
                 tsns: 64,
@@ -123,7 +132,7 @@ impl Default for AudioTrackMachinesParamsSetup {
             flex_machine: AudioTrackMachineParamsSetupFlex {
                 xloop: 1,
                 slic: 0,
-                len: 1,
+                len: 0,
                 rate: 0,
                 tstr: 1,
                 tsns: 64,
@@ -149,8 +158,8 @@ impl Default for AudioTrackMachinesParamsSetup {
                 unused_2: 0,
                 unused_3: 0,
                 unused_4: 0,
-                tstr: 0,
-                tsns: 0,
+                tstr: 1,
+                tsns: 64,
             },
         }
     }
@@ -338,11 +347,11 @@ impl Default for AudioTrackAmpParamsValues {
     fn default() -> Self {
         Self {
             atk: 0,
-            hold: 0,
-            rel: 0,
-            vol: 0,
-            bal: 0,
-            unused: 0,
+            hold: 127,
+            rel: 127,
+            vol: 64,
+            bal: 64,
+            unused: 127,
         }
     }
 }
@@ -371,9 +380,9 @@ impl Default for AudioTrackParamsValues {
     fn default() -> Self {
         Self {
             lfo: LfoParamsValues {
-                spd1: 0,
-                spd2: 0,
-                spd3: 0,
+                spd1: 32,
+                spd2: 32,
+                spd3: 32,
                 dep1: 0,
                 dep2: 0,
                 dep3: 0,
@@ -381,18 +390,18 @@ impl Default for AudioTrackParamsValues {
             amp: AudioTrackAmpParamsValues::default(),
             fx1: AudioTrackFxParamsValues {
                 param_1: 0,
-                param_2: 0,
+                param_2: 127,
                 param_3: 0,
-                param_4: 0,
+                param_4: 64,
                 param_5: 0,
-                param_6: 0,
+                param_6: 64,
             },
             fx2: AudioTrackFxParamsValues {
-                param_1: 0,
+                param_1: 47,
                 param_2: 0,
-                param_3: 0,
+                param_3: 127,
                 param_4: 0,
-                param_5: 0,
+                param_5: 127,
                 param_6: 0,
             },
         }
@@ -873,7 +882,14 @@ impl Default for AudioTrackScenesParamsAssignments {
                 dep2: 255,
                 dep3: 255,
             },
-            amp: AudioTrackAmpParamsValues::default(),
+            amp: AudioTrackAmpParamsValues {
+                atk: 255,
+                hold: 255,
+                rel: 255,
+                vol: 255,
+                bal: 255,
+                unused: 255,
+            },
             fx1: AudioTrackFxParamsValues {
                 param_1: 255,
                 param_2: 255,
@@ -945,14 +961,17 @@ impl Default for MidiArpSequence {
 }
 
 /// Parts in the bank, containing track data.
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsBoxedBigArray)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Part {
     #[serde(with = "BigArray")]
     pub header: [u8; 4],
 
     /// All 0 values.
     #[serde(with = "BigArray")]
-    pub data_block_1: [u8; 5],
+    pub data_block_1: [u8; 4],
+
+    /// Zero-indexed part number
+    pub part_id: u8,
 
     /// Audio Tracks active FX for FX1.
     /// ```text
@@ -1081,17 +1100,25 @@ pub struct Part {
     pub midi_tracks_arp_seqs: [MidiArpSequence; 8],
 }
 
-impl Default for Part {
-    fn default() -> Self {
+impl Part {
+    /// WARNING: This `default` method is not from the `Default` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// part data --> the individual default depends on their position
+    /// in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    fn default(part_id: u8) -> Self {
+        // TODO: create an ot-tools error
+        assert!(part_id < 4);
         Self {
             header: PART_HEADER,
             data_block_1: from_fn(|_| 0),
+            part_id,
             audio_track_fx1: from_fn(|_| 4),
             audio_track_fx2: from_fn(|_| 8),
-            active_scenes: ActiveScenes {
-                scene_a: 0,
-                scene_b: 0,
-            },
+            active_scenes: ActiveScenes::default(),
             audio_track_volumes: AudioTrackVolume::defaults(),
             audio_track_machine_types: from_fn(|_| 0),
             audio_track_machine_params: AudioTrackMachinesParamsValues::defaults(),
@@ -1112,6 +1139,18 @@ impl Default for Part {
             midi_tracks_arp_seqs: MidiArpSequence::defaults(),
         }
     }
+
+    /// WARNING: This `defaults` method is not from the `Defaults` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// machine slots data --> the individual default depends on their position
+    /// in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    pub fn defaults<const N: usize>() -> Box<Array<Self, N>> {
+        Array(from_fn(|x| Self::default(x as u8))).into()
+    }
 }
 
 impl CheckHeader for Part {
@@ -1120,15 +1159,16 @@ impl CheckHeader for Part {
     }
 }
 
+/// Contains the two different types of Part data
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Parts {
     /// Unsaved Part data for a Bank.
     ///
-    /// Part state prior to before saving a Part is captured here.
+    /// Part state prior to saving a Part via the Part menu (but after SYNC TO CARD).
     pub unsaved: Box<Array<Part, 4>>,
     /// Saved Part data for a Bank.
     ///
-    /// Part state once the Part has been saved is stored here.
+    /// Part state once the Part has been saved via the Part menu is stored here.
     pub saved: Box<Array<Part, 4>>,
 }
 

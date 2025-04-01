@@ -22,7 +22,7 @@
 mod deserialize;
 mod serialize;
 
-use crate::{CheckHeader, DefaultsArrayBoxed};
+use crate::{CheckHeader, DefaultsArrayBoxed, IsDefault};
 use ot_tools_derive::{Decodeable, DefaultsAsBoxedBigArray, Encodeable};
 use serde::{Deserialize, Serialize};
 use serde_big_array::{Array, BigArray};
@@ -106,6 +106,18 @@ impl CheckHeader for ArrangementFile {
     }
 }
 
+impl IsDefault for ArrangementFile {
+    fn is_default(&self) -> bool {
+        let default = &ArrangementFile::default();
+        // check everything except checksums and the arrangement name (see
+        // ArrangementBlock's IsDefault implementation for more details)
+        self.arrangement_state_current.is_default()
+            && self.arrangement_state_previous.is_default()
+            && default.unk1 == self.unk1
+            && default.unk2 == self.unk2
+    }
+}
+
 /// An Arrangement 'block'. 5650 bytes.
 /// There are multiple arrangement states in `arr??.*` files for Arrangements,
 /// seemingly due to the peculiarities of how the Octatrack stores data
@@ -137,6 +149,21 @@ impl Default for ArrangementBlock {
             n_rows: 0,
             rows: ArrangeRow::defaults(),
         }
+    }
+}
+
+impl IsDefault for ArrangementBlock {
+    fn is_default(&self) -> bool {
+        let default = &Self::default();
+
+        // when the octatrack creates a new arrangement file, it will reuse a
+        // name from a previously created arrangement in a different project
+        //
+        // no idea why it does this (copying the other file?) but it does it
+        // reliably when creating a new project from the project menu.
+        default.unknown_1 == self.unknown_1
+            && default.n_rows == self.n_rows
+            && default.rows == self.rows
     }
 }
 
@@ -228,7 +255,38 @@ mod test {
             arr.header[0] = 0x01;
             arr.header[1] = 0x01;
             arr.header[2] = 0x50;
-            assert_eq!(arr.check_header(), false);
+            assert!(!arr.check_header());
+        }
+    }
+
+    mod is_default {
+        use crate::arrangements::ArrangementFile;
+        use crate::{read_type_from_bin_file, IsDefault};
+        use std::path::{Path, PathBuf};
+
+        #[test]
+        fn true_not_modified_default() {
+            assert!(ArrangementFile::default().is_default())
+        }
+        #[test]
+        fn true_not_modified_file() {
+            let path = PathBuf::from("..")
+                .join("data")
+                .join("tests")
+                .join("arrange")
+                .join("blank.work");
+            let arr = read_type_from_bin_file::<ArrangementFile>(&path).unwrap();
+            assert!(arr.is_default())
+        }
+        #[test]
+        fn false_modified_file() {
+            let path = PathBuf::from("..")
+                .join("data")
+                .join("tests")
+                .join("arrange")
+                .join("full_options.work");
+            let arr = read_type_from_bin_file::<ArrangementFile>(&path).unwrap();
+            assert!(!arr.is_default())
         }
     }
 }

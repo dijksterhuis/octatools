@@ -644,7 +644,7 @@ mod test {
             let mut mutated = new.unwrap();
             mutated.header[0] = 0x00;
             mutated.header[22] = 0x10;
-            assert_eq!(mutated.check_header(), false);
+            assert!(!mutated.check_header());
         }
     }
 }

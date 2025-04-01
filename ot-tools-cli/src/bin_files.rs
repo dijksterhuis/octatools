@@ -4,7 +4,7 @@ use ot_tools_io::arrangements::{ArrangementFile, ArrangementFileRawBytes};
 use ot_tools_io::banks::{Bank, BankRawBytes};
 use ot_tools_io::projects::{Project, ProjectToString};
 use ot_tools_io::samples::{SampleAttributes, SampleAttributesRawBytes};
-use ot_tools_io::{read_type_from_bin_file, CheckHeader, Decode, Encode};
+use ot_tools_io::{read_type_from_bin_file, CheckHeader, Decode, Encode, IsDefault};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -79,6 +79,15 @@ pub(crate) enum SubCmds {
         #[arg(value_enum)]
         bin_type: BinTypes,
         /// Path of where to write the new binary data file to
+        #[arg(value_hint = ValueHint::FilePath)]
+        bin_path: PathBuf,
+    },
+    /// Check if a binary data file has been modified (changes made to the project/bank/arrangement)
+    IsModified {
+        /// Type of binary data file
+        #[arg(value_enum)]
+        bin_type: BinTypes,
+        /// Path of the binary data file to check for modifications
         #[arg(value_hint = ValueHint::FilePath)]
         bin_path: PathBuf,
     },
@@ -426,6 +435,47 @@ pub(crate) fn subcmd_runner(x: SubCmds) {
                 }
             }
         }
+        SubCmds::IsModified { bin_type, bin_path } => match bin_type {
+            BinTypes::Arrangement => {
+                let read = read_type_from_bin_file::<ArrangementFile>(&bin_path)
+                    .expect("Could not read arrangement file");
+                println!(
+                    "Arrangement file is {}",
+                    if read.is_default() {
+                        "not modified"
+                    } else {
+                        "modified"
+                    }
+                );
+            }
+            BinTypes::Bank => {
+                let read =
+                    read_type_from_bin_file::<Bank>(&bin_path).expect("Could not read bank file");
+                println!(
+                    "Bank file is {}",
+                    if read.is_default() {
+                        "not modified"
+                    } else {
+                        "modified"
+                    }
+                );
+            }
+            BinTypes::Project => {
+                let read = read_type_from_bin_file::<Project>(&bin_path)
+                    .expect("Could not read project file");
+                println!(
+                    "Project file is {}",
+                    if read.is_default() {
+                        "not modified"
+                    } else {
+                        "modified"
+                    }
+                );
+            }
+            BinTypes::SampleAttributes => {
+                unimplemented!("All sample attributes files are 'modified' files (depends on audio file properties).");
+            }
+        },
         SubCmds::HumanToBin {
             source_type,
             source_path,

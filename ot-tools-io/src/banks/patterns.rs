@@ -6,11 +6,10 @@ use crate::{
         MidiTrackArpParamsValues, MidiTrackCc1ParamsValues, MidiTrackCc2ParamsValues,
         MidiTrackLfoParamsValues, MidiTrackMidiParamsValues,
     },
-    CheckHeader, DefaultsArray, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
+    CheckHeader, DefaultsArrayBoxed, OptionEnumValueConvert, SerdeOctatrackErrors,
 };
+use ot_tools_derive::DefaultsAsBoxedBigArray;
 use std::array::from_fn;
-
-use ot_tools_derive::{DefaultsAsArray, DefaultsAsBoxedBigArray};
 
 use crate::RBoxErr;
 use serde::{Deserialize, Serialize};
@@ -720,7 +719,7 @@ impl OptionEnumValueConvert for TrigCondition {
 }
 
 /// Track trigs assigned on an Audio Track within a Pattern
-#[derive(PartialEq, Debug, Serialize, Deserialize, Clone, DefaultsAsArray)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
 pub struct AudioTrackTrigs {
     /// Header data section
     ///
@@ -734,7 +733,10 @@ pub struct AudioTrackTrigs {
 
     /// Unknown data.
     #[serde(with = "BigArray")]
-    pub unknown_1: [u8; 5],
+    pub unknown_1: [u8; 4],
+
+    /// The zero indexed track number
+    pub track_id: u8,
 
     /// Trig masks contain the Trig step locations for different trig types
     pub trig_masks: AudioTrackTrigMasks,
@@ -908,11 +910,21 @@ pub struct AudioTrackTrigs {
     pub trig_offsets_repeats_conditions: [[u8; 2]; 64],
 }
 
-impl Default for AudioTrackTrigs {
-    fn default() -> Self {
+impl AudioTrackTrigs {
+    /// WARNING: This `default` method is not from the `Default` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// midi track trig data --> the individual default depends on their
+    /// position in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    fn default(id: u8) -> Self {
+        assert!(id < 8);
         Self {
             header: AUDIO_TRACK_HEADER,
             unknown_1: from_fn(|_| 0),
+            track_id: id,
             trig_masks: AudioTrackTrigMasks::default(),
             scale_per_track_mode: TrackPerTrackModeScale::default(),
             swing_amount: 0,
@@ -922,6 +934,18 @@ impl Default for AudioTrackTrigs {
             unknown_3: from_fn(|_| 0),
             trig_offsets_repeats_conditions: from_fn(|_| [0, 0]),
         }
+    }
+
+    /// WARNING: This `defaults` method is not from the `Defaults` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// machine slots data --> the individual default depends on their position
+    /// in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    pub fn defaults<const N: usize>() -> [Self; N] {
+        from_fn(|x| Self::default(x as u8))
     }
 }
 
@@ -982,7 +1006,7 @@ impl Default for MidiTrackTrigMasks {
 }
 
 /// Track trigs assigned on an Audio Track within a Pattern
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, DefaultsAsArray)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MidiTrackTrigs {
     /// Header data section
     ///
@@ -998,12 +1022,8 @@ pub struct MidiTrackTrigs {
     #[serde(with = "BigArray")]
     pub unknown_1: [u8; 4],
 
-    /// this is something to do with the trig masks but i don't know what it's referring to
-    /// * when not active1 trigs on a track: 7
-    /// * when all trigs on a track are trigger trigs: 7
-    /// * when all trigs on a track are trigless trigs: 6
-    /// * when all trigs on a track are plock trigs: 5
-    pub unknown_2: u8,
+    /// The zero indexed track number
+    pub track_id: u8,
 
     /// MIDI Track Trig masks contain the Trig step locations for different trig types
     pub trig_masks: MidiTrackTrigMasks,
@@ -1033,12 +1053,22 @@ pub struct MidiTrackTrigs {
     pub trig_offsets_repeats_conditions: [[u8; 2]; 64],
 }
 
-impl Default for MidiTrackTrigs {
-    fn default() -> Self {
+impl MidiTrackTrigs {
+    /// WARNING: This `default` method is not from the `Default` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// midi track trig data --> the individual default depends on their
+    /// position in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    fn default(id: u8) -> Self {
+        // TODO: create an ot-tools error
+        assert!(id < 8);
         Self {
             header: MIDI_TRACK_HEADER,
             unknown_1: from_fn(|_| 0),
-            unknown_2: 0,
+            track_id: id,
             trig_masks: MidiTrackTrigMasks::default(),
             scale_per_track_mode: TrackPerTrackModeScale::default(),
             swing_amount: 0,
@@ -1046,6 +1076,18 @@ impl Default for MidiTrackTrigs {
             plocks: MidiTrackParameterLocks::defaults(),
             trig_offsets_repeats_conditions: from_fn(|_| [0, 0]),
         }
+    }
+
+    /// WARNING: This `defaults` method is not from the `Defaults` trait, as we
+    /// cannot use a default struct instance to create an array/vector of
+    /// machine slots data --> the individual default depends on their position
+    /// in the final array!
+    ///
+    /// In the future, maybe it might be worth creating `default_with` and
+    /// `defaults_with` methods to deal with this. But it's not clear they are
+    /// needed just yet. 80/20.
+    pub fn defaults<const N: usize>() -> [Self; N] {
+        from_fn(|x| Self::default(x as u8))
     }
 }
 
@@ -1247,6 +1289,60 @@ impl CheckHeader for Pattern {
 #[cfg(test)]
 #[allow(unused_imports)]
 mod test {
+
+    mod track_trig_defaults {
+
+        mod audio {
+            use crate::banks::patterns::AudioTrackTrigs;
+            use crate::RBoxErr;
+
+            fn wrap_err(track_id: u8) -> RBoxErr<AudioTrackTrigs> {
+                Ok(AudioTrackTrigs::default(track_id))
+            }
+
+            #[test]
+            fn ok_track_id_zero() {
+                assert!(wrap_err(0).is_ok());
+            }
+
+            #[test]
+            fn ok_track_id_seven() {
+                assert!(wrap_err(7).is_ok());
+            }
+
+            // todo: proper error handling (don't use an assert!() in the default method)
+            #[test]
+            #[should_panic]
+            fn err_default_track_id_eight() {
+                assert!(wrap_err(8).is_err());
+            }
+        }
+        mod midi {
+            use crate::banks::patterns::MidiTrackTrigs;
+            use crate::RBoxErr;
+
+            fn wrap_err(track_id: u8) -> RBoxErr<MidiTrackTrigs> {
+                Ok(MidiTrackTrigs::default(track_id))
+            }
+
+            #[test]
+            fn ok_track_id_zero() {
+                assert!(wrap_err(0).is_ok());
+            }
+
+            #[test]
+            fn ok_track_id_seven() {
+                assert!(wrap_err(7).is_ok());
+            }
+
+            // todo: proper error handling (don't use an assert!() in the default method)
+            #[test]
+            #[should_panic]
+            fn err_default_track_id_eight() {
+                assert!(wrap_err(8).is_err());
+            }
+        }
+    }
     mod trig_bitmasks {
 
         #[test]
@@ -1417,7 +1513,7 @@ mod test {
                 pattern.header[0] = 0x01;
                 pattern.header[1] = 0x01;
                 pattern.header[7] = 0x50;
-                assert_eq!(pattern.check_header(), false);
+                assert!(!pattern.check_header());
             }
         }
         mod audio_track_trigs {
@@ -1426,17 +1522,17 @@ mod test {
 
             #[test]
             fn true_valid_header() {
-                let trigs = AudioTrackTrigs::default();
+                let trigs = AudioTrackTrigs::default(0);
                 assert!(trigs.check_header());
             }
 
             #[test]
             fn false_invalid_header() {
-                let mut trigs = AudioTrackTrigs::default();
+                let mut trigs = AudioTrackTrigs::default(0);
                 trigs.header[0] = 0x01;
                 trigs.header[1] = 0x01;
                 trigs.header[2] = 0x50;
-                assert_eq!(trigs.check_header(), false);
+                assert!(!trigs.check_header());
             }
         }
         mod midi_track_trigs {
@@ -1445,17 +1541,17 @@ mod test {
 
             #[test]
             fn true_valid_header() {
-                let trigs = MidiTrackTrigs::default();
+                let trigs = MidiTrackTrigs::default(0);
                 assert!(trigs.check_header());
             }
 
             #[test]
             fn false_invalid_header() {
-                let mut trigs = MidiTrackTrigs::default();
+                let mut trigs = MidiTrackTrigs::default(0);
                 trigs.header[0] = 0x01;
                 trigs.header[1] = 0x01;
                 trigs.header[2] = 0x50;
-                assert_eq!(trigs.check_header(), false);
+                assert!(!trigs.check_header());
             }
         }
     }

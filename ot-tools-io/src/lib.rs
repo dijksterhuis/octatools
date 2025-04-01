@@ -154,9 +154,14 @@ pub trait DefaultsArrayBoxed {
     }
 }
 
+/// Whether they type matches the default for the type
+pub trait IsDefault {
+    fn is_default(&self) -> bool;
+}
+
 /// Verify if headers are valid in some read data.
 /// See this thread to understand why this is useful:
-/// https://www.elektronauts.com/t/bank-unavailable-octatrack/190647/27
+/// <https://www.elektronauts.com/t/bank-unavailable-octatrack/190647/27>
 // NOTE: ot-tools-io does not validate headers on file read, which means it is
 // possible to perform checks like this when a data file has been read.
 // otherwise we'd have to do a complicated check to verify headers on every

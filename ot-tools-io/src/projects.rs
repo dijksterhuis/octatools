@@ -14,7 +14,7 @@ use crate::{
         metadata::ProjectMetadata, options::ProjectSampleSlotType, settings::ProjectSettings,
         slots::ProjectSampleSlot, states::ProjectStates,
     },
-    Decode, Encode, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
+    Decode, Encode, IsDefault, OptionEnumValueConvert, RBoxErr, SerdeOctatrackErrors,
 };
 
 /// Trait to use when a new struct can be created from some hashmap with all the necessary fields.
@@ -226,6 +226,12 @@ impl Default for Project {
             states,
             slots,
         }
+    }
+}
+
+impl IsDefault for Project {
+    fn is_default(&self) -> bool {
+        &Project::default() == self
     }
 }
 

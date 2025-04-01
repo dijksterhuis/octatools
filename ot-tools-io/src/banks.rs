@@ -5,7 +5,7 @@ pub mod patterns;
 
 use crate::{
     banks::{parts::Parts, patterns::Pattern},
-    CheckHeader, DefaultsArrayBoxed,
+    CheckHeader, DefaultsArrayBoxed, IsDefault,
 };
 use std::array::from_fn;
 
@@ -23,12 +23,12 @@ const BANK_HEADER: [u8; 22] = [
     70, 79, 82, 77, 0, 0, 0, 0, 68, 80, 83, 49, 66, 65, 78, 75, 0, 0, 0, 0, 0, 23,
 ];
 
-/// Default Part names (PART 1, PART 2 etc.) converted to u8 for ease of use.
+/// Default Part names (ONE, TWO, THREE, FOUR) converted to u8 for ease of use.
 const DEFAULT_PART_NAMES: [[u8; 7]; 4] = [
-    [80, 65, 82, 84, 32, 49, 0], // "PART 1"
-    [80, 65, 82, 84, 32, 50, 0], // "PART 2"
-    [80, 65, 82, 84, 32, 51, 0], // "PART 3"
-    [80, 65, 82, 84, 32, 52, 0], // "PART 4"
+    [0x4f, 0x4e, 0x45, 0x00, 0x00, 0x00, 0x00], // "ONE"
+    [0x54, 0x57, 0x4f, 0x00, 0x00, 0x00, 0x00], // "TWO"
+    [0x54, 0x48, 0x52, 0x45, 0x45, 0x00, 0x00], // "THREE"
+    [0x46, 0x4f, 0x55, 0x52, 0x00, 0x00, 0x00], // "FOUR"
 ];
 
 /// An Octatrack Bank. Contains data related to Parts and Patterns.
@@ -59,7 +59,7 @@ pub struct Bank {
 
     /// Seems to be related to whether the Bank has been modified or saved?
     #[serde(with = "BigArray")]
-    pub remainder: [u8; 2],
+    pub checksum: [u8; 2],
 }
 
 impl Default for Bank {
@@ -70,8 +70,18 @@ impl Default for Bank {
             parts: Parts::default(),
             unknown: from_fn(|_| 0),
             part_names: DEFAULT_PART_NAMES,
-            remainder: from_fn(|_| 0),
+            checksum: from_fn(|_| 0),
         }
+    }
+}
+
+impl IsDefault for Bank {
+    fn is_default(&self) -> bool {
+        let default = &mut Bank::default();
+        // until i work out the checksums, set the default checksum to equal the
+        // current instance's values
+        default.checksum = self.checksum;
+        default == self
     }
 }
 
