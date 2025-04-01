@@ -1,26 +1,36 @@
-to_copy:
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-  - src: "data/tests/copy/bank/BANK-COPY-SRC/bank01.work"
-    dest: "data/tests/copy/bank/BANK-COPY-DEST/bank02.work"
-
-
 bank_copies:
   # copy the bank to a different project
   - src:
       # I'm using Linux based relative file paths here
       # for windows you will need to change these to:
-      #   project: ".\\path\\to\\SET\\PROJECT_SOURCE"
-      project: "./path/to/SET/PROJECT_SOURCE"
+      #   project: ".\\path\\to\\SET\\SRC"
+      project: "./path/to/SET/SRC"
       bank_id: 1
     dest:
-      project: "./path/to/SET/PROJECT_A"
+      project: "./path/to/SET/DEST"
       bank_id: 1
+      # default is false
+      force: false
+  - src:
+      project: "./path/to/SET/SRC"
+      bank_id: 2
+    dest:
+      project: "./path/to/SET/DEST"
+      bank_id: 3
+      # destination bank has been modified, but i'm sure that i want to
+      # overwrite it
+      force: true
+  # can copy a bank from another set
+  - src:
+      project: "./path/to/ANOTHER_SET/ANOTHER_SRC"
+      bank_id: 15
+    dest:
+      project: "./path/to/SET/DEST"
+      bank_id: 5
+  # copy a bank within the same project
+  - src:
+      project: "./path/to/SET/DEST"
+      bank_id: 12
+    dest:
+      project: "./path/to/SET/DEST"
+      bank_id: 6

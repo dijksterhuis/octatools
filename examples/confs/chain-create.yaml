@@ -1,7 +1,7 @@
 global_settings:
-  # WARNING: ensure you name your chains uniquely when generating them from the
-  # same yaml config file. all chain output files are written to the same
-  # directory
+  # WARNING: ensure you name your chains uniquely for each directory you write
+  # to. newly created sample chain files will overwrite any existing files that
+  # have the same file name / file path.
   out_dir_path: "./outchains/"
 
 chains:
@@ -42,6 +42,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the timestretch setting (default is "Normal")
   - chain_name: timestretch-beat
     octatrack_settings:
       # "Off", "Beat" or "Normal"
@@ -49,6 +50,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the timestretch setting (default is "Normal")
   - chain_name: timestretch-normal
     octatrack_settings:
       # "Off", "Beat" or "Normal"
@@ -56,6 +58,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the trig quantization setting
   - chain_name: quant-direct
     octatrack_settings:
       # "Direct", "PatternLength", "OneStep", "TwoSteps", "ThreeSteps"
@@ -64,6 +67,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the trig quantization setting
   - chain_name: quant-patlen
     octatrack_settings:
       # "Direct", "PatternLength", "OneStep", "TwoSteps", "ThreeSteps"
@@ -72,6 +76,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the trig quantization setting
   - chain_name: quant-1step
     octatrack_settings:
       # "Direct", "PatternLength", "OneStep", "TwoSteps", "ThreeSteps"
@@ -80,6 +85,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the trig quantization setting
   - chain_name: quant-256step
     octatrack_settings:
       # "Direct", "PatternLength", "OneStep", "TwoSteps", "ThreeSteps"
@@ -88,6 +94,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the loop settings (default is "Off")
   - chain_name: loop-normal
     octatrack_settings:
       # "Off", "Normal" or "PingPong"
@@ -95,6 +102,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
+  # change the loop settings (default is "Off")
   - chain_name: loop-pingpong
     octatrack_settings:
       # "Off", "Normal" or "PingPong"
@@ -117,6 +125,8 @@ chains:
 
   - chain_name: fadein
     audio_processing:
+      # linearly increasing amplitude fade applied to each slice for X% of the
+      # total slice length
       # between 0.0 and 1.0
       fade_in_percent: 0.1
     audio_file_paths:
@@ -127,6 +137,8 @@ chains:
 
   - chain_name: fadeout
     audio_processing:
+      # linearly decreasing amplitude fade applied to each slice for X% of the
+      # total slice length
       # between 0.0 and 1.0
       fade_out_percent: 0.1
     audio_file_paths:
@@ -156,7 +168,7 @@ chains:
       - "./data/tests/samples/chains/create/wav.wav"
 
   # increase speed of slices by factor of 1 (double speed)
-  # WARNING: this is a lossy conversion
+  # NOTE: this is a lossy conversion
   - chain_name: stretch-plus-1
     audio_processing:
       time_stretch: 1
@@ -164,7 +176,7 @@ chains:
       - "./data/tests/samples/chains/create/wav.wav"
 
   # increase speed of slices by factor of 2 (4x speed)
-  # WARNING: this is a lossy conversion
+  # NOTE: this is a lossy conversion
   - chain_name: stretch-plus-2
     audio_processing:
       time_stretch: 2
@@ -206,7 +218,7 @@ chains:
     audio_file_paths:
       - "./data/tests/samples/chains/create/wav.wav"
 
-  # chains are write as 16-bit signed PCM WAV files by default
+  # chains are written as 16-bit signed PCM WAV files by default
   - chain_name: 16-bit-wav-format
     audio_format:
       # 16 bit-depth is default
@@ -222,7 +234,6 @@ chains:
   # can write individual chains as different formats, like 24-bit wav files
   - chain_name: 24-bit-wav-format
     audio_format:
-      # only 16 can be used here for now, working on 24-bit support
       bit_depth: 24
       # "Wav" is the only accepted format for now
       # format: "Wav"

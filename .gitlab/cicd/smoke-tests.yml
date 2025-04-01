@@ -14,6 +14,8 @@ smoke-test-bin-write-examples:
   stage: "test"
   script:
     - make gen-examples-human-readable
+    - make example-sample-chain
+    - make example-split-slices
 
 # test we can build a docker image successfully
 include:

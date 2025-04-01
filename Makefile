@@ -124,3 +124,13 @@ gen-examples-human-readable:
 	cargo r bin-files bin-to-human project data/tests/blank-project/project.work json ./examples/human-readable/json/project.json >/dev/null 2>&1
 	cargo r bin-files bin-to-human arrangement data/tests/blank-project/arr01.work json ./examples/human-readable/json/arr01.json >/dev/null 2>&1
 	echo "Done."
+
+example-sample-chain:
+	# todo: create directory if does not exist
+	mkdir outchains
+	cargo run sample-files chain-yaml ./examples/confs/chain-create.yaml
+
+example-split-slices:
+	# todo: create directory if does not exist
+	mkdir outsplits
+	cargo run sample-files split-slices-yaml ./examples/confs/split-by-slices.yaml

@@ -1,6 +1,7 @@
 global_settings:
   out_dir_path: ./outsplits/
 
+# will output Nx wav files based on the sample's configured slices
 chains:
   - sample: ./data/tests/chains/deconstruct/test.wav
     otfile: ./data/tests/chains/deconstruct/test.ot
