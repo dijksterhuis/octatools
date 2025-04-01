@@ -249,12 +249,14 @@ mod tests {
     use super::*;
 
     mod arrangement_file {
+        use crate::test_utils::get_arrange_dirpath;
+        use std::path::PathBuf;
 
         #[test]
         // WARN: Currently depends on deserialization being functional.
         fn test_serialize_to_json() {
-            let path = std::path::Path::new("../data/tests/arrange/blank.work");
-            let r = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(path)
+            let path = get_arrange_dirpath().join("blank.work");
+            let r = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(&path)
                 .unwrap();
             let json = crate::serialize_json_from_type::<crate::arrangements::ArrangementFile>(&r);
             assert!(json.is_ok());
@@ -265,12 +267,12 @@ mod tests {
         #[cfg(not(target_os = "windows"))]
         // WARN: Depends on deserialization being functional.
         fn test_serialize_to_yaml() {
-            let valid_yaml_path = std::path::Path::new("../data/tests/arrange/blank.yaml");
-            let valid_yaml = crate::read_str_file(valid_yaml_path);
+            let valid_yaml_path = get_arrange_dirpath().join("blank.yaml");
+            let valid_yaml = crate::read_str_file(&valid_yaml_path);
 
-            let bin_file_path = std::path::Path::new("../data/tests/arrange/blank.work");
+            let bin_file_path = get_arrange_dirpath().join("blank.work");
             let arr = crate::read_type_from_bin_file::<crate::arrangements::ArrangementFile>(
-                bin_file_path,
+                &bin_file_path,
             );
             let yaml = crate::serialize_yaml_from_type::<crate::arrangements::ArrangementFile>(
                 &arr.unwrap(),

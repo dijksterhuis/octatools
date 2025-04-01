@@ -262,7 +262,7 @@ mod test {
     mod is_default {
         use crate::arrangements::ArrangementFile;
         use crate::{read_type_from_bin_file, IsDefault};
-        use std::path::{Path, PathBuf};
+        use std::path::PathBuf;
 
         #[test]
         fn true_not_modified_default() {

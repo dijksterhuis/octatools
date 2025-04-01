@@ -394,11 +394,14 @@ mod test {
         mod file_based {
             use crate::read_type_from_bin_file;
             use crate::samples::{calculate_checksum_sample_attr_bytes, SampleAttributes};
+            use crate::test_utils::get_samples_dirpath;
             use std::path::PathBuf;
 
             #[test]
             fn zero_slices_trig_quant_one_step() {
-                let path = PathBuf::from("../data/tests/samples/checksum/0slices-tq1step.ot");
+                let path = get_samples_dirpath()
+                    .join("checksum")
+                    .join("0slices-tq1step.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 743);
@@ -406,7 +409,7 @@ mod test {
 
             #[test]
             fn zero_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/0slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("0slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 997);
@@ -414,70 +417,70 @@ mod test {
 
             #[test]
             fn one_slice() {
-                let path = PathBuf::from("../data/tests/samples/checksum/1slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("1slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 2082);
             }
             #[test]
             fn two_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/2slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("2slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 3673);
             }
             #[test]
             fn four_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/4slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("4slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 7235);
             }
             #[test]
             fn eight_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/8slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("8slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 13943);
             }
             #[test]
             fn sixteen_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/16slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("16slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 26111);
             }
             #[test]
             fn thirty_two_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/32slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("32slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 50405);
             }
             #[test]
             fn forty_eight_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/48slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("48slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 10787);
             }
             #[test]
             fn sixty_two_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/62slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("62slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 35738);
             }
             #[test]
             fn sixty_three_slices() {
-                let path = PathBuf::from("../data/tests/samples/checksum/63slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("63slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 35086);
             }
             #[test]
             fn sixty_four_slices_correct() {
-                let path = PathBuf::from("../data/tests/samples/checksum/64slices.ot");
+                let path = get_samples_dirpath().join("checksum").join("64slices.ot");
                 let data = read_type_from_bin_file::<SampleAttributes>(&path).unwrap();
                 let bytes: Vec<u8> = bincode::serialize(&data).unwrap();
                 assert_eq!(calculate_checksum_sample_attr_bytes(&bytes).unwrap(), 34295,);

@@ -17,6 +17,9 @@ pub mod projects;
 pub mod samples;
 pub mod utils;
 
+#[cfg(test)]
+mod test_utils;
+
 use serde::{Deserialize, Serialize};
 use serde_big_array::Array;
 use std::array::from_fn;
@@ -415,35 +418,38 @@ mod test {
     use crate::banks::Bank;
     use crate::projects::Project;
     use crate::samples::SampleAttributes;
+    use crate::test_utils::*;
+    use std::path::PathBuf;
 
     mod show_ok {
         use super::*;
+        use std::path::PathBuf;
 
         #[test]
         fn test_arrangement() {
-            let fp = Path::new("../data/tests/blank-project/arr01.work");
-            let r = show_type::<ArrangementFile>(fp, None);
+            let fp = get_blank_proj_dirpath().join("arr01.work");
+            let r = show_type::<ArrangementFile>(&fp, None);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_bank() {
-            let fp = Path::new("../data/tests/blank-project/bank01.work");
-            let r = show_type::<Bank>(fp, None);
+            let fp = get_blank_proj_dirpath().join("bank01.work");
+            let r = show_type::<Bank>(&fp, None);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_project() {
-            let fp = Path::new("../data/tests/blank-project/project.work");
-            let r = show_type::<Project>(fp, None);
+            let fp = get_blank_proj_dirpath().join("project.work");
+            let r = show_type::<Project>(&fp, None);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_sample() {
-            let fp = Path::new("../data/tests/misc/pair.ot");
-            let r = show_type::<SampleAttributes>(fp, None);
+            let fp = get_misc_dirpath().join("pair.ot");
+            let r = show_type::<SampleAttributes>(&fp, None);
             assert!(r.is_ok())
         }
     }
@@ -451,13 +457,12 @@ mod test {
     // TODO: Add more cases
     mod yaml_file_to_bin_file_ok {
         use super::*;
-        use std::path::PathBuf;
 
         #[test]
         fn test_arrangement_blank() {
-            let testfile = PathBuf::from("../data/tests/arrange/blank.work");
+            let testfile = get_arrange_dirpath().join("blank.work");
             let outfile = std::env::temp_dir().join("ot-tools-io-arrangement-load-test-blank.work");
-            let yaml = PathBuf::from("../data/tests/arrange/blank.yaml");
+            let yaml = get_arrange_dirpath().join("blank.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
 
@@ -472,10 +477,10 @@ mod test {
 
         #[test]
         fn test_arrangement_full_options() {
-            let testfile = PathBuf::from("../data/tests/arrange/full_options.work");
+            let testfile = get_arrange_dirpath().join("full_options.work");
             let outfile =
                 std::env::temp_dir().join("ot-tools-io-arrangement-load-test-full_options.work");
-            let yaml = PathBuf::from("../data/tests/arrange/full_options.yaml");
+            let yaml = get_arrange_dirpath().join("full_options.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
 
@@ -490,10 +495,10 @@ mod test {
 
         #[test]
         fn test_arrangement_one_reminder_row() {
-            let testfile = PathBuf::from("../data/tests/arrange/one_reminder_row.work");
+            let testfile = get_arrange_dirpath().join("one_reminder_row.work");
             let outfile = std::env::temp_dir()
                 .join("ot-tools-io-arrangement-load-test-one_reminder_row.work");
-            let yaml = PathBuf::from("../data/tests/arrange/one_reminder_row.yaml");
+            let yaml = get_arrange_dirpath().join("one_reminder_row.yaml");
 
             let r = yaml_file_to_bin_file::<ArrangementFile>(&yaml, &outfile);
 
@@ -509,7 +514,7 @@ mod test {
         #[test]
         fn test_project() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-project-load-test-ok.work");
-            let yaml = PathBuf::from("../data/tests/projects/project.yaml");
+            let yaml = get_project_dirpath().join("project.yaml");
             let r = yaml_file_to_bin_file::<Project>(&yaml, &outfile);
             let _ = std::fs::remove_file(&outfile);
             println!("{r:?}");
@@ -518,9 +523,9 @@ mod test {
 
         #[test]
         fn test_project_matches_blank() {
-            let testfile = PathBuf::from("../data/tests/projects/blank.work");
+            let testfile = get_project_dirpath().join("blank.work");
             let outfile = std::env::temp_dir().join("ot-tools-actions-project-load-test-full.work");
-            let yaml = PathBuf::from("../data/tests/projects/project.yaml");
+            let yaml = get_project_dirpath().join("project.yaml");
 
             let r = yaml_file_to_bin_file::<Project>(&yaml, &outfile);
 
@@ -536,7 +541,7 @@ mod test {
         #[test]
         fn test_bank() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bank-load-test-ok.work");
-            let yaml = PathBuf::from("../data/tests/bank/blank.yaml");
+            let yaml = get_bank_dirpath().join("blank.yaml");
             let r = yaml_file_to_bin_file::<Bank>(&yaml, &outfile);
             let _ = std::fs::remove_file(&outfile);
             println!("{r:?}");
@@ -546,7 +551,7 @@ mod test {
         #[test]
         fn test_sample() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-sample-load-test-ok.work");
-            let yaml = PathBuf::from("../data/tests/samples/chain.yaml");
+            let yaml = get_samples_dirpath().join("chain.yaml");
             let r = yaml_file_to_bin_file::<SampleAttributes>(&yaml, &outfile);
             let _ = std::fs::remove_file(&outfile);
             println!("{r:?}");
@@ -556,18 +561,19 @@ mod test {
 
     mod bin_file_to_yaml_file_ok {
         use super::*;
+        use std::path::PathBuf;
 
         #[test]
         // Windows will add on carriage returns...
         #[cfg(not(target_os = "windows"))]
         fn arrangement_blank() {
-            let valid_yaml_path = std::path::Path::new("../data/tests/arrange/blank.yaml");
-            let binpath = std::path::Path::new("../data/tests/arrange/blank.work");
+            let valid_yaml_path = get_arrange_dirpath().join("blank.yaml");
+            let binpath = get_arrange_dirpath().join("blank.work");
             let outyaml = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-blank.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");
@@ -579,13 +585,13 @@ mod test {
         // Windows will add on carriage returns...
         #[cfg(not(target_os = "windows"))]
         fn arrangement_full_options() {
-            let valid_yaml_path = std::path::Path::new("../data/tests/arrange/full_options.yaml");
-            let binpath = std::path::Path::new("../data/tests/arrange/full_options.work");
+            let valid_yaml_path = get_arrange_dirpath().join("full_options.yaml");
+            let binpath = get_arrange_dirpath().join("full_options.work");
             let outyaml = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-fulloptions.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");
@@ -597,15 +603,14 @@ mod test {
         // Windows will add on carriage returns...
         #[cfg(not(target_os = "windows"))]
         fn arrangement_one_reminder_row() {
-            let valid_yaml_path =
-                std::path::Path::new("../data/tests/arrange/one_reminder_row.yaml");
-            let binpath = std::path::Path::new("../data/tests/arrange/one_reminder_row.work");
+            let valid_yaml_path = get_arrange_dirpath().join("one_reminder_row.yaml");
+            let binpath = get_arrange_dirpath().join("one_reminder_row.work");
             let outyaml =
                 std::env::temp_dir().join("serde-ot-bin2yaml-arrange-onereminderrow.yaml");
 
-            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(binpath, &outyaml);
+            let r = crate::bin_file_to_yaml_file::<super::ArrangementFile>(&binpath, &outyaml);
             let written = crate::read_str_file(&outyaml).unwrap();
-            let valid = crate::read_str_file(valid_yaml_path).unwrap();
+            let valid = crate::read_str_file(&valid_yaml_path).unwrap();
 
             let _ = std::fs::remove_file(&outyaml);
             println!("{r:?}");
@@ -616,8 +621,8 @@ mod test {
         #[test]
         fn test_bank() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-bank-ok.yaml");
-            let binfile = Path::new("../data/tests/blank-project/bank01.work");
-            let r = bin_file_to_yaml_file::<Bank>(binfile, &outfile);
+            let binfile = get_blank_proj_dirpath().join("bank01.work");
+            let r = bin_file_to_yaml_file::<Bank>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -625,8 +630,8 @@ mod test {
         #[test]
         fn test_project() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-project-ok.yaml");
-            let binfile = Path::new("../data/tests/blank-project/project.work");
-            let r = bin_file_to_yaml_file::<Project>(binfile, &outfile);
+            let binfile = get_blank_proj_dirpath().join("project.work");
+            let r = bin_file_to_yaml_file::<Project>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -634,8 +639,8 @@ mod test {
         #[test]
         fn test_sample() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-sample-ok.yaml");
-            let binfile = Path::new("../data/tests/misc/pair.ot");
-            let r = bin_file_to_yaml_file::<SampleAttributes>(binfile, &outfile);
+            let binfile = get_misc_dirpath().join("pair.ot");
+            let r = bin_file_to_yaml_file::<SampleAttributes>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -647,10 +652,11 @@ mod test {
         #[test]
         fn arrangement_blank() {
             // let valid_json_path = std::path::Path::new("TODO");
-            let binpath = std::path::Path::new("../data/tests/arrange/blank.work");
+
+            let binpath = get_arrange_dirpath().join("blank.work");
             let outjson = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-blank.json");
 
-            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(binpath, &outjson);
+            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(&binpath, &outjson);
             let written = crate::read_str_file(&outjson);
             // let valid = crate::read_str_file(&valid_json_path).unwrap();
 
@@ -664,10 +670,10 @@ mod test {
         #[test]
         fn arrangement_full_options() {
             // let valid_json_path = std::path::Path::new("TODO");
-            let binpath = std::path::Path::new("../data/tests/arrange/full_options.work");
+            let binpath = get_arrange_dirpath().join("full_options.work");
             let outjson = std::env::temp_dir().join("serde-ot-bin2yaml-arrange-full.json");
 
-            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(binpath, &outjson);
+            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(&binpath, &outjson);
             let written = crate::read_str_file(&outjson);
             // let valid = crate::read_str_file(&valid_json_path).unwrap();
 
@@ -681,11 +687,11 @@ mod test {
         #[test]
         fn arrangement_one_reminder_row() {
             // let valid_json_path = std::path::Path::new("TODO");
-            let binpath = std::path::Path::new("../data/tests/arrange/one_reminder_row.work");
+            let binpath = get_arrange_dirpath().join("one_reminder_row.work");
             let outjson =
                 std::env::temp_dir().join("serde-ot-bin2yaml-arrange-one_reminder_row.json");
 
-            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(binpath, &outjson);
+            let r = crate::bin_file_to_json_file::<super::ArrangementFile>(&binpath, &outjson);
             let written = crate::read_str_file(&outjson);
             // let valid = crate::read_str_file(&valid_json_path).unwrap();
 
@@ -699,8 +705,8 @@ mod test {
         #[test]
         fn test_bank() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-bank-ok.json");
-            let binfile = Path::new("../data/tests/blank-project/bank01.work");
-            let r = bin_file_to_json_file::<Bank>(binfile, &outfile);
+            let binfile = get_blank_proj_dirpath().join("bank01.work");
+            let r = bin_file_to_json_file::<Bank>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -708,8 +714,8 @@ mod test {
         #[test]
         fn test_project() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-project-ok.json");
-            let binfile = Path::new("../data/tests/blank-project/project.work");
-            let r = bin_file_to_json_file::<Project>(binfile, &outfile);
+            let binfile = get_blank_proj_dirpath().join("project.work");
+            let r = bin_file_to_json_file::<Project>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -717,8 +723,8 @@ mod test {
         #[test]
         fn test_sample() {
             let outfile = std::env::temp_dir().join("ot-tools-actions-bin2yaml-sample-ok.json");
-            let binfile = Path::new("../data/tests/misc/pair.ot");
-            let r = bin_file_to_json_file::<SampleAttributes>(binfile, &outfile);
+            let binfile = get_misc_dirpath().join("pair.ot");
+            let r = bin_file_to_json_file::<SampleAttributes>(&binfile, &outfile);
             let _ = std::fs::remove_file(&outfile);
             assert!(r.is_ok())
         }
@@ -769,43 +775,43 @@ mod test {
 
         #[test]
         fn arrangement_blank() {
-            let binfile = Path::new("../data/tests/arrange/blank.work");
-            let r = read_type_from_bin_file::<ArrangementFile>(binfile);
+            let binfile = get_arrange_dirpath().join("blank.work");
+            let r = read_type_from_bin_file::<ArrangementFile>(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn arrangement_full_options() {
-            let binfile = Path::new("../data/tests/arrange/full_options.work");
-            let r = read_type_from_bin_file::<ArrangementFile>(binfile);
+            let binfile = get_arrange_dirpath().join("full_options.work");
+            let r = read_type_from_bin_file::<ArrangementFile>(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn arrangement_one_reminder() {
-            let binfile = Path::new("../data/tests/arrange/one_reminder_row.work");
-            let r = read_type_from_bin_file::<ArrangementFile>(binfile);
+            let binfile = get_arrange_dirpath().join("one_reminder_row.work");
+            let r = read_type_from_bin_file::<ArrangementFile>(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_type_from_bin_file_bank() {
-            let binfile = Path::new("../data/tests/blank-project/bank01.work");
-            let r = read_type_from_bin_file::<Bank>(binfile);
+            let binfile = get_blank_proj_dirpath().join("bank01.work");
+            let r = read_type_from_bin_file::<Bank>(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_type_from_bin_file_project() {
-            let binfile = Path::new("../data/tests/blank-project/project.work");
-            let r = read_type_from_bin_file::<Project>(binfile);
+            let binfile = get_blank_proj_dirpath().join("project.work");
+            let r = read_type_from_bin_file::<Project>(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_type_from_bin_file_sample() {
-            let binfile = Path::new("../data/tests/misc/pair.ot");
-            let r = read_type_from_bin_file::<SampleAttributes>(binfile);
+            let binfile = get_misc_dirpath().join("pair.ot");
+            let r = read_type_from_bin_file::<SampleAttributes>(&binfile);
             assert!(r.is_ok())
         }
     }
@@ -819,43 +825,43 @@ mod test {
 
         #[test]
         fn arrangement_blank() {
-            let binfile = Path::new("../data/tests/arrange/blank.work");
-            let r = read_bin_file(binfile);
+            let binfile = get_arrange_dirpath().join("blank.work");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn arrangement_full_options() {
-            let binfile = Path::new("../data/tests/arrange/full_options.work");
-            let r = read_bin_file(binfile);
+            let binfile = get_arrange_dirpath().join("full_options.work");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn arrangement_one_reminder() {
-            let binfile = Path::new("../data/tests/arrange/one_reminder_row.work");
-            let r = read_bin_file(binfile);
+            let binfile = get_arrange_dirpath().join("one_reminder_row.work");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_bin_file_bank() {
-            let binfile = Path::new("../data/tests/blank-project/bank01.work");
-            let r = read_bin_file(binfile);
+            let binfile = get_blank_proj_dirpath().join("bank01.work");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_bin_file_project() {
-            let binfile = Path::new("../data/tests/blank-project/project.work");
-            let r = read_bin_file(binfile);
+            let binfile = get_blank_proj_dirpath().join("project.work");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
 
         #[test]
         fn test_read_bin_file_sample() {
-            let binfile = Path::new("../data/tests/misc/pair.ot");
-            let r = read_bin_file(binfile);
+            let binfile = get_misc_dirpath().join("pair.ot");
+            let r = read_bin_file(&binfile);
             assert!(r.is_ok())
         }
     }
@@ -885,14 +891,14 @@ mod test {
         // can read a project file without errors
         #[test]
         fn test_read_default_project_work_file() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             assert!(read_type_from_bin_file::<Project>(&infile).is_ok());
         }
 
         // test that the metadata section is correct
         #[test]
         fn test_read_default_project_work_file_metadata() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
 
             let correct = ProjectMetadata::default();
@@ -903,7 +909,7 @@ mod test {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_states() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
 
             let correct = ProjectStates::default();
@@ -914,7 +920,7 @@ mod test {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_settings() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
 
             let correct = ProjectSettings::default();
@@ -925,7 +931,7 @@ mod test {
         // test that the states section is correct
         #[test]
         fn test_read_default_project_work_file_sslots() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
             let default_sslots = ProjectSampleSlot::defaults();
 
@@ -935,7 +941,7 @@ mod test {
         // test that reading and writing a single project gives the same outputs
         #[test]
         fn test_read_write_default_project_work_file() {
-            let infile = PathBuf::from("../data/tests/blank-project/project.work");
+            let infile = get_blank_proj_dirpath().join("project.work");
             let outfile = std::env::temp_dir().join("default_1.work");
             let p = read_type_from_bin_file::<Project>(&infile).unwrap();
             let _ = write_type_to_bin_file::<Project>(&p, &outfile);

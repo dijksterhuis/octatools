@@ -579,27 +579,28 @@ mod tests {
     use super::*;
 
     mod arrangement_file {
+        use crate::test_utils::get_arrange_dirpath;
 
         #[test]
         fn read_binfile_blank() {
-            let path = std::path::Path::new("../data/tests/arrange/blank.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
+            let path = get_arrange_dirpath().join("blank.work");
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
 
         #[test]
         fn read_binfile_full_options() {
-            let path = std::path::Path::new("../data/tests/arrange/full_options.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
+            let path = get_arrange_dirpath().join("full_options.work");
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
 
         #[test]
         fn read_binfile_one_reminder_row() {
-            let path = std::path::Path::new("../data/tests/arrange/one_reminder_row.work");
-            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(path);
+            let path = get_arrange_dirpath().join("one_reminder_row.work");
+            let r = crate::read_type_from_bin_file::<super::ArrangementFile>(&path);
             println!("{r:?}");
             assert!(r.is_ok());
         }
