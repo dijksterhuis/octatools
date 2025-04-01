@@ -40,6 +40,20 @@ docs-full:
 docs:
 	cargo doc --workspace --no-deps
 
+docker:
+	docker build -t ot-tools -f ./Dockerfile .
+
+docker-uncached:
+	docker build -t ot-tools --no-cache -f ./Dockerfile .
+
+docker-release-glab: docker-uncached
+	CI_REGISTRY_IMAGE ?= $(error CI_REGISTRY_IMAGE not set -- please do not run this make target outside of GitLab CI jobs)
+	CI_COMMIT_TAG ?= $(error CI_COMMIT_TAG not set -- please do not run this make target outside of GitLab CI jobs)
+	docker tag "${DOCKER_LOCAL_IMAGE_NAME}" "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}"
+	docker tag "${DOCKER_LOCAL_IMAGE_NAME}" "${CI_REGISTRY_IMAGE}:latest"
+	docker push "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_SLUG}"
+	docker push "${CI_REGISTRY_IMAGE}:latest"
+
 test:
 	cargo test --workspace --no-fail-fast
 

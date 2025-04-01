@@ -1,0 +1,10 @@
+include:
+  - local: ".gitlab/cicd/docker-setup.yml"
+
+docker-release:
+  extends: .docker-setup
+  stage: "release"
+  script:
+    # https://docs.gitlab.com/user/packages/container_registry/authenticate_with_container_registry/#use-gitlab-cicd-to-authenticate
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - make docker-release-glab

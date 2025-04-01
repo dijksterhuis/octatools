@@ -1,0 +1,9 @@
+.docker-setup:
+  image: "docker:28.0.4"
+  services:
+    - "docker:28.0.4-dind"
+  before_script:
+    # check docker is working in container
+    - docker info
+    # docker images are alpine based, don't have make installed by default
+    - apk add -q make
