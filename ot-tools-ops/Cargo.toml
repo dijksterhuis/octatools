@@ -21,6 +21,7 @@ log = "0.4.22"
 md5 = "0.7.0"
 rand = "0.8.5"
 ot-tools-io = { path = "../ot-tools-io" }
+regex = "1.11.1"
 
 itertools.workspace = true
 serde.workspace = true

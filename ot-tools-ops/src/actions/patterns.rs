@@ -4,7 +4,7 @@ use crate::actions::banks::utils::{
     find_sample_slot_refs_in_patterns, get_bank_fname_from_id,
     get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType,
 };
-use crate::{OctatoolErrors, RBoxErr};
+use crate::{validate_project_version, OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use ot_tools_io::{
     banks::Bank, projects::options::ProjectSampleSlotType, projects::Project,
@@ -60,6 +60,10 @@ pub fn list_pattern_sample_slot_references(
 
     let src_project =
         read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+
+    if !validate_project_version(&src_project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     // we will be changing this in place so needs to be mutable
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");

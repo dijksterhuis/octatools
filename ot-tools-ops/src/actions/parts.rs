@@ -2,7 +2,7 @@ use crate::actions::banks::utils::{
     find_sample_slot_refs_in_parts, get_bank_fname_from_id,
     get_zero_indexed_slots_from_one_indexed, BankSlotReferenceType,
 };
-use crate::{OctatoolErrors, RBoxErr};
+use crate::{validate_project_version, OctatoolErrors, RBoxErr};
 use itertools::Itertools;
 use ot_tools_io::banks::parts::Part;
 use ot_tools_io::projects::options::ProjectSampleSlotType;
@@ -78,6 +78,11 @@ pub fn list_unsaved_part_sample_slot_references(
 
     let proj =
         read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+
+    if !validate_project_version(&proj) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
+
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
     let part = bank.parts.unsaved[part_id - 1].clone();
 
@@ -99,6 +104,11 @@ pub fn list_saved_part_sample_slot_references(
 
     let proj =
         read_type_from_bin_file::<Project>(&project_fpath).expect("Failed to read project file.");
+
+    if !validate_project_version(&proj) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
+
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath).expect("Failed to read bank file.");
     let part = bank.parts.saved[part_id - 1].clone();
 

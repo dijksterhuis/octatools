@@ -1,7 +1,7 @@
 pub mod slots;
 
 use crate::audio::utils::scan_dir_path_for_audio_files;
-use crate::RBoxErr;
+use crate::{validate_project_version, OctatoolErrors, RBoxErr};
 
 use ot_tools_io::{
     projects::{slots::ProjectSampleSlot, Project},
@@ -17,6 +17,10 @@ use std::{
 /// List all the sample slots within an Octatrack Project, given a path to a Project data file
 pub fn list_project_sample_slots(path: &Path) -> RBoxErr<()> {
     let project = read_type_from_bin_file::<Project>(path).expect("Could not load project file");
+
+    if !validate_project_version(&project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     let slots = project
         .slots
@@ -48,6 +52,10 @@ pub fn consolidate_sample_slots_to_audio_pool(project_file_path: &Path) -> RBoxE
 
     let mut project =
         read_type_from_bin_file::<Project>(project_file_path).expect("Could not load project file");
+
+    if !validate_project_version(&project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
@@ -114,6 +122,10 @@ pub fn consolidate_sample_slots_to_project_pool(project_file_path: &Path) -> RBo
     let mut project =
         read_type_from_bin_file::<Project>(project_file_path).expect("Could not load project file");
 
+    if !validate_project_version(&project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
+
     let mut slots: Vec<ProjectSampleSlot> = project
         .slots
         .into_iter()
@@ -173,6 +185,10 @@ pub fn purge_project_pool(project_file_path: &Path) -> RBoxErr<()> {
 
     let project =
         read_type_from_bin_file::<Project>(&abs_project_fp).expect("Could not load project file");
+
+    if !validate_project_version(&project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     let sample_file_slots: Vec<ProjectSampleSlot> = project
         .slots

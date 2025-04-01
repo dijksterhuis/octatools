@@ -475,6 +475,7 @@ dependencies = [
  "ot-tools-derive",
  "ot-tools-io",
  "rand",
+ "regex",
  "serde",
  "walkdir",
 ]

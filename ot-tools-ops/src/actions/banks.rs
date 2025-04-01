@@ -6,7 +6,9 @@ mod tests;
 pub(crate) mod utils;
 mod yaml;
 
-use crate::{actions::banks::yaml::YamlCopyBankConfig, OctatoolErrors, RBoxErr};
+use crate::{
+    actions::banks::yaml::YamlCopyBankConfig, validate_project_version, OctatoolErrors, RBoxErr,
+};
 use itertools::Itertools;
 use ot_tools_io::projects::options::ProjectSampleSlotType;
 use ot_tools_io::{
@@ -86,6 +88,10 @@ pub fn copy_bank_by_paths(
 
     let src_project = read_type_from_bin_file::<Project>(&source_meta.project.filepath)?;
 
+    if !validate_project_version(&src_project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
+
     let destination_meta = BankCopyPathsMeta {
         project: ProjectMeta::frompath(destination_project_dirpath)?,
         bank: BankMeta::frompath(destination_project_dirpath, destination_bank_number)?,
@@ -123,6 +129,10 @@ pub fn copy_bank_by_paths(
     create_backup_of_work_file(&destination_meta.bank.filepath)?;
 
     let dest_project = read_type_from_bin_file::<Project>(&destination_meta.project.filepath)?;
+
+    if !validate_project_version(&dest_project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     let bank = read_type_from_bin_file::<Bank>(&source_meta.bank.filepath)?;
 
@@ -212,6 +222,10 @@ pub fn list_bank_sample_slot_references(
         .join(get_bank_fname_from_id(bank_id));
 
     let src_project = read_type_from_bin_file::<Project>(&project_fpath)?;
+
+    if !validate_project_version(&src_project) {
+        return Err(OctatoolErrors::InvalidOsVersion.into());
+    };
 
     let bank = read_type_from_bin_file::<Bank>(&bank_fpath)?;
 
