@@ -1,0 +1,92 @@
+# test we can read some example data via python module
+smoke-test-lib-py:
+  image: "rust:latest"
+  stage: "test"
+  before_script:
+    - apt update -yqq
+    - apt install -yqq python3-venv
+  script:
+    - make py-smoke
+
+# test we can write some default example binary data files
+smoke-test-bin-write-examples:
+  image: "rust:latest"
+  stage: "test"
+  script:
+    - make gen-examples-human-readable
+
+# test we can build a docker image successfully
+include:
+  - local: ".gitlab/cicd/docker-setup.yml"
+
+smoke-test-docker-build:
+  extends: .docker-setup
+  stage: "test"
+  script:
+    - make docker-uncached
+    - docker run ot-tools --help
+
+# test we can compile the cli and lib-io for multiple os/arch targets
+smoke-test-target-builds:
+  stage: "test"
+  image: "${CI_IMAGE}"
+  before_script:
+    - |
+      if [[ "${RUST_TARGET}" == "aarch64-apple-darwin" ]] || [[ "${RUST_TARGET}" == "x86_64-apple-darwin" ]]
+      then
+        curl https://sh.rustup.rs -sSf -o ./rustup.sh
+        chmod +x ./rustup.sh
+        ./rustup.sh -y
+        rm -f ./rustup.sh
+      fi 
+      if [[ "${RUST_TARGET}" == "aarch64-pc-windows-gnu" ]] || [[ "${RUST_TARGET}" == "x86_64-pc-windows-gnu" ]]
+      then
+        apt update -yqq
+        apt install -yqq gcc-mingw-w64-x86-64
+      fi 
+      rustup target add "${RUST_TARGET}"
+  script:
+    - cargo build --package "ot-tools-io" --target "${RUST_TARGET}"
+    - cargo build --bin "ot-tools" --target "${RUST_TARGET}"
+  tags:
+    - $CI_RUNNER_TAG
+  parallel:
+    # - RUST_TARGET -- actual cargo/rust target id
+    # - CI_RUNNER_TAG: the CI machine type to execute the release build step on
+    # - CI_IMAGE: the CI image to run the release build step inside, macOS has
+    #   special images [0] with a limited set of tools installed [1]
+    #
+    #   [0]: https://docs.gitlab.com/ci/runners/hosted_runners/macos/#supported-macos-images
+    #   [1]: https://gitlab-org.gitlab.io/ci-cd/shared-runners/images/macos-image-inventory/macos-14-xcode-15/
+    matrix:
+      # ==========================================
+      # intel linux CLI
+      - RUST_TARGET: x86_64-unknown-linux-gnu
+        CI_RUNNER_TAG: saas-linux-small-amd64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # ARM linux CLI
+      - RUST_TARGET: aarch64-unknown-linux-gnu
+        CI_RUNNER_TAG: saas-linux-small-arm64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # Intel windows CLI (works for powershell/MYSYS2/CMD)
+      - RUST_TARGET: x86_64-pc-windows-gnu
+        CI_RUNNER_TAG: saas-linux-small-amd64
+        CI_IMAGE: "rust:latest"
+      # ==========================================
+      # TODO: ARM windows CLI
+      # - RUST_TARGET: aarch64-pc-windows-gnullvm
+      #   CI_RUNNER_TAG: saas-linux-small-arm64
+      #   CI_IMAGE: "rust:latest"
+      # Disabled due to being unavailable for some reason? capacity issues tuesday afternoon?
+      #  # ==========================================
+      #  # Intel macOS CLI
+      #  - RUST_TARGET: x86_64-apple-darwin
+      #    CI_RUNNER_TAG: saas-macos-medium-m1
+      #    CI_IMAGE: "macos-14-xcode-15"
+      #  # ==========================================
+      #  # ARM macOS CLI
+      #  - RUST_TARGET: aarch64-apple-darwin
+      #    CI_RUNNER_TAG: saas-macos-medium-m1
+      #    CI_IMAGE: "macos-14-xcode-15"

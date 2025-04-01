@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright © 2024 Mike Robeson [dijksterhuis]
+
+# Publish ot-tools-ops, ot-tools-derive and ot-tools-io to crates.io.
+# ot-tools-derive has to be published to crates.io first, otherwise ot-tools-io
+# cannot be published. ot-tools-ops has to be published last as it depends on
+# both.
+
+release-publish-derive:
+  stage: "release"
+  image: "rust:latest"
+  script:
+    - make publish-derive
+
+release-publish-lib-io:
+  stage: "release"
+  image: "rust:latest"
+  needs:
+    - release-publish-derive
+  script:
+    - make publish-io
+
+release-publish-lib-ops:
+  stage: "release"
+  image: "rust:latest"
+  needs:
+    - release-publish-derive
+    - release-publish-lib
+  script:
+    - make publish-ops
+
+include:
+  - local: ".gitlab/cicd/docker-setup.yml"
+
+docker-release:
+  extends: .docker-setup
+  stage: "release"
+  script:
+    # https://docs.gitlab.com/user/packages/container_registry/authenticate_with_container_registry/#use-gitlab-cicd-to-authenticate
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+    - make docker-release-glab

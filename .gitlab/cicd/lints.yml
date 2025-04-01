@@ -10,7 +10,7 @@ check-cargo-fmt:
   before_script:
     - rustup component add rustfmt
   script:
-    - cargo fmt --all --verbose --check
+    - make fmt-check
 
 check-cargo-clippy:
   stage: check
@@ -21,7 +21,7 @@ check-cargo-clippy:
   before_script:
     - rustup component add clippy
   script:
-    - cargo clippy --all-targets --no-deps
+    - make clippy-check
 
 #check-qlty-metrics:
 #  stage: check

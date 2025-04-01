@@ -11,7 +11,7 @@ coverage-cobertura:
     - cargo install cargo-tarpaulin
   # need to exclude ot-tools-py and ot-tools-derive for now as they break tarpaulin
   script:
-    - cargo tarpaulin -o xml --workspace --exclude ot-tools-py --exclude ot-tools-derive
+    - make cov-xml
   coverage: '/^\d+.\d+% coverage/'
   artifacts:
     when: always
@@ -28,8 +28,7 @@ coverage-junit:
     - saas-linux-medium-amd64
   image: rustlang/rust:nightly
   script:
-    - "cargo +nightly install junitify"
-    - "cargo +nightly test -- --format=json -Z unstable-options --report-time | junitify --out test-results"
+    - make cov-junit
   artifacts:
     when: always
     reports:

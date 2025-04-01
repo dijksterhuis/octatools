@@ -39,25 +39,17 @@ include:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
       - if: $CI_COMMIT_BRANCH
       - if: $CI_COMMIT_TAG
-  # run multi-target build checks for bin/lib only on merge requests
-  - local: ".gitlab/cicd/target-builds-check.yml"
-    rules:
-      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-  # run docker image build smoke checks for bin only on merge requests
-  - local: ".gitlab/cicd/docker-build-check.yml"
+  # run smoke test checks for bin/lib-py only on merge requests
+  - local: ".gitlab/cicd/smoke-tests.yml"
     rules:
       - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   # only run linting checks in a merge request
   - local: ".gitlab/cicd/lints.yml"
     rules:
       - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH && $CI_COMMIT_TAG == null
-  # only publish to crates.io on a new tag push
-  # NOTE: Currently only does a dry-run publish
-  - local: ".gitlab/cicd/crates.yml"
-    rules:
-      - if: $CI_COMMIT_TAG
-  # build and release docker image build on new tags only
-  - local: ".gitlab/cicd/docker-release.yml"
+  # publish to crates.io and docker registry build 'n' push on a new tag push
+  # NOTE: Currently only does a dry-run publish to crates.io
+  - local: ".gitlab/cicd/release.yml"
     rules:
       - if: $CI_COMMIT_TAG
 
